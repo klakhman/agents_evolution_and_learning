@@ -1,6 +1,10 @@
 #ifndef TNEURALPOOL_H
 #define TNEURALPOOL_H
 
+#include <iostream>
+#include <fstream>
+
+class TPoolNetwork;
 class TPoolConnection;
 class TPoolPredConnection;
 
@@ -133,7 +137,12 @@ public:
 	// ”даление предикторной св€зи из пула
 	void deletePredConnection(int predConnectionNumber);
 
-	friend int main(int argc, char** argv);
+	// ѕечать сведений о пуле в файл
+	friend std::ostream& operator<<(std::ostream& ofs, const TNeuralPool& neuralPool);
+
+	//ѕечать сети в файл
+	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork); // ‘ункци€ вывода сети объ€влена дружественной, чтобы она имела пр€мой доступ к списку св€зей пула
+	//friend int main(int argc, char** argv);
 };
 
 #endif // TNEURALPOOL_H

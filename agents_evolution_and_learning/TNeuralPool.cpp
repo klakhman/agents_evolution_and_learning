@@ -3,6 +3,10 @@
 #include "TPoolPredConnection.h"
 
 #include <cstring>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 
 // Процедура увеличения размера массива входных связей
 void TNeuralPool::inflateConnectednessSet(int inflateSize){
@@ -106,4 +110,11 @@ void TNeuralPool::deletePredConnection(int predConnectionNumber){
 	//memcpy(connectednessSet[connectionNumber - 1], connectednessSet[connectionNumber], (inputConnectionsQuantity - connectionNumber) * sizeof(TPoolConnection*));
 	predConnectednessSet[inputPredConnectionsQuantity - 1] = 0; // Обнуляем указатель последней связи
 	--inputPredConnectionsQuantity;
+}
+
+// Печать сведений о пуле в файл
+std::ostream& operator<<(std::ostream& ofs, const TNeuralPool& neuralPool){
+	ofs << neuralPool.type << "\t" << neuralPool.capacity << "\t" << neuralPool.biasMean
+		<<	"\t" << neuralPool.biasVariance << "\t" << neuralPool.layer << std::endl;
+	return ofs;
 }

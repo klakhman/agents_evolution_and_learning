@@ -3,6 +3,9 @@
 
 #include "TNeuralPool.h"
 
+#include <iostream>
+#include <fstream>
+
 /*
 Класс cети из нейрональных пулов
 */
@@ -44,17 +47,17 @@ public:
 	int getOutputResolution() { return outputResolution; }
 
 	// Геттеры и сеттеры для всех пулов сети (во всех случаях передается номер пула в массиве пула)
-	int getPoolID(int poolNumber){ poolsStructure[poolNumber-1]->getID(); }
+	int getPoolID(int poolNumber){ return poolsStructure[poolNumber-1]->getID(); }
 	void setPoolID(int poolNumber, int newID){ poolsStructure[poolNumber-1]->setID(newID); }
-	int getPoolType(int poolNumber) { poolsStructure[poolNumber-1]->getType(); }
+	int getPoolType(int poolNumber) { return poolsStructure[poolNumber-1]->getType(); }
 	void setPoolType(int poolNumber, int newType) { poolsStructure[poolNumber-1]->setType(newType); }
-	int getPoolCapacity(int poolNumber) { poolsStructure[poolNumber-1]->getCapacity(); }
+	int getPoolCapacity(int poolNumber) { return poolsStructure[poolNumber-1]->getCapacity(); }
 	void setPoolCapacity(int poolNumber, int newCapacity) { poolsStructure[poolNumber-1]->setCapacity(newCapacity); }
-	double getPoolBiasMean(int poolNumber) { poolsStructure[poolNumber-1]->getBiasMean(); }
+	double getPoolBiasMean(int poolNumber) { return poolsStructure[poolNumber-1]->getBiasMean(); }
 	void setPoolBiasMean(int poolNumber, double newBiasMean) { poolsStructure[poolNumber-1]->setBiasMean(newBiasMean); }
-	double getPoolBiasVariance(int poolNumber) { poolsStructure[poolNumber-1]->getBiasVariance(); }
+	double getPoolBiasVariance(int poolNumber) { return poolsStructure[poolNumber-1]->getBiasVariance(); }
 	void setPoolBiasVariance(int poolNumber, double newBiasVariance) { poolsStructure[poolNumber-1]->setBiasVariance(newBiasVariance); }
-	int getPoolLayer(int poolNumber) { poolsStructure[poolNumber-1]->getLayer(); }
+	int getPoolLayer(int poolNumber) { return poolsStructure[poolNumber-1]->getLayer(); }
 	void setPoolLayer(int poolNumber, int newLayer) { poolsStructure[poolNumber-1]->setLayer(newLayer); }
 
 	int getPoolInputConnectionsQuantity(int poolNumber){ return poolsStructure[poolNumber-1]->getInputConnectionsQuantity(); }
@@ -97,7 +100,7 @@ public:
 	void setPredConnectionPostPool(int poolNumber, int predConnectionNumber, TNeuralPool* newPostPool) { poolsStructure[poolNumber-1]->setPredConnectionPostPool(predConnectionNumber, newPostPool); }
 
 	//Добавление нейронального пула в сеть
-	void addPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVatiance, int newLayer);
+	void addPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer);
 
 	//Добавление связи в сеть
 	void addConnection(int prePoolNumber, int postPoolNumber, int newID, double newWeightMean, double newWeightVariance, bool newEnabled, int newDisabledStep, double newDevelopSynapseProb, long newInnovationNumber){
@@ -125,6 +128,15 @@ public:
 		poolsStructure[poolNumber]->deletePredConnection(predConnectionNumber);
 		--predConnectionsQuantity;
 	}
+
+	// Стирание сети
+	void erasePoolNetwork();
+
+	//Печать сети в файл или на экран
+	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork);
+
+	//Считывание сети из файла или экрана
+	friend std::istream& operator>>(std::istream& ifs, TPoolNetwork& PoolNetwork);
 };
 
 #endif // TPOOLNETWORK_H

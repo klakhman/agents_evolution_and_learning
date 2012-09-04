@@ -1,6 +1,9 @@
 #ifndef TPOOLPREDCONNECTION_H
 #define TPOOLPREDCONNECTION_H
 
+#include <iostream>
+#include <fstream>
+
 class TNeuralPool;
 
 /* 
@@ -11,10 +14,9 @@ class TPoolPredConnection{
 	bool enabled; // Признак экспресии связи
 	int disabledStep; // Номер популяции (такта эволюции), в которой связь была выключена (0 - если включена)
 	double developPredConnectionProb; // Вероятность развития предикторной связи между нейронами по этой связи
-	long int innovationNumber; // Номер инновации связи
+	long innovationNumber; // Номер инновации связи
 	TNeuralPool* prePool; // Ссылка на пресинаптический пул
 	TNeuralPool* postPool; // Ссылка на постсинаптический пул
-
 public:
 	// Конструктор по умолчанию
 	TPoolPredConnection(){
@@ -27,7 +29,7 @@ public:
 		postPool = 0;
 	}
 	// Полный конструктор
-	TPoolPredConnection(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
+	TPoolPredConnection(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		setAll(newID, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber, newPrePool, newPostPool);
 	}
 	// Деструктор
@@ -42,14 +44,14 @@ public:
 	void setDisabledStep(int newDisabledStep) { disabledStep = newDisabledStep; }
 	double getDevelopPredConnectionProb() const { return developPredConnectionProb; }
 	void setDevelopPredConnectionProb(double newDevelopPredConnectionProb) { developPredConnectionProb = newDevelopPredConnectionProb; }
-	long int getInnovationNumber() const { return innovationNumber; }
-	void setInnovationNumber(long int newInnovationNumber) { innovationNumber = newInnovationNumber; }
+	long getInnovationNumber() const { return innovationNumber; }
+	void setInnovationNumber(long newInnovationNumber) { innovationNumber = newInnovationNumber; }
 	TNeuralPool* getPrePool() const { return prePool; }
 	void setPrePool(TNeuralPool* newPrePool) { prePool = newPrePool; }
 	TNeuralPool* getPostPool() const { return postPool; }
 	void setPostPool(TNeuralPool* newPostPool) { postPool = newPostPool; }
 	// Заполнение всех характеристик связи
-	void setAll(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
+	void setAll(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		ID = newID;
 		enabled = newEnabled;
 		disabledStep = newDisabledStep;
@@ -58,6 +60,8 @@ public:
 		prePool = newPrePool;
 		postPool = newPostPool;
 	}
+	// Запись предикторной связи в файл или на экран
+	friend std::ostream& operator<<(std::ostream& ofs, const TPoolPredConnection& poolPredConnection);
 };
 
 #endif // TPOOLPREDCONNECTION_H

@@ -1,6 +1,9 @@
 #ifndef TPOOLCONNECTION_H
 #define TPOOLCONNECTION_H
 
+#include <iostream>
+#include <fstream>
+
 class TNeuralPool;
 
 /* 
@@ -13,10 +16,9 @@ class TPoolConnection{
 	bool enabled; // Признак экспресии связи
 	int disabledStep; // Номер популяции (такта эволюции), в которой связь была выключена (0 - если включена)
 	double developSynapseProb; // Вероятность развития синапса по этой связи
-	long int innovationNumber; // Номер инновации связи
+	long innovationNumber; // Номер инновации связи
 	TNeuralPool* prePool; // Ссылка на пресинаптический пул
 	TNeuralPool* postPool; // Ссылка на постсинаптический пул
-
 public:
 	// Конструктор по умолчанию
 	TPoolConnection(){
@@ -31,7 +33,7 @@ public:
 		postPool = 0;
 	}
 	// Полный конструктор
-	TPoolConnection(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
+	TPoolConnection(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		setAll(newID, newWeightMean, newWeightVariance, newEnabled, newDisabledStep, newDevelopSynapseProb, newInnovationNumber, newPrePool, newPostPool);
 	}
 	// Деструктор
@@ -50,14 +52,14 @@ public:
 	void setDisabledStep(int newDisabledStep) { disabledStep = newDisabledStep; }
 	double getDevelopSynapseProb() const { return developSynapseProb; }
 	void setDevelopSynapseProb(double newDevelopSynapseProb) { developSynapseProb = newDevelopSynapseProb; }
-	long int getInnovationNumber() const { return innovationNumber; }
-	void setInnovationNumber(long int newInnovationNumber) { innovationNumber = newInnovationNumber; }
+	long getInnovationNumber() const { return innovationNumber; }
+	void setInnovationNumber(long newInnovationNumber) { innovationNumber = newInnovationNumber; }
 	TNeuralPool* getPrePool() const { return prePool; }
 	void setPrePool(TNeuralPool* newPrePool) { prePool = newPrePool; }
 	TNeuralPool* getPostPool() const { return postPool; }
 	void setPostPool(TNeuralPool* newPostPool) { postPool = newPostPool; }
 	// Заполнение всех характеристик связи
-	void setAll(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
+	void setAll(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		ID = newID;
 		weightMean = newWeightMean;
 		weightVariance = newWeightVariance;
@@ -67,7 +69,9 @@ public:
 		innovationNumber = newInnovationNumber;
 		prePool = newPrePool;
 		postPool = newPostPool;
-	}
+	};
+	// Запись связи в файл или на экран
+	friend std::ostream& operator<<(std::ostream& ofs, const TPoolConnection& poolConnection);
 };
 
 #endif // TPOOLCONNECTION_H
