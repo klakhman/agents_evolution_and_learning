@@ -71,7 +71,7 @@ public:
 		postPool = newPostPool;
 	};
 	// Запись связи в файл или на экран
-	friend std::ostream& operator<<(std::ostream& ofs, const TPoolConnection& poolConnection);
+	friend std::ostream& operator<<(std::ostream& os, const TPoolConnection& poolConnection);
 };
 
 #endif // TPOOLCONNECTION_H

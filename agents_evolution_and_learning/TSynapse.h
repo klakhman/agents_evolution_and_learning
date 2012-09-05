@@ -1,7 +1,10 @@
 #ifndef TSYNAPSE_H
 #define TSYNAPSE_H
 
-#include "TNeuron.h"
+#include <iostream>
+#include <fstream>
+
+class TNeuron;
 
 /* 
 Класс синапса нейронной сети 
@@ -48,6 +51,8 @@ public:
 		preNeuron = newPreNeuron;
 		postNeuron = newPostNeuron;
 	}
-}
+	// Запись синапса в файл или на экран
+	friend std::ostream& operator<<(std::ostream& ofs, const TSynapse& synapse);
+};
 
 #endif // TSYNAPSE_H

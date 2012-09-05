@@ -120,8 +120,8 @@ public:
 	void setPredConnectionDisabledStep(int predConnectionNumber, int newDisabledStep);
 	double getDevelopPredConnectionProb(int predConnectionNumber) const;
 	void setDevelopPredConnectionProb(int predConnectionNumber, double newDevelopPredConnectionProb);
-	long int getPredConnectionInnovationNumber(int predConnectionNumber) const;
-	void setPredConnectionInnovationNumber(int predConnectionNumber, long int newInnovationNumber);
+	long getPredConnectionInnovationNumber(int predConnectionNumber) const;
+	void setPredConnectionInnovationNumber(int predConnectionNumber, long newInnovationNumber);
 	TNeuralPool* getPredConnectionPrePool(int predConnectionNumber) const;
 	void setPredConnectionPrePool(int predConnectionNumber, TNeuralPool* newPrePool);
 	TNeuralPool* getPredConnectionPostPool(int predConnectionNumber) const;
@@ -137,12 +137,11 @@ public:
 	// ”даление предикторной св€зи из пула
 	void deletePredConnection(int predConnectionNumber);
 
-	// ѕечать сведений о пуле в файл
-	friend std::ostream& operator<<(std::ostream& ofs, const TNeuralPool& neuralPool);
+	// ѕечать сведений о пуле в файл или на экран
+	friend std::ostream& operator<<(std::ostream& os, const TNeuralPool& neuralPool);
 
-	//ѕечать сети в файл
+	//ѕечать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork); // ‘ункци€ вывода сети объ€влена дружественной, чтобы она имела пр€мой доступ к списку св€зей пула
-	//friend int main(int argc, char** argv);
 };
 
 #endif // TNEURALPOOL_H

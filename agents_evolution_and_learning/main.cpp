@@ -1,28 +1,89 @@
 #include "TPoolNetwork.h"
+#include "TNeuralNetwork.h"
 
 #include <iostream>
 #include <fstream>
 
-int test(){
+using namespace std;
+
+int testPoolNetwork(){
 	TPoolNetwork PoolNetwork;
-	/*PoolNetwork.addPool(1, 0, 1, 0.2, 0.003, 1);
+	PoolNetwork.addPool(1, 0, 1, 0.2, 0.003, 1);
 	PoolNetwork.addPool(2, 2, 1, 0.4, 0.004, 3);
-	PoolNetwork.addConnection(1, 2, 1, 0.1, 0, 1, 0, 0.5, 1);
-	PoolNetwork.addPredConnection(2, 1, 1, 1, 0, 0.6, 1);
 	PoolNetwork.addPool(3, 1, 1, 0.8, 0.1, 2);
-	printf("%i\t%i\t%i\n", PoolNetwork.getPoolsQuantity(), PoolNetwork.getConnectionsQuantity(), PoolNetwork.getPredConnectionsQuantity());
-	printf("%i\t%i\n", PoolNetwork.getPoolID(1), PoolNetwork.getPoolID(2));*/
-	//std::cout << PoolNetwork;
+	PoolNetwork.addPool(4, 1, 1, 0.5, 0.1, 2);
+
+	PoolNetwork.addConnection(1, 3, 1, 0.1, 0, 1, 0, 0.5, 1);
+	PoolNetwork.addConnection(2, 3, 1, 0.1, 0, 1, 0, 0.5, 1);
+	PoolNetwork.addConnection(3, 2, 1, 0.1, 0, 1, 0, 0.5, 1);
+	PoolNetwork.addPredConnection(2, 3, 1, 1, 0, 0.6, 1);
+	PoolNetwork.addPredConnection(1, 3, 1, 1, 0, 0.6, 1);
+
+	cout << PoolNetwork << endl << endl;
+
+	std::ofstream ofs("C:/Runs/net.txt");
+	ofs << PoolNetwork;
+	ofs.close();
+
 	std::ifstream ifs("C:/Runs/net.txt");
 	ifs >> PoolNetwork;
 	ifs.close();
 
-	std::ofstream ofs("C:/Runs/net1.txt");
-	ofs << PoolNetwork;
+	cout << PoolNetwork << endl << endl;
+
+	PoolNetwork.deletePredConnection(3, 1);
+	PoolNetwork.deleteConnection(3, 1);
+
+	cout << PoolNetwork << endl << endl;
+
+	PoolNetwork.deletePool(3);
+
+	cout<< PoolNetwork << endl << endl;
+	
+	cout<< PoolNetwork.getPoolID(3);
+	
+	return 0;
+}
+
+int testNeuralNetwork(){
+	TNeuralNetwork NeuralNetwork;
+	NeuralNetwork.addNeuron(1, 0, 1, 1);
+	NeuralNetwork.addNeuron(2, 2, 1, 3);
+	NeuralNetwork.addNeuron(3, 1, 1, 2);
+	NeuralNetwork.addNeuron(4, 1, 1, 2);
+
+	NeuralNetwork.addSynapse(1, 3, 1, 0.1, 1);
+	NeuralNetwork.addSynapse(2, 3, 1, 0.1, 1);
+	NeuralNetwork.addSynapse(3, 2, 1, 0.1, 1);
+	NeuralNetwork.addPredConnection(2, 3, 1, 1);
+	NeuralNetwork.addPredConnection(1, 3, 1, 1);
+
+	cout << NeuralNetwork << endl << endl;
+
+	std::ofstream ofs("C:/Runs/net.txt");
+	ofs << NeuralNetwork;
 	ofs.close();
+
+	std::ifstream ifs("C:/Runs/net.txt");
+	ifs >> NeuralNetwork;
+	ifs.close();
+
+	cout << NeuralNetwork << endl << endl;
+
+	NeuralNetwork.deletePredConnection(3, 1);
+	NeuralNetwork.deleteSynapse(3, 1);
+
+	cout << NeuralNetwork << endl << endl;
+
+	NeuralNetwork.deleteNeuron(3);
+
+	cout<< NeuralNetwork << endl << endl;
+	
+	cout<< NeuralNetwork.getNeuronID(3);
+	
 	return 0;
 }
 
 int main(int argc, char** argv){
-	test();
+	testNeuralNetwork();
 }

@@ -22,6 +22,9 @@ class TPoolNetwork{
 
 	static const int INFLATE_POOLS_SIZE = 10; // Размер увеличения массива с пулами в случае переполнения
 	
+	// Корректировка ID пулов (например после удаления)
+	void fixPoolsIDs();
+
 	// Процедура увеличения размера массива пулов
 	void inflatePoolsStructure(int inflateSize);
 
@@ -76,8 +79,8 @@ public:
 	void setConnectionDisabledStep(int poolNumber, int connectionNumber, int newDisabledStep) { poolsStructure[poolNumber-1]->setConnectionDisabledStep(connectionNumber, newDisabledStep); }
 	double getConnectionDevelopSynapseProb(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionDevelopSynapseProb(connectionNumber); }
 	void setConnectionDevelopSynapseProb(int poolNumber, int connectionNumber, double newDevelopSynapseProb) { poolsStructure[poolNumber-1]->setConnectionDevelopSynapseProb(connectionNumber, newDevelopSynapseProb); }
-	long int getConnectionInnovationNumber(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionInnovationNumber(connectionNumber); }
-	void setConnectionInnovationNumber(int poolNumber, int connectionNumber, long int newInnovationNumber) { poolsStructure[poolNumber-1]->setConnectionInnovationNumber(connectionNumber, newInnovationNumber); }
+	long getConnectionInnovationNumber(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionInnovationNumber(connectionNumber); }
+	void setConnectionInnovationNumber(int poolNumber, int connectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1]->setConnectionInnovationNumber(connectionNumber, newInnovationNumber); }
 	TNeuralPool* getConnectionPrePool(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPrePool(connectionNumber); }
 	void setConnectionPrePool(int poolNumber, int connectionNumber, TNeuralPool* newPrePool) { poolsStructure[poolNumber-1]->setConnectionPrePool(connectionNumber, newPrePool); }
 	TNeuralPool* getConnectionPostPool(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPostPool(connectionNumber); }
@@ -92,8 +95,8 @@ public:
 	void setPredConnectionDisabledStep(int poolNumber, int predConnectionNumber, int newDisabledStep) { poolsStructure[poolNumber-1]->setPredConnectionDisabledStep(predConnectionNumber, newDisabledStep); }
 	double getDevelopPredConnectionProb(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getDevelopPredConnectionProb(predConnectionNumber); }
 	void setDevelopPredConnectionProb(int poolNumber, int predConnectionNumber, double newDevelopPredConnectionProb) { poolsStructure[poolNumber-1]->setDevelopPredConnectionProb(predConnectionNumber, newDevelopPredConnectionProb); }
-	long int getPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionInnovationNumber(predConnectionNumber); }
-	void setPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber, long int newInnovationNumber) { poolsStructure[poolNumber-1]->setPredConnectionInnovationNumber(predConnectionNumber, newInnovationNumber); }
+	long getPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionInnovationNumber(predConnectionNumber); }
+	void setPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1]->setPredConnectionInnovationNumber(predConnectionNumber, newInnovationNumber); }
 	TNeuralPool* getPredConnectionPrePool(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPrePool(predConnectionNumber); }
 	void setPredConnectionPrePool(int poolNumber, int predConnectionNumber, TNeuralPool* newPrePool) { poolsStructure[poolNumber-1]->setPredConnectionPrePool(predConnectionNumber, newPrePool); }
 	TNeuralPool* getPredConnectionPostPool(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPostPool(predConnectionNumber); }
@@ -113,19 +116,18 @@ public:
 		poolsStructure[postPoolNumber-1]->addPredConnection(newID, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber, poolsStructure[prePoolNumber-1]); 
 		++predConnectionsQuantity;
 	}
-
-	// Удаление пула из сети (с удалением также всех входных и выходных связей из этого нейрона)
+	// Удаление пула из сети (с удалением также всех входных и выходных связей из этого пула)
 	void deletePool(int poolNumber);
 
 	//Удаление связи из сети
 	void deleteConnection(int poolNumber, int connectionNumber){
-		poolsStructure[poolNumber]->deleteConnection(connectionNumber);
+		poolsStructure[poolNumber-1]->deleteConnection(connectionNumber);
 		--connectionsQuantity;
 	}
 
 	// Удаление предикторной связи из сети
 	void deletePredConnection(int poolNumber, int predConnectionNumber){
-		poolsStructure[poolNumber]->deletePredConnection(predConnectionNumber);
+		poolsStructure[poolNumber-1]->deletePredConnection(predConnectionNumber);
 		--predConnectionsQuantity;
 	}
 
@@ -133,10 +135,12 @@ public:
 	void erasePoolNetwork();
 
 	//Печать сети в файл или на экран
-	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork);
+	friend std::ostream& operator<<(std::ostream& os, const TPoolNetwork& PoolNetwork);
 
 	//Считывание сети из файла или экрана
-	friend std::istream& operator>>(std::istream& ifs, TPoolNetwork& PoolNetwork);
+	friend std::istream& operator>>(std::istream& is, TPoolNetwork& PoolNetwork);
+
+	//friend int testPoolNetwork();
 };
 
 #endif // TPOOLNETWORK_H
