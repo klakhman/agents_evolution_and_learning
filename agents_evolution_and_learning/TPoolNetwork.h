@@ -16,7 +16,8 @@ class TPoolNetwork{
 
 	int connectionsQuantity; // Количество связей в сети
 	int predConnectionsQuantity; // Количество предикторных связей в сети
-
+	
+	int layersQuantity; // Количество слоев в сети (!!!! не уменьшается при удалении пулов !!!)
 	int inputResolution; // Размер входного пр-ва сети
 	int outputResolution; // Размер выходного пр-ва сети
 
@@ -36,6 +37,7 @@ public:
 		poolsQuantity = 0;
 		connectionsQuantity = 0;
 		predConnectionsQuantity = 0;
+		layersQuantity = 0;
 		inputResolution = 0;
 		outputResolution = 0;
 	}

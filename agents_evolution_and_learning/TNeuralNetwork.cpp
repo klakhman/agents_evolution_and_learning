@@ -41,6 +41,8 @@ void TNeuralNetwork::addNeuron(int newID, int newType, double newBias, int newLa
 	if (0 == newType) ++inputResolution;
 	// Если нейрон выходной
 	if (2 == newType) ++outputResolution;
+	// Смотрим на слой нейрона
+	if (newLayer > layersQuantity) layersQuantity = newLayer;
 }
 
 // Удаление нейрона из сети (с удалением также всех входных и выходных связей из этого нейрона)
@@ -79,8 +81,36 @@ void TNeuralNetwork::eraseNeuralNetwork(){
 	neuronsQuantity = 0;
 	synapsesQuantity = 0;
 	predConnectionsQuantity = 0;
+	layersQuantity = 0;
 	inputResolution = 0;
 	outputResolution = 0;
+}
+
+// "Перезагрузка" сети
+void TNeuralNetwork::reset(){
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		neuronsStructure[currentNeuron - 1]->reset();
+}
+
+// Обсчет одного такта работы сети
+void TNeuralNetwork::calculateNetwork(double inputVector[]){
+	// Сначала подготавливаем все нейроны
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		neuronsStructure[currentNeuron - 1]->prepare();
+	// Заполняем входные нейроны
+	for (int currentBit = 1; currentBit <= inputResolution; ++currentBit)
+		neuronsStructure[currentBit - 1]->setCurrentOut(inputVector[currentBit - 1]);
+	// Проходимся по нейронам по слоям (начинаем со второго)
+	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
+		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+			if (neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer)
+				neuronsStructure[currentNeuron - 1]->calculateOut();
+}
+
+// Получение текущего выходного вектора сети
+void TNeuralNetwork::getOutputVecor(double outputVector[]){
+	for (int currentBit = 1; currentBit <= outputResolution; ++currentBit)
+		outputVector[currentBit - 1] = neuronsStructure[currentBit - 1 + inputResolution]->getCurrentOut(); 
 }
 
 //Печать сети в файл или на экран

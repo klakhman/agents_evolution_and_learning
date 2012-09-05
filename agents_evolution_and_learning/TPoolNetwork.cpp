@@ -41,6 +41,8 @@ void TPoolNetwork::addPool(int newID, int newType, int newCapacity, double newBi
 	if (0 == newType) ++inputResolution;
 	// Если пул выходной
 	if (2 == newType) ++outputResolution;
+	// Смотрим на слой пула
+	if (newLayer > layersQuantity) layersQuantity = newLayer;
 }
 
 // Удаление пула из сети (с удалением также всех входных и выходных связей из этого пула)
@@ -79,6 +81,7 @@ void TPoolNetwork::erasePoolNetwork(){
 	poolsQuantity = 0;
 	connectionsQuantity = 0;
 	predConnectionsQuantity = 0;
+	layersQuantity = 0;
 	inputResolution = 0;
 	outputResolution = 0;
 }

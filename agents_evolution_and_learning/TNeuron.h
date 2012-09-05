@@ -33,6 +33,9 @@ class TNeuron{
 	double potential; // Текущий потенциал нейрона
 	double previousOut; // Предыдущий выход нейрона
 
+	// Установка значения выхода нейрона (только для дружественного TNeuralNetwork для заполнения нейронов среды)
+	void setCurrentOut(double newCurrentOut) { currentOut = newCurrentOut; }
+
 	// Процедура увеличения размера массива входных синапсов
 	void inflateSynapsesSet(int inflateSize);
 	// Процедура увеличения размера массива входных предикторных связей
@@ -106,27 +109,32 @@ public:
 		active = newActive;
 		parentPoolID = newParentPoolID;
 	}
+	// Получение динамических характеристик нейрона
+	double getCurrentOut() { return currentOut; }
+	double getCurrentPotential() { return potential; }
+	double getPreviousOut() { return previousOut; }
+
 	// Геттеры и сеттеры для синапсов данного пула (во всех случаях передается номер синапса в массиве синапсов)
-	int TNeuron::getSynapseID(int synapseNumber) const;
-	void TNeuron::setSynapseID(int synapseNumber, int newID);
-	double TNeuron::getSynapseWeight(int synapseNumber) const;
-	void TNeuron::setSynapseWeight(int synapseNumber, double newWeight);
-	bool TNeuron::getSynapseEnabled(int synapseNumber) const;
-	void TNeuron::setSynapseEnabled(int synapseNumber, bool newEnabled);
-	TNeuron* TNeuron::getSynapsePreNeuron(int synapseNumber) const;
-	void TNeuron::setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron);
-	TNeuron* TNeuron::getSynapsePostNeuron(int synapseNumber) const;
-	void TNeuron::setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron);
+	int getSynapseID(int synapseNumber) const;
+	void setSynapseID(int synapseNumber, int newID);
+	double getSynapseWeight(int synapseNumber) const;
+	void setSynapseWeight(int synapseNumber, double newWeight);
+	bool getSynapseEnabled(int synapseNumber) const;
+	void setSynapseEnabled(int synapseNumber, bool newEnabled);
+	TNeuron* getSynapsePreNeuron(int synapseNumber) const;
+	void setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron);
+	TNeuron* getSynapsePostNeuron(int synapseNumber) const;
+	void setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron);
 
 	// Геттеры и сеттеры для предикторных связей данного нейрона (во всех случаях передается номер связи в массиве связей)
-	int TNeuron::getPredConnectionID(int predConnectionNumber) const;
-	void TNeuron::setPredConnectionID(int predConnectionNumber, int newID);
-	bool TNeuron::getPredConnectionEnabled(int predConnectionNumber) const;
-	void TNeuron::setPredConnectionEnabled(int predConnectionNumber, bool newEnabled);
-	TNeuron* TNeuron::getPredConnectionPreNeuron(int predConnectionNumber) const;
-	void TNeuron::setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newPreNeuron);
-	TNeuron* TNeuron::getPredConnectionPostNeuron(int predConnectionNumber) const;
-	void TNeuron::setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron);
+	int getPredConnectionID(int predConnectionNumber) const;
+	void setPredConnectionID(int predConnectionNumber, int newID);
+	bool getPredConnectionEnabled(int predConnectionNumber) const;
+	void setPredConnectionEnabled(int predConnectionNumber, bool newEnabled);
+	TNeuron* getPredConnectionPreNeuron(int predConnectionNumber) const;
+	void setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newPreNeuron);
+	TNeuron* getPredConnectionPostNeuron(int predConnectionNumber) const;
+	void setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron);
 
 	// Добавление входного синапса в нейрон
 	void addSynapse(int newID, double newWeight, bool newEnabled = true, TNeuron* newPreNeuron = 0);
@@ -138,11 +146,30 @@ public:
 	// Удаление предикторной связи из нейрона
 	void deletePredConnection(int predConnectionNumber);
 
+	// "Перезагрузка нейрона"
+	void reset(){
+		currentOut = EMPTY_OUT;
+		potential = 0;
+		previousOut = 0;
+	}
+
+	// Подготовка нейрона к обсчету на следующем такте времени
+	void prepare(){
+		previousOut = currentOut;
+		currentOut = EMPTY_OUT;
+		potential = 0;
+	}
+
+	// Рассчет выхода нейрона
+	void calculateOut();
+
 	// Печать сведений о нейроне в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TNeuron& neuron);
 
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& neuralNetwork); // Функция вывода сети объявлена дружественной, чтобы она имела прямой доступ к списку связей нейрона
+
+	friend class TNeuralNetwork;
 };
 
 #endif // TNEURON_H

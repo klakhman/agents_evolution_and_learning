@@ -17,6 +17,7 @@ class TNeuralNetwork{
 	int synapsesQuantity; // Количество синапсов в сети
 	int predConnectionsQuantity; // Количество предикторных связей в сети
 
+	int layersQuantity; // Количество слоев в сети (!!!! не уменьшается при удалении нейронов !!!)
 	int inputResolution; // Размер входного пр-ва сети
 	int outputResolution; // Размер выходного пр-ва сети
 
@@ -36,6 +37,7 @@ public:
 		neuronsQuantity = 0;
 		synapsesQuantity = 0;
 		predConnectionsQuantity = 0;
+		layersQuantity = 0;
 		inputResolution = 0;
 		outputResolution = 0;
 	}
@@ -116,6 +118,15 @@ public:
 
 	// Стирание сети
 	void eraseNeuralNetwork();
+
+	// "Перезагрузка" сети
+	void reset();
+
+	// Обсчет одного такта работы сети
+	void calculateNetwork(double inputVector[]);
+
+	// Получение текущего выходного вектора сети
+	void getOutputVecor(double outputVector[]);
 
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& NeuralNetwork);

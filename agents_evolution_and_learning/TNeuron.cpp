@@ -8,6 +8,9 @@
 
 using namespace std;
 
+const double TNeuron::EMPTY_OUT = -10.0; // Признак неозначенного выхода нейрона
+const double TNeuron::ACTIVITY_TRESHOLD = 0.5; // Порог активности, при котором сигнал передается по выходным связям
+
 // Процедура увеличения размера массива входных синапсов
 void TNeuron::inflateSynapsesSet(int inflateSize){
 	TSynapse** newInputSynapsesSet = new TSynapse*[inputSynapsesSetSize + inflateSize];
@@ -96,6 +99,22 @@ void TNeuron::deletePredConnection(int predConnectionNumber){
 	//memcpy(connectednessSet[connectionNumber - 1], connectednessSet[connectionNumber], (inputConnectionsQuantity - connectionNumber) * sizeof(TPoolConnection*));
 	inputPredConnectionsSet[inputPredConnectionsQuantity - 1] = 0; // Обнуляем указатель последней связи
 	--inputPredConnectionsQuantity;
+}
+
+// Рассчет выхода нейрона
+void TNeuron::calculateOut(){
+	potential = 0; // На всякий случай
+	for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
+	{
+		// Определяем какая связь - рекуррентная или прямая
+		double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getLayer()) ? inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getCurrentOut():
+																																			inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getPreviousOut();
+		// Если выход не означен, то что-то пошло не так (эта строчка больше для отладки)
+		if (preNeuronOut == EMPTY_OUT) exit(2);
+		potential += inputSynapsesSet[currentSynapse - 1]->getWeight() * preNeuronOut;
+	}
+	//!!!!!!!!! Потом здесь нужно заменить на вызов служебной функции в служебной модуле !!!!!!!!!!!
+	currentOut = ( 1.0 / (1.0 + exp(-2 * potential)) );
 }
 
 // Печать сведений о нейроне в файл или на экран
