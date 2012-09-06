@@ -104,14 +104,17 @@ void TNeuron::deletePredConnection(int predConnectionNumber){
 // Рассчет выхода нейрона
 void TNeuron::calculateOut(){
 	potential = 0; // На всякий случай
+	potential += bias; // Добавляем смещение
 	for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
 	{
 		// Определяем какая связь - рекуррентная или прямая
-		double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getLayer()) ? inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getCurrentOut():
-																																			inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getPreviousOut();
+		double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getLayer()) ? 
+													inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getCurrentOut():
+													inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getPreviousOut();
 		// Если выход не означен, то что-то пошло не так (эта строчка больше для отладки)
 		if (preNeuronOut == EMPTY_OUT) exit(2);
-		potential += inputSynapsesSet[currentSynapse - 1]->getWeight() * preNeuronOut;
+		if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
+			potential += inputSynapsesSet[currentSynapse - 1]->getWeight() * preNeuronOut;
 	}
 	//!!!!!!!!! Потом здесь нужно заменить на вызов служебной функции в служебной модуле !!!!!!!!!!!
 	currentOut = ( 1.0 / (1.0 + exp(-2 * potential)) );

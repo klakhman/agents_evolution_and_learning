@@ -148,7 +148,7 @@ public:
 
 	// "Перезагрузка нейрона"
 	void reset(){
-		currentOut = EMPTY_OUT;
+		currentOut = 0;
 		potential = 0;
 		previousOut = 0;
 	}

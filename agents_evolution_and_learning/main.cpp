@@ -84,6 +84,37 @@ int testNeuralNetwork(){
 	return 0;
 }
 
+int testNeuralNetworkProcessing(){
+	TNeuralNetwork NeuralNetwork;
+	ifstream ifs("C:/Runs/net_new.txt");
+	ifs >> NeuralNetwork;
+	ifs.close();
+
+	double* inputVector = new double[NeuralNetwork.getInputResolution()];
+	double* outputVector = new double[NeuralNetwork.getOutputResolution()];
+
+	NeuralNetwork.reset();
+	
+	inputVector[0] = 1;
+	inputVector[1] = 0;
+	inputVector[2] = 1;
+	NeuralNetwork.calculateNetwork(inputVector);
+	NeuralNetwork.getOutputVecor(outputVector);
+	cout << outputVector[0] << "\t" << outputVector[1] << endl;
+
+	inputVector[0] = 0;
+	inputVector[1] = 1;
+	inputVector[2] = 1;
+	NeuralNetwork.calculateNetwork(inputVector);
+	NeuralNetwork.getOutputVecor(outputVector);
+	cout << outputVector[0] << "\t" << outputVector[1] << endl;
+
+	delete []inputVector;
+	delete []outputVector;
+
+	return 0;
+}
+
 int main(int argc, char** argv){
-	testNeuralNetwork();
+	testNeuralNetworkProcessing();
 }
