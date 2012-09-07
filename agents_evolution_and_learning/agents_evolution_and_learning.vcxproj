@@ -76,6 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="service.h" />
     <ClInclude Include="TEnvironment.h" />
     <ClInclude Include="TNeuralNetwork.h" />
     <ClInclude Include="TNeuralPool.h" />
@@ -88,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="service.cpp" />
     <ClCompile Include="TEnvironment.cpp" />
     <ClCompile Include="TNeuralNetwork.cpp" />
     <ClCompile Include="TNeuralPool.cpp" />

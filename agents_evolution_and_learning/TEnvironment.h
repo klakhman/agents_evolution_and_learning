@@ -56,7 +56,7 @@ public:
 		rewardRecoveryTime = 0;
 		nonstaionarityCoefficient = 0;
 	}
-	// Конструктор сразу с загрузкой целей
+	// Конструктор сразу с загрузкой целей и возможной установкой параметров сети
 	TEnvironment(std::string aimsFilename, int _rewardRecoveryTime = 0, double nonstaionarityCoefficient = 0){
 		rewardRecoveryTime = _rewardRecoveryTime;
 		nonstaionarityCoefficient = 0;

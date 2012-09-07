@@ -33,7 +33,7 @@ void TEnvironment::loadAims(string aimsFilename){
 	}
 	environmentFile.close();
 
-	// Создаем новый вектор и заполняем нулями
+	// Создаем новый вектор и сразу заполняем нулями
 	currentEnvironmentVector = new bool[environmentResolution];
 	memset(currentEnvironmentVector, 0, environmentResolution * sizeof(bool));
 }
