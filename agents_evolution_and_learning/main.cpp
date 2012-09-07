@@ -116,5 +116,5 @@ int testNeuralNetworkProcessing(){
 }
 
 int main(int argc, char** argv){
-	testNeuralNetworkProcessing();
+	//testNeuralNetworkProcessing();
 }
