@@ -1,6 +1,7 @@
 #include "TNeuron.h"
 #include "TSynapse.h"
 #include "TPredConnection.h"
+#include "service.h"
 
 #include <cstring>
 #include <iostream>
@@ -116,8 +117,8 @@ void TNeuron::calculateOut(){
 		if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
 			potential += inputSynapsesSet[currentSynapse - 1]->getWeight() * preNeuronOut;
 	}
-	//!!!!!!!!! Потом здесь нужно заменить на вызов служебной функции в служебной модуле !!!!!!!!!!!
-	currentOut = ( 1.0 / (1.0 + exp(-2 * potential)) );
+
+	currentOut = service::tansig(potential);
 }
 
 // Печать сведений о нейроне в файл или на экран

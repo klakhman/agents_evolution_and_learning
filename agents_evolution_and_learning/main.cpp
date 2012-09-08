@@ -1,9 +1,13 @@
 #include "TPoolNetwork.h"
 #include "TNeuralNetwork.h"
+#include "TEnvironment.h"
 
 #include <iostream>
 #include <fstream>
+#include <ctime>
 //#include <string>
+
+#include "service.h"
 
 using namespace std;
 
@@ -116,7 +120,63 @@ int testNeuralNetworkProcessing(){
 	return 0;
 }
 
+void testUnifrormDistr(){
+	double rnd;
+	int zero_q=0;
+	int one_q=0;
+	int near_zero_q=0;
+	int near_one_q = 0;
+	long trials = 1000000000;
+	for (int i=0; i<trials; ++i){
+		rnd = service::uniformDistribution(0, 1, false, false);
+		if ((rnd < 0) || (rnd > 1)) cout << "fault : " << rnd << endl;
+		if (rnd == 1) ++one_q;
+		if (rnd == 0) ++zero_q;
+		if ((rnd>0) && (rnd<=0.1)) ++near_zero_q;
+		if ((rnd>=0.9) && (rnd<1)) ++near_one_q;
+	}
+	cout << zero_q << endl << one_q << endl 
+		<< near_zero_q/static_cast<double>(trials) << endl << near_one_q/static_cast<double>(trials) << endl;
+}
+
+void testEnvironment(){
+	ofstream ofs("C:/Runs/env.txt");
+	ofs << 8 << "\t" << 5 << endl; // Размерность и кол-во целей
+	// Записываем цели
+	ofs << 2 << "\t" << 20 << endl << 1 << "\t" << 1 << "\t" << 5 << "\t" << 0 << endl;
+	ofs << 3 << "\t" << 30 << endl << 1 << "\t" << 1 << "\t" << 5 << "\t" << 0 << "\t" << 2 << "\t" << 1 << endl;
+	ofs << 4 << "\t" << 40 << endl << 1 << "\t" << 1 << "\t" << 5 << "\t" << 0 << "\t" << 2 << "\t" << 1 << "\t" << 1 << "\t" << 0 << endl;
+	ofs << 2 << "\t" << 20 << endl << 4 << "\t" << 0 << "\t" << 8 << "\t" << 1 << endl;
+	ofs << 2 << "\t" << 20 << endl << 8 << "\t" << 1 << "\t" << 2 << "\t" << 0 << endl;
+	ofs.close();
+	
+	TEnvironment environment("C:/Runs/env.txt", 30);
+	environment.uploadAims("C:/Runs/env1.txt");
+	double life[6];
+	life[0] = 1;
+	life[1] = -5;
+	life[2] = 2;
+	life[3] = 0;
+	life[4] = 1;
+	life[5] = -5;
+	cout << environment.calculateReward(life, 6) << endl;
+	double _life[4];
+	_life[0] = 0;
+	_life[1] = -4;
+	_life[2] = 8;
+	_life[3] = -2;
+	cout << environment.calculateReward(_life, 6) << endl;
+}
+
 int main(int argc, char** argv){
 
+	long startTime = time(0);
+	srand(static_cast<unsigned int>(time(0)));
+
+	testEnvironment();
+	//testUnifrormDistr();
 	//testNeuralNetworkProcessing();
+
+	long endTime = time(0);
+	cout << endl << "Runtime: "<< (endTime - startTime) / 60 << " min. " << (endTime - startTime) % 60 << " sec."<< endl;
 }

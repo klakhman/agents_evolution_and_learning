@@ -27,9 +27,10 @@ double service::uniformDistribution(double A, double B, bool include_start/* = t
    // ћодифицируем интервал, чтобы удовлетворить услови€м включени€ или не включени€ концов
    //A += (!include_start) * 1.0F/static_cast<double>(scale);
    //B -= (!include_end) * 1.0F/static_cast<double>(scale);
+	/* ƒолго работает, но распределение точно равномерное! */
    return (uniformDiscreteDistribution(0 + 1 * (!include_start), SCALE - 1 * (!include_end) )/static_cast<double>(SCALE)) * (B - A) + A;
-	/* –аботает точно быстрее, но € не уверен, что распределение получаетс€ точно равномерное:*/
-	return ((static_cast<double>(rand()) - 1*(!include_start) - 1*(!include_end))/ RAND_MAX + 1.0/RAND_MAX * (!include_start)) * (B - A) + A; 
+	/* –аботает точно быстрее, но € не уверен, что распределение получаетс€ точно равномерное :*/
+	//return (static_cast<double>(rand() - 1*(!include_start) - 1*(!include_end))/ RAND_MAX + 1.0/RAND_MAX * (!include_start)) * (B - A) + A;
 }
 
 // ‘ункци€ генераци€ псевдослучайного нормально распределенного числа

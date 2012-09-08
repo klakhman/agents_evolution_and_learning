@@ -1,4 +1,5 @@
 #include "TEnvironment.h"
+#include "service.h"
 
 #include <string>
 #include <fstream>
@@ -52,6 +53,15 @@ void TEnvironment::uploadAims(string aimsFilename) const{
 			environmentFile << aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber << "\t"
 									<< aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue << "\t";
 		environmentFile << endl;
+	}
+}
+
+// Процедура случайных изменений среды согласно степени нестационарности
+void TEnvironment::randomizeEnvironment(){
+	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit){
+		// Не включаем начало интервала, чтобы при нулевой вероятности условие никогда не срабатывало, а при вероятности равной единице, условие всегда срабатывало
+		if (service::uniformDistribution(0, 1, false) <= nonstaionarityCoefficient)
+			currentEnvironmentVector[currentBit - 1] = !currentEnvironmentVector[currentBit - 1];
 	}
 }
 

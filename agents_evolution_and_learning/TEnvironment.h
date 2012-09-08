@@ -48,6 +48,9 @@ class TEnvironment{
 	// Размерность вектора среды
 	int environmentResolution;
 
+	// Процедура случайных изменений среды согласно степени нестационарности
+	void TEnvironment::randomizeEnvironment();
+
 public:
 	// Конструктор по умолчанию
 	TEnvironment(){
@@ -57,9 +60,11 @@ public:
 		nonstaionarityCoefficient = 0;
 	}
 	// Конструктор сразу с загрузкой целей и возможной установкой параметров сети
-	TEnvironment(std::string aimsFilename, int _rewardRecoveryTime = 0, double nonstaionarityCoefficient = 0){
+	TEnvironment(std::string aimsFilename, int _rewardRecoveryTime = 0, double _nonstaionarityCoefficient = 0){
+		aimsQuantity = 0;
+		environmentResolution = 0;
 		rewardRecoveryTime = _rewardRecoveryTime;
-		nonstaionarityCoefficient = 0;
+		nonstaionarityCoefficient = _nonstaionarityCoefficient;
 		loadAims(aimsFilename);
 	}
 
