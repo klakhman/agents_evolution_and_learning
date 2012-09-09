@@ -17,7 +17,7 @@ class TEnvironment{
 	class TAim{	
 	public:
 		// Максимальное кол-во действий в цели
-		static const int MAX_AIM_COMPLEXITY = 10;
+		static const int MAX_AIM_COMPLEXITY = 7;
 		// Структура одного необходимого действия в цели
 		struct SAction{
 			int bitNumber; // Номер бита в векторе состояния среды
@@ -34,7 +34,7 @@ class TEnvironment{
 		}
 	};
 	// Максимальное кол-во целей в среде
-	static const int MAX_AIMS_QUANTITY = 1000;
+	static const int MAX_AIMS_QUANTITY = 3000;
 	// Массив целей в среде (включая все подцели)
 	TAim aimsSet[MAX_AIMS_QUANTITY];
 	// Кол-во целей в среде
@@ -50,6 +50,8 @@ class TEnvironment{
 
 	// Процедура случайных изменений среды согласно степени нестационарности
 	void TEnvironment::randomizeEnvironment();
+	// Сравнение двух полных целей для процедуры генерации среды (возвращает true - если есть хотя бы одна совпадающая подцель)
+	bool TEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSubAimComplexity, TAim& secondAim, int minSecondSubAimComplexity);
 
 public:
 	// Конструктор по умолчанию
@@ -66,6 +68,10 @@ public:
 		rewardRecoveryTime = _rewardRecoveryTime;
 		nonstaionarityCoefficient = _nonstaionarityCoefficient;
 		loadAims(aimsFilename);
+	}
+	// Деструктор
+	~TEnvironment(){
+		if (environmentResolution) delete []currentEnvironmentVector;
 	}
 
 	// Геттеры и сеттеры параметров среды
@@ -89,6 +95,9 @@ public:
 	// Выгрузка структуры целей в файл
 	void uploadAims(std::string aimsFilename) const;
 
+	// Подсчет коэффициента заполненности всей среды
+	double calculateOccupancyCoefficient() const;
+
 	/* 
 	Изменение среды под действием агента (возвращает совершено ли действие или его невозможно совершить)
 	В рамках данной архитектуры actionID кодируется как +-(bitNumber), при этом знак определяет в какую сторону изменяется бит (+ это с нуля на единицу)
@@ -97,6 +106,9 @@ public:
 
 	// Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
 	double calculateReward(double actionsIDs[], int actionsQuantity) const;
+
+	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
+	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps, int maxAimComplexity, int minAimComplexity, int minMaxAimComplexity);
 
 };
 
