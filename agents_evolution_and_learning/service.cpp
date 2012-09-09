@@ -78,7 +78,7 @@ int service::binToDec(bool binNumber[], int binResolution)
 
 // ѕроцедура конвертировани€ дес€тичного числа в шестнадцатеричное - символьное
 // ѕо умолчанию кодируетс€ service::MAX_HEX_RESOLUTION разр€дов, так что в начале могут быть нули, а большие числа будут обрезатьс€
-void decToHex(int decNumber, string& hexNumber, int hexResolution /* = MAX_HEX_RESOLUTION*/)
+void service::decToHex(int decNumber, string& hexNumber, int hexResolution /* = MAX_HEX_RESOLUTION*/)
 {
 	hexNumber = "";
 	for (int currentPosition = 1; currentPosition <= hexResolution; ++currentPosition)

@@ -108,7 +108,7 @@ public:
 	double calculateReward(double actionsIDs[], int actionsQuantity) const;
 
 	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
-	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps, int maxAimComplexity, int minAimComplexity, int minMaxAimComplexity);
+	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps = 0.001, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3);
 
 };
 

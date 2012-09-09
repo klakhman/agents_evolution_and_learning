@@ -184,7 +184,7 @@ bool TEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSu
 }
 
 // Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
-double TEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps, int maxAimComplexity, int minAimComplexity, int minMaxAimComplexity){
+double TEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps /*=0.001*/, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/){
 	if (environmentResolution) delete []currentEnvironmentVector;
 	environmentResolution = _environmentResolution;
 	currentEnvironmentVector = new bool[environmentResolution];
