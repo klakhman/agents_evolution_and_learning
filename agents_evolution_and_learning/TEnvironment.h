@@ -2,6 +2,7 @@
 #define TENVIRONMENT_H 
 
 #include <string>
+
 /*
 NB!
 Строго говоря надо сделать этот класс чисто виртуальным, чтобы реальные среды наследовали от него при этом предоставляя правильный интерфейс. 
@@ -110,6 +111,8 @@ public:
 	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
 	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps = 0.001, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3);
 
+	// Добавляем в друзья тестовые процедуры
+	friend class tests;
 };
 
 #endif // TENVIRONMENT_H

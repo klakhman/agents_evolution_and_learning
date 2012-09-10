@@ -1,6 +1,7 @@
 #include "TEnvironment.h"
 #include "service.h"
 
+#include <iostream>
 #include <string>
 #include <fstream>
 #include <cstring>
@@ -65,19 +66,19 @@ double TEnvironment::calculateOccupancyCoefficient() const{
 
 	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
 		// ќчищаем массив вхождений
-		memset(bitsOccurrence, 0, sizeof(*bitsOccurrence));
+		memset(bitsOccurrence, 0, environmentResolution * sizeof(*bitsOccurrence));
 		// «аполнени€ массива вхождений
 		for (int currentAction = 1; currentAction <= aimsSet[currentAim - 1].aimComplexity; ++currentAction)
-			bitsOccurrence[aimsSet[currentAction-1].actionsSequence[currentAction-1].bitNumber - 1] = true;
+			bitsOccurrence[aimsSet[currentAim - 1].actionsSequence[currentAction-1].bitNumber - 1] = true;
 
 		//  ол-во различных бит, вход€щих в цель
-		int differntBitsQuantity = 0;
+		int differentBitsQuantity = 0;
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
-			differntBitsQuantity += 1 * bitsOccurrence[currentBit - 1];
+			differentBitsQuantity += 1 * bitsOccurrence[currentBit - 1];
 		// ¬еро€тность совершени€ k последовательных действий (с учетом что перевод из нул€ в единицу и обратно - это разные действи€)
-		double sequenceProbability = 1.0 / pow(2.0*environmentResolution, aimsSet[currentAim].aimComplexity);
+		double sequenceProbability = 1.0 / pow(2.0*environmentResolution, aimsSet[currentAim - 1].aimComplexity);
 		// „асть заполненности, которую вносит эта цель
-		double aimOccupancyPart = sequenceProbability * pow(2, aimsSet[currentAim].aimComplexity - differntBitsQuantity);
+		double aimOccupancyPart = sequenceProbability * pow(2, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
 		
 		occupancyCoefficient += aimOccupancyPart;
 	}
@@ -193,11 +194,13 @@ double TEnvironment::generateEnvironment(int _environmentResolution, double requ
 	double occupancyCoef = 0.0;
 	do {
 		// !!!!  оличество полных целей (которые потом будут разбиты на подцели) !!!
-		const int MAX_FULL_AIMS = 1000;
+		const int MAX_FULL_AIMS = 1000; //1000
 		int fullAimsQuantity = service::uniformDiscreteDistribution(1, MAX_FULL_AIMS);
 		// —оздаем среду, в которую будут записыватьс€ полные цели
 		TEnvironment environmentWithFullAims;
 		environmentWithFullAims.environmentResolution = environmentResolution;
+		// —оздаем фиктивный вектор среды (чтобы при удалении типа не происходило ошибки)
+		environmentWithFullAims.currentEnvironmentVector = new bool[environmentResolution];
 		environmentWithFullAims.aimsQuantity = fullAimsQuantity;
 		// ћассив со сложност€ми минимальной подцели в полной цели
 		int* minSubAimComplexity = new int[environmentWithFullAims.aimsQuantity];
@@ -220,13 +223,16 @@ double TEnvironment::generateEnvironment(int _environmentResolution, double requ
 						currentBit = service::uniformDiscreteDistribution(1, environmentWithFullAims.environmentResolution);
 						currentDirection = (service::uniformDiscreteDistribution(0, 1) == 1);
 						// Ќаходим последнее действие в цели, которое использует тот же бит, что и сгенерированное
-						for (int currentCompareAction = currentAction - 1; currentCompareAction > 0; --currentCompareAction){
+						int currentCompareAction = 0;
+						for (currentCompareAction = currentAction - 1; currentCompareAction > 0; --currentCompareAction){
 							if (environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentCompareAction - 1].bitNumber == currentBit){
 								if (environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentCompareAction - 1].desiredValue != currentDirection)
 									stop = true;
 								break; // Ќе идем дальше по цели
 							}
 						}
+						// ≈сли мы дошли до конца и не встретили нужного бита
+						if (currentCompareAction == 0) stop = true;
 					} while (!stop); //  онец генерировани€ действий цели
 					environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber = currentBit;
 					environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue = currentDirection;
@@ -244,6 +250,7 @@ double TEnvironment::generateEnvironment(int _environmentResolution, double requ
 																						environmentWithFullAims.aimsSet[currentCompareAim - 1], minSubAimComplexity[currentCompareAim - 1]);
 					++currentCompareAim;
 				}
+
 			} while (identicAimFound);
 		}
 		// ѕосле генерации всех полных целей необходимо сгенерировать итоговую среду с подцел€ми

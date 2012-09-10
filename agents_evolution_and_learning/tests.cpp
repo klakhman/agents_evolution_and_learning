@@ -90,56 +90,6 @@ int tests::testNeuralNetwork(string outputFilename){
 	return 0;
 }
 
-int tests::testNeuralNetworkProcessing(string inputNetworkFilename){
-	TNeuralNetwork NeuralNetwork;
-	ifstream ifs(inputNetworkFilename);
-	ifs >> NeuralNetwork;
-	ifs.close();
-
-	double* inputVector = new double[NeuralNetwork.getInputResolution()];
-	double* outputVector = new double[NeuralNetwork.getOutputResolution()];
-
-	NeuralNetwork.reset();
-	
-	inputVector[0] = 1;
-	inputVector[1] = 0;
-	inputVector[2] = 1;
-	NeuralNetwork.calculateNetwork(inputVector);
-	NeuralNetwork.getOutputVecor(outputVector);
-	cout << outputVector[0] << "\t" << outputVector[1] << endl;
-
-	inputVector[0] = 0;
-	inputVector[1] = 1;
-	inputVector[2] = 1;
-	NeuralNetwork.calculateNetwork(inputVector);
-	NeuralNetwork.getOutputVecor(outputVector);
-	cout << outputVector[0] << "\t" << outputVector[1] << endl;
-
-	delete []inputVector;
-	delete []outputVector;
-
-	return 0;
-}
-
-void tests::testUnifrormDistr(){
-	double rnd;
-	int zero_q=0;
-	int one_q=0;
-	int near_zero_q=0;
-	int near_one_q = 0;
-	long trials = 1000000000;
-	for (int i=0; i<trials; ++i){
-		rnd = service::uniformDistribution(0, 1, false, false);
-		if ((rnd < 0) || (rnd > 1)) cout << "fault : " << rnd << endl;
-		if (rnd == 1) ++one_q;
-		if (rnd == 0) ++zero_q;
-		if ((rnd>0) && (rnd<=0.1)) ++near_zero_q;
-		if ((rnd>=0.9) && (rnd<1)) ++near_one_q;
-	}
-	cout << zero_q << endl << one_q << endl 
-		<< near_zero_q/static_cast<double>(trials) << endl << near_one_q/static_cast<double>(trials) << endl;
-}
-
 void tests::testEnvironment(string firstOutputEnvironmentFilename, string secondOutputEnvironmentFilename){
 	ofstream ofs(firstOutputEnvironmentFilename);
 	ofs << 8 << "\t" << 5 << endl; // –азмерность и кол-во целей
@@ -168,3 +118,134 @@ void tests::testEnvironment(string firstOutputEnvironmentFilename, string second
 	_life[3] = -2;
 	cout << environment.calculateReward(_life, 6) << endl;
 }
+
+//ѕроцедура тестировани€ прогона нейронной сети (0 - без ошибок, 1 - есть ошибки)
+int tests::testNeuralNetworkProcessing(string inputNetworkFilename){
+	int checkStatus = 0;
+	cout << endl << "------------------+ TEST FOR NEURAL NETWORK PROCESSING +------------------" << endl;
+
+	TNeuralNetwork NeuralNetwork;
+	ifstream ifs(inputNetworkFilename);
+	ifs >> NeuralNetwork;
+	ifs.close();
+
+	double* inputVector = new double[NeuralNetwork.getInputResolution()];
+	double* outputVector = new double[NeuralNetwork.getOutputResolution()];
+
+	NeuralNetwork.reset();
+	
+	inputVector[0] = 1;
+	inputVector[1] = 0;
+	inputVector[2] = 1;
+	NeuralNetwork.calculateNetwork(inputVector);
+	NeuralNetwork.getOutputVecor(outputVector);
+	cout << "Output vector : [" << outputVector[0] << "; " << outputVector[1] << "], should be [0.343277; 0.610570]" << endl;
+
+	inputVector[0] = 0;
+	inputVector[1] = 1;
+	inputVector[2] = 1;
+	NeuralNetwork.calculateNetwork(inputVector);
+	NeuralNetwork.getOutputVecor(outputVector);
+	cout << "Output vector : [" << outputVector[0] << "; " << outputVector[1] << "], should be [0.406367; 0.702089]" << endl;
+
+	delete []inputVector;
+	delete []outputVector;
+	
+	cout << "---------------------------------------------------------------------------" << endl;
+	return checkStatus;
+}
+
+// “естирование процедуры подсчета заполненности среды (0 - без ошибок, 1 - есть ошибки)
+int tests::testCalculateOccupancyCoeffcient(string environmentFilename){
+	int checkStatus = 0;
+	cout << endl << "--------------------+ TEST FOR ENVIRONMENT'S OCCUPANCY +--------------------" << endl;
+	double environmentOccupancy = 0.1204;
+	TEnvironment*  environment = new TEnvironment(environmentFilename);
+
+	if (environment->calculateOccupancyCoefficient() != environmentOccupancy)
+		checkStatus = 1;
+	cout << "Calculated environment's occupancy is " << environment->calculateOccupancyCoefficient() << ", should be " << environmentOccupancy << endl;   
+
+	delete environment;
+	cout << "---------------------------------------------------------------------------" << endl;
+	return checkStatus;
+}
+
+// ѕроверка непротиворечивости цели (true - цель противоречива, false - цель непротиворечива)
+bool tests::checkAimInconsistency(TEnvironment::TAim& aim, int environmentResolution){
+	// ћассив последних действий в отношении битов среды (-1 - действи€ еще не было, 0 - перевод в ноль, 1 - перевод в единицу)
+	int* lastAction = new int[environmentResolution];
+	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
+		lastAction[currentBit - 1] = -1;
+
+	for (int currentAction = 1; currentAction <= aim.aimComplexity; ++currentAction)
+		// ≈сли еще не совершали действи€ над этим битом
+		if (lastAction[aim.actionsSequence[currentAction - 1].bitNumber - 1] == -1)
+			lastAction[aim.actionsSequence[currentAction - 1].bitNumber - 1] = static_cast<int>(aim.actionsSequence[currentAction - 1].desiredValue);
+		else
+			if ((lastAction[aim.actionsSequence[currentAction - 1].bitNumber - 1] == 1) == aim.actionsSequence[currentAction - 1].desiredValue)
+				return true;
+			else
+				lastAction[aim.actionsSequence[currentAction - 1].bitNumber - 1] = static_cast<int>(aim.actionsSequence[currentAction - 1].desiredValue);
+	
+	delete []lastAction;
+	return false;
+}
+
+// —равнение двух целей среды (true - цели равны, false - цели неравны)
+bool tests::compareTwoAims(TEnvironment::TAim& firstAim, TEnvironment::TAim& secondAim){
+	if (firstAim.aimComplexity != secondAim.aimComplexity)
+		return false;
+	else 
+		for (int currentAction = 1; currentAction <= firstAim.aimComplexity; ++currentAction)
+			if ((firstAim.actionsSequence[currentAction - 1].bitNumber != secondAim.actionsSequence[currentAction - 1].bitNumber) ||
+					(firstAim.actionsSequence[currentAction - 1].desiredValue != secondAim.actionsSequence[currentAction - 1].desiredValue)) 
+				return false;
+	return true;
+}
+
+// “естирование процедуры генерации среды (0 - все хорошо, 1 - есть противоречива€ цель, 2 - есть равные цели)
+int tests::testGenerateEnvironment(){
+	int checkStatus = 0;
+
+	int environmentResolution = 8;
+	double occupancySet[] = {0.04, 0.14, 0.4, 0.7};
+	TEnvironment* environment = new TEnvironment;
+	cout << endl << "--------------------+ TEST FOR ENVIRONMENT'S GENERATING +--------------------" << endl;
+	for (int currentOccupancy = 1; currentOccupancy <= sizeof(occupancySet)/sizeof(*occupancySet); ++currentOccupancy){
+		environment->generateEnvironment(environmentResolution, occupancySet[currentOccupancy - 1]);
+		cout << "Done! Occupancy of the environment : " << environment->calculateOccupancyCoefficient() << 
+										", desired occupancy: " << occupancySet[currentOccupancy - 1] << endl;
+		// ѕровер€ем непротиворечивость структуры целей
+		for (int currentAim = 1; currentAim <= environment->getAimsQuantity(); ++currentAim){
+			if (static_cast<int>(checkAimInconsistency(environment->aimsSet[currentAim - 1], environment->getEnvironmentResolution()))){
+				cout << "Aim #" << currentAim << "is inconsistent." << endl;
+				for (int currentAction = 1; currentAction <= environment->aimsSet[currentAim - 1].aimComplexity; ++currentAction)
+					cout << environment->aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber << "->" 
+									<< environment->aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue << "\t";
+				cout << endl;
+				checkStatus = 1;
+			}
+			// —равниваем со всеми остальными цел€ми
+			for (int currentCompareAim = 1; currentCompareAim <= environment->getAimsQuantity(); ++currentCompareAim)
+				if (currentAim != currentCompareAim)
+					if (compareTwoAims(environment->aimsSet[currentAim - 1], environment->aimsSet[currentCompareAim-1])){
+						cout << "Aims #" << currentAim << "and #" << currentCompareAim << " is equal." << endl;
+						checkStatus = 2;
+						for (int currentAction = 1; currentAction <= environment->aimsSet[currentAim - 1].aimComplexity; ++currentAction)
+							cout << environment->aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber << "->" 
+									<< environment->aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue << "\t";
+						cout << endl;
+						for (int currentAction = 1; currentAction <= environment->aimsSet[currentCompareAim - 1].aimComplexity; ++currentAction)
+							cout << environment->aimsSet[currentCompareAim - 1].actionsSequence[currentAction - 1].bitNumber << "->" 
+									<< environment->aimsSet[currentCompareAim - 1].actionsSequence[currentAction - 1].desiredValue << "\t";
+						cout << endl;
+					}
+		}
+	}
+	delete environment;
+	cout << "---------------------------------------------------------------------------" << endl;
+	return checkStatus;
+}
+
+
