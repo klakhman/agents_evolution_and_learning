@@ -1,5 +1,50 @@
 #include "TAgent.h"
 #include "TEnvironment.h"
+#include "TNeuralNetwork.h"
+#include "TPoolNetwork.h"
+#include "service.h"
+
+#include <iostream>
+
+using namespace std;
+
+// Загрузка нейроконтроллера агента
+void TAgent::loadController(istream& is){
+	string tmp_str;
+	is >> tmp_str; // Считываем технический номер сети
+	if (!neuralController) neuralController = new TNeuralNetwork;
+	is >> *neuralController;
+}
+// Загрузка генома нейрононтроллера
+void TAgent::loadGenome(std::istream& is){
+	string tmp_str;
+	is >> tmp_str; // Считываем технический номер сети
+	is >> tmp_str; // Считываем номер более приспособленного родителя
+	parents[0] = atoi(tmp_str.c_str());
+	is >> tmp_str; // Считываем номер менее приспособленного родителя
+	parents[1] = atoi(tmp_str.c_str());
+	if (!genome) genome = new TPoolNetwork;
+	is >> *genome;
+}
+
+// Генерация случайного минимального возможного генома агента
+void TAgent::generateMinimalAgent(int inputResolution, int outputResolution, int initialPoolCapacity, int initialDevelopProbability){
+	int currentNeuron = 1;
+	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
+		genome->addPool(currentNeuron, 0, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
+	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
+		genome->addPool(currentNeuron, 2, 1, service::uniformDistribution(-0.5, 0.5), 0, 3);
+	genome->addPool(currentNeuron + 1, 1, initialPoolCapacity, service::uniformDistribution(-0.5, 0.5), 0, 2);
+	int currentConnection = 1;
+	for (currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron){
+		genome->addConnection(currentNeuron, inputResolution + outputResolution + 1, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
+		++currentConnection;
+	}
+	for (currentNeuron = inputResolution + 1; currentNeuron <= inputResolution + outputResolution; ++currentNeuron){
+		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
+		++currentConnection;
+	}
+}
 
 // Декодирование идентификатора совершаемого агентом действия
 double TAgent::decodeAction(double outputVector[]){

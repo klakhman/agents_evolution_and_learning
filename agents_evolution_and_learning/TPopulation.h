@@ -11,6 +11,7 @@ class TPopulation{
 	// Кол-во агентов в популяции
 	int populationSize;
 public:
+	
 	// Список агентов в популяции
 	TAgent* agents;
 
