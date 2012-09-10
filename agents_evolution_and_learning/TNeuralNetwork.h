@@ -126,7 +126,7 @@ public:
 	void calculateNetwork(double inputVector[]);
 
 	// Получение текущего выходного вектора сети
-	void getOutputVecor(double outputVector[]);
+	void getOutputVector(double outputVector[]);
 
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& NeuralNetwork);

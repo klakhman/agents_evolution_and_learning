@@ -101,6 +101,8 @@ void TEnvironment::randomizeEnvironment(){
 ¬ рамках данной архитектуры actionID кодируетс€ как +-(bitNumber), при этом знак определ€ет в какую сторону измен€етс€ бит (+ это с нул€ на единицу)
 */
 bool TEnvironment::forceEnvironment(double actionID){
+	// ѕризнак успешности совершаемого действи€
+	bool actionSuccess = false;
 	//Ќаправление изменени€
 	bool changeDirection = (actionID > 0);
 	// Ќомер измен€емого бита
@@ -108,10 +110,12 @@ bool TEnvironment::forceEnvironment(double actionID){
 	// ≈сли бит в противоположной позиции, то действие совершаетс€
 	if (currentEnvironmentVector[changeBit -1 ] != changeDirection){
 		currentEnvironmentVector[changeBit - 1] = changeDirection;
-		return true;
+		actionSuccess = true;
 	}
-	else return false;
-	// !!!!! “ут еще должно быть случайно изменение среды !!!!!!
+	else actionSuccess = false;
+	randomizeEnvironment();
+
+	return actionSuccess;
 }
 
 // ѕодсчет награды агента - при этом передаетс€ вс€ записанна€ жизнь агента - возвращает награду

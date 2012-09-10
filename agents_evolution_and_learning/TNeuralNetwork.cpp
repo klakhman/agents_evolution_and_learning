@@ -108,7 +108,7 @@ void TNeuralNetwork::calculateNetwork(double inputVector[]){
 }
 
 // ѕолучение текущего выходного вектора сети
-void TNeuralNetwork::getOutputVecor(double outputVector[]){
+void TNeuralNetwork::getOutputVector(double outputVector[]){
 	for (int currentBit = 1; currentBit <= outputResolution; ++currentBit)
 		outputVector[currentBit - 1] = neuronsStructure[currentBit - 1 + inputResolution]->getCurrentOut(); 
 }

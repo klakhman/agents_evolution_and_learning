@@ -138,14 +138,14 @@ int tests::testNeuralNetworkProcessing(string inputNetworkFilename){
 	inputVector[1] = 0;
 	inputVector[2] = 1;
 	NeuralNetwork.calculateNetwork(inputVector);
-	NeuralNetwork.getOutputVecor(outputVector);
+	NeuralNetwork.getOutputVector(outputVector);
 	cout << "Output vector : [" << outputVector[0] << "; " << outputVector[1] << "], should be [0.343277; 0.610570]" << endl;
 
 	inputVector[0] = 0;
 	inputVector[1] = 1;
 	inputVector[2] = 1;
 	NeuralNetwork.calculateNetwork(inputVector);
-	NeuralNetwork.getOutputVecor(outputVector);
+	NeuralNetwork.getOutputVector(outputVector);
 	cout << "Output vector : [" << outputVector[0] << "; " << outputVector[1] << "], should be [0.406367; 0.702089]" << endl;
 
 	delete []inputVector;
