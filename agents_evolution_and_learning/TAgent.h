@@ -5,6 +5,9 @@
 #include "TPoolNetwork.h"
 #include "TEnvironment.h"
 
+/*
+Класс нейросетевого агента
+*/
 class TAgent{
 	// Записанная жизнь агента
 	double* agentLife;

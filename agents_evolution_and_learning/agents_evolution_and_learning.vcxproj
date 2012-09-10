@@ -86,6 +86,7 @@
     <ClInclude Include="TPoolConnection.h" />
     <ClInclude Include="TPoolNetwork.h" />
     <ClInclude Include="TPoolPredConnection.h" />
+    <ClInclude Include="TPopulation.h" />
     <ClInclude Include="TPredConnection.h" />
     <ClInclude Include="TSynapse.h" />
   </ItemGroup>
