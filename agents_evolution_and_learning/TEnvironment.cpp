@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstring>
 
+
 using namespace std;
 
 // «агрузка структуры целей среды из файла
@@ -91,7 +92,7 @@ double TEnvironment::calculateOccupancyCoefficient() const{
 void TEnvironment::randomizeEnvironment(){
 	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit){
 		// Ќе включаем начало интервала, чтобы при нулевой веро€тности условие никогда не срабатывало, а при веро€тности равной единице, условие всегда срабатывало
-		if (service::uniformDistribution(0, 1, false) <= nonstaionarityCoefficient)
+		if (service::uniformDistributionWeak(0, 1, false) <= nonstaionarityCoefficient)
 			currentEnvironmentVector[currentBit - 1] = !currentEnvironmentVector[currentBit - 1];
 	}
 }

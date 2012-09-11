@@ -11,18 +11,21 @@
 Класс нейросетевого агента
 */
 class TAgent{
-	// Записанная жизнь агента
-	double* agentLife;
+	// Геном агента из которого транслируется контроллер
+	TPoolNetwork* genome;
+	// Контроллер агент
+	TNeuralNetwork* neuralController;
 	// Награда, набранная агентом
 	double reward;
+	// Родители агента (первый более приспособленный, второй - менее)
 	int parents[2];
+	// Записанная жизнь агента
+	double* agentLife;
 	// Декодирование идентификатора совершаемого агентом действия
 	double decodeAction(double outputVector[]);
-
+	// Запрещаем копирующий конструктор (чтобы экземпляры нельзя было передавать по значению)
+	TAgent(const TAgent&);
 public:
-	TNeuralNetwork* neuralController;
-	TPoolNetwork* genome;
-
 	// Конструктор по умолчанию
 	TAgent(){
 		parents[0] = 0;
@@ -44,14 +47,20 @@ public:
 	int getMoreFitParent() const { return parents[0]; }
 	int getLessFitParent() const { return parents[1]; }
 	void setMoreFitParent(int moreFitParent) { parents[0] = moreFitParent; }
-	void lessMoreFitParent(int lessFitParent) { parents[1] = lessFitParent; }
+	void setLessFitParent(int lessFitParent) { parents[1] = lessFitParent; }
+	TPoolNetwork* getPointerToAgentGenome(int agentNumber) const { return genome; }
+	TNeuralNetwork* getPointerToAgentController(int agentNumber) const { return neuralController; }
 
 	// Загрузка нейроконтроллера агента
 	void loadController(std::istream& is);
 	// Загрузка генома нейрононтроллера
 	void loadGenome(std::istream& is);
+	// Выгрузка нейроконтроллера агета в файл или на экран
+	void uploadController(std::ostream& os) const;
+	// Выгрузка генома агента в файл или на экран
+	void uploadGenome(std::ostream& os) const;
 	// Генерация случайного минимального возможного генома агента
-	void generateMinimalAgent(int inputResolution, int outputResolution, int initialPoolCapacity, int initialDevelopProbability);
+	void generateMinimalAgent(int inputResolution, int outputResolution, int initialPoolCapacity = 1, double initialDevelopProbability = 1);
 
 	// Моделирование жизни агента
 	void life(TEnvironment& environment, int agentLifeTime);

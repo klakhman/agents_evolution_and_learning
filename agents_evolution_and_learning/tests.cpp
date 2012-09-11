@@ -248,4 +248,55 @@ int tests::testGenerateEnvironment(){
 	return checkStatus;
 }
 
+// Процедура тестирования степени равномерности распределения, получаемого с помощью слабой функции
+int tests::testWeakUniformDistribution(){
+	int checkStatus = 0;
+	cout << endl << "--------------------+ TEST FOR WEAK UNIFORM DISTRIBUTION +--------------------" << endl;
+	int valuesQuantity = 1000000000;
+	double zeroValues = 0;
+	double oneValues = 0;
+	double nearZeroValues = 0;
+	double nearOneValues = 0;
+	for (int currentValue = 1; currentValue <= valuesQuantity; ++currentValue){
+		double randNumber = service::uniformDistributionWeak(0, 1);
+		if (randNumber == 0) zeroValues += 1;
+		if (randNumber == 1) oneValues += 1;
+		if ((randNumber > 0) && (randNumber <= 0.1)) nearZeroValues += 1;
+		if ((randNumber >= 0.9) && (randNumber < 1)) nearOneValues += 1;
+	}
+	cout << "Test #1" << endl;
+	cout << "Zero value " << zeroValues << " should be equal to one value " << oneValues << endl;
+	cout << "Near zero value probability " << nearZeroValues / valuesQuantity << " = near one value probability " << nearOneValues / valuesQuantity << endl;
+	oneValues = 0;
+	zeroValues = 0;
+	for (int currentValue = 1; currentValue <= valuesQuantity/100; ++currentValue){
+		double randNumber = service::uniformDistributionWeak(0, 1, false);
+		if (randNumber == 0) zeroValues += 1;
+		if (randNumber == 1) oneValues += 1;
+	}
+	cout << "Test #2" << endl;
+	cout << "Zero value " << zeroValues << " = 0, but one value " << oneValues << " != 0" << endl;
+	oneValues = 0;
+	zeroValues = 0;
+	for (int currentValue = 1; currentValue <= valuesQuantity/100; ++currentValue){
+		double randNumber = service::uniformDistributionWeak(0, 1, true, false);
+		if (randNumber == 0) zeroValues += 1;
+		if (randNumber == 1) oneValues += 1;
+	}
+	cout << "Test #3" << endl;
+	cout << "Zero value " << zeroValues << " != 0, but one value " << oneValues << " = 0" << endl;
+	oneValues = 0;
+	zeroValues = 0;
+	for (int currentValue = 1; currentValue <= valuesQuantity/100; ++currentValue){
+		double randNumber = service::uniformDistributionWeak(0, 1, false, false);
+		if (randNumber == 0) zeroValues += 1;
+		if (randNumber == 1) oneValues += 1;
+	}
+	cout << "Test #4" << endl;
+	cout << "Zero value " << zeroValues << " = 0, and one value " << oneValues << " = 0" << endl;
+	cout << "---------------------------------------------------------------------------" << endl;
+
+	return checkStatus;
+}
+
 

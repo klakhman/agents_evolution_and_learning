@@ -20,7 +20,7 @@ int service::uniformDiscreteDistribution(int A, int B)
    return A + r;
 }
 
-// Функция генерации псеводослучайного равномерно распределенного числа (сами куски интервала включаются, если не указано иного)
+// Функция генерации псеводослучайного СТРОГО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ МЕДЛЕННО
 double service::uniformDistribution(double A, double B, bool include_start/* = true*/, bool include_end /*= true*/)
 {
    const int SCALE = 10000;
@@ -29,8 +29,12 @@ double service::uniformDistribution(double A, double B, bool include_start/* = t
    //B -= (!include_end) * 1.0F/static_cast<double>(scale);
 	/* Долго работает, но распределение точно равномерное! */
    return (uniformDiscreteDistribution(0 + 1 * (!include_start), SCALE - 1 * (!include_end) )/static_cast<double>(SCALE)) * (B - A) + A;
-	/* Работает точно быстрее, но я не уверен, что распределение получается точно равномерное :*/
-	//return (static_cast<double>(rand() - 1*(!include_start) - 1*(!include_end))/ RAND_MAX + 1.0/RAND_MAX * (!include_start)) * (B - A) + A;
+}
+
+// Функция генерации псеводослучайного СЛАБО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ БЫСТРО
+// Если включать оба конца интервала, то распределение получается "идеально" равномерное - идентичное строгой функции
+double service::uniformDistributionWeak(double A, double B, bool include_start/* = true*/, bool include_end /*= true*/){
+	return (rand() % ( RAND_MAX + 1 - 1 * (!include_start) - 1 * (!include_end)) + 1 * (!include_start)) / static_cast<double>(RAND_MAX) * (B - A) + A;
 }
 
 // Функция генерация псевдослучайного нормально распределенного числа

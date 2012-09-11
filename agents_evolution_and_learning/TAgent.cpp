@@ -16,7 +16,7 @@ void TAgent::loadController(istream& is){
 	is >> *neuralController;
 }
 // Загрузка генома нейрононтроллера
-void TAgent::loadGenome(std::istream& is){
+void TAgent::loadGenome(istream& is){
 	string tmp_str;
 	is >> tmp_str; // Считываем технический номер сети
 	is >> tmp_str; // Считываем номер более приспособленного родителя
@@ -27,21 +27,34 @@ void TAgent::loadGenome(std::istream& is){
 	is >> *genome;
 }
 
+// Выгрузка нейроконтроллера агета в файл или на экран
+void TAgent::uploadController(ostream& os) const{
+	if (neuralController) os << *neuralController;
+}
+
+// Выгрузка генома агента в файл или на экран
+void TAgent::uploadGenome(ostream& os) const{
+	if (genome){
+		os << parents[0] << "\t" << parents[1] << endl;
+		os << *genome;
+	}
+}
+
 // Генерация случайного минимального возможного генома агента
-void TAgent::generateMinimalAgent(int inputResolution, int outputResolution, int initialPoolCapacity, int initialDevelopProbability){
+void TAgent::generateMinimalAgent(int inputResolution, int outputResolution, int initialPoolCapacity /*=1*/, double initialDevelopProbability /*=1*/){
 	int currentNeuron = 1;
 	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
-		genome->addPool(currentNeuron, 0, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
+		genome->addPool(currentNeuron, 0, 1, service::uniformDistributionWeak(-0.5, 0.5), 0, 1);
 	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
-		genome->addPool(currentNeuron, 2, 1, service::uniformDistribution(-0.5, 0.5), 0, 3);
-	genome->addPool(currentNeuron + 1, 1, initialPoolCapacity, service::uniformDistribution(-0.5, 0.5), 0, 2);
+		genome->addPool(currentNeuron, 2, 1, service::uniformDistributionWeak(-0.5, 0.5), 0, 3);
+	genome->addPool(currentNeuron + 1, 1, initialPoolCapacity, service::uniformDistributionWeak(-0.5, 0.5), 0, 2);
 	int currentConnection = 1;
 	for (currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron){
-		genome->addConnection(currentNeuron, inputResolution + outputResolution + 1, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
+		genome->addConnection(currentNeuron, inputResolution + outputResolution + 1, currentConnection, service::uniformDistributionWeak(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
 		++currentConnection;
 	}
 	for (currentNeuron = inputResolution + 1; currentNeuron <= inputResolution + outputResolution; ++currentNeuron){
-		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
+		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, currentConnection, service::uniformDistributionWeak(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
 		++currentConnection;
 	}
 }
@@ -111,6 +124,7 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime){
 	}
 	reward = environment.calculateReward(agentLife, agentLifeTime);
 	delete []agentLife;
+	agentLife = 0;
 	delete []outputVector;
 	delete []environmentVector;
 }

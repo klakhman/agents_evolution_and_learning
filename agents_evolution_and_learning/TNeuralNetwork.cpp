@@ -27,9 +27,11 @@ void TNeuralNetwork::inflateNeuronsStructure(int inflateSize){
 
 // Декструктор
 TNeuralNetwork::~TNeuralNetwork(){
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		delete neuronsStructure[currentNeuron - 1];
-	delete []neuronsStructure;
+	if (neuronsStructure){
+		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+			delete neuronsStructure[currentNeuron - 1];
+		delete []neuronsStructure;
+	}
 }
 
 //Добавление нейрона в сеть
