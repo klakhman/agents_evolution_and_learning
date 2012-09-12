@@ -3,6 +3,13 @@
 #include <cmath>
 #include <cstdlib>
 #include <string>
+#include <ctime>
+
+/*#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
+boost::random::mt11213b randomGenerator(static_cast<unsigned int>(time(0)));*/
 
 using namespace std;
 
@@ -18,6 +25,10 @@ int service::uniformDiscreteDistribution(int A, int B)
    while (r>=range);
 
    return A + r;
+
+	/*// Вариант с использованием библиотеки boost - работает значительно медленее, но зато статистически более верно и диапазон генерируемых чисел значительно выше
+	boost::random::uniform_int_distribution<> uniformDiscreteDistr(A, B);
+	return uniformDiscreteDistr(randomGenerator); */
 }
 
 // Функция генерации псеводослучайного СТРОГО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ МЕДЛЕННО
@@ -27,8 +38,13 @@ double service::uniformDistribution(double A, double B, bool include_start/* = t
    // Модифицируем интервал, чтобы удовлетворить условиям включения или не включения концов
    //A += (!include_start) * 1.0F/static_cast<double>(scale);
    //B -= (!include_end) * 1.0F/static_cast<double>(scale);
-	/* Долго работает, но распределение точно равномерное! */
+
    return (uniformDiscreteDistribution(0 + 1 * (!include_start), SCALE - 1 * (!include_end) )/static_cast<double>(SCALE)) * (B - A) + A;
+
+	/*// Вариант с использованием библиотеки boost - работает значительно медленее, но зато статистически более верно и диапазон генерируемых чисел значительно выше
+	// Однако может генерировать только одну ситуацию включения концов: [min; max)
+	boost::random::uniform_real_distribution<> uniformRealDistr(A, B);
+	return uniformRealDistr(randomGenerator); */
 }
 
 // Функция генерации псеводослучайного СЛАБО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ БЫСТРО
@@ -47,9 +63,12 @@ double service::normalDistribution(double mean, double variance)
       RandomSum += rand()%10001 / 10000.0;
 
    return Variance * (RandomSum - 6) + Mean; // Variance * sqrt(12.0/RandomNumbers) * (RandomSum - RandomNumbers/6.0) + Mean;*/
-
    /* Генерация методом Бокса-Мюллера */
    return variance*sqrt(-2*log(uniformDistribution(0, 1, false)))*cos(2*PI*uniformDistribution(0, 1, false)) + mean;
+
+	/*// Вариант с использованием библиотеки boost - работает значительно медленее, но зато статистически более верно и диапазон генерируемых чисел значительно выше
+	boost::random::normal_distribution<> normalDistr(mean, variance);
+	return normalDistr(randomGenerator); */
 }
 
 // Процедура перевода десятичного числа в двоичное (старшие разряды в начале массива)
