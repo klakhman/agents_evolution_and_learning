@@ -39,8 +39,8 @@ public:
 	// Деструктор
 	~TAgent(){
 		if (agentLife) delete []agentLife;
-		if (neuralController) delete []neuralController;
-		if (genome) delete []genome;
+		if (neuralController) delete neuralController;
+		if (genome) delete genome;
 	}
 	// Геттеры и сеттеры
 	double getReward() const { return reward; }

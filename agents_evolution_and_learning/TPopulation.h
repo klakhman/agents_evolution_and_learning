@@ -3,6 +3,7 @@
 
 #include "TAgent.h"
 #include "TEnvironment.h"
+#include <string>
 
 /*
 Класс популяции нейросетевых агентов
@@ -18,6 +19,10 @@ public:
 		agents = 0;
 		populationSize = 0;
 	}
+	// Конструктор сразу с загрузкой геномов агентов
+	TPopulation(std::string populationFilename, int _populationSize){
+		loadPopulation(populationFilename, _populationSize);
+	}
 	// Деструктор
 	~TPopulation(){ 
 		if (agents) {
@@ -29,6 +34,9 @@ public:
 	// Геттеры и сеттеры
 	int getPopulationSize() const { return populationSize; }
 	TAgent* getPointertoAgent(int agentNumber) const { return agents[agentNumber]; }
+
+	// Загрузка популяции геномов из файла
+	void loadPopulation(std::string populationFilename, int _populationSize);
 
 	// Процедура эволюции популяции
 	void evolution(TEnvironment& environment, int evolutionTime);
