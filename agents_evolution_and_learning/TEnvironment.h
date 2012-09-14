@@ -90,6 +90,10 @@ public:
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			currentEnvironmentVector[currentBit - 1] = (environmentVector[currentBit - 1] == 1);
 	}
+	void setRandomEnvironmentVector(){
+		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
+			currentEnvironmentVector[currentBit - 1] = (rand() % 2 != 0);
+	}
 	// Загрузка структуры целей среды из файла
 	void loadAims(std::string aimsFilename);
 

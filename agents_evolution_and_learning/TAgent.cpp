@@ -40,9 +40,31 @@ void TAgent::uploadGenome(ostream& os) const{
 	}
 }
 
+// ѕодсчет размера выходного вектора нейроконтроллера и генома агента на основе размера входного вектора среды
+int TAgent::calculateOutputResoltion(int inputResolution) const{
+	int _outputResolution = - 1;
+	int codingNeuronsQuantity = 2; //  ол-во нейронов, кодирующих одно действие агента
+	//  ол-во доступных дл€ кодировани€ действий при определенной размерности выходного вектора
+	double actionQuantity; 
+	do {
+		++_outputResolution;
+		actionQuantity = 1;
+		// ѕодсчитываем кол-во комбинаций 
+		//  омбинаторное кол-во сочетаний при условии, что каждое действие кодируетс€ двум€ нейронами и противоположные действи€ кодируютс€ разными парами нейронов - n!/(k! * (n-k)!), при этом n - output resolution, k - кол-во нейронов кодирующих одно действие
+		for (int i = 1; i <= _outputResolution; ++i)
+			actionQuantity *= i;
+		for (int i = 1; i <= _outputResolution - codingNeuronsQuantity; ++i)
+			actionQuantity /= i;
+		for (int i = 1; i <= codingNeuronsQuantity; ++i)
+			actionQuantity /= i;
+	} while (actionQuantity < (2 * inputResolution));
+	return _outputResolution;
+}
+
 // √енераци€ случайного минимального возможного генома агента
-void TAgent::generateMinimalAgent(int inputResolution, int outputResolution, int initialPoolCapacity /*=1*/, double initialDevelopProbability /*=1*/){
+void TAgent::generateMinimalAgent(int inputResolution, int initialPoolCapacity /*=1*/, double initialDevelopProbability /*=1*/){
 	int currentNeuron = 1;
+	int outputResolution = calculateOutputResoltion(inputResolution);
 	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
 		genome->addPool(currentNeuron, 0, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
 	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
@@ -57,6 +79,22 @@ void TAgent::generateMinimalAgent(int inputResolution, int outputResolution, int
 		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
 		++currentConnection;
 	}
+}
+
+// Ћинейна€ процедра первичного системогеназа (когда происходит однозначна€ трансл€ци€ генотипа) - используетс€, когда нет ни насто€щего системогенеза, ни обучени€
+void TAgent::linearSystemogenesis(){
+	if (neuralController) neuralController->eraseNeuralNetwork();
+	// —начала создаем все нейроны в сети
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+		neuralController->addNeuron(neuralController->getNeuronsQuantity() + 1, genome->getPoolType(currentPool), genome->getPoolBiasMean(currentPool), genome->getPoolLayer(currentPool), true, currentPool);
+	// ѕотом создаем синапсы
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= genome->getPoolInputConnectionsQuantity(currentPool); ++currentConnection)
+			neuralController->addSynapse(genome->getConnectionPrePool(currentPool, currentConnection)->getID(), currentPool, neuralController->getSynapsesQuantity() + 1, genome->getConnectionWeightMean(currentPool, currentConnection), genome->getConnectionEnabled(currentPool, currentConnection));
+	// » создаем предикторные св€зи
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <= genome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPredConnection)
+			neuralController->addPredConnection(genome->getPredConnectionPrePool(currentPool, currentPredConnection)->getID(), currentPool, neuralController->getPredConnectionsQuantity() + 1, genome->getPredConnectionEnabled(currentPool, currentPredConnection));
 }
 
 // ƒекодирование идентификатора совершаемого агентом действи€
@@ -110,7 +148,7 @@ double TAgent::decodeAction(double outputVector[]){
 void TAgent::life(TEnvironment& environment, int agentLifeTime){
 	double* environmentVector = new double[neuralController->getInputResolution()];
 	double* outputVector = new double[neuralController->getOutputResolution()];
-	double* agentLife = new double[agentLifeTime];
+	agentLife = new double[agentLifeTime];
 	// «десь в теории надо вместо просто получени€ вектора среды поставить процедуру кодировщика
 	environment.getCurrentEnvironmentVector(environmentVector);
 

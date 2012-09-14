@@ -21,8 +21,10 @@ class TAgent{
 	int parents[2];
 	// Записанная жизнь агента
 	double* agentLife;
-	// Декодирование идентификатора совершаемого агентом действия
+	// Декодирование идентификатора совершаемого агентом действия (!!!! по идее декодирование действия, как и кодирование состояния среды во входной вектор, так и определение необходимой размерности выходного вектора должны совершаться некоторым сторонним от агента образом, так как это средоспецифические функции, но при этом не принадлежащие среде !!!!!)
 	double decodeAction(double outputVector[]);
+	// Подсчет размера выходного вектора нейроконтроллера и генома агента на основе размера входного вектора среды
+	int calculateOutputResoltion(int inputResolution) const;
 	// Запрещаем копирующий конструктор (чтобы экземпляры нельзя было передавать по значению)
 	TAgent(const TAgent&);
 public:
@@ -60,8 +62,9 @@ public:
 	// Выгрузка генома агента в файл или на экран
 	void uploadGenome(std::ostream& os) const;
 	// Генерация случайного минимального возможного генома агента
-	void generateMinimalAgent(int inputResolution, int outputResolution, int initialPoolCapacity = 1, double initialDevelopProbability = 1);
-
+	void generateMinimalAgent(int inputResolution, int initialPoolCapacity = 1, double initialDevelopProbability = 1);
+	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
+	void linearSystemogenesis();
 	// Моделирование жизни агента
 	void life(TEnvironment& environment, int agentLifeTime);
 };

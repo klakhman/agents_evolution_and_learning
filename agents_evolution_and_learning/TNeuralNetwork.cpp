@@ -75,10 +75,12 @@ void TNeuralNetwork::deleteNeuron(int neuronNumber){
 
 // Стирание сети
 void TNeuralNetwork::eraseNeuralNetwork(){
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		delete neuronsStructure[currentNeuron - 1];
-	delete []neuronsStructure;
-	neuronsStructure = 0;
+	if (neuronsStructure) {
+		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+			delete neuronsStructure[currentNeuron - 1];
+		delete []neuronsStructure;
+		neuronsStructure = 0;
+	}
 	neuronsStructureSize = 0;
 	neuronsQuantity = 0;
 	synapsesQuantity = 0;
