@@ -13,6 +13,11 @@ class TPopulation{
 	TAgent** agents;
 	// Кол-во агентов в популяции
 	int populationSize;
+	// Текущий последний номер инновации связей популяции
+	long connectionInnovationNumber;
+	// Текущий последний номер инновации предикторных связей популяции
+	long predConnectionInnovationNumber;
+
 	// Очистка популяции
 	void erasePopulation(){
 		if (agents){
@@ -20,38 +25,58 @@ class TPopulation{
 				delete agents[currentAgent - 1];
 			delete []agents;
 			agents = 0;
+			connectionInnovationNumber = 0;
+			predConnectionInnovationNumber = 0;
+			populationSize = 0;
 		}
 	}
+	// ---------------  Различные процедуры мутации -------------------------
+	// Процедура мутации - удаление связи
+	void mutationDeletePoolConnection(TAgent& kidAgent);
+	// Процедура мутации - удаление предикторной связи
+	void mutationDeletePoolPredConnection(TAgent& kidAgent);
+	// Коэффициент уменьшения вероятности дупликации пула с ростом генома
+	double duplicateDivision(int poolsQuantity, int connectionsQuantity);
+	// Процедура мутации - дупликация пула
+	void mutationPoolDuplication(TAgent& kidAgent);
+	// Процедура мутации вероятности развития синапса по связи между пулами
+	void mutationDevelopSynapseProb(TAgent& KidAgent);
+	// Процедура мутации вероятности развития предикторной связи по предикторной связи между пулами
+	void mutationDevelopPredConProb(TAgent& KidAgent);
+
 public:
 	// Структура параметры эволюции
 	struct SEvolutionSettings{
 		int evolutionTime; // Кол-во тактов эволюции
 		int agentLifetime; // Кол-во тактов жизни агента
 	} evolutionSettings;
+
 	// Структура "Найстройки мутационных процедур" (сюда включаются необходимые константы, относящиеся к мутациям)
 	struct SMutationSettings{
-		 double MutWeightProbability; // Вероятность мутации веса связи
-		double MutWeightMeanDisp; // Дисперсия значения мутации веса связи
-		double MutWeightDispDisp; // Дисперсия значения мутации дисперсии связи
-		int DisLimit;  // Максимальное кол-во тактов, после которого выключенная связь удаляется из генома
-		double EnConProb; // Вероятность включения выключенной связи
-		double DisConProb; // Вероятность выключения включенной связи
-		double AddConnectionProb; // Вероятность вставки связи
-		double AddPredConnectionProb; // Вероятность вставки предикторной связи
-		double DeleteConnectionProb; // Вероятность удаления связи
-		double DeletePredConnectionProb; //  Вероятность удаления предикторной связи
-		double DuplicatePoolProb;  // Вероятность дуплицирования нейронального пула (модернизированный эволюционный алгоритм)
-		double PoolDivisionCoef; // Коэффициент уменьшения размерности пула при его деления в процедуре дупликации пула
-		int PoolStandartAmount; // Стандартный размер сети в кол-ве пулов(для использования в процедуре дупликации нейрона)
-		int ConnectionStandartAmount;
-		double MutDevelopConProbProb; // Вероятность мутации вероятности образования связи связи
-		double MutDevelopConProbDisp; // Дисперсия мутации вероятности образования связи связи
+		 double mutWeightProbability; // Вероятность мутации веса связи
+		double mutWeightMeanDisp; // Дисперсия значения мутации веса связи
+		double mutWeightDispDisp; // Дисперсия значения мутации дисперсии связи
+		int disLimit;  // Максимальное кол-во тактов, после которого выключенная связь удаляется из генома
+		double enConProb; // Вероятность включения выключенной связи
+		double disConProb; // Вероятность выключения включенной связи
+		double addConnectionProb; // Вероятность вставки связи
+		double addPredConnectionProb; // Вероятность вставки предикторной связи
+		double deleteConnectionProb; // Вероятность удаления связи
+		double deletePredConnectionProb; //  Вероятность удаления предикторной связи
+		double duplicatePoolProb;  // Вероятность дуплицирования нейронального пула (модернизированный эволюционный алгоритм)
+		double poolDivisionCoef; // Коэффициент уменьшения размерности пула при его деления в процедуре дупликации пула
+		int poolStandartAmount; // Стандартный размер сети в кол-ве пулов(для использования в процедуре дупликации нейрона)
+		int connectionStandartAmount; // Стандартное кол-во связей в сети
+		double mutDevelopConProbProb; // Вероятность мутации вероятности образования связи связи
+		double mutDevelopConProbDisp; // Дисперсия мутации вероятности образования связи связи
 	} mutationSettings;
 
 	// Конструктор по умолчанию
 	TPopulation(){
 		agents = 0;
 		populationSize = 0;
+		connectionInnovationNumber = 0;
+		predConnectionInnovationNumber = 0;
 	}
 	// Конструктор сразу с загрузкой геномов агентов
 	TPopulation(std::string populationFilename, int _populationSize){

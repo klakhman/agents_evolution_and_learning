@@ -22,9 +22,6 @@ class TPoolNetwork{
 	int outputResolution; // Размер выходного пр-ва сети
 
 	static const int INFLATE_POOLS_SIZE = 10; // Размер увеличения массива с пулами в случае переполнения
-	
-	// Корректировка ID пулов (например после удаления)
-	void fixPoolsIDs();
 
 	// Процедура увеличения размера массива пулов
 	void inflatePoolsStructure(int inflateSize);
@@ -103,6 +100,13 @@ public:
 	void setPredConnectionPrePool(int poolNumber, int predConnectionNumber, TNeuralPool* newPrePool) { poolsStructure[poolNumber-1]->setPredConnectionPrePool(predConnectionNumber, newPrePool); }
 	TNeuralPool* getPredConnectionPostPool(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPostPool(predConnectionNumber); }
 	void setPredConnectionPostPool(int poolNumber, int predConnectionNumber, TNeuralPool* newPostPool) { poolsStructure[poolNumber-1]->setPredConnectionPostPool(predConnectionNumber, newPostPool); }
+
+	// Корректировка ID пулов (например после удаления)
+	void fixPoolsIDs();
+	// Корректировка ID связей (например после удаления)
+	void fixConnectionsIDs();
+	// Корректировка ID предикторных связей (например после удаления)
+	void fixPredConnectionsIDs();
 
 	//Добавление нейронального пула в сеть
 	void addPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer);

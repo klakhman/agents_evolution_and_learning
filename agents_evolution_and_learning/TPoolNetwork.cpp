@@ -15,6 +15,22 @@ void TPoolNetwork::fixPoolsIDs(){
 		poolsStructure[currentPool - 1]->setID(currentPool);
 }
 
+// Корректировка ID связей (например после удаления)
+void TPoolNetwork::fixConnectionsIDs(){
+	int _connectionsQuantity = 0;
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
+			poolsStructure[currentPool - 1]->setConnectionID(currentConnection, ++_connectionsQuantity);
+}
+
+// Корректировка ID предикторных связей (например после удаления)
+void TPoolNetwork::fixPredConnectionsIDs(){
+	int _predConnectionsQuantity = 0;
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+			poolsStructure[currentPool - 1]->setPredConnectionID(currentPredConnection, ++_predConnectionsQuantity);
+}
+
 // Процедура увеличения размера массива пулов
 void TPoolNetwork::inflatePoolsStructure(int inflateSize){
 	TNeuralPool** newPoolsStructure = new TNeuralPool*[poolsStructureSize + inflateSize];
