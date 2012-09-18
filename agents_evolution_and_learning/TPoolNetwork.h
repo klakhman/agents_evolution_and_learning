@@ -136,6 +136,10 @@ public:
 		poolsStructure[poolNumber-1]->deletePredConnection(predConnectionNumber);
 		--predConnectionsQuantity;
 	}
+	// Проверка существования связи в сети
+	bool checkConnectionExistance(int prePoolNumber, int postPoolNumber);
+	// Проверка существования предикторной связи в сети
+	bool checkPredConnectionExistance(int prePoolNumber, int postPoolNumber);
 
 	// Стирание сети
 	void erasePoolNetwork();

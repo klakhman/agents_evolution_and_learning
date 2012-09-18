@@ -28,6 +28,19 @@ class TAgent{
 	// Запрещаем копирующий конструктор (чтобы экземпляры нельзя было передавать по значению)
 	TAgent(const TAgent&);
 public:
+	// Структура настройки первичного системогенеза
+	struct SPrimarySystemogenesisSettings
+	{
+		int initialPoolCapacity; // Изначальная размерность каждого пула
+		double initialDevelopSynapseProbability; // Вероятность образования синапса связи в процессе построения первичной сети
+		double initialDevelopPredConnectionProbability; // Вероятность образования предикторной связи в процессе построения первичной сети
+		int primarySystemogenesisTime; // Время (в тактах), в течение которого происходит первичный системогенез
+		double spontaneousActivityProb; // Вероятность спонтанной активации нейрона
+		double activeNeuronsPercent; // Процент наиболее активных нейронов, которые становятся активными после ПС
+		double synapsesActivityTreshold; //! Порог общего сигнала, прошедшего по синапсу в ПС, по которому происходит отбор связей между активными нейронами (или процент синапсов которые надо отобрать)
+		double significanceTreshold; // Порог значимости предсказания, осуществляемого по пред. связи в ПС, по которому происходит отбор связей между активными нейронами
+	} primarySystemogenesisSettings;
+
 	// Конструктор по умолчанию
 	TAgent(){
 		parents[0] = 0;
@@ -62,7 +75,7 @@ public:
 	// Выгрузка генома агента в файл или на экран
 	void uploadGenome(std::ostream& os) const;
 	// Генерация случайного минимального возможного генома агента
-	void generateMinimalAgent(int inputResolution, int initialPoolCapacity = 1, double initialDevelopProbability = 1);
+	void generateMinimalAgent(int inputResolution);
 	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
 	void linearSystemogenesis();
 	// Моделирование жизни агента

@@ -31,6 +31,20 @@ class TPopulation{
 		}
 	}
 	// ---------------  Различные процедуры мутации -------------------------
+	// Процедура мутации - мутация весовых коэффициентов связи
+	void mutationConnectionsWeight(TAgent& kidAgent);
+	// Процедура мутации - включения/выключения связей
+	void mutationEnableDisableConnections(TAgent& kidAgent, int currentEvolutionStep);
+	// Процедура мутации - включения/выключения предикторных связей
+	void mutationEnableDisablePredConnections(TAgent& kidAgent, int currentEvolutionStep);
+	// Процедура мутации - удаления из агента связей, которые выключены более некоторого количества поколений
+	void mutationDeleteConnectionPopulation(TAgent& kidAgent, int currentEvolutionStep);
+	// Процедура мутации - удаления из агента предикторных связей, которые выключены более некоторого количества поколений
+	void mutationDeletePredConnectionPopulation(TAgent& kidAgent, int currentEvolutionStep);
+	// Процедура мутации - добавление связи
+	void mutationAddPoolConnection(TAgent& kidAgent);
+	// Процедура мутации - добавление предикторной связи
+	void mutationAddPoolPredConnection(TAgent& kidAgent);
 	// Процедура мутации - удаление связи
 	void mutationDeletePoolConnection(TAgent& kidAgent);
 	// Процедура мутации - удаление предикторной связи
@@ -57,8 +71,8 @@ public:
 		double mutWeightMeanDisp; // Дисперсия значения мутации веса связи
 		double mutWeightDispDisp; // Дисперсия значения мутации дисперсии связи
 		int disLimit;  // Максимальное кол-во тактов, после которого выключенная связь удаляется из генома
-		double enConProb; // Вероятность включения выключенной связи
-		double disConProb; // Вероятность выключения включенной связи
+		double enableConnectionProb; // Вероятность включения выключенной связи
+		double disableConnectionProb; // Вероятность выключения включенной связи
 		double addConnectionProb; // Вероятность вставки связи
 		double addPredConnectionProb; // Вероятность вставки предикторной связи
 		double deleteConnectionProb; // Вероятность удаления связи

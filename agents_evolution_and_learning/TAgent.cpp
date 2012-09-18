@@ -62,21 +62,21 @@ int TAgent::calculateOutputResoltion(int inputResolution) const{
 }
 
 // Генерация случайного минимального возможного генома агента
-void TAgent::generateMinimalAgent(int inputResolution, int initialPoolCapacity /*=1*/, double initialDevelopProbability /*=1*/){
+void TAgent::generateMinimalAgent(int inputResolution){
 	int currentNeuron = 1;
 	int outputResolution = calculateOutputResoltion(inputResolution);
 	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
 		genome->addPool(currentNeuron, 0, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
 	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
 		genome->addPool(currentNeuron, 2, 1, service::uniformDistribution(-0.5, 0.5), 0, 3);
-	genome->addPool(currentNeuron + 1, 1, initialPoolCapacity, service::uniformDistribution(-0.5, 0.5), 0, 2);
+	genome->addPool(currentNeuron + 1, 1, primarySystemogenesisSettings.initialPoolCapacity, service::uniformDistribution(-0.5, 0.5), 0, 2);
 	int currentConnection = 1;
 	for (currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron){
-		genome->addConnection(currentNeuron, inputResolution + outputResolution + 1, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
+		genome->addConnection(currentNeuron, inputResolution + outputResolution + 1, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, primarySystemogenesisSettings.initialDevelopSynapseProbability, currentConnection); 
 		++currentConnection;
 	}
 	for (currentNeuron = inputResolution + 1; currentNeuron <= inputResolution + outputResolution; ++currentNeuron){
-		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, initialDevelopProbability, currentConnection); 
+		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, primarySystemogenesisSettings.initialDevelopSynapseProbability, currentConnection); 
 		++currentConnection;
 	}
 }
