@@ -80,6 +80,9 @@ public:
 	void linearSystemogenesis();
 	// ћоделирование жизни агента
 	void life(TEnvironment& environment, int agentLifeTime);
+	// ќператор присваивани€ (фактически полное копирование агента, включа€ геном, но не включа€ контроллер - создание новых структур)
+	TAgent& operator=(const TAgent& sourceAgent);
+
 };
 
 #endif TAGENT_H // TAGENT_H

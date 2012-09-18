@@ -166,3 +166,21 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime){
 	delete []outputVector;
 	delete []environmentVector;
 }
+
+// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
+TAgent& TAgent::operator=(const TAgent& sourceAgent){
+	*genome = *sourceAgent.genome;
+	reward = sourceAgent.reward;
+	parents[0] = sourceAgent.parents[0];
+	parents[1] = sourceAgent.parents[1];
+	// Копируем настройки первичного системогенеза
+	primarySystemogenesisSettings.initialPoolCapacity = sourceAgent.primarySystemogenesisSettings.initialPoolCapacity;
+	primarySystemogenesisSettings.initialDevelopSynapseProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability;
+	primarySystemogenesisSettings.initialDevelopPredConnectionProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability;
+	primarySystemogenesisSettings.primarySystemogenesisTime = sourceAgent.primarySystemogenesisSettings.primarySystemogenesisTime;
+	primarySystemogenesisSettings.spontaneousActivityProb = sourceAgent.primarySystemogenesisSettings.spontaneousActivityProb;
+	primarySystemogenesisSettings.activeNeuronsPercent = sourceAgent.primarySystemogenesisSettings.activeNeuronsPercent;
+	primarySystemogenesisSettings.synapsesActivityTreshold = sourceAgent.primarySystemogenesisSettings.synapsesActivityTreshold; 
+	primarySystemogenesisSettings.significanceTreshold = sourceAgent.primarySystemogenesisSettings.significanceTreshold; 
+	return *this;
+}

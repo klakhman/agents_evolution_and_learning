@@ -42,28 +42,28 @@ public:
 	~TPoolNetwork();
 
 	//Геттеры для параметров сети
-	int getPoolsQuantity() { return poolsQuantity; }
-	int getConnectionsQuantity() { return connectionsQuantity; }
-	int getPredConnectionsQuantity() { return predConnectionsQuantity; }
-	int getInputResolution() { return inputResolution; }
-	int getOutputResolution() { return outputResolution; }
+	int getPoolsQuantity() const{ return poolsQuantity; }
+	int getConnectionsQuantity() const { return connectionsQuantity; }
+	int getPredConnectionsQuantity() const { return predConnectionsQuantity; }
+	int getInputResolution() const { return inputResolution; }
+	int getOutputResolution() const { return outputResolution; }
 
 	// Геттеры и сеттеры для всех пулов сети (во всех случаях передается номер пула в массиве пула)
-	int getPoolID(int poolNumber){ return poolsStructure[poolNumber-1]->getID(); }
+	int getPoolID(int poolNumber) const { return poolsStructure[poolNumber-1]->getID(); }
 	void setPoolID(int poolNumber, int newID){ poolsStructure[poolNumber-1]->setID(newID); }
-	int getPoolType(int poolNumber) { return poolsStructure[poolNumber-1]->getType(); }
+	int getPoolType(int poolNumber) const { return poolsStructure[poolNumber-1]->getType(); }
 	void setPoolType(int poolNumber, int newType) { poolsStructure[poolNumber-1]->setType(newType); }
-	int getPoolCapacity(int poolNumber) { return poolsStructure[poolNumber-1]->getCapacity(); }
+	int getPoolCapacity(int poolNumber) const { return poolsStructure[poolNumber-1]->getCapacity(); }
 	void setPoolCapacity(int poolNumber, int newCapacity) { poolsStructure[poolNumber-1]->setCapacity(newCapacity); }
-	double getPoolBiasMean(int poolNumber) { return poolsStructure[poolNumber-1]->getBiasMean(); }
+	double getPoolBiasMean(int poolNumber) const { return poolsStructure[poolNumber-1]->getBiasMean(); }
 	void setPoolBiasMean(int poolNumber, double newBiasMean) { poolsStructure[poolNumber-1]->setBiasMean(newBiasMean); }
-	double getPoolBiasVariance(int poolNumber) { return poolsStructure[poolNumber-1]->getBiasVariance(); }
+	double getPoolBiasVariance(int poolNumber) const { return poolsStructure[poolNumber-1]->getBiasVariance(); }
 	void setPoolBiasVariance(int poolNumber, double newBiasVariance) { poolsStructure[poolNumber-1]->setBiasVariance(newBiasVariance); }
-	int getPoolLayer(int poolNumber) { return poolsStructure[poolNumber-1]->getLayer(); }
+	int getPoolLayer(int poolNumber) const { return poolsStructure[poolNumber-1]->getLayer(); }
 	void setPoolLayer(int poolNumber, int newLayer) { poolsStructure[poolNumber-1]->setLayer(newLayer); }
 
-	int getPoolInputConnectionsQuantity(int poolNumber){ return poolsStructure[poolNumber-1]->getInputConnectionsQuantity(); }
-	int getPoolInputPredConnectionsQuantity(int poolNumber){ return poolsStructure[poolNumber-1]->getInputPredConnectionsQuantity(); }
+	int getPoolInputConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputConnectionsQuantity(); }
+	int getPoolInputPredConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputPredConnectionsQuantity(); }
 
 	// Геттеры и сеттеры для связей данной сети (во всех случаях передается номер пула в массиве пулов и номер связи в массиве связей)
 	int getConnectionID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionID(connectionNumber); }
@@ -143,6 +143,9 @@ public:
 
 	// Стирание сети
 	void erasePoolNetwork();
+
+	// Оператор присваивания (фактически полное копирование сети - создание новых структур)
+	TPoolNetwork& operator=(const TPoolNetwork& sourcePoolNetwork);
 
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TPoolNetwork& PoolNetwork);

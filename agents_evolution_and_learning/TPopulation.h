@@ -57,6 +57,14 @@ class TPopulation{
 	void mutationDevelopSynapseProb(TAgent& KidAgent);
 	// Процедура мутации вероятности развития предикторной связи по предикторной связи между пулами
 	void mutationDevelopPredConProb(TAgent& KidAgent);
+	// Процедура составления потомка от двух родителей
+	void сomposeOffspringFromParents(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent);
+	// Процедура генерации одного потомка
+	void generateOffspring(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent, int currentEvolutionStep);
+	//Процедура получения номера агента, используемая в рулеточном алгоритме
+	int rouletteWheelSelection(double populationFitness[]);
+	// Процедура генерации нового поколения и замены старого на новое
+	void generateNextPopulation(int currentEvolutionStep);
 
 public:
 	// Структура параметры эволюции
@@ -118,7 +126,7 @@ public:
 	void generateMinimalPopulation(int _populationSize, int inputResolution);
 
 	// Процедура эволюции популяции (если указан ноль, то эволюция идет кол-во тактов, указанное в настройках)
-	void evolution(TEnvironment& environment, int evolutionTime = 0);
+	void evolution(TEnvironment& environment);
 };
 
 #endif // TPOPULATION_H

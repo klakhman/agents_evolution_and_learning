@@ -112,17 +112,43 @@ bool TPoolNetwork::checkPredConnectionExistance(int prePoolNumber, int postPoolN
 
 // Стирание сети
 void TPoolNetwork::erasePoolNetwork(){
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		delete poolsStructure[currentPool - 1];
-	delete []poolsStructure;
-	poolsStructure = 0;
-	poolsStructureSize = 0;
+	if (poolsStructure){
+		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+			delete poolsStructure[currentPool - 1];
+		delete []poolsStructure;
+		poolsStructure = 0;
+		poolsStructureSize = 0;
+	}
 	poolsQuantity = 0;
 	connectionsQuantity = 0;
 	predConnectionsQuantity = 0;
 	layersQuantity = 0;
 	inputResolution = 0;
 	outputResolution = 0;
+}
+
+// Оператор присваивания (фактически полное копирование сети - создание новых структур)
+TPoolNetwork& TPoolNetwork::operator=(const TPoolNetwork& sourcePoolNetwork){
+	erasePoolNetwork(); // На всякий случай опустошаем сеть
+	// Копируем пулы
+	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool)
+		addPool(sourcePoolNetwork.getPoolID(currentPool), sourcePoolNetwork.getPoolType(currentPool), sourcePoolNetwork.getPoolCapacity(currentPool),
+					sourcePoolNetwork.getPoolBiasMean(currentPool), sourcePoolNetwork.getPoolBiasVariance(currentPool), sourcePoolNetwork.getPoolLayer(currentPool));
+	// Копируем все связи сети
+	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool){
+		for (int currentPoolConnection = 1; currentPoolConnection <= sourcePoolNetwork.getPoolInputConnectionsQuantity(currentPool); ++ currentPoolConnection)
+			addConnection(sourcePoolNetwork.getConnectionPrePool(currentPool, currentPoolConnection)->getID(), sourcePoolNetwork.getConnectionPostPool(currentPool, currentPoolConnection)->getID(),
+								sourcePoolNetwork.getConnectionID(currentPool, currentPoolConnection), sourcePoolNetwork.getConnectionWeightMean(currentPool, currentPoolConnection),
+								sourcePoolNetwork.getConnectionWeightVariance(currentPool, currentPoolConnection), sourcePoolNetwork.getConnectionEnabled(currentPool, currentPoolConnection),
+								sourcePoolNetwork.getConnectionDisabledStep(currentPool, currentPoolConnection), sourcePoolNetwork.getConnectionDevelopSynapseProb(currentPool, currentPoolConnection),
+								sourcePoolNetwork.getConnectionInnovationNumber(currentPool, currentPoolConnection));
+		for (int currentPoolPredConnection = 1; currentPoolPredConnection <= sourcePoolNetwork.getPoolInputPredConnectionsQuantity(currentPool); ++ currentPoolPredConnection)
+			addPredConnection(sourcePoolNetwork.getPredConnectionPrePool(currentPool, currentPoolPredConnection)->getID(), sourcePoolNetwork.getPredConnectionPostPool(currentPool, currentPoolPredConnection)->getID(),
+								sourcePoolNetwork.getPredConnectionID(currentPool, currentPoolPredConnection), sourcePoolNetwork.getPredConnectionEnabled(currentPool, currentPoolPredConnection),
+								sourcePoolNetwork.getPredConnectionDisabledStep(currentPool, currentPoolPredConnection), sourcePoolNetwork.getDevelopPredConnectionProb(currentPool, currentPoolPredConnection),
+								sourcePoolNetwork.getPredConnectionInnovationNumber(currentPool, currentPoolPredConnection));
+	}
+	return *this;
 }
 
 //Печать сети в файл или на экран

@@ -44,16 +44,17 @@ void TPopulation::generateMinimalPopulation(int _populationSize, int inputResolu
 }
 
 // Процедура эволюции популяции
-void TPopulation::evolution(TEnvironment& environment, int evolutionTime /* = 0*/){
-	for (int evolutionStep = 1; evolutionStep <= evolutionTime; ++evolutionStep){
+void TPopulation::evolution(TEnvironment& environment){
+	for (int evolutionStep = 1; evolutionStep <= evolutionSettings.evolutionTime; ++evolutionStep){
 		// Прогоняем всех агентов
 		for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
 			// Проводим первичный системогенез
 			agents[currentAgent - 1]->linearSystemogenesis();
 			environment.setRandomEnvironmentVector();
-			agents[currentAgent - 1]->life(environment, 250); // !!! надо вписать жизнь агента
-
+			agents[currentAgent - 1]->life(environment, evolutionSettings.agentLifetime);
 		}
+		// Создаем новую популяцию
+		generateNextPopulation(evolutionStep);
 	}
 }
 
@@ -334,3 +335,97 @@ void TPopulation::mutationDevelopPredConProb(TAgent& kidAgent){
 					kidGenome->setDevelopPredConnectionProb(currentPool, currentPoolPredConnection, 
 						min(1.0, max(0.0, kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
 }
+
+// Процедура составления потомка от двух родителей
+void TPopulation::сomposeOffspringFromParents(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent){
+	if (firstParentAgent.getReward() >= secondParentAgent.getReward())
+		kidAgent = firstParentAgent;
+	else 
+		kidAgent = secondParentAgent;
+}
+
+// Процедура генерации одного потомка
+void TPopulation::generateOffspring(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent, int currentEvolutionStep){
+	
+	сomposeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
+	
+	mutationDeleteConnectionPopulation(kidAgent, currentEvolutionStep);
+	mutationDeletePredConnectionPopulation(kidAgent, currentEvolutionStep);
+	mutationEnableDisableConnections(kidAgent, currentEvolutionStep);
+	mutationEnableDisablePredConnections(kidAgent, currentEvolutionStep);
+
+	mutationPoolDuplication(kidAgent);
+	mutationAddPoolConnection(kidAgent);
+	mutationAddPoolPredConnection(kidAgent);
+	mutationDeletePoolConnection(kidAgent);
+	mutationDeletePoolPredConnection(kidAgent);
+	mutationConnectionsWeight(kidAgent);
+	mutationDevelopSynapseProb(kidAgent);
+	mutationDevelopPredConProb(kidAgent);
+}
+
+//Процедура получения номера агента, используемая в рулеточном алгоритме
+int TPopulation::rouletteWheelSelection(double populationFitness[]){
+   double totalFitness = 0; // Полная награда популяции
+	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++) 
+		totalFitness += populationFitness[currentAgent - 1];
+
+   double currentRandomFitness = service::uniformDistribution(0, totalFitness, false, false);
+   double currentSum = 0.0;
+   int currentAgent = 0;
+   while (currentRandomFitness > currentSum)
+      currentSum += populationFitness[currentAgent++];
+
+   return currentAgent;
+}
+
+// Процедура генерации нового поколения и замены старого на новое
+void TPopulation::generateNextPopulation(int currentEvolutionStep){
+	double* populationReward = new double[populationSize]; // Массив со всеми наградами популяции
+   double rewardSum = 0.0; // Сумма всех наград агентов
+	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++) // Заполняем массив с наградами популяции
+		rewardSum += (populationReward[currentAgent - 1] = agents[currentAgent - 1]->getReward());
+	TAgent** newAgents = new TAgent*[populationSize];
+
+	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++){ // Генерируем новую популяцию
+      int firstParentAgent;
+      int secondParentAgent;
+      // Определяем номер родительского агента
+      if (rewardSum){ // Если есть хоть один агент, который набрал хоть сколько-то награды
+         firstParentAgent = rouletteWheelSelection(populationReward);
+         int checkCount = 0; // Пытаемся найти другого агента
+         do{
+            secondParentAgent =  rouletteWheelSelection(populationReward);
+         } while ((firstParentAgent == secondParentAgent) && (++checkCount < 10));
+
+         if (firstParentAgent == secondParentAgent) //Если не удается найти другого агента (потому что у всех остальных очень маленькие награды)
+				secondParentAgent = service::uniformDiscreteDistribution(1, populationSize);
+      } else{ // Если ни один из агентов не набрал никакой награды
+			firstParentAgent = service::uniformDiscreteDistribution(1, populationSize);
+         do{
+				secondParentAgent =  service::uniformDiscreteDistribution(1, populationSize);
+         } while (firstParentAgent == secondParentAgent);
+      }
+      // Пусть более приспособленный родитель всегда будет на первом месте
+		if (agents[firstParentAgent - 1]->getReward() > agents[secondParentAgent - 1]->getReward()){
+			int tmp = firstParentAgent;
+			firstParentAgent = secondParentAgent;
+			secondParentAgent = tmp;
+		}
+		newAgents[currentAgent - 1] = new TAgent;
+		// Создаем нового агента
+		generateOffspring(*newAgents[currentAgent - 1], *agents[firstParentAgent - 1], *agents[secondParentAgent - 1], currentEvolutionStep);
+		newAgents[currentAgent - 1]->setMoreFitParent(firstParentAgent);
+		newAgents[currentAgent - 1]->setLessFitParent(secondParentAgent);
+   }
+
+   delete []populationReward;
+   // Теперь перепишем новую популяцию в старую (но не физически, а только ссылки, при этом старую удаляем)
+	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
+		delete agents[currentAgent - 1];
+		agents[currentAgent - 1] = newAgents[currentAgent - 1];  // Копируем только ссылку
+   }
+
+   delete []newAgents; // Удаляем только массив ссылок, но не самих агентов
+}
+
