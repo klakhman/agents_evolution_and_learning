@@ -125,7 +125,10 @@ public:
 	// Генерация минимальной популяции
 	void generateMinimalPopulation(int _populationSize, int inputResolution);
 
-	// Процедура эволюции популяции (если указан ноль, то эволюция идет кол-во тактов, указанное в настройках)
+	// Шаг эволюционного процесса
+	void evolutionaryStep(TEnvironment& environment, int evolutionStepNumber);
+
+	// Процедура эволюции популяции
 	void evolution(TEnvironment& environment);
 };
 

@@ -81,6 +81,7 @@
     <ClInclude Include="TAgent.h" />
     <ClInclude Include="TEnvironment.h" />
     <ClInclude Include="tests.h" />
+    <ClInclude Include="TEvolutionaryProcess.h" />
     <ClInclude Include="TNeuralNetwork.h" />
     <ClInclude Include="TNeuralPool.h" />
     <ClInclude Include="TNeuron.h" />
@@ -97,6 +98,7 @@
     <ClCompile Include="TAgent.cpp" />
     <ClCompile Include="TEnvironment.cpp" />
     <ClCompile Include="tests.cpp" />
+    <ClCompile Include="TEvolutionaryProcess.cpp" />
     <ClCompile Include="TNeuralNetwork.cpp" />
     <ClCompile Include="TNeuralPool.cpp" />
     <ClCompile Include="TNeuron.cpp" />

@@ -42,21 +42,26 @@ void TPopulation::generateMinimalPopulation(int _populationSize, int inputResolu
 		predConnectionInnovationNumber = agents[0]->getPointerToAgentGenome()->getPredConnectionsQuantity();
 	}
 }
+// Шаг эволюционного процесса
+void TPopulation::evolutionaryStep(TEnvironment& environment, int evolutionStepNumber){
+	// Сначала мутируем популяцию (чтобы можно потом было отчеты составлять и всегда текущая популяция уже была прогнана на среде)
+	generateNextPopulation(evolutionStepNumber);
+	// Прогоняем всех агентов
+	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
+		// Проводим первичный системогенез
+		agents[currentAgent - 1]->linearSystemogenesis();
+		environment.setRandomEnvironmentVector();
+		agents[currentAgent - 1]->life(environment, evolutionSettings.agentLifetime);
+	}
+}
 
 // Процедура эволюции популяции
 void TPopulation::evolution(TEnvironment& environment){
 	for (int evolutionStep = 1; evolutionStep <= evolutionSettings.evolutionTime; ++evolutionStep){
-		// Прогоняем всех агентов
-		for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
-			// Проводим первичный системогенез
-			agents[currentAgent - 1]->linearSystemogenesis();
-			environment.setRandomEnvironmentVector();
-			agents[currentAgent - 1]->life(environment, evolutionSettings.agentLifetime);
-		}
-		// Создаем новую популяцию
-		generateNextPopulation(evolutionStep);
+		evolutionaryStep(environment, evolutionStep);
 	}
 }
+
 
 // ---------------  Различные процедуры мутации -------------------------
 // Процедура мутации - мутация весовых коэффициентов связи
