@@ -22,7 +22,8 @@ class TPopulation{
 	void erasePopulation(){
 		if (agents){
 			for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
-				delete agents[currentAgent - 1];
+				if (agents[currentAgent - 1])
+					delete agents[currentAgent - 1];
 			delete []agents;
 			agents = 0;
 			connectionInnovationNumber = 0;
@@ -106,24 +107,28 @@ public:
 	}
 	// ƒеструктор
 	~TPopulation(){ 
-		if (agents) {
-			for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
-				delete agents[currentAgent - 1];
-			delete []agents;
-		}
+		erasePopulation();
 	}
 	// √еттеры и сеттеры
 	int getPopulationSize() const { return populationSize; }
-	TAgent* getPointertoAgent(int agentNumber) const { return agents[agentNumber]; }
+	// »зменение размера попул€ции (измен€етс€ не только само значение, но и удал€етс€ стара€ попул€ци€ и создаетс€ пуста€ нова€)
+	void setPopulationSize(int _populationSize){ 
+		if (agents)	erasePopulation();
+		populationSize = _populationSize;
+		agents = new TAgent*[populationSize];
+		for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
+			agents[currentAgent - 1] = new TAgent;
+	}
+	TAgent* getPointertoAgent(int agentNumber) const { return agents[agentNumber - 1]; }
 
-	// «агрузка попул€ции геномов из файла
-	void loadPopulation(std::string populationFilename, int _populationSize);
+	// «агрузка попул€ции геномов из файла (если размер попул€ции не передаетс€, то значение беретс€ из текущих параметров попул€ции)
+	void loadPopulation(std::string populationFilename, int _populationSize = 0);
 
 	// ¬ыгрузка попул€ции геномов в файл
 	void uploadPopulation(std::string populationFilename) const;
 
-	// √енераци€ минимальной попул€ции
-	void generateMinimalPopulation(int _populationSize, int inputResolution);
+	// √енераци€ минимальной попул€ции (если размер попул€ции не передаетс€, то значение беретс€ из текущих параметров попул€ции)
+	void generateMinimalPopulation(int inputResolution, int _populationSize = 0);
 
 	// Ўаг эволюционного процесса
 	void evolutionaryStep(TEnvironment& environment, int evolutionStepNumber);

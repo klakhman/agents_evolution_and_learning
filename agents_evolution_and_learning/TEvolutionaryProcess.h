@@ -8,10 +8,10 @@
 class TEvolutionaryProcess{
 	// Загрузка параметров популяции из файла
 	void fillPopulationSettingsFromFile();
-	// Загрузка параметров агента из файла
-	void fillAgentSettingsFromFile();
 	// Загрузка параметров среды из файла
 	void fillEnvironmentSettingsFromFile();
+	// Загрузка параметров агента из файла
+	void fillAgentSettingsFromFile();
 	// Популяция агентов
 	TPopulation* agentsPopulation;
 	// Среда для агентов
@@ -26,11 +26,17 @@ public:
 	// Конструктор по умолчанию
 	TEvolutionaryProcess(){
 		agentsPopulation = 0;
+		environment = 0;
 	}
 	// Деструктор
 	~TEvolutionaryProcess(){
 		if (agentsPopulation) delete agentsPopulation;
+		if (environment) delete environment;
 	}
+	
+	// Вывод логовых сообщений (прогресса) на консоль или в файл
+	void makeLogNote(std::ostream& outputConsole, int currentEvolutionStep =0);
+
 	// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
 	void start(unsigned int randomSeed = 0);
 };

@@ -4,24 +4,21 @@
 
 using namespace std;
 
-// Загрузка популяции геномов из файла
-void TPopulation::loadPopulation(std::string populationFilename, int _populationSize){
-	erasePopulation();
+	// Загрузка популяции геномов из файла (если размер популяции не передается, то значение берется из текущих параметров популяции)
+void TPopulation::loadPopulation(string populationFilename, int _populationSize /*=0*/){
 	//!!! Возможно надо как-то по другому обходится с номерами инноваций
 	connectionInnovationNumber = 0;
 	predConnectionInnovationNumber = 0;
-	agents = new TAgent*[_populationSize];
-	populationSize = _populationSize;
+	if (_populationSize) setPopulationSize(_populationSize);
 	ifstream populationFile(populationFilename);
-	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
-		agents[currentAgent - 1] = new TAgent;
+	for (int currentAgent = 1; currentAgent <=populationSize; ++currentAgent){
 		agents[currentAgent - 1]->loadGenome(populationFile);
 	}
 	populationFile.close();
 }
 
 // Выгрузка популяции геномов в файл
-void TPopulation::uploadPopulation(std::string populationFilename) const{
+void TPopulation::uploadPopulation(string populationFilename) const{
 	ofstream populationFile(populationFilename);
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
 		agents[currentAgent - 1]->uploadGenome(populationFile);
@@ -29,14 +26,10 @@ void TPopulation::uploadPopulation(std::string populationFilename) const{
 }
 
 // Генерация минимальной популяции
-void TPopulation::generateMinimalPopulation(int _populationSize, int inputResolution){
-	erasePopulation();
-	agents = new TAgent*[_populationSize];
-	populationSize = _populationSize;
-	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
-		agents[currentAgent - 1] = new TAgent;
+void TPopulation::generateMinimalPopulation(int inputResolution, int _populationSize /*= 0*/){
+	if (_populationSize) populationSize = _populationSize;
+	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
 		agents[currentAgent - 1]->generateMinimalAgent(inputResolution);
-	}
 	if (populationSize){
 		connectionInnovationNumber = agents[0]->getPointerToAgentGenome()->getConnectionsQuantity();
 		predConnectionInnovationNumber = agents[0]->getPointerToAgentGenome()->getPredConnectionsQuantity();
@@ -45,7 +38,7 @@ void TPopulation::generateMinimalPopulation(int _populationSize, int inputResolu
 // Шаг эволюционного процесса
 void TPopulation::evolutionaryStep(TEnvironment& environment, int evolutionStepNumber){
 	// Сначала мутируем популяцию (чтобы можно потом было отчеты составлять и всегда текущая популяция уже была прогнана на среде)
-	generateNextPopulation(evolutionStepNumber);
+	if (evolutionStepNumber != 1) generateNextPopulation(evolutionStepNumber);
 	// Прогоняем всех агентов
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
 		// Проводим первичный системогенез
@@ -158,9 +151,9 @@ void TPopulation::mutationAddPoolConnection(TAgent& kidAgent){
 		int tryCount = 0; //Количество ложных генераций связи - введено, чтобы не было зацикливания
 		do{ // Цикл нахождения отсутствующей связи
 			do{ // Цикл нахождения корректной связи
-				prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getConnectionsQuantity());
+				prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getPoolsQuantity());
 				// Постсинаптический пул точно не может быть входным
-				postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + 1, kidGenome->getConnectionsQuantity());
+				postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + 1, kidGenome->getPoolsQuantity());
 				//Если постсинаптический и пресинаптический пулы не являются одновременно выходными, то значит мы нашли корректную связь
 			} while (! ((postPoolID > kidGenome->getInputResolution() + kidGenome->getOutputResolution()) || 
 																(prePoolID <= kidGenome->getInputResolution()) || (prePoolID > kidGenome->getInputResolution() + kidGenome->getOutputResolution())));
@@ -189,9 +182,9 @@ void TPopulation::mutationAddPoolPredConnection(TAgent& kidAgent){
 		int prePoolID, postPoolID; // Пресинаптический и постсинаптический пул потенциальной предикторной связи
 		int tryCount = 0; //Количество ложных генераций предикторной связи - введено, чтобы не было зацикливания
 		do{ // Цикл нахождения отсутствующей предикторной связи
-			prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getPredConnectionsQuantity());
+			prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getPoolsQuantity());
 			// Постсинаптический пул точно не может быть входным или выходным
-			postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + kidGenome->getOutputResolution() + 1, kidGenome->getPredConnectionsQuantity());
+			postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + kidGenome->getOutputResolution() + 1, kidGenome->getPoolsQuantity());
 			++tryCount;
 		// Пока не найдем отсутствующую предикторную связь или превысим допустимое кол-во попыток
 		}while ((kidGenome->checkPredConnectionExistance(prePoolID, postPoolID)) && (tryCount <= 1000));
@@ -207,7 +200,7 @@ void TPopulation::mutationAddPoolPredConnection(TAgent& kidAgent){
 // Процедура мутации - удаление связи
 void TPopulation::mutationDeletePoolConnection(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.deleteConnectionProb){ //  Если имеет место мутация
+	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deleteConnectionProb) && (kidGenome->getConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
 		int deletingConnectionID = service::uniformDiscreteDistribution(1, kidGenome->getConnectionsQuantity());
 		// Нахождение удаляемой связи
 		for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
@@ -223,7 +216,7 @@ void TPopulation::mutationDeletePoolConnection(TAgent& kidAgent){
 // Процедура мутации - удаление предикторной связи
 void TPopulation::mutationDeletePoolPredConnection(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.deletePredConnectionProb){ //  Если имеет место мутация
+	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deletePredConnectionProb) && (kidGenome->getPredConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
 		int deletingPredConnectionID = service::uniformDiscreteDistribution(1, kidGenome->getPredConnectionsQuantity());
 		// Нахождение удаляемой предикторной связи
 		for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
@@ -354,10 +347,10 @@ void TPopulation::generateOffspring(TAgent& kidAgent, const TAgent& firstParentA
 	
 	сomposeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
 	
-	mutationDeleteConnectionPopulation(kidAgent, currentEvolutionStep);
-	mutationDeletePredConnectionPopulation(kidAgent, currentEvolutionStep);
-	mutationEnableDisableConnections(kidAgent, currentEvolutionStep);
-	mutationEnableDisablePredConnections(kidAgent, currentEvolutionStep);
+	//mutationDeleteConnectionPopulation(kidAgent, currentEvolutionStep);
+	//mutationDeletePredConnectionPopulation(kidAgent, currentEvolutionStep);
+	//mutationEnableDisableConnections(kidAgent, currentEvolutionStep);
+	//mutationEnableDisablePredConnections(kidAgent, currentEvolutionStep);
 
 	mutationPoolDuplication(kidAgent);
 	mutationAddPoolConnection(kidAgent);

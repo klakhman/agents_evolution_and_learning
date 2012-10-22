@@ -79,7 +79,7 @@ double TEnvironment::calculateOccupancyCoefficient() const{
 		// Вероятность совершения k последовательных действий (с учетом что перевод из нуля в единицу и обратно - это разные действия)
 		double sequenceProbability = 1.0 / pow(2.0*environmentResolution, aimsSet[currentAim - 1].aimComplexity);
 		// Часть заполненности, которую вносит эта цель
-		double aimOccupancyPart = sequenceProbability * pow(2, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
+		double aimOccupancyPart = sequenceProbability * pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
 		
 		occupancyCoefficient += aimOccupancyPart;
 	}

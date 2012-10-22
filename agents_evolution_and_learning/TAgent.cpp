@@ -63,13 +63,17 @@ int TAgent::calculateOutputResoltion(int inputResolution) const{
 
 // Генерация случайного минимального возможного генома агента
 void TAgent::generateMinimalAgent(int inputResolution){
+	if (!genome) 
+		genome = new TPoolNetwork;
+	else 
+		genome->erasePoolNetwork();
 	int currentNeuron = 1;
 	int outputResolution = calculateOutputResoltion(inputResolution);
 	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
 		genome->addPool(currentNeuron, 0, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
 	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
 		genome->addPool(currentNeuron, 2, 1, service::uniformDistribution(-0.5, 0.5), 0, 3);
-	genome->addPool(currentNeuron + 1, 1, primarySystemogenesisSettings.initialPoolCapacity, service::uniformDistribution(-0.5, 0.5), 0, 2);
+	genome->addPool(currentNeuron, 1, primarySystemogenesisSettings.initialPoolCapacity, service::uniformDistribution(-0.5, 0.5), 0, 2);
 	int currentConnection = 1;
 	for (currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron){
 		genome->addConnection(currentNeuron, inputResolution + outputResolution + 1, currentConnection, service::uniformDistribution(-0.5, 0.5), 0, true, 0, primarySystemogenesisSettings.initialDevelopSynapseProbability, currentConnection); 
@@ -83,7 +87,10 @@ void TAgent::generateMinimalAgent(int inputResolution){
 
 // Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
 void TAgent::linearSystemogenesis(){
-	if (neuralController) neuralController->eraseNeuralNetwork();
+	if (!neuralController) 
+		neuralController = new TNeuralNetwork;
+	else 
+		neuralController->eraseNeuralNetwork();
 	// Сначала создаем все нейроны в сети
 	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
 		neuralController->addNeuron(neuralController->getNeuronsQuantity() + 1, genome->getPoolType(currentPool), genome->getPoolBiasMean(currentPool), genome->getPoolLayer(currentPool), true, currentPool);

@@ -47,8 +47,8 @@ public:
 		parents[1] = 0;
 		agentLife = 0;
 		reward = 0;
-		neuralController = 0;
-		genome = 0;
+		neuralController = new TNeuralNetwork;
+		genome = new TPoolNetwork;
 	}
 
 	// Деструктор
