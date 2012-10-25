@@ -128,6 +128,10 @@ public:
 	// Получение текущего выходного вектора сети
 	void getOutputVector(double outputVector[]);
 
+	// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH	
+	void printGraphNetwork(std::string graphFilename);
+
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& NeuralNetwork);
 

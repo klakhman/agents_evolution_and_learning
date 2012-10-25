@@ -16,11 +16,19 @@ int main(int argc, char** argv){
 	long startTime = time(0);
 	//srand(static_cast<unsigned int>(time(0)));
 	
-	TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
+	TNeuralNetwork* neuralNet = new TNeuralNetwork;
+	ifstream hTestNet;
+	hTestNet.open("C:/Tests/test_net.txt");
+	hTestNet >> *neuralNet;
+	neuralNet->printGraphNetwork("C:/Tests/net_graph.jpg");
+	hTestNet.close();
+	delete neuralNet;
+
+	/*TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
 	evolutionaryProcess->filenameSettings.environmentFilename = "C:/Tests/test_environment.txt";
 	evolutionaryProcess->filenameSettings.settingsFilename = "C:/Tests/test_settings.txt";
 	evolutionaryProcess->start();
-	delete evolutionaryProcess;
+	delete evolutionaryProcess;*/
 
 	/*string settingsFilename = "C:/Temp/Temp/settings.ini";
 	ifstream settingsFile(settingsFilename.c_str(), ifstream::in);

@@ -1,6 +1,7 @@
 #include "TNeuralNetwork.h"
 #include "TSynapse.h"
 #include "TPredConnection.h"
+#include "service.h"
 
 #include <cstring>
 #include <iostream>
@@ -115,6 +116,67 @@ void TNeuralNetwork::calculateNetwork(double inputVector[]){
 void TNeuralNetwork::getOutputVector(double outputVector[]){
 	for (int currentBit = 1; currentBit <= outputResolution; ++currentBit)
 		outputVector[currentBit - 1] = neuronsStructure[currentBit - 1 + inputResolution]->getCurrentOut(); 
+}
+
+// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
+void TNeuralNetwork::printGraphNetwork(string graphFilename){
+	ofstream hDotGraphFile;
+	hDotGraphFile.open((graphFilename + ".dot").c_str());
+	// Инициализируем и указываем, что слои должны следовать слево на право
+	hDotGraphFile << "digraph G { \n\trankdir=LR;\n";
+	// Подсчитываем кол-во пулов сети
+	int poolsQuantity = 0;
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		if (neuronsStructure[currentNeuron - 1]->getParentPoolID() > poolsQuantity)
+			poolsQuantity = neuronsStructure[currentNeuron - 1]->getParentPoolID();
+	// Записываем нейроны послойно
+	for (int currentLayer = 1; currentLayer <= layersQuantity; ++ currentLayer){
+		// Указываем, что это один слой и нейроны должны идти в столбец
+		hDotGraphFile << "\t{ rank = same; \n";
+		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+			// !! Не отображаем неактивные нейроны
+			if ((neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer) && (neuronsStructure[currentNeuron - 1]->getActive())){
+				// Определяем насыщенность цвета нейрона (отражает принадлежность к пулу)
+				string hex;
+				service::decToHex((poolsQuantity - neuronsStructure[currentNeuron-1]->getParentPoolID() + 1) * (255 - 30) / poolsQuantity + 30, hex, 2);
+				string color = hex + hex + hex;
+				hDotGraphFile << "\t\tsubgraph cluster" << neuronsStructure[currentNeuron - 1]->getParentPoolID() << "{\n" << "\t\t\tstyle=dashed;\n\t\t\tcolor=lightgrey;\n" <<
+					"\t\t\t\"" << neuronsStructure[currentNeuron - 1]->getID() << "\"[label=\"" << neuronsStructure[currentNeuron - 1]->getID() << "; " << neuronsStructure[currentNeuron - 1]->getParentPoolID() <<
+					"\", shape=\"circle\", style=filled, fillcolor=\"#" << color << "\"];\n\t\t}\n";
+			}
+		hDotGraphFile << "\t}\n"; // Заканчиваем запись слоя
+	}
+	// Записываем синапсы
+	double maxWeightValue = 1.0;
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
+			//Отображаем связи только между активными нейронами
+			if ((neuronsStructure[currentNeuron - 1]->getSynapseEnabled(currentSynapse)) &&
+					(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive()) && 
+						(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive())){
+				string hex;
+				service::decToHex(static_cast<int>(min(abs(255 * neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) / maxWeightValue), 255.0)), hex, 2);
+				string color;
+				if (neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) < 0)
+					color = "0000" + hex; // Оттенок синего
+				else
+					color = hex + "0000"; // Оттенок красного
+				hDotGraphFile << "\t\"" << neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getID() << "\" -> \"" <<
+					neuronsStructure[currentNeuron - 1]->getSynapsePostNeuron(currentSynapse)->getID() << "\" [label=\"" << neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) << 
+					"\", arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
+			}
+	// Записываем предикторные связи
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+			if ((neuronsStructure[currentNeuron - 1]->getPredConnectionEnabled(currentPredConnection)) &&
+					(neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getActive()) &&
+						(neuronsStructure[currentNeuron - 1]->getPredConnectionPostNeuron(currentPredConnection)->getActive()))
+				hDotGraphFile << "\t\"" << neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getID() << "\" -> \"" <<
+					neuronsStructure[currentNeuron - 1]->getPredConnectionPostNeuron(currentPredConnection)->getID() << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
+	hDotGraphFile << "}";
+	hDotGraphFile.close();
+	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
 }
 
 //Печать сети в файл или на экран
