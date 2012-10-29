@@ -16,14 +16,22 @@ int main(int argc, char** argv){
 	long startTime = time(0);
 	//srand(static_cast<unsigned int>(time(0)));
 	
-	TNeuralNetwork* neuralNet = new TNeuralNetwork;
+	/*TNeuralNetwork* neuralNet = new TNeuralNetwork;
 	ifstream hTestNet;
 	hTestNet.open("C:/Tests/test_net.txt");
 	hTestNet >> *neuralNet;
 	neuralNet->printGraphNetwork("C:/Tests/net_graph.jpg");
 	hTestNet.close();
-	delete neuralNet;
+	delete neuralNet;*/
 
+	/*TPoolNetwork* poolNet = new TPoolNetwork;
+	ifstream hTestNet;
+	hTestNet.open("C:/Tests/test_pool_net.txt");
+	hTestNet >> *poolNet;
+	cout << *poolNet;
+	poolNet->printGraphNetwork("C:/Tests/pool_net_graph.jpg");
+	hTestNet.close();
+	delete poolNet;*/
 	/*TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
 	evolutionaryProcess->filenameSettings.environmentFilename = "C:/Tests/test_environment.txt";
 	evolutionaryProcess->filenameSettings.settingsFilename = "C:/Tests/test_settings.txt";

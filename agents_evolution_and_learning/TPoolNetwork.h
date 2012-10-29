@@ -147,6 +147,10 @@ public:
 	// Оператор присваивания (фактически полное копирование сети - создание новых структур)
 	TPoolNetwork& operator=(const TPoolNetwork& sourcePoolNetwork);
 
+	// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
+	void printGraphNetwork(std::string graphFilename);
+
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TPoolNetwork& PoolNetwork);
 

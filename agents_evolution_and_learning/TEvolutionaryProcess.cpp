@@ -89,14 +89,17 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	double averagePredConnectionsQuantity = 0;
 	double averageReward = 0;
 	double maxReward = 0;
+	int bestAgent = 0;
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
 		TPoolNetwork* currentGenomePointer = agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentGenome();
 		averagePoolsQuantity += currentGenomePointer->getPoolsQuantity();
 		averageConnectionsQuantity += currentGenomePointer->getConnectionsQuantity();
 		averagePredConnectionsQuantity += currentGenomePointer->getPredConnectionsQuantity();
 		averageReward += agentsPopulation->getPointertoAgent(currentAgent)->getReward();
-		if (agentsPopulation->getPointertoAgent(currentAgent)->getReward() > maxReward)
+		if (agentsPopulation->getPointertoAgent(currentAgent)->getReward() > maxReward){
+			bestAgent = currentAgent;
 			maxReward = agentsPopulation->getPointertoAgent(currentAgent)->getReward();
+		}
 	}
 	averagePoolsQuantity /= agentsPopulation->getPopulationSize();
 	averageConnectionsQuantity /= agentsPopulation->getPopulationSize();

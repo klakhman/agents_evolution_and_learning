@@ -1,6 +1,7 @@
 #include "TPoolNetwork.h"
 #include "TPoolConnection.h"
 #include "TPoolPredConnection.h"
+#include "service.h"
 
 #include <cstring>
 #include <iostream>
@@ -149,6 +150,49 @@ TPoolNetwork& TPoolNetwork::operator=(const TPoolNetwork& sourcePoolNetwork){
 								sourcePoolNetwork.getPredConnectionInnovationNumber(currentPool, currentPoolPredConnection));
 	}
 	return *this;
+}
+
+// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
+void TPoolNetwork::printGraphNetwork(string graphFilename){
+	ofstream hDotGraphFile;
+	hDotGraphFile.open((graphFilename + ".dot").c_str());
+	// Инициализируем и указываем, что слои должны следовать слево на право
+	hDotGraphFile << "digraph G { \n\trankdir=LR;\n";
+	// Записываем пулы послойно
+	for (int currentLayer = 1; currentLayer <= layersQuantity; ++ currentLayer){
+		// Указываем, что это один слой и пулы должны идти в столбец
+		hDotGraphFile << "\t{ rank = same; \n";
+		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+			if (poolsStructure[currentPool - 1]->getLayer() == currentLayer)
+				hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"circle\"];\n" ;
+		hDotGraphFile << "\t}\n"; // Заканчиваем запись слоя
+	}
+	// Записываем связи
+	double maxWeightValue = 1.0;
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
+			if (poolsStructure[currentPool - 1]->getConnectionEnabled(currentConnection)){
+				string hex;
+				service::decToHex(static_cast<int>(min(abs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue), 255.0)), hex, 2);
+				string color;
+				if (poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) < 0)
+					color = "0000" + hex; // Оттенок синего
+				else
+					color = hex + "0000"; // Оттенок красного
+				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() << "\" -> \"" <<
+					poolsStructure[currentPool - 1]->getConnectionPostPool(currentConnection)->getID() << "\" [label=\"" << poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) << 
+					"\", arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
+			}
+	// Записываем предикторные связи
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+			if (poolsStructure[currentPool - 1]->getPredConnectionEnabled(currentPredConnection))
+				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getPredConnectionPrePool(currentPredConnection)->getID() << "\" -> \"" <<
+					poolsStructure[currentPool - 1]->getPredConnectionPostPool(currentPredConnection)->getID() << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
+	hDotGraphFile << "}";
+	hDotGraphFile.close();
+	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
 }
 
 //Печать сети в файл или на экран
