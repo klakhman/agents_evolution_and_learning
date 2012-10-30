@@ -156,7 +156,7 @@ void TNeuralNetwork::printGraphNetwork(string graphFilename){
 					(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive()) && 
 						(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive())){
 				string hex;
-				service::decToHex(static_cast<int>(min(abs(255 * neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) / maxWeightValue), 255.0)), hex, 2);
+				service::decToHex(static_cast<int>(min(fabs(255 * neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) / maxWeightValue), 255.0)), hex, 2);
 				string color;
 				if (neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) < 0)
 					color = "0000" + hex; // Оттенок синего

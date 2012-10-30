@@ -6,6 +6,9 @@
 #include <string>
 #include <fstream>
 
+#include <sstream>
+
+
 using namespace std;
 
 // Загрузка параметров популяции из файла
@@ -89,7 +92,7 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	double averagePredConnectionsQuantity = 0;
 	double averageReward = 0;
 	double maxReward = 0;
-	int bestAgent = 0;
+	int bestAgent = 1;
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
 		TPoolNetwork* currentGenomePointer = agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentGenome();
 		averagePoolsQuantity += currentGenomePointer->getPoolsQuantity();
@@ -106,14 +109,23 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	averagePredConnectionsQuantity /= agentsPopulation->getPopulationSize();
 	averageReward /= agentsPopulation->getPopulationSize();
 	outputConsole << currentEvolutionStep << ": " << averageReward << "\t" << maxReward << "\t" <<
-		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;  
+		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl; 
+	
+	/*stringstream tmp_stream;
+	tmp_stream << currentEvolutionStep;
+	string tmp_str;
+	tmp_stream >> tmp_str;
+	agentsPopulation->getPointertoAgent(bestAgent)->getPointerToAgentGenome()->printGraphNetwork("C:/Tests/Networks/pool_net_" + tmp_str + ".jpg");
+	agentsPopulation->getPointertoAgent(bestAgent)->getPointerToAgentController()->printGraphNetwork("C:/Tests/Networks/neural_net_" + tmp_str + ".jpg");*/
 }
 
 // Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
 void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Если не было передано зерно рандомизации
+	cout << randomSeed << endl << endl;
 	if (!randomSeed)
 		randomSeed = static_cast<unsigned int>(time(0));
+	cout << randomSeed;
 	srand(randomSeed);
 	// Запуски генератора случайных чисел, чтобы развести значения
 	rand();
@@ -138,6 +150,5 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 		agentsPopulation->evolutionaryStep(*environment, currentEvolutionStep); 
 		makeLogNote(cout, currentEvolutionStep);
 	}
-
 }
 

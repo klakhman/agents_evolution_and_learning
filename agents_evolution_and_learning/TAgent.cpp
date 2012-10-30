@@ -159,6 +159,7 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime){
 	// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
 	environment.getCurrentEnvironmentVector(environmentVector);
 
+	neuralController->reset();
 	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
 		neuralController->calculateNetwork(environmentVector);
 		neuralController->getOutputVector(outputVector);

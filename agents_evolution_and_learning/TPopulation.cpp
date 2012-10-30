@@ -66,7 +66,7 @@ void  TPopulation::mutationConnectionsWeight(TAgent& kidAgent){
 			kidGenome->setPoolBiasMean(currentPool, kidGenome->getPoolBiasMean(currentPool) +
 																service::uniformDistribution(-mutationSettings.mutWeightMeanDisp, mutationSettings.mutWeightMeanDisp));
 			// Важно, чтобы дисперсия была не меньше нуля
-			kidGenome->setPoolBiasVariance(currentPool, abs(kidGenome->getPoolBiasVariance(currentPool) + 
+			kidGenome->setPoolBiasVariance(currentPool, fabs(kidGenome->getPoolBiasVariance(currentPool) + 
 															service::uniformDistribution(-mutationSettings.mutWeightDispDisp, mutationSettings.mutWeightDispDisp)));
 		}
 		for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
@@ -75,7 +75,7 @@ void  TPopulation::mutationConnectionsWeight(TAgent& kidAgent){
 				kidGenome->setConnectionWeightMean(currentPool, currentPoolConnection, kidGenome->getConnectionWeightMean(currentPool, currentPoolConnection) +
 																service::uniformDistribution(-mutationSettings.mutWeightMeanDisp, mutationSettings.mutWeightMeanDisp));
 				// Важно, чтобы дисперсия была не меньше нуля
-				kidGenome->setConnectionWeightVariance(currentPool, currentPoolConnection, abs(kidGenome->getConnectionWeightVariance(currentPool, currentPoolConnection) + 
+				kidGenome->setConnectionWeightVariance(currentPool, currentPoolConnection, fabs(kidGenome->getConnectionWeightVariance(currentPool, currentPoolConnection) + 
 																service::uniformDistribution(-mutationSettings.mutWeightDispDisp, mutationSettings.mutWeightDispDisp)));
 			}
 	}

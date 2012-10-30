@@ -107,7 +107,7 @@ bool TEnvironment::forceEnvironment(double actionID){
 	//Ќаправление изменени€
 	bool changeDirection = (actionID > 0);
 	// Ќомер измен€емого бита
-	int changeBit = static_cast<int>(abs(actionID));
+	int changeBit = static_cast<int>(fabs(actionID));
 	// ≈сли бит в противоположной позиции, то действие совершаетс€
 	if (currentEnvironmentVector[changeBit -1 ] != changeDirection){
 		currentEnvironmentVector[changeBit - 1] = changeDirection;
@@ -138,7 +138,7 @@ double TEnvironment::calculateReward(double actionsIDs[], int actionsQuantity) c
 				while (achivedFlag && (currentAction <= aimsSet[currentAim - 1].aimComplexity)){
 					// ќпределение направлени€ изменени€ и измен€емого бита (с откатыванием времени назад)
 					bool changedDirection = (actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction] > 0);
-					int changedBit = static_cast<int>(abs(actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction]));
+					int changedBit = static_cast<int>(fabs(actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction]));
 					/* ѕровер€ем совпадает ли реальное действие с действием в цели на нужном месте 
 						ќжидаетс€, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
 					if ((changedBit != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber) ||

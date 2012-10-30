@@ -174,7 +174,7 @@ void TPoolNetwork::printGraphNetwork(string graphFilename){
 		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
 			if (poolsStructure[currentPool - 1]->getConnectionEnabled(currentConnection)){
 				string hex;
-				service::decToHex(static_cast<int>(min(abs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue), 255.0)), hex, 2);
+				service::decToHex(static_cast<int>(min(fabs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue), 255.0)), hex, 2);
 				string color;
 				if (poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) < 0)
 					color = "0000" + hex; // Оттенок синего
