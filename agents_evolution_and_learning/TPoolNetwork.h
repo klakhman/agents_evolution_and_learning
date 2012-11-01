@@ -157,7 +157,7 @@ public:
 	//—читывание сети из файла или экрана
 	friend std::istream& operator>>(std::istream& is, TPoolNetwork& PoolNetwork);
 
-	//friend int testPoolNetwork();
+	//friend class tests;
 };
 
 #endif // TPOOLNETWORK_H

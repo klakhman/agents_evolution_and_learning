@@ -135,6 +135,8 @@ public:
 
 	// Процедура эволюции популяции
 	void evolution(TEnvironment& environment);
+
+	friend class tests;
 };
 
 #endif // TPOPULATION_H

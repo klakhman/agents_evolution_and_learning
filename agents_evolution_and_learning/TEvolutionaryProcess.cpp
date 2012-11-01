@@ -109,8 +109,25 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	averagePredConnectionsQuantity /= agentsPopulation->getPopulationSize();
 	averageReward /= agentsPopulation->getPopulationSize();
 	outputConsole << currentEvolutionStep << ": " << averageReward << "\t" << maxReward << "\t" <<
-		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl; 
-	
+		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
+	// Также записываем в файл результатов
+	ofstream resultsFile;
+	resultsFile.open(filenameSettings.resultsFilename, fstream::app);
+	resultsFile <<  currentEvolutionStep << "\t" << averageReward << "\t" << maxReward << "\t" <<
+		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
+	resultsFile.close();
+	// Записываем лучшего агента и всю популяцию, если нужно
+	ofstream bestAgentsFile;
+	bestAgentsFile.open(filenameSettings.bestAgentsFilename, fstream::app);
+	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsFile);
+	bestAgentsFile.close();
+	if (averageReward > bestAverageReward){
+		ofstream bestPopulationFile;
+		bestPopulationFile.open(filenameSettings.bestPopulationFilename);
+		for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
+			agentsPopulation->getPointertoAgent(currentAgent)->uploadGenome(bestPopulationFile);
+		bestPopulationFile.close();
+	}
 	/*stringstream tmp_stream;
 	tmp_stream << currentEvolutionStep;
 	string tmp_str;
@@ -143,6 +160,13 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	fillPopulationSettingsFromFile();
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	fillAgentSettingsFromFile();
+	// Опустошаем файлы если они есть
+	ofstream resultsFile;
+	resultsFile.open(filenameSettings.resultsFilename);
+	resultsFile.close();
+	ofstream bestAgentsFile;
+	bestAgentsFile.open(filenameSettings.bestAgentsFilename);
+	bestAgentsFile.close();
 	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
 	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
 

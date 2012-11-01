@@ -109,7 +109,7 @@ bool TEnvironment::forceEnvironment(double actionID){
 	// Ќомер измен€емого бита
 	int changeBit = static_cast<int>(fabs(actionID));
 	// ≈сли бит в противоположной позиции, то действие совершаетс€
-	if (currentEnvironmentVector[changeBit -1 ] != changeDirection){
+	if (currentEnvironmentVector[changeBit -1] != changeDirection){
 		currentEnvironmentVector[changeBit - 1] = changeDirection;
 		actionSuccess = true;
 	}

@@ -2,6 +2,7 @@
 #define TESTS_H
 
 #include "TEnvironment.h"
+#include "TPoolNetwork.h"
 #include <string>
 
 class tests{
@@ -23,6 +24,23 @@ public:
 	int testGenerateEnvironment();
 	// Процедура тестирования степени равномерности распределения, получаемого с помощью слабой функции
 	int testWeakUniformDistribution();
+
+	//------------------ Тестирование различных процедур мутации ---------------------------
+
+	// Создание тестовой сети из пулов
+	void createTestPoolNetwork(TPoolNetwork& poolNetwork);
+
+	// Тестирование процедуры мутации весов
+	void testWeigthsMutation(std::string testDirectory);
+
+	//Тестирование процедуры добавления связи
+	void testAddConnection(std::string testDirectory);
+
+	// Тестирование процедуры удаления связи
+	void testDeleteConnection(std::string testDirectory);
+
+	// Тестирование процедуры дупликации пула
+	void tests::testDuplicatePool(std::string testDirectory);
 };
 
 #endif // TESTS_H

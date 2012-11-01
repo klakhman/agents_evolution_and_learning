@@ -180,9 +180,11 @@ void TPoolNetwork::printGraphNetwork(string graphFilename){
 					color = "0000" + hex; // Оттенок синего
 				else
 					color = hex + "0000"; // Оттенок красного
-				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() << "\" -> \"" <<
+				/*hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() << "\" -> \"" <<
 					poolsStructure[currentPool - 1]->getConnectionPostPool(currentConnection)->getID() << "\" [label=\"" << poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) << 
-					"\", arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
+					"\", arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";*/
+				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() << "\" -> \"" <<
+					poolsStructure[currentPool - 1]->getConnectionPostPool(currentConnection)->getID() << "\" [ arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
 			}
 	// Записываем предикторные связи
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)

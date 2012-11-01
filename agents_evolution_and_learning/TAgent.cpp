@@ -11,14 +11,12 @@ using namespace std;
 // Загрузка нейроконтроллера агента
 void TAgent::loadController(istream& is){
 	string tmp_str;
-	is >> tmp_str; // Считываем технический номер сети
 	if (!neuralController) neuralController = new TNeuralNetwork;
 	is >> *neuralController;
 }
 // Загрузка генома нейрононтроллера
 void TAgent::loadGenome(istream& is){
 	string tmp_str;
-	is >> tmp_str; // Считываем технический номер сети
 	is >> tmp_str; // Считываем номер более приспособленного родителя
 	parents[0] = atoi(tmp_str.c_str());
 	is >> tmp_str; // Считываем номер менее приспособленного родителя
@@ -41,7 +39,7 @@ void TAgent::uploadGenome(ostream& os) const{
 }
 
 // Подсчет размера выходного вектора нейроконтроллера и генома агента на основе размера входного вектора среды
-int TAgent::calculateOutputResoltion(int inputResolution) const{
+int TAgent::calculateOutputResolution(int inputResolution) const{
 	int _outputResolution = - 1;
 	int codingNeuronsQuantity = 2; // Кол-во нейронов, кодирующих одно действие агента
 	// Кол-во доступных для кодирования действий при определенной размерности выходного вектора
@@ -68,7 +66,7 @@ void TAgent::generateMinimalAgent(int inputResolution){
 	else 
 		genome->erasePoolNetwork();
 	int currentNeuron = 1;
-	int outputResolution = calculateOutputResoltion(inputResolution);
+	int outputResolution = calculateOutputResolution(inputResolution);
 	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
 		genome->addPool(currentNeuron, 0, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
 	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
@@ -124,7 +122,7 @@ double TAgent::decodeAction(double outputVector[]){
 			maxOutputNeurons[1] = currentNeuron;
 		}
 	// Меняем местами номера, если они не по порядку (нас не интересует их порядок)
-	if (maxOutputNeurons[1] > maxOutputNeurons[0]){
+	if (maxOutputNeurons[0] > maxOutputNeurons[1]){
 		int tmp = maxOutputNeurons[0];
 		maxOutputNeurons[0] = maxOutputNeurons[1];
 		maxOutputNeurons[1] = tmp;
@@ -134,7 +132,7 @@ double TAgent::decodeAction(double outputVector[]){
 	int secondCheckNeuron = fisrtCheckNeuron + 1; // Номер второго нейрона в проверяемой паре
 	int pairCount = 0; // Количество проверенных пар
 	// Считаем кол-во пар до нужной пары нейронов
-	while ((fisrtCheckNeuron != maxOutputNeurons[0]) && (secondCheckNeuron != maxOutputNeurons[1])) {
+	while ((fisrtCheckNeuron != maxOutputNeurons[0]) || (secondCheckNeuron != maxOutputNeurons[1])) {
 		if (secondCheckNeuron < neuralController->getOutputResolution())
 			++secondCheckNeuron;
 		else{
@@ -142,8 +140,7 @@ double TAgent::decodeAction(double outputVector[]){
 			secondCheckNeuron = fisrtCheckNeuron + 1;
 		}
 		++pairCount;
-	}
-		
+	}	
 	int actionNumber = pairCount % (2 * neuralController->getInputResolution()); // Итоговый номер совершаемого действия (от 0 до 2*environmentResolution)
 	// Если вычисленный номер действия четный, то это перевод из 0 в 1, и соответственно наоброт
 	double actionCode = (actionNumber % 2 ? -1 : 1) * (actionNumber / 2 + 1);
@@ -156,17 +153,17 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime){
 	double* environmentVector = new double[neuralController->getInputResolution()];
 	double* outputVector = new double[neuralController->getOutputResolution()];
 	agentLife = new double[agentLifeTime];
-	// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
-	environment.getCurrentEnvironmentVector(environmentVector);
 
 	neuralController->reset();
 	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
+		// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
+		environment.getCurrentEnvironmentVector(environmentVector);
 		neuralController->calculateNetwork(environmentVector);
 		neuralController->getOutputVector(outputVector);
 		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
 		// Действуем на среду и проверяем успешно ли действие
 		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
-		if (!actionSuccess ) agentLife[agentLifeStep - 1] = 0;
+		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
 	}
 	reward = environment.calculateReward(agentLife, agentLifeTime);
 	delete []agentLife;
@@ -191,4 +188,42 @@ TAgent& TAgent::operator=(const TAgent& sourceAgent){
 	primarySystemogenesisSettings.synapsesActivityTreshold = sourceAgent.primarySystemogenesisSettings.synapsesActivityTreshold; 
 	primarySystemogenesisSettings.significanceTreshold = sourceAgent.primarySystemogenesisSettings.significanceTreshold; 
 	return *this;
+}
+
+// Временная процедура печати жизни агента
+void TAgent::printLife(TEnvironment& environment, int agentLifeTime){
+	double* environmentVector = new double[neuralController->getInputResolution()];
+	double* outputVector = new double[neuralController->getOutputResolution()];
+	agentLife = new double[agentLifeTime];
+	// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
+	environment.getCurrentEnvironmentVector(environmentVector);
+	cout << "Environment: ";
+	for (int currentBit = 1; currentBit <= neuralController->getInputResolution(); ++currentBit)
+		cout << environmentVector[currentBit - 1] << "\t";
+	cout << endl << endl;
+
+	neuralController->reset();
+	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
+		neuralController->calculateNetwork(environmentVector);
+		neuralController->getOutputVector(outputVector);
+		cout << "Output: ";
+		for (int currentBit = 1; currentBit <= neuralController->getOutputResolution(); ++currentBit)
+			cout << outputVector[currentBit - 1] << "\t";
+		cout << endl;
+		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
+		// Действуем на среду и проверяем успешно ли действие
+		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
+		environment.getCurrentEnvironmentVector(environmentVector);
+		cout << "Environment: ";
+		for (int currentBit = 1; currentBit <= neuralController->getInputResolution(); ++currentBit)
+			cout << environmentVector[currentBit - 1] << "\t";
+		cout << endl;
+		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
+		cout << "Action: " <<  agentLife[agentLifeStep - 1] << endl;
+	}
+	reward = environment.calculateReward(agentLife, agentLifeTime);
+	delete []agentLife;
+	agentLife = 0;
+	delete []outputVector;
+	delete []environmentVector;
 }

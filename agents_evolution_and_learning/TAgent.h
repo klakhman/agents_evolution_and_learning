@@ -24,7 +24,7 @@ class TAgent{
 	// Декодирование идентификатора совершаемого агентом действия (!!!! по идее декодирование действия, как и кодирование состояния среды во входной вектор, так и определение необходимой размерности выходного вектора должны совершаться некоторым сторонним от агента образом, так как это средоспецифические функции, но при этом не принадлежащие среде !!!!!)
 	double decodeAction(double outputVector[]);
 	// Подсчет размера выходного вектора нейроконтроллера и генома агента на основе размера входного вектора среды
-	int calculateOutputResoltion(int inputResolution) const;
+	int calculateOutputResolution(int inputResolution) const;
 	// Запрещаем копирующий конструктор (чтобы экземпляры нельзя было передавать по значению)
 	TAgent(const TAgent&);
 public:
@@ -49,6 +49,14 @@ public:
 		reward = 0;
 		neuralController = new TNeuralNetwork;
 		genome = new TPoolNetwork;
+		primarySystemogenesisSettings.initialPoolCapacity = 1;
+		primarySystemogenesisSettings.initialDevelopSynapseProbability = 1;
+		primarySystemogenesisSettings.initialDevelopPredConnectionProbability = 1;
+		primarySystemogenesisSettings.primarySystemogenesisTime = 0;
+		primarySystemogenesisSettings.spontaneousActivityProb = 0;
+		primarySystemogenesisSettings.activeNeuronsPercent = 0;
+		primarySystemogenesisSettings.synapsesActivityTreshold = 0;
+		primarySystemogenesisSettings.significanceTreshold = 0;
 	}
 
 	// Деструктор
@@ -82,6 +90,9 @@ public:
 	void life(TEnvironment& environment, int agentLifeTime);
 	// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
 	TAgent& operator=(const TAgent& sourceAgent);
+
+	// Временная процедура печати жизни агента
+	void TAgent::printLife(TEnvironment& environment, int agentLifeTime);
 
 };
 

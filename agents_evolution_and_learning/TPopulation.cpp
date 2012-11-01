@@ -346,20 +346,22 @@ void TPopulation::сomposeOffspringFromParents(TAgent& kidAgent, const TAgent& fi
 void TPopulation::generateOffspring(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent, int currentEvolutionStep){
 	
 	сomposeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
-	
+
+	mutationAddPoolConnection(kidAgent);
+	//mutationAddPoolPredConnection(kidAgent);
+	mutationDeletePoolConnection(kidAgent);
+	//mutationDeletePoolPredConnection(kidAgent);
+
+	mutationPoolDuplication(kidAgent);
+
 	//mutationDeleteConnectionPopulation(kidAgent, currentEvolutionStep);
 	//mutationDeletePredConnectionPopulation(kidAgent, currentEvolutionStep);
 	//mutationEnableDisableConnections(kidAgent, currentEvolutionStep);
 	//mutationEnableDisablePredConnections(kidAgent, currentEvolutionStep);
 
-	mutationPoolDuplication(kidAgent);
-	mutationAddPoolConnection(kidAgent);
-	mutationAddPoolPredConnection(kidAgent);
-	mutationDeletePoolConnection(kidAgent);
-	mutationDeletePoolPredConnection(kidAgent);
 	mutationConnectionsWeight(kidAgent);
-	mutationDevelopSynapseProb(kidAgent);
-	mutationDevelopPredConProb(kidAgent);
+	//mutationDevelopSynapseProb(kidAgent);
+	//mutationDevelopPredConProb(kidAgent);
 }
 
 //Процедура получения номера агента, используемая в рулеточном алгоритме

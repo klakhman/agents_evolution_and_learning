@@ -4,6 +4,7 @@
 #include "TNeuralNetwork.h"
 #include "TEnvironment.h"
 #include "service.h"
+#include "TPopulation.h"
 
 #include <iostream>
 #include <fstream>
@@ -298,5 +299,143 @@ int tests::testWeakUniformDistribution(){
 
 	return checkStatus;
 }
+
+//------------------ Тестирование различных процедур мутации ---------------------------
+
+// Создание тестовой сети из пулов
+void tests::createTestPoolNetwork(TPoolNetwork& poolNetwork){
+	poolNetwork.erasePoolNetwork();
+	// Входные пулы
+	poolNetwork.addPool(1, 0, 1, -0.5, 0.1, 1);
+	poolNetwork.addPool(2, 0, 1, 0.4, 0.1, 1);
+	poolNetwork.addPool(3, 0, 1, 0.1, 0.1, 1);
+	// Выходные пулы
+	poolNetwork.addPool(4, 2, 1, 0.5, 0.1, 3);
+	poolNetwork.addPool(5, 2, 1, 0.6, 0.1, 3);
+	// Интер-пулы
+	poolNetwork.addPool(6, 1, 10, -0.5, 0.1, 2);
+	poolNetwork.addPool(7, 1, 1, 0.3, 0.1, 2);
+
+	// Добавляем связи
+	poolNetwork.addConnection(1, 6, 1, 0.4, 0.1, 1, 0, 1, 1);
+	poolNetwork.addConnection(1, 7, 2, 0.3, 0.1, 1, 0, 1, 2);
+	poolNetwork.addConnection(2, 6, 3, 0.21, 0.1, 1, 0, 1, 3);
+	poolNetwork.addConnection(3, 7, 4, 0.39, 0.1, 1, 0, 1, 4);
+
+	poolNetwork.addConnection(6, 6, 5, 0.6, 0.1, 1, 0, 1, 5);
+	poolNetwork.addConnection(7, 6, 6, 0.43, 0.1, 1, 0, 1, 6);
+
+	poolNetwork.addConnection(6, 5, 7, 0.70, 0.1, 1, 0, 1, 7);
+	poolNetwork.addConnection(7, 4, 8, 0.50, 0.1, 1, 0, 1, 8);
+	poolNetwork.addConnection(5, 7, 9, 0.33, 0.1, 1, 0, 1, 9);
+
+	// Добавляем предикторные связи
+	poolNetwork.addPredConnection(6, 7, 1, 1, 0, 1, 1);
+	poolNetwork.addPredConnection(4, 6, 2, 1, 0, 1, 2);
+}
+
+// Тестирование процедуры мутации весов
+void tests::testWeigthsMutation(string testDirectory){
+	TPoolNetwork* testNetwork = new TPoolNetwork;
+	createTestPoolNetwork(*testNetwork);
+	cout << *testNetwork << endl;
+
+	TPopulation* testPopulation = new TPopulation;
+	testPopulation->setPopulationSize(1);
+	*(testPopulation->getPointertoAgent(1)->getPointerToAgentGenome()) = *testNetwork; 
+	testPopulation->mutationSettings.mutWeightProbability = 0.5;
+	testPopulation->mutationSettings.mutWeightMeanDisp = 0.08;
+	testPopulation->mutationSettings.mutWeightDispDisp = 0.005;
+	testPopulation->mutationConnectionsWeight(*(testPopulation->getPointertoAgent(1)));
+
+	TPoolNetwork* mutatedNetwork = (testPopulation->getPointertoAgent(1)->getPointerToAgentGenome());
+
+	cout << *(testPopulation->getPointertoAgent(1)->getPointerToAgentGenome()) << endl;
+	cout << "----- Statistics ----" << endl << "Standart deviation: " << testPopulation->mutationSettings.mutWeightMeanDisp << endl;
+	cout << "Real non-zero values: ";
+	int zero_values = 0;
+	for (int currentPool = 1; currentPool <= testNetwork->getPoolsQuantity(); ++currentPool){
+		if (testNetwork->getPoolBiasMean(currentPool) != mutatedNetwork->getPoolBiasMean(currentPool))
+			cout << mutatedNetwork->getPoolBiasMean(currentPool) - testNetwork->getPoolBiasMean(currentPool) << "\t";
+		else 
+			++zero_values;
+		for (int currentConnection = 1; currentConnection <= testNetwork->getPoolInputConnectionsQuantity(currentPool); ++currentConnection)
+			if (testNetwork->getConnectionWeightMean(currentPool, currentConnection) != mutatedNetwork->getConnectionWeightMean(currentPool, currentConnection))
+				cout << mutatedNetwork->getConnectionWeightMean(currentPool, currentConnection) - testNetwork->getConnectionWeightMean(currentPool, currentConnection) << "\t";
+			else 
+				++zero_values;
+	}
+	cout << endl << endl << "Probability: " << testPopulation->mutationSettings.mutWeightProbability << "\t Real number of zero-values: " << zero_values << ", all connections: " << testNetwork->getPoolsQuantity() + testNetwork->getConnectionsQuantity();
+
+	delete testPopulation;
+	delete testNetwork;
+}
+
+//Тестирование процедуры добавления связи
+void tests::testAddConnection(string testDirectory){
+	TPoolNetwork* testNetwork = new TPoolNetwork;
+	createTestPoolNetwork(*testNetwork);
+	cout << *testNetwork << endl;
+
+	TPopulation* testPopulation = new TPopulation;
+	testPopulation->setPopulationSize(1);
+	*(testPopulation->getPointertoAgent(1)->getPointerToAgentGenome()) = *testNetwork; 
+	testPopulation->mutationSettings.addConnectionProb = 1;
+	testPopulation->connectionInnovationNumber = testNetwork->getConnectionsQuantity();
+
+	testPopulation->mutationAddPoolConnection(*(testPopulation->getPointertoAgent(1)));
+	TPoolNetwork* mutatedNetwork = (testPopulation->getPointertoAgent(1)->getPointerToAgentGenome());
+	cout << *mutatedNetwork << endl << endl;
+	cout << "Previous connections quantity = " << testNetwork->getConnectionsQuantity() << " Current = " << mutatedNetwork->getConnectionsQuantity() << endl;
+	delete testPopulation;
+	delete testNetwork;
+}
+
+// Тестирование процедуры удаления связи
+void tests::testDeleteConnection(string testDirectory){
+	TPoolNetwork* testNetwork = new TPoolNetwork;
+	createTestPoolNetwork(*testNetwork);
+	cout << *testNetwork << endl;
+
+	TPopulation* testPopulation = new TPopulation;
+	testPopulation->setPopulationSize(1);
+	*(testPopulation->getPointertoAgent(1)->getPointerToAgentGenome()) = *testNetwork; 
+	testPopulation->mutationSettings.deleteConnectionProb = 1;
+	testPopulation->connectionInnovationNumber = testNetwork->getConnectionsQuantity();
+
+	testPopulation->mutationDeletePoolConnection(*(testPopulation->getPointertoAgent(1)));
+	TPoolNetwork* mutatedNetwork = (testPopulation->getPointertoAgent(1)->getPointerToAgentGenome());
+	cout << *mutatedNetwork << endl << endl;
+	cout << "Previous connections quantity = " << testNetwork->getConnectionsQuantity() << " Current = " << mutatedNetwork->getConnectionsQuantity() << endl;
+	delete testPopulation;
+	delete testNetwork;
+}
+
+// Тестирование процедуры дупликации пула
+void tests::testDuplicatePool(string testDirectory){
+	TPoolNetwork* testNetwork = new TPoolNetwork;
+	createTestPoolNetwork(*testNetwork);
+	cout << *testNetwork << endl;
+	//testNetwork->printGraphNetwork(testDirectory + "/test_pool_net.jpg");
+	TPopulation* testPopulation = new TPopulation;
+	testPopulation->setPopulationSize(1);
+	*(testPopulation->getPointertoAgent(1)->getPointerToAgentGenome()) = *testNetwork; 
+	testPopulation->mutationSettings.duplicatePoolProb = 1;
+	testPopulation->mutationSettings.connectionStandartAmount = 9;
+	testPopulation->mutationSettings.poolStandartAmount = 7;
+	testPopulation->mutationSettings.poolDivisionCoef = 2.0 / 3.0;
+	testPopulation->connectionInnovationNumber = testNetwork->getConnectionsQuantity();
+	testPopulation->predConnectionInnovationNumber = testNetwork->getPredConnectionsQuantity();
+
+	testPopulation->mutationPoolDuplication(*(testPopulation->getPointertoAgent(1)));
+	TPoolNetwork* mutatedNetwork = (testPopulation->getPointertoAgent(1)->getPointerToAgentGenome());
+	cout << *mutatedNetwork << endl << endl;
+	mutatedNetwork->printGraphNetwork(testDirectory + "/mutated_pool_net.jpg");
+	cout << "Previous connections quantity = " << testNetwork->getConnectionsQuantity() << " Current = " << mutatedNetwork->getConnectionsQuantity() << endl;
+
+	delete testPopulation;
+	delete testNetwork;
+}
+
 
 
