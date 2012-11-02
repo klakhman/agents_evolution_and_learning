@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\boost\boost_1_51;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\boost\boost_1_51\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\MPICH2\include;C:\Program Files\boost\boost_1_51;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\MPICH2\lib;C:\Program Files\boost\boost_1_51\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -58,6 +58,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>mpi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -86,6 +87,7 @@
     <ClInclude Include="TNeuralNetwork.h" />
     <ClInclude Include="TNeuralPool.h" />
     <ClInclude Include="TNeuron.h" />
+    <ClInclude Include="TParallelEvolutionaryProcess.h" />
     <ClInclude Include="TPoolConnection.h" />
     <ClInclude Include="TPoolNetwork.h" />
     <ClInclude Include="TPoolPredConnection.h" />
@@ -103,6 +105,7 @@
     <ClCompile Include="TNeuralNetwork.cpp" />
     <ClCompile Include="TNeuralPool.cpp" />
     <ClCompile Include="TNeuron.cpp" />
+    <ClCompile Include="TParallelEvolutionaryProcess.cpp" />
     <ClCompile Include="TPoolConnection.cpp" />
     <ClCompile Include="TPoolNetwork.cpp" />
     <ClCompile Include="TPoolPredConnection.cpp" />
