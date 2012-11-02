@@ -136,13 +136,42 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	agentsPopulation->getPointertoAgent(bestAgent)->getPointerToAgentController()->printGraphNetwork("C:/Tests/Networks/neural_net_" + tmp_str + ".jpg");*/
 }
 
+// Создание и заполнение предварительного файла основных результатов
+void TEvolutionaryProcess::createMainResultsFile(){
+	// Опустошаем файлы если они есть
+	ofstream resultsFile;
+	resultsFile.open(filenameSettings.resultsFilename);
+	//Записываем параметры эволюции
+	resultsFile << "Evolutionary_parameters:" << "\tpopulation-size=" << agentsPopulation->getPopulationSize() << "\tagent-lifetime=" << agentsPopulation->evolutionSettings.agentLifetime
+		<< "\tevolution-time=" << agentsPopulation->evolutionSettings.evolutionTime << endl << endl;
+	// Записываем параметры мутаций
+	resultsFile << "Mutation_parameters:" << "\tmut-weight-probability=" << agentsPopulation->mutationSettings.mutWeightProbability << "\tmut-weight-mean-disp=" << agentsPopulation->mutationSettings.mutWeightMeanDisp
+		<< "\tmut-weight-disp-disp=" << agentsPopulation->mutationSettings.mutWeightDispDisp << "\tdis-limit=" << agentsPopulation->mutationSettings.disLimit << "\tenable-connection-prob=" << agentsPopulation->mutationSettings.enableConnectionProb
+		<< "\tdisable-connection-prob=" << agentsPopulation->mutationSettings.disableConnectionProb << "\tadd-connection-prob=" << agentsPopulation->mutationSettings.addConnectionProb
+		<< "\tadd-predconnection-prob=" << agentsPopulation->mutationSettings.addPredConnectionProb << "\tdelete-connection-prob=" << agentsPopulation->mutationSettings.deleteConnectionProb
+		<< "\tdelete-predconnection-prob=" << agentsPopulation->mutationSettings.deletePredConnectionProb << "\tduplicate-pool-prob=" << agentsPopulation->mutationSettings.duplicatePoolProb
+		<< "\tpool-division-coef=" << agentsPopulation->mutationSettings.poolDivisionCoef << "\tpool-standart-amount=" << agentsPopulation->mutationSettings.poolStandartAmount
+		<< "\tconnection-standart-amount=" << agentsPopulation->mutationSettings.connectionStandartAmount << "\tmut-develop-con-prob-prob=" << agentsPopulation->mutationSettings.mutDevelopConProbProb
+		<< "\tmut-develop-con-prob-disp=" << agentsPopulation->mutationSettings.mutDevelopConProbDisp << endl << endl;
+	TAgent* pointerToAgent = agentsPopulation->getPointertoAgent(1);
+	// Записываем параметры первичного системогенеза
+	resultsFile << "Primary_systemogenesis_parameters:" << "\tinitial-pool-capacity=" << pointerToAgent->primarySystemogenesisSettings.initialPoolCapacity
+		<< "\tinitial-develop-synapse-probability=" << pointerToAgent->primarySystemogenesisSettings.initialDevelopSynapseProbability << "\tinitial-develop-predconnection-prob=" << pointerToAgent->primarySystemogenesisSettings.initialDevelopPredConnectionProbability
+		<< "\tprimary-systemogenesis-time=" << pointerToAgent->primarySystemogenesisSettings.primarySystemogenesisTime << "\tspontaneous-acivity-prob=" << pointerToAgent->primarySystemogenesisSettings.spontaneousActivityProb
+		<< "\tactive-neurons-percent=" << pointerToAgent->primarySystemogenesisSettings.activeNeuronsPercent << "\tsynapses-activity-treshold=" << pointerToAgent->primarySystemogenesisSettings.synapsesActivityTreshold
+		<< "\tsignificance-treshold=" << pointerToAgent->primarySystemogenesisSettings.significanceTreshold << endl << endl;
+	// Записываем параметры среды
+	resultsFile << "Environment_parameters:" << "\tnonstationarity-coefficient=" << environment->getNonstationarityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
+	// Записываем заголовки
+	resultsFile << "Step\tAverage_reward\tMax_reward\tPools\tConnections\tPredConnections" << endl;
+	resultsFile.close();
+}
+
 // Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
 void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Если не было передано зерно рандомизации
-	cout << randomSeed << endl << endl;
 	if (!randomSeed)
 		randomSeed = static_cast<unsigned int>(time(0));
-	cout << randomSeed;
 	srand(randomSeed);
 	// Запуски генератора случайных чисел, чтобы развести значения
 	rand();
@@ -160,10 +189,8 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	fillPopulationSettingsFromFile();
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	fillAgentSettingsFromFile();
-	// Опустошаем файлы если они есть
-	ofstream resultsFile;
-	resultsFile.open(filenameSettings.resultsFilename);
-	resultsFile.close();
+	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
+	createMainResultsFile();
 	ofstream bestAgentsFile;
 	bestAgentsFile.open(filenameSettings.bestAgentsFilename);
 	bestAgentsFile.close();
