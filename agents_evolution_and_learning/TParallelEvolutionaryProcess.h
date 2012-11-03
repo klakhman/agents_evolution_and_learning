@@ -30,10 +30,14 @@ class TParallelEvolutionaryProcess{
 	void fillDirectoriesSettings();
 	// Расишифровка парметров командной строки
 	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string runSign);
+	// Расшифровка сообщения от рабочего процесса 
+	void decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry);
 	// Выполнение управляющего процесса
 	void rootProcess(int argc, char **argv);
+	// Расшифровка сообщения от рутового процесса 
+	void decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, std::string& runSign);
 	// Выполнение рабочего процесса
-	void workProcess();
+	void workProcess(int argc, char **argv);
 public:
 	// Конструктор
 	TParallelEvolutionaryProcess(){

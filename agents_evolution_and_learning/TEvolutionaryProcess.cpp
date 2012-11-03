@@ -137,7 +137,7 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 }
 
 // Создание и заполнение предварительного файла основных результатов
-void TEvolutionaryProcess::createMainResultsFile(){
+void TEvolutionaryProcess::createMainResultsFile(unsigned int randomSeed){
 	// Опустошаем файлы если они есть
 	ofstream resultsFile;
 	resultsFile.open(filenameSettings.resultsFilename);
@@ -162,6 +162,8 @@ void TEvolutionaryProcess::createMainResultsFile(){
 		<< "\tsignificance-treshold=" << pointerToAgent->primarySystemogenesisSettings.significanceTreshold << endl << endl;
 	// Записываем параметры среды
 	resultsFile << "Environment_parameters:" << "\tnonstationarity-coefficient=" << environment->getNonstationarityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
+	//Записываем уникальное ядро рандомизации
+	resultsFile << "Random_seed:\t" << randomSeed << endl << endl; 
 	// Записываем заголовки
 	resultsFile << "Step\tAverage_reward\tMax_reward\tPools\tConnections\tPredConnections" << endl;
 	resultsFile.close();
@@ -190,7 +192,7 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	fillAgentSettingsFromFile();
 	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
-	createMainResultsFile();
+	createMainResultsFile(randomSeed);
 	ofstream bestAgentsFile;
 	bestAgentsFile.open(filenameSettings.bestAgentsFilename);
 	bestAgentsFile.close();

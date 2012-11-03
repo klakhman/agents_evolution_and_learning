@@ -43,7 +43,7 @@ public:
 	void makeLogNote(std::ostream& outputConsole, int currentEvolutionStep = 0);
 	
 	// Создание и заполнение предварительного файла основных результатов
-	void createMainResultsFile();
+	void createMainResultsFile(unsigned int randomSeed);
 
 	// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
 	void start(unsigned int randomSeed = 0);

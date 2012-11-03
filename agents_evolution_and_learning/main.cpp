@@ -46,6 +46,7 @@ int main(int argc, char** argv){
 	poolNet->printGraphNetwork("C:/Tests/pool_net_graph.jpg");
 	hTestNet.close();
 	delete poolNet;*/
+
 	TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
 	evolutionaryProcess->filenameSettings.environmentFilename = "D:/tests/test_environment.txt";
 	evolutionaryProcess->filenameSettings.settingsFilename = "D:/tests/test_settings.txt";
