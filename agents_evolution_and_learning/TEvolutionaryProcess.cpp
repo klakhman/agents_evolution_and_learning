@@ -108,8 +108,8 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	averageConnectionsQuantity /= agentsPopulation->getPopulationSize();
 	averagePredConnectionsQuantity /= agentsPopulation->getPopulationSize();
 	averageReward /= agentsPopulation->getPopulationSize();
-	outputConsole << currentEvolutionStep << ": " << averageReward << "\t" << maxReward << "\t" <<
-		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
+	//outputConsole << currentEvolutionStep << ": " << averageReward << "\t" << maxReward << "\t" <<
+	//	averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
 	// Также записываем в файл результатов
 	ofstream resultsFile;
 	resultsFile.open(filenameSettings.resultsFilename, fstream::app);

@@ -20,13 +20,13 @@ void TParallelEvolutionaryProcess::fillDirectoriesSettings(){
 	while (settingsFile >> optionString){
 		if (optionString == "work-directory") { settingsFile >> directoriesSettings.workDirectory; }
 		if (optionString == "environment-directory") { settingsFile >> directoriesSettings.environmentDirectory; }
-		if (optionString == "results-directory") { settingsFile >> directoriesSettings.workDirectory; }
+		if (optionString == "results-directory") { settingsFile >> directoriesSettings.resultsDirectory; }
 	}
 	settingsFile.close();
 }
 
 // Расишифровка парметров командной строки
-void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string runSign){
+void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign){
 	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
 	while (currentArgNumber < argc){
 		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
@@ -80,7 +80,6 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	int lastTryNumber;
 	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
 	decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign);
-
 	// Создаем файл с логом
 	stringstream logFilename;
 	logFilename << directoriesSettings.workDirectory << "/Evolution_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << runSign << ".txt";
@@ -95,12 +94,12 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 				int processRankSend = (currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1;
 				// Составляем сообщение для рабочего процесса
 				stringstream outStream;
-				outStream << currentEnvironment << "e" << currentTry << "t" << runSign << "s";
+				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
 				char outMessage[messageLentgh];
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
-				logFile << "Environment: " << currentEnvironment << "\tTry: " << currentTry << "\t-\tIssued for process " << processRankSend << endl; 
+				logFile << "Environment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
 			} // Если все процессы получили задание,  то ждем завершения выполнения и по ходу выдаем оставшиеся задания
 			else {
 				char inputMessage[messageLentgh];
@@ -110,15 +109,15 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 				int processRankSend, finishedEnvironment, finishedTry;
 				decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
 				// Записываем в лог прием задания
-				logFile << "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\t-\tDone from process " << processRankSend << endl; 
+				logFile << "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
 				// Составляем сообщение и высылаем задание рабочему процессу
 				stringstream outStream;
-				outStream << currentEnvironment << "e" << currentTry << "t" << runSign << "s";
+				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
 				char outMessage[messageLentgh];
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
-				logFile << "Environment: " << currentEnvironment << "\tTry: " << currentTry << "\t-\tIssued for process " << processRankSend << endl; 
+				logFile << "Environment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
 			}
 	// Когда все задания закончились, ждем пока все они будут выполнены и по ходу посылаем всем процессам команду о завершении
 	int processTillQuit = processesQuantity - 1; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
@@ -129,7 +128,7 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 		int processRankSend, finishedEnvironment, finishedTry;
 		decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
 		// Записываем в лог прием задания
-		logFile << "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\t-\tDone from process " << processRankSend << endl; 
+		logFile << "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
 		// Составляем сообщение о выходе и высылаем
 		char outMessage[messageLentgh];
 		strcpy(outMessage, "q");
@@ -144,17 +143,17 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 void TParallelEvolutionaryProcess::decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, string& runSign){
 	string tmpString;
 	for (unsigned int i=0; i < strlen(inputMessage); ++i)
-		if ( (inputMessage[i] >= '0') && (inputMessage[i] <= '9') ) // Если символ число
+		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || ((inputMessage[i] >= 'a') && (inputMessage[i] <= 'z')) ) // Если символ число или маленькая буква
 			tmpString += inputMessage[i];
 		else {
 			switch (inputMessage[i]){
-				case 'e': // Если это номер среды
+				case 'E': // Если это номер среды
 					currentEnvironment = atoi(tmpString.c_str());
 					break;
-				case 't': // Если это номер попытки
+				case 'T': // Если это номер попытки
 					currentTry = atoi(tmpString.c_str());
 					break;
-				case 's': // Если это номер процесса
+				case 'S': // Если это номер процесса
 					runSign = tmpString;
 					break;
 			}
@@ -189,7 +188,7 @@ void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 		tmpStream << directoriesSettings.resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestagents.txt";
 		evolutionaryProcess->filenameSettings.bestAgentsFilename = tmpStream.str();
 		evolutionaryProcess->filenameSettings.settingsFilename = settingsFilename;
-		evolutionaryProcess->start();
+		evolutionaryProcess->start(randomSeed);
 		delete evolutionaryProcess;
 		// Посылаем ответ о завершении работы над заданием
 		tmpStream.str(""); // Очищаем поток

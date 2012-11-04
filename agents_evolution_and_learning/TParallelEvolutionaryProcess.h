@@ -29,7 +29,7 @@ class TParallelEvolutionaryProcess{
 	// Заполнение параметров директорий для записи файлов
 	void fillDirectoriesSettings();
 	// Расишифровка парметров командной строки
-	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string runSign);
+	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string& runSign);
 	// Расшифровка сообщения от рабочего процесса 
 	void decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry);
 	// Выполнение управляющего процесса

@@ -1,4 +1,5 @@
 #include "TEvolutionaryProcess.h"
+#include "TParallelEvolutionaryProcess.h"
 #include "service.h"
 
 #include <iostream>
@@ -16,10 +17,15 @@ using namespace std;
 
 int main(int argc, char** argv){
 	long startTime = time(0);
-	srand(static_cast<unsigned int>(time(0)));
+
+	TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
+	parallelProcess->start(argc, argv);
+	delete parallelProcess;
+
+	/*srand(static_cast<unsigned int>(time(0)));
 	rand();
 	rand();
-	rand();
+	rand();*/
 	/*long low = 0;
 	long high = 0;
 	long number = 1000000000;
@@ -47,14 +53,14 @@ int main(int argc, char** argv){
 	hTestNet.close();
 	delete poolNet;*/
 
-	TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
+	/*TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
 	evolutionaryProcess->filenameSettings.environmentFilename = "D:/tests/test_environment.txt";
 	evolutionaryProcess->filenameSettings.settingsFilename = "D:/tests/test_settings.txt";
 	evolutionaryProcess->filenameSettings.resultsFilename = "D:/tests/test_results.txt";
 	evolutionaryProcess->filenameSettings.bestPopulationFilename = "D:/tests/test_best_population.txt";
 	evolutionaryProcess->filenameSettings.bestAgentsFilename = "D:/tests/test_best_agents.txt";
 	evolutionaryProcess->start();
-	delete evolutionaryProcess;
+	delete evolutionaryProcess;*/
 
 	/*TEnvironment* environment = new TEnvironment("D:/tests/test_environment.txt", 30);
 	TAgent* agent = new TAgent;
@@ -95,5 +101,5 @@ int main(int argc, char** argv){
 	//test.testDuplicatePool("D:/tests/");
 	long endTime = time(0);
 	cout << endl << "Runtime: "<< (endTime - startTime) / 60 << " min. " << (endTime - startTime) % 60 << " sec."<< endl;
-	char c = getchar();
+	//char c = getchar();
 }
