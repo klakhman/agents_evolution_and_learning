@@ -28,11 +28,13 @@ int tests::testPoolNetwork(string outputFilename){
 
 	cout << PoolNetwork << endl << endl;
 
-	std::ofstream ofs(outputFilename);
+	std::ofstream ofs;
+	ofs.open(outputFilename.c_str());
 	ofs << PoolNetwork;
 	ofs.close();
 
-	std::ifstream ifs(outputFilename);
+	std::ifstream ifs;
+	ifs.open(outputFilename.c_str());
 	ifs >> PoolNetwork;
 	ifs.close();
 
@@ -67,11 +69,13 @@ int tests::testNeuralNetwork(string outputFilename){
 
 	cout << NeuralNetwork << endl << endl;
 
-	std::ofstream ofs(outputFilename);
+	std::ofstream ofs;
+	ofs.open(outputFilename.c_str());
 	ofs << NeuralNetwork;
 	ofs.close();
 
-	std::ifstream ifs(outputFilename);
+	std::ifstream ifs;
+	ifs.open(outputFilename.c_str());
 	ifs >> NeuralNetwork;
 	ifs.close();
 
@@ -92,7 +96,8 @@ int tests::testNeuralNetwork(string outputFilename){
 }
 
 void tests::testEnvironment(string firstOutputEnvironmentFilename, string secondOutputEnvironmentFilename){
-	ofstream ofs(firstOutputEnvironmentFilename);
+	ofstream ofs;
+	ofs.open(firstOutputEnvironmentFilename.c_str());
 	ofs << 8 << "\t" << 5 << endl; // Размерность и кол-во целей
 	// Записываем цели
 	ofs << 2 << "\t" << 20 << endl << 1 << "\t" << 1 << "\t" << 5 << "\t" << 0 << endl;
@@ -126,7 +131,8 @@ int tests::testNeuralNetworkProcessing(string inputNetworkFilename){
 	cout << endl << "------------------+ TEST FOR NEURAL NETWORK PROCESSING +------------------" << endl;
 
 	TNeuralNetwork NeuralNetwork;
-	ifstream ifs(inputNetworkFilename);
+	ifstream ifs;
+	ifs.open(inputNetworkFilename.c_str());
 	ifs >> NeuralNetwork;
 	ifs.close();
 
@@ -250,7 +256,7 @@ int tests::testGenerateEnvironment(){
 }
 
 // Процедура тестирования степени равномерности распределения, получаемого с помощью слабой функции
-int tests::testWeakUniformDistribution(){
+/*int tests::testWeakUniformDistribution(){
 	int checkStatus = 0;
 	cout << endl << "--------------------+ TEST FOR WEAK UNIFORM DISTRIBUTION +--------------------" << endl;
 	int valuesQuantity = 1000000000;
@@ -298,7 +304,7 @@ int tests::testWeakUniformDistribution(){
 	cout << "---------------------------------------------------------------------------" << endl;
 
 	return checkStatus;
-}
+}*/
 
 //------------------ Тестирование различных процедур мутации ---------------------------
 

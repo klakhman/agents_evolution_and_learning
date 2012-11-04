@@ -15,7 +15,7 @@ using namespace std;
 void TEvolutionaryProcess::fillPopulationSettingsFromFile(){
 	string optionString;
 	ifstream settingsFile;
-	settingsFile.open(filenameSettings.settingsFilename);
+	settingsFile.open(filenameSettings.settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "population-size") { settingsFile >> optionString; agentsPopulation->setPopulationSize(atoi(optionString.c_str())); }
 		if (optionString == "agent-lifetime") { settingsFile >> optionString; agentsPopulation->evolutionSettings.agentLifetime = atoi(optionString.c_str()); }
@@ -45,7 +45,7 @@ void TEvolutionaryProcess::fillPopulationSettingsFromFile(){
 void TEvolutionaryProcess::fillEnvironmentSettingsFromFile(){
 	string optionString;
 	ifstream settingsFile;
-	settingsFile.open(filenameSettings.settingsFilename);
+	settingsFile.open(filenameSettings.settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "reward-recovery-time") { settingsFile >> optionString; environment->setRewardRecoveryTime(atoi(optionString.c_str())); }
 		if (optionString == "nonstationarity-coefficient") { settingsFile >> optionString; environment->setNonstationarityCoefficient(atof(optionString.c_str())); }
@@ -57,7 +57,7 @@ void TEvolutionaryProcess::fillEnvironmentSettingsFromFile(){
 void TEvolutionaryProcess::fillAgentSettingsFromFile(){
 	string optionString;
 	ifstream settingsFile;
-	settingsFile.open(filenameSettings.settingsFilename);
+	settingsFile.open(filenameSettings.settingsFilename.c_str());
 	TAgent::SPrimarySystemogenesisSettings* primarySystemogenesisSettings = new TAgent::SPrimarySystemogenesisSettings;
 	while (settingsFile >> optionString){
 		if (optionString == "initial-pool-capacity") { settingsFile >> optionString; primarySystemogenesisSettings->initialPoolCapacity = atoi(optionString.c_str()); }
@@ -112,18 +112,18 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	//	averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
 	// Также записываем в файл результатов
 	ofstream resultsFile;
-	resultsFile.open(filenameSettings.resultsFilename, fstream::app);
+	resultsFile.open(filenameSettings.resultsFilename.c_str(), fstream::app);
 	resultsFile <<  currentEvolutionStep << "\t" << averageReward << "\t" << maxReward << "\t" <<
 		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
 	resultsFile.close();
 	// Записываем лучшего агента и всю популяцию, если нужно
 	ofstream bestAgentsFile;
-	bestAgentsFile.open(filenameSettings.bestAgentsFilename, fstream::app);
+	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str(), fstream::app);
 	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsFile);
 	bestAgentsFile.close();
 	if (averageReward > bestAverageReward){
 		ofstream bestPopulationFile;
-		bestPopulationFile.open(filenameSettings.bestPopulationFilename);
+		bestPopulationFile.open(filenameSettings.bestPopulationFilename.c_str());
 		for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
 			agentsPopulation->getPointertoAgent(currentAgent)->uploadGenome(bestPopulationFile);
 		bestPopulationFile.close();
@@ -140,7 +140,7 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 void TEvolutionaryProcess::createMainResultsFile(unsigned int randomSeed){
 	// Опустошаем файлы если они есть
 	ofstream resultsFile;
-	resultsFile.open(filenameSettings.resultsFilename);
+	resultsFile.open(filenameSettings.resultsFilename.c_str());
 	//Записываем параметры эволюции
 	resultsFile << "Evolutionary_parameters:" << "\tpopulation-size=" << agentsPopulation->getPopulationSize() << "\tagent-lifetime=" << agentsPopulation->evolutionSettings.agentLifetime
 		<< "\tevolution-time=" << agentsPopulation->evolutionSettings.evolutionTime << endl << endl;
@@ -194,7 +194,7 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
 	createMainResultsFile(randomSeed);
 	ofstream bestAgentsFile;
-	bestAgentsFile.open(filenameSettings.bestAgentsFilename);
+	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str());
 	bestAgentsFile.close();
 	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
 	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());

@@ -25,7 +25,7 @@ namespace service{
 	double uniformDistribution(double A, double B, bool include_start = true, bool include_end = true);
 
 	// Функция генерации псеводослучайного СЛАБО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ БЫСТРО
-	double uniformDistributionWeak(double A, double B, bool include_start = true, bool include_end = true);
+	//double uniformDistributionWeak(double A, double B, bool include_start = true, bool include_end = true);
 
 	// Функция генерация псевдослучайного нормально распределенного числа
 	double normalDistribution(double mean, double variance);

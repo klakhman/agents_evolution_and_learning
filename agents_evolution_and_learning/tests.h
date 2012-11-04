@@ -40,7 +40,7 @@ public:
 	void testDeleteConnection(std::string testDirectory);
 
 	// Тестирование процедуры дупликации пула
-	void tests::testDuplicatePool(std::string testDirectory);
+	void testDuplicatePool(std::string testDirectory);
 };
 
 #endif // TESTS_H

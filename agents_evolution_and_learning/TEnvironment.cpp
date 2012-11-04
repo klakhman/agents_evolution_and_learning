@@ -14,7 +14,8 @@ void TEnvironment::loadAims(string aimsFilename){
 	// Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
 	if (environmentResolution) delete []currentEnvironmentVector;
 
-	ifstream environmentFile(aimsFilename);
+	ifstream environmentFile;
+	environmentFile.open(aimsFilename.c_str());
 	string tmp_str;
 	environmentFile >> tmp_str; // Считываем размерность среды
 	environmentResolution = atoi(tmp_str.c_str());
@@ -43,7 +44,8 @@ void TEnvironment::loadAims(string aimsFilename){
 
 // Выгрузка структуры целей в файл
 void TEnvironment::uploadAims(string aimsFilename) const{
-	ofstream environmentFile(aimsFilename);
+	ofstream environmentFile;
+	environmentFile.open(aimsFilename.c_str());
 	// Записываем размерность среды и кол-во целей
 	environmentFile << environmentResolution << "\t" << aimsQuantity << endl;
 	// Записываем все цели

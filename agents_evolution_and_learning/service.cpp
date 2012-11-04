@@ -49,9 +49,9 @@ double service::uniformDistribution(double A, double B, bool include_start/* = t
 
 // Функция генерации псеводослучайного СЛАБО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ БЫСТРО
 // Если включать оба конца интервала, то распределение получается "идеально" равномерное - идентичное строгой функции
-double service::uniformDistributionWeak(double A, double B, bool include_start/* = true*/, bool include_end /*= true*/){
-	return (rand() % ( RAND_MAX + 1 - 1 * (!include_start) - 1 * (!include_end)) + 1 * (!include_start)) / static_cast<double>(RAND_MAX) * (B - A) + A;
-}
+//double service::uniformDistributionWeak(double A, double B, bool include_start/* = true*/, bool include_end /*= true*/){
+//	return (rand() % ( RAND_MAX + 1 - 1 * (!include_start) - 1 * (!include_end)) + 1 * (!include_start)) / static_cast<double>(RAND_MAX) * (B - A) + A;
+//}
 
 // Функция генерация псевдослучайного нормально распределенного числа
 double service::normalDistribution(double mean, double variance)

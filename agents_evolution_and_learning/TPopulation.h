@@ -59,7 +59,7 @@ class TPopulation{
 	// Процедура мутации вероятности развития предикторной связи по предикторной связи между пулами
 	void mutationDevelopPredConProb(TAgent& KidAgent);
 	// Процедура составления потомка от двух родителей
-	void сomposeOffspringFromParents(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent);
+	void composeOffspringFromParents(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent);
 	// Процедура генерации одного потомка
 	void generateOffspring(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent, int currentEvolutionStep);
 	//Процедура получения номера агента, используемая в рулеточном алгоритме

@@ -2,6 +2,7 @@
 #define TENVIRONMENT_H 
 
 #include <string>
+#include <cstdlib>
 
 /*
 NB!
@@ -50,9 +51,9 @@ class TEnvironment{
 	int environmentResolution;
 
 	// ѕроцедура случайных изменений среды согласно степени нестационарности
-	void TEnvironment::randomizeEnvironment();
+	void randomizeEnvironment();
 	// —равнение двух полных целей дл€ процедуры генерации среды (возвращает true - если есть хот€ бы одна совпадающа€ подцель)
-	bool TEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSubAimComplexity, TAim& secondAim, int minSecondSubAimComplexity);
+	bool compareDifferentLengthFullAims(TAim& firstAim, int minFirstSubAimComplexity, TAim& secondAim, int minSecondSubAimComplexity);
 
 public:
 	//  онструктор по умолчанию

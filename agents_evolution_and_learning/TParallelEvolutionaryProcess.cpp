@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <ctime>
+#include <cstring>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ using namespace std;
 void TParallelEvolutionaryProcess::fillDirectoriesSettings(){
 	string optionString;
 	ifstream settingsFile;
-	settingsFile.open(settingsFilename);
+	settingsFile.open(settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "work-directory") { settingsFile >> directoriesSettings.workDirectory; }
 		if (optionString == "environment-directory") { settingsFile >> directoriesSettings.environmentDirectory; }
@@ -84,7 +85,7 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	stringstream logFilename;
 	logFilename << directoriesSettings.workDirectory << "/Evolution_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << runSign << ".txt";
 	ofstream logFile;
-	logFile.open(logFilename.str());
+	logFile.open(logFilename.str().c_str());
 	// Выдача дочерним процессам всех заданий данных на выполнение программе
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment)
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)

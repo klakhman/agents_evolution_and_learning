@@ -10,7 +10,8 @@ void TPopulation::loadPopulation(string populationFilename, int _populationSize 
 	connectionInnovationNumber = 0;
 	predConnectionInnovationNumber = 0;
 	if (_populationSize) setPopulationSize(_populationSize);
-	ifstream populationFile(populationFilename);
+	ifstream populationFile;
+	populationFile.open(populationFilename.c_str());
 	for (int currentAgent = 1; currentAgent <=populationSize; ++currentAgent){
 		agents[currentAgent - 1]->loadGenome(populationFile);
 	}
@@ -19,7 +20,8 @@ void TPopulation::loadPopulation(string populationFilename, int _populationSize 
 
 // Выгрузка популяции геномов в файл
 void TPopulation::uploadPopulation(string populationFilename) const{
-	ofstream populationFile(populationFilename);
+	ofstream populationFile;
+	populationFile.open(populationFilename.c_str());
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
 		agents[currentAgent - 1]->uploadGenome(populationFile);
 	populationFile.close();
@@ -335,7 +337,7 @@ void TPopulation::mutationDevelopPredConProb(TAgent& kidAgent){
 }
 
 // Процедура составления потомка от двух родителей
-void TPopulation::сomposeOffspringFromParents(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent){
+void TPopulation::composeOffspringFromParents(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent){
 	if (firstParentAgent.getReward() >= secondParentAgent.getReward())
 		kidAgent = firstParentAgent;
 	else 
@@ -345,7 +347,7 @@ void TPopulation::сomposeOffspringFromParents(TAgent& kidAgent, const TAgent& fi
 // Процедура генерации одного потомка
 void TPopulation::generateOffspring(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent, int currentEvolutionStep){
 	
-	сomposeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
+	composeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
 
 	mutationAddPoolConnection(kidAgent);
 	//mutationAddPoolPredConnection(kidAgent);

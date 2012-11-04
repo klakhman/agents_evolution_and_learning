@@ -92,8 +92,8 @@ public:
 	TAgent& operator=(const TAgent& sourceAgent);
 
 	// Временная процедура печати жизни агента
-	void TAgent::printLife(TEnvironment& environment, int agentLifeTime);
+	void printLife(TEnvironment& environment, int agentLifeTime);
 
 };
 
-#endif TAGENT_H // TAGENT_H
+#endif // TAGENT_H
