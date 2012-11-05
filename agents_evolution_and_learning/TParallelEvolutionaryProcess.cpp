@@ -80,6 +80,7 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	int firstTryNumber; // Диапазон попыток
 	int lastTryNumber;
 	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
+	unsigned long startTime = static_cast<unsigned long>(time(0)); // Время старта процесса эволюции
 	decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign);
 	// Создаем файл с логом
 	stringstream logFilename;
@@ -100,7 +101,9 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
-				logFile << "Environment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
+				unsigned long currentTime = static_cast<unsigned long>(time(0));
+				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
+					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
 			} // Если все процессы получили задание,  то ждем завершения выполнения и по ходу выдаем оставшиеся задания
 			else {
 				char inputMessage[messageLentgh];
@@ -110,7 +113,9 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 				int processRankSend, finishedEnvironment, finishedTry;
 				decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
 				// Записываем в лог прием задания
-				logFile << "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
+				unsigned long currentTime = static_cast<unsigned long>(time(0));
+				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
+					<< "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
 				// Составляем сообщение и высылаем задание рабочему процессу
 				stringstream outStream;
 				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
@@ -118,7 +123,8 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
-				logFile << "Environment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
+				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
+					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
 			}
 	// Когда все задания закончились, ждем пока все они будут выполнены и по ходу посылаем всем процессам команду о завершении
 	int processTillQuit = processesQuantity - 1; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
@@ -129,7 +135,9 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 		int processRankSend, finishedEnvironment, finishedTry;
 		decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
 		// Записываем в лог прием задания
-		logFile << "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
+		unsigned long currentTime = static_cast<unsigned long>(time(0));
+		logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
+			<< "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
 		// Составляем сообщение о выходе и высылаем
 		char outMessage[messageLentgh];
 		strcpy(outMessage, "q");
