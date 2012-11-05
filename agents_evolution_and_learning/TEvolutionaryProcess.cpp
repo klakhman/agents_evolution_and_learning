@@ -85,7 +85,7 @@ void TEvolutionaryProcess::fillAgentSettingsFromFile(){
 }
 
 // Вывод логовых сообщений (прогресса) на консоль или в файл
-void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolutionStep /*=0*/){
+void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgentsConsole, int currentEvolutionStep /*=0*/){
 	// Подсчитываем средние характеристики
 	double averagePoolsQuantity = 0;
 	double averageConnectionsQuantity = 0;
@@ -111,22 +111,23 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 	//outputConsole << currentEvolutionStep << ": " << averageReward << "\t" << maxReward << "\t" <<
 	//	averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
 	// Также записываем в файл результатов
-	ofstream resultsFile;
-	resultsFile.open(filenameSettings.resultsFilename.c_str(), fstream::app);
-	resultsFile <<  currentEvolutionStep << "\t" << averageReward << "\t" << maxReward << "\t" <<
+	//ofstream resultsFile;
+	//resultsFile.open(filenameSettings.resultsFilename.c_str(), fstream::app);
+	outputConsole <<  currentEvolutionStep << "\t" << averageReward << "\t" << maxReward << "\t" <<
 		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
-	resultsFile.close();
+	//resultsFile.close();
 	// Записываем лучшего агента и всю популяцию, если нужно
-	ofstream bestAgentsFile;
-	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str(), fstream::app);
-	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsFile);
-	bestAgentsFile.close();
+	//ofstream bestAgentsFile;
+	//bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str(), fstream::app);
+	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsConsole);
+
 	if (averageReward > bestAverageReward){
 		ofstream bestPopulationFile;
 		bestPopulationFile.open(filenameSettings.bestPopulationFilename.c_str());
 		for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
 			agentsPopulation->getPointertoAgent(currentAgent)->uploadGenome(bestPopulationFile);
 		bestPopulationFile.close();
+		bestAverageReward = averageReward;
 	}
 	/*stringstream tmp_stream;
 	tmp_stream << currentEvolutionStep;
@@ -137,9 +138,9 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, int currentEvolut
 }
 
 // Создание и заполнение предварительного файла основных результатов
-void TEvolutionaryProcess::createMainResultsFile(unsigned int randomSeed){
+void TEvolutionaryProcess::createMainResultsFile(ofstream& resultsFile, unsigned int randomSeed){
 	// Опустошаем файлы если они есть
-	ofstream resultsFile;
+	//ofstream resultsFile;
 	resultsFile.open(filenameSettings.resultsFilename.c_str());
 	//Записываем параметры эволюции
 	resultsFile << "Evolutionary_parameters:" << "\tpopulation-size=" << agentsPopulation->getPopulationSize() << "\tagent-lifetime=" << agentsPopulation->evolutionSettings.agentLifetime
@@ -166,7 +167,7 @@ void TEvolutionaryProcess::createMainResultsFile(unsigned int randomSeed){
 	resultsFile << "Random_seed:\t" << randomSeed << endl << endl; 
 	// Записываем заголовки
 	resultsFile << "Step\tAverage_reward\tMax_reward\tPools\tConnections\tPredConnections" << endl;
-	resultsFile.close();
+	//resultsFile.close();
 }
 
 // Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
@@ -192,16 +193,18 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	fillAgentSettingsFromFile();
 	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
-	createMainResultsFile(randomSeed);
+	ofstream resultsFile;
+	createMainResultsFile(resultsFile, randomSeed);
 	ofstream bestAgentsFile;
 	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str());
-	bestAgentsFile.close();
 	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
 	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
 
 	for (int currentEvolutionStep = 1; currentEvolutionStep <= agentsPopulation->evolutionSettings.evolutionTime; ++currentEvolutionStep){
 		agentsPopulation->evolutionaryStep(*environment, currentEvolutionStep); 
-		makeLogNote(cout, currentEvolutionStep);
+		makeLogNote(resultsFile, bestAgentsFile, currentEvolutionStep);
 	}
+	resultsFile.close();
+	bestAgentsFile.close();
 }
 

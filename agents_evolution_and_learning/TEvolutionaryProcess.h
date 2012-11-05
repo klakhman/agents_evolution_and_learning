@@ -4,6 +4,8 @@
 #include "TPopulation.h"
 #include "TEnvironment.h"
 #include <string>
+#include <iostream>
+#include <fstream>
 
 class TEvolutionaryProcess{
 	// Загрузка параметров популяции из файла
@@ -40,10 +42,10 @@ public:
 	}
 	
 	// Вывод логовых сообщений (прогресса) на консоль или в файл
-	void makeLogNote(std::ostream& outputConsole, int currentEvolutionStep = 0);
+	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, int currentEvolutionStep /*=0*/);
 	
 	// Создание и заполнение предварительного файла основных результатов
-	void createMainResultsFile(unsigned int randomSeed);
+	void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
 
 	// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
 	void start(unsigned int randomSeed = 0);
