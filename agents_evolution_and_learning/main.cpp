@@ -42,7 +42,9 @@ int main(int argc, char** argv){
 			delete bestPopulationAnalysis;
 		}
 	//long startTime = time(0);
-
+	/*TAnalysis* bestPopulationAnalysis = new TAnalysis;
+	bestPopulationAnalysis->startBestPopulationAnalysis("D:/tests/Results/En1001/En1001_test(1)_bestpopulation.txt", "D:/tests/Environments/Environment1001.txt", "D:/tests/test_settings.txt");
+	delete bestPopulationAnalysis;*/
 	/*TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
 	parallelProcess->start(argc, argv);
 	delete parallelProcess;*/

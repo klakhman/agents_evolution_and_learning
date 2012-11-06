@@ -27,8 +27,8 @@ class TNeuralPool{
 	int predConnectednessSetSize; // Текущий размер массива входных предикторных связей
 	int inputPredConnectionsQuantity; // Количество входных предикторных связей пула
 
-	static const int INFLATE_CONNECTIONS_SIZE = 100; // Размер увеличения массива с входным связями в случае переполнения
-	static const int INFLATE_PRED_CONNECTIONS_SIZE = 100; // Размер увеличения массива с входным предикторными связями в случае переполнения
+	static const int INFLATE_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным связями в случае переполнения
+	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным предикторными связями в случае переполнения
 	
 	// Процедура увеличения размера массива входных связей
 	void inflateConnectednessSet(int inflateSize);

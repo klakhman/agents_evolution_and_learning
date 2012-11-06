@@ -116,12 +116,14 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
 		for (int currentInitialState = 0; currentInitialState < intitalStatesQuantity; ++currentInitialState){
 			environment->setEnvironmentState(currentInitialState);
+			agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
 			agentsPopulation->getPointertoAgent(currentAgent)->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
 			agentsRewards[currentAgent - 1][currentInitialState] = agentsPopulation->getPointertoAgent(currentAgent)->getReward();
 			
 			averageReward += agentsRewards[currentAgent - 1][currentInitialState] / (agentsPopulation->getPopulationSize() *  intitalStatesQuantity);
 			if (agentsRewards[currentAgent - 1][currentInitialState] > maxReward)
 				maxReward = agentsRewards[currentAgent - 1][currentInitialState];
+			//cout << currentAgent << " : " << currentInitialState << " - " << agentsRewards[currentAgent - 1][currentInitialState] << endl;
 		}
 	// Удаляем все переменные
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
