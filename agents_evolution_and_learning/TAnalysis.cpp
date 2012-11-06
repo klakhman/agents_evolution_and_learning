@@ -9,6 +9,7 @@
 #include <string>
 #include <ctime>
 #include <fstream>
+#include <cstring>
 #include <sstream>
 
 using namespace std;
@@ -298,14 +299,16 @@ void TAnalysis::rootProcess(int argc, char **argv){
 
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment)
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)
-			analysisResultFile << "Environment¹" << currentEnvironment << "\tTry¹" << currentTry << "\t" << averageRewards[currentEnvironment - firstEnvironmentNumber][currentTry - firstTryNumber] << endl;
+			analysisResultFile << "Environment#" << currentEnvironment << "\tTry#" << currentTry << "\t"
+				<< averageRewards[currentEnvironment - firstEnvironmentNumber][currentTry - firstTryNumber] << endl;
+
 	analysisResultFile << endl << endl;
 
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment){
 		double averageEnvironmentReward = 0.0;
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)
 			averageEnvironmentReward += averageRewards[currentEnvironment - firstEnvironmentNumber][currentTry - firstTryNumber] / (lastTryNumber - firstTryNumber + 1);
-		analysisResultFile << "Environment¹" << currentEnvironment << "\t" << averageEnvironmentReward << endl;
+		analysisResultFile << "Environment#" << currentEnvironment << "\t" << averageEnvironmentReward << endl;
 	}
 	analysisResultFile.close();
 	for (int currentEnvironment = 1; currentEnvironment <= lastEnvironmentNumber - firstEnvironmentNumber + 1; ++currentEnvironment)
