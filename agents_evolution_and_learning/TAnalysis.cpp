@@ -113,25 +113,24 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	double maxReward = 0.0;
 	long double averageReward = 0.0;
 	// Прогоняем всех агентов и записываем награды в массив
-	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
+	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
+		agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
 		for (int currentInitialState = 0; currentInitialState < intitalStatesQuantity; ++currentInitialState){
 			environment->setEnvironmentState(currentInitialState);
-			agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
 			agentsPopulation->getPointertoAgent(currentAgent)->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
 			agentsRewards[currentAgent - 1][currentInitialState] = agentsPopulation->getPointertoAgent(currentAgent)->getReward();
 			
 			averageReward += agentsRewards[currentAgent - 1][currentInitialState] / (agentsPopulation->getPopulationSize() *  intitalStatesQuantity);
 			if (agentsRewards[currentAgent - 1][currentInitialState] > maxReward)
 				maxReward = agentsRewards[currentAgent - 1][currentInitialState];
-			//cout << currentAgent << " : " << currentInitialState << " - " << agentsRewards[currentAgent - 1][currentInitialState] << endl;
 		}
+	}
 	// Удаляем все переменные
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
 		delete []agentsRewards[currentAgent - 1];
 	delete []agentsRewards;
 	delete agentsPopulation;
 	delete environment;
-	
 	return static_cast<double>(averageReward);
 }
 
@@ -228,6 +227,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 	double** averageRewards = new double*[lastEnvironmentNumber - firstEnvironmentNumber + 1];
 	for (int currentEnvironment = 1; currentEnvironment <= lastEnvironmentNumber - firstEnvironmentNumber + 1; ++currentEnvironment)
 		averageRewards[currentEnvironment - 1] = new double[lastTryNumber - firstTryNumber + 1];
+
 	// Выдача дочерним процессам всех заданий данных на выполнение программе
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment)
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)
