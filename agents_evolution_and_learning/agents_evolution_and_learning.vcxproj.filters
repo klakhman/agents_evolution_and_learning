@@ -60,6 +60,9 @@
     <ClInclude Include="TParallelEvolutionaryProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TAnalysis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TNeuralPool.cpp">
@@ -108,6 +111,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TParallelEvolutionaryProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TAnalysis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

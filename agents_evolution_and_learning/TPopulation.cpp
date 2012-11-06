@@ -45,7 +45,7 @@ void TPopulation::evolutionaryStep(TEnvironment& environment, int evolutionStepN
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
 		// Проводим первичный системогенез
 		agents[currentAgent - 1]->linearSystemogenesis();
-		environment.setRandomEnvironmentVector();
+		environment.setRandomEnvironmentState();
 		agents[currentAgent - 1]->life(environment, evolutionSettings.agentLifetime);
 	}
 }

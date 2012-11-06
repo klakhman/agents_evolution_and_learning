@@ -11,7 +11,7 @@ class TParallelEvolutionaryProcess{
 	// Общее кол-во процессов
 	int processesQuantity;
 	// Стандартная максимальная длина сообщения
-	static const int messageLentgh = 100;
+	static const int messageLength = 100;
 	// Стандартный служебный тип сообщения
 	static const int messageType = 99;
 	// Служебная перемення статуса процесса

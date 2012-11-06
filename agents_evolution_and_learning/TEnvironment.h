@@ -3,6 +3,8 @@
 
 #include <string>
 #include <cstdlib>
+#include <cmath>
+#include "service.h"
 
 /*
 NB!
@@ -87,11 +89,25 @@ public:
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			environmentVector[currentBit - 1] = static_cast<double>(currentEnvironmentVector[currentBit - 1]);
 	}
+	// Получение кол-ва начальных состояний среды (для текущей бинарной среды - фактически общее кол-во состояний)
+	int getInitialStatesQuantity() const {
+		return static_cast<int>(pow(2, environmentResolution));
+	}
+	// Задание вектора среды (по значению целого вектора)
 	void setEnvironmentVector(double environmentVector[]) {
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			currentEnvironmentVector[currentBit - 1] = (environmentVector[currentBit - 1] == 1);
 	}
-	void setRandomEnvironmentVector(){
+	// Задание вектора среды (по номеру - !!!начиная с нуля!!!!) 
+	void setEnvironmentState(double stateNumber){
+		bool* requiredEnvironmentVector = new bool[environmentResolution];
+		service::decToBin(static_cast<int>(stateNumber), requiredEnvironmentVector, environmentResolution);
+		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
+			currentEnvironmentVector[currentBit - 1] = requiredEnvironmentVector[currentBit - 1];
+		delete []requiredEnvironmentVector;
+	}
+	// Задание случайного состояния среды
+	void setRandomEnvironmentState(){
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			currentEnvironmentVector[currentBit - 1] = (rand() % 2 != 0);
 	}

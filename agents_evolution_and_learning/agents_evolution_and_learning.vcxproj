@@ -81,6 +81,7 @@
   <ItemGroup>
     <ClInclude Include="service.h" />
     <ClInclude Include="TAgent.h" />
+    <ClInclude Include="TAnalysis.h" />
     <ClInclude Include="TEnvironment.h" />
     <ClInclude Include="tests.h" />
     <ClInclude Include="TEvolutionaryProcess.h" />
@@ -99,6 +100,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="service.cpp" />
     <ClCompile Include="TAgent.cpp" />
+    <ClCompile Include="TAnalysis.cpp" />
     <ClCompile Include="TEnvironment.cpp" />
     <ClCompile Include="tests.cpp" />
     <ClCompile Include="TEvolutionaryProcess.cpp" />

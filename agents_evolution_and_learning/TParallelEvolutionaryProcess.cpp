@@ -32,20 +32,15 @@ void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int
 	while (currentArgNumber < argc){
 		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
 			case 'e': // Если это диапозон номеров сред
-				++currentArgNumber;
-				firstEnvironmentNumber = atoi(argv[currentArgNumber]);
-				++currentArgNumber;
-				lastEnvironmentNumber = atoi(argv[currentArgNumber]);
+				firstEnvironmentNumber = atoi(argv[++currentArgNumber]);
+				lastEnvironmentNumber = atoi(argv[++currentArgNumber]);
 				break;
 			case 't': // Если это диапазон попыток
-				++currentArgNumber;
-				firstTryNumber = atoi(argv[currentArgNumber]);
-				++currentArgNumber;
-				lastTryNumber = atoi(argv[currentArgNumber]);
+				firstTryNumber = atoi(argv[++currentArgNumber]);
+				lastTryNumber = atoi(argv[++currentArgNumber]);
 				break;
 			case 's': // Если это признак конктретного запуска
-				++currentArgNumber;
-				runSign = argv[currentArgNumber];
+				runSign = argv[++currentArgNumber];
 		}
 		++currentArgNumber;
 	}
@@ -97,18 +92,18 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 				// Составляем сообщение для рабочего процесса
 				stringstream outStream;
 				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
-				char outMessage[messageLentgh];
+				char outMessage[messageLength];
 				outStream >> outMessage;
-				MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
+				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
 					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
 			} // Если все процессы получили задание,  то ждем завершения выполнения и по ходу выдаем оставшиеся задания
 			else {
-				char inputMessage[messageLentgh];
+				char inputMessage[messageLength];
 				// Ждем входящее сообщение о том, что процесс выполнил задание
-				MPI_Recv(inputMessage, messageLentgh - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+				MPI_Recv(inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
 				// Расшифровываем сообщение от рабочего процесса
 				int processRankSend, finishedEnvironment, finishedTry;
 				decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
@@ -119,9 +114,9 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 				// Составляем сообщение и высылаем задание рабочему процессу
 				stringstream outStream;
 				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
-				char outMessage[messageLentgh];
+				char outMessage[messageLength];
 				outStream >> outMessage;
-				MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
+				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
 					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
@@ -129,8 +124,8 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	// Когда все задания закончились, ждем пока все они будут выполнены и по ходу посылаем всем процессам команду о завершении
 	int processTillQuit = processesQuantity - 1; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
 	while (processTillQuit > 0){
-		char inputMessage[messageLentgh];
-		MPI_Recv(inputMessage, messageLentgh - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+		char inputMessage[messageLength];
+		MPI_Recv(inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
 		// Расшифровываем сообщение от рабочего процесса
 		int processRankSend, finishedEnvironment, finishedTry;
 		decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
@@ -139,9 +134,9 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 		logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
 			<< "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
 		// Составляем сообщение о выходе и высылаем
-		char outMessage[messageLentgh];
+		char outMessage[messageLength];
 		strcpy(outMessage, "q");
-		MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
+		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 		--processTillQuit;
 	}
 
@@ -172,8 +167,8 @@ void TParallelEvolutionaryProcess::decodeTaskMessage(char inputMessage[], int& c
 
 // Выполнение рабочего процесса
 void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
-	char inputMessage[messageLentgh];
-	MPI_Recv(inputMessage, messageLentgh-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status); // Ждем сообщения с заданием
+	char inputMessage[messageLength];
+	MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status); // Ждем сообщения с заданием
 	while (strcmp(inputMessage, "q")){ // Пока не было команды о выходе
 		// Декодируем сообщение с заданием
 		int currentEnvironment, currentTry;
@@ -202,12 +197,12 @@ void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 		// Посылаем ответ о завершении работы над заданием
 		tmpStream.str(""); // Очищаем поток
 		tmpStream << currentEnvironment << "e" << currentTry << "t" << processRank << "p";
-		char outMessage[messageLentgh];
+		char outMessage[messageLength];
 		tmpStream >> outMessage;
-		MPI_Send(outMessage, messageLentgh - 1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD);
+		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD);
 
 		//Ожидание нового задания
-		MPI_Recv(inputMessage, messageLentgh-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status);
+		MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status);
 	}
 }
 

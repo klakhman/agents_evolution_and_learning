@@ -1,6 +1,7 @@
 #include "TEvolutionaryProcess.h"
 #include "TParallelEvolutionaryProcess.h"
 #include "service.h"
+#include "TAnalysis.h"
 
 #include <iostream>
 #include <fstream>
@@ -15,12 +16,36 @@
 
 using namespace std;
 
-int main(int argc, char** argv){
-	long startTime = time(0);
+void decodeProgramMode(string& programMode, int argc, char** argv){
+	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+	while (currentArgNumber < argc){
+		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
+			case 'm': // Если это режим запуска программного комплекса
+				programMode = argv[++currentArgNumber];
+				break;
+		}
+		++currentArgNumber;
+	}
+}
 
-	TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
+int main(int argc, char** argv){
+	string programMode; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
+	decodeProgramMode(programMode, argc, argv);
+	if (programMode == "E"){ // Режим эволюции
+		TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
+		parallelProcess->start(argc, argv);
+		delete parallelProcess;	
+	}
+	else if (programMode == "BPA"){ // Режим анализа методом прогона лучшей популяции
+			TAnalysis* bestPopulationAnalysis = new TAnalysis;
+			bestPopulationAnalysis->startParallelBestPopulationAnalysis(argc, argv);
+			delete bestPopulationAnalysis;
+		}
+	//long startTime = time(0);
+
+	/*TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
 	parallelProcess->start(argc, argv);
-	delete parallelProcess;
+	delete parallelProcess;*/
 
 	/*srand(static_cast<unsigned int>(time(0)));
 	rand();
@@ -54,11 +79,11 @@ int main(int argc, char** argv){
 	delete poolNet;*/
 
 	/*TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
-	evolutionaryProcess->filenameSettings.environmentFilename = "D:/tests/test_environment.txt";
-	evolutionaryProcess->filenameSettings.settingsFilename = "D:/tests/test_settings.txt";
-	evolutionaryProcess->filenameSettings.resultsFilename = "D:/tests/test_results.txt";
-	evolutionaryProcess->filenameSettings.bestPopulationFilename = "D:/tests/test_best_population.txt";
-	evolutionaryProcess->filenameSettings.bestAgentsFilename = "D:/tests/test_best_agents.txt";
+	evolutionaryProcess->filenameSettings.environmentFilename = "C:/Tests/test_environment.txt";
+	evolutionaryProcess->filenameSettings.settingsFilename = "C:/Tests/test_settings.txt";
+	evolutionaryProcess->filenameSettings.resultsFilename = "C:/Tests/test_results.txt";
+	evolutionaryProcess->filenameSettings.bestPopulationFilename = "C:/Tests/test_best_population.txt";
+	evolutionaryProcess->filenameSettings.bestAgentsFilename = "C:/Tests/test_best_agents.txt";
 	evolutionaryProcess->start();
 	delete evolutionaryProcess;*/
 
@@ -99,7 +124,7 @@ int main(int argc, char** argv){
 	//test.testEnvironment("D:/tests/env.txt", "D:/tests/env1.txt");
 	//test.testWeigthsMutation("D:/tests/");
 	//test.testDuplicatePool("D:/tests/");
-	long endTime = time(0);
-	cout << endl << "Runtime: "<< (endTime - startTime) / 60 << " min. " << (endTime - startTime) % 60 << " sec."<< endl;
+	//long endTime = time(0);
+	//cout << endl << "Runtime: "<< (endTime - startTime) / 60 << " min. " << (endTime - startTime) % 60 << " sec."<< endl;
 	//char c = getchar();
 }
