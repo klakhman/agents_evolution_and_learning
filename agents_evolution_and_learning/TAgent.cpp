@@ -1,4 +1,4 @@
-#include "TAgent.h"
+п»ї#include "TAgent.h"
 #include "TEnvironment.h"
 #include "TNeuralNetwork.h"
 #include "TPoolNetwork.h"
@@ -8,29 +8,29 @@
 
 using namespace std;
 
-// Загрузка нейроконтроллера агента
+// Р—Р°РіСЂСѓР·РєР° РЅРµР№СЂРѕРєРѕРЅС‚СЂРѕР»Р»РµСЂР° Р°РіРµРЅС‚Р°
 void TAgent::loadController(istream& is){
 	string tmp_str;
 	if (!neuralController) neuralController = new TNeuralNetwork;
 	is >> *neuralController;
 }
-// Загрузка генома нейрононтроллера
+// Р—Р°РіСЂСѓР·РєР° РіРµРЅРѕРјР° РЅРµР№СЂРѕРЅРѕРЅС‚СЂРѕР»Р»РµСЂР°
 void TAgent::loadGenome(istream& is){
 	string tmp_str;
-	is >> tmp_str; // Считываем номер более приспособленного родителя
+	is >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ Р±РѕР»РµРµ РїСЂРёСЃРїРѕСЃРѕР±Р»РµРЅРЅРѕРіРѕ СЂРѕРґРёС‚РµР»СЏ
 	parents[0] = atoi(tmp_str.c_str());
-	is >> tmp_str; // Считываем номер менее приспособленного родителя
+	is >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РјРµРЅРµРµ РїСЂРёСЃРїРѕСЃРѕР±Р»РµРЅРЅРѕРіРѕ СЂРѕРґРёС‚РµР»СЏ
 	parents[1] = atoi(tmp_str.c_str());
 	if (!genome) genome = new TPoolNetwork;
 	is >> *genome;
 }
 
-// Выгрузка нейроконтроллера агета в файл или на экран
+// Р’С‹РіСЂСѓР·РєР° РЅРµР№СЂРѕРєРѕРЅС‚СЂРѕР»Р»РµСЂР° Р°РіРµС‚Р° РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 void TAgent::uploadController(ostream& os) const{
 	if (neuralController) os << *neuralController;
 }
 
-// Выгрузка генома агента в файл или на экран
+// Р’С‹РіСЂСѓР·РєР° РіРµРЅРѕРјР° Р°РіРµРЅС‚Р° РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 void TAgent::uploadGenome(ostream& os) const{
 	if (genome){
 		os << parents[0] << "\t" << parents[1] << endl;
@@ -38,17 +38,17 @@ void TAgent::uploadGenome(ostream& os) const{
 	}
 }
 
-// Подсчет размера выходного вектора нейроконтроллера и генома агента на основе размера входного вектора среды
+// РџРѕРґСЃС‡РµС‚ СЂР°Р·РјРµСЂР° РІС‹С…РѕРґРЅРѕРіРѕ РІРµРєС‚РѕСЂР° РЅРµР№СЂРѕРєРѕРЅС‚СЂРѕР»Р»РµСЂР° Рё РіРµРЅРѕРјР° Р°РіРµРЅС‚Р° РЅР° РѕСЃРЅРѕРІРµ СЂР°Р·РјРµСЂР° РІС…РѕРґРЅРѕРіРѕ РІРµРєС‚РѕСЂР° СЃСЂРµРґС‹
 int TAgent::calculateOutputResolution(int inputResolution) const{
 	int _outputResolution = - 1;
-	int codingNeuronsQuantity = 2; // Кол-во нейронов, кодирующих одно действие агента
-	// Кол-во доступных для кодирования действий при определенной размерности выходного вектора
+	int codingNeuronsQuantity = 2; // РљРѕР»-РІРѕ РЅРµР№СЂРѕРЅРѕРІ, РєРѕРґРёСЂСѓСЋС‰РёС… РѕРґРЅРѕ РґРµР№СЃС‚РІРёРµ Р°РіРµРЅС‚Р°
+	// РљРѕР»-РІРѕ РґРѕСЃС‚СѓРїРЅС‹С… РґР»СЏ РєРѕРґРёСЂРѕРІР°РЅРёСЏ РґРµР№СЃС‚РІРёР№ РїСЂРё РѕРїСЂРµРґРµР»РµРЅРЅРѕР№ СЂР°Р·РјРµСЂРЅРѕСЃС‚Рё РІС‹С…РѕРґРЅРѕРіРѕ РІРµРєС‚РѕСЂР°
 	double actionQuantity; 
 	do {
 		++_outputResolution;
 		actionQuantity = 1;
-		// Подсчитываем кол-во комбинаций 
-		// Комбинаторное кол-во сочетаний при условии, что каждое действие кодируется двумя нейронами и противоположные действия кодируются разными парами нейронов - n!/(k! * (n-k)!), при этом n - output resolution, k - кол-во нейронов кодирующих одно действие
+		// РџРѕРґСЃС‡РёС‚С‹РІР°РµРј РєРѕР»-РІРѕ РєРѕРјР±РёРЅР°С†РёР№ 
+		// РљРѕРјР±РёРЅР°С‚РѕСЂРЅРѕРµ РєРѕР»-РІРѕ СЃРѕС‡РµС‚Р°РЅРёР№ РїСЂРё СѓСЃР»РѕРІРёРё, С‡С‚Рѕ РєР°Р¶РґРѕРµ РґРµР№СЃС‚РІРёРµ РєРѕРґРёСЂСѓРµС‚СЃСЏ РґРІСѓРјСЏ РЅРµР№СЂРѕРЅР°РјРё Рё РїСЂРѕС‚РёРІРѕРїРѕР»РѕР¶РЅС‹Рµ РґРµР№СЃС‚РІРёСЏ РєРѕРґРёСЂСѓСЋС‚СЃСЏ СЂР°Р·РЅС‹РјРё РїР°СЂР°РјРё РЅРµР№СЂРѕРЅРѕРІ - n!/(k! * (n-k)!), РїСЂРё СЌС‚РѕРј n - output resolution, k - РєРѕР»-РІРѕ РЅРµР№СЂРѕРЅРѕРІ РєРѕРґРёСЂСѓСЋС‰РёС… РѕРґРЅРѕ РґРµР№СЃС‚РІРёРµ
 		for (int i = 1; i <= _outputResolution; ++i)
 			actionQuantity *= i;
 		for (int i = 1; i <= _outputResolution - codingNeuronsQuantity; ++i)
@@ -59,7 +59,7 @@ int TAgent::calculateOutputResolution(int inputResolution) const{
 	return _outputResolution;
 }
 
-// Генерация случайного минимального возможного генома агента
+// Р“РµРЅРµСЂР°С†РёСЏ СЃР»СѓС‡Р°Р№РЅРѕРіРѕ РјРёРЅРёРјР°Р»СЊРЅРѕРіРѕ РІРѕР·РјРѕР¶РЅРѕРіРѕ РіРµРЅРѕРјР° Р°РіРµРЅС‚Р°
 void TAgent::generateMinimalAgent(int inputResolution){
 	if (!genome) 
 		genome = new TPoolNetwork;
@@ -83,33 +83,33 @@ void TAgent::generateMinimalAgent(int inputResolution){
 	}
 }
 
-// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
+// Р›РёРЅРµР№РЅР°СЏ РїСЂРѕС†РµРґСЂР° РїРµСЂРІРёС‡РЅРѕРіРѕ СЃРёСЃС‚РµРјРѕРіРµРЅР°Р·Р° (РєРѕРіРґР° РїСЂРѕРёСЃС…РѕРґРёС‚ РѕРґРЅРѕР·РЅР°С‡РЅР°СЏ С‚СЂР°РЅСЃР»СЏС†РёСЏ РіРµРЅРѕС‚РёРїР°) - РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, РєРѕРіРґР° РЅРµС‚ РЅРё РЅР°СЃС‚РѕСЏС‰РµРіРѕ СЃРёСЃС‚РµРјРѕРіРµРЅРµР·Р°, РЅРё РѕР±СѓС‡РµРЅРёСЏ
 void TAgent::linearSystemogenesis(){
 	if (!neuralController) 
 		neuralController = new TNeuralNetwork;
 	else 
 		neuralController->eraseNeuralNetwork();
-	// Сначала создаем все нейроны в сети
+	// РЎРЅР°С‡Р°Р»Р° СЃРѕР·РґР°РµРј РІСЃРµ РЅРµР№СЂРѕРЅС‹ РІ СЃРµС‚Рё
 	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
 		neuralController->addNeuron(neuralController->getNeuronsQuantity() + 1, genome->getPoolType(currentPool), genome->getPoolBiasMean(currentPool), genome->getPoolLayer(currentPool), true, currentPool);
-	// Потом создаем синапсы
+	// РџРѕС‚РѕРј СЃРѕР·РґР°РµРј СЃРёРЅР°РїСЃС‹
 	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
 		for (int currentConnection = 1; currentConnection <= genome->getPoolInputConnectionsQuantity(currentPool); ++currentConnection)
 			neuralController->addSynapse(genome->getConnectionPrePool(currentPool, currentConnection)->getID(), currentPool, neuralController->getSynapsesQuantity() + 1, genome->getConnectionWeightMean(currentPool, currentConnection), genome->getConnectionEnabled(currentPool, currentConnection));
-	// И создаем предикторные связи
+	// Р СЃРѕР·РґР°РµРј РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё
 	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
 		for (int currentPredConnection = 1; currentPredConnection <= genome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPredConnection)
 			neuralController->addPredConnection(genome->getPredConnectionPrePool(currentPool, currentPredConnection)->getID(), currentPool, neuralController->getPredConnectionsQuantity() + 1, genome->getPredConnectionEnabled(currentPool, currentPredConnection));
 }
 
-// Декодирование идентификатора совершаемого агентом действия
+// Р”РµРєРѕРґРёСЂРѕРІР°РЅРёРµ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° СЃРѕРІРµСЂС€Р°РµРјРѕРіРѕ Р°РіРµРЅС‚РѕРј РґРµР№СЃС‚РІРёСЏ
 double TAgent::decodeAction(double outputVector[]){
-	// Два максимальных выхода нейронов сети
+	// Р”РІР° РјР°РєСЃРёРјР°Р»СЊРЅС‹С… РІС‹С…РѕРґР° РЅРµР№СЂРѕРЅРѕРІ СЃРµС‚Рё
 	double maxOutputs[] = {-1, -1};
-	// Номера двух нейронов с максимальным выходом
+	// РќРѕРјРµСЂР° РґРІСѓС… РЅРµР№СЂРѕРЅРѕРІ СЃ РјР°РєСЃРёРјР°Р»СЊРЅС‹Рј РІС‹С…РѕРґРѕРј
 	int maxOutputNeurons[] = {0 , 0};
 
-	// Определение двух максимальных выходов нейронов
+	// РћРїСЂРµРґРµР»РµРЅРёРµ РґРІСѓС… РјР°РєСЃРёРјР°Р»СЊРЅС‹С… РІС‹С…РѕРґРѕРІ РЅРµР№СЂРѕРЅРѕРІ
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getOutputResolution(); ++currentNeuron)
 		if (outputVector[currentNeuron - 1] > maxOutputs[0]){
 			maxOutputs[1] = maxOutputs[0];
@@ -121,17 +121,17 @@ double TAgent::decodeAction(double outputVector[]){
 			maxOutputs[1] = outputVector[currentNeuron - 1];
 			maxOutputNeurons[1] = currentNeuron;
 		}
-	// Меняем местами номера, если они не по порядку (нас не интересует их порядок)
+	// РњРµРЅСЏРµРј РјРµСЃС‚Р°РјРё РЅРѕРјРµСЂР°, РµСЃР»Рё РѕРЅРё РЅРµ РїРѕ РїРѕСЂСЏРґРєСѓ (РЅР°СЃ РЅРµ РёРЅС‚РµСЂРµСЃСѓРµС‚ РёС… РїРѕСЂСЏРґРѕРє)
 	if (maxOutputNeurons[0] > maxOutputNeurons[1]){
 		int tmp = maxOutputNeurons[0];
 		maxOutputNeurons[0] = maxOutputNeurons[1];
 		maxOutputNeurons[1] = tmp;
 	}
-	// Расшифровка выходов сети
-	int fisrtCheckNeuron = 1; // Номер первого нейрона в проверяемой паре
-	int secondCheckNeuron = fisrtCheckNeuron + 1; // Номер второго нейрона в проверяемой паре
-	int pairCount = 0; // Количество проверенных пар
-	// Считаем кол-во пар до нужной пары нейронов
+	// Р Р°СЃС€РёС„СЂРѕРІРєР° РІС‹С…РѕРґРѕРІ СЃРµС‚Рё
+	int fisrtCheckNeuron = 1; // РќРѕРјРµСЂ РїРµСЂРІРѕРіРѕ РЅРµР№СЂРѕРЅР° РІ РїСЂРѕРІРµСЂСЏРµРјРѕР№ РїР°СЂРµ
+	int secondCheckNeuron = fisrtCheckNeuron + 1; // РќРѕРјРµСЂ РІС‚РѕСЂРѕРіРѕ РЅРµР№СЂРѕРЅР° РІ РїСЂРѕРІРµСЂСЏРµРјРѕР№ РїР°СЂРµ
+	int pairCount = 0; // РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕРІРµСЂРµРЅРЅС‹С… РїР°СЂ
+	// РЎС‡РёС‚Р°РµРј РєРѕР»-РІРѕ РїР°СЂ РґРѕ РЅСѓР¶РЅРѕР№ РїР°СЂС‹ РЅРµР№СЂРѕРЅРѕРІ
 	while ((fisrtCheckNeuron != maxOutputNeurons[0]) || (secondCheckNeuron != maxOutputNeurons[1])) {
 		if (secondCheckNeuron < neuralController->getOutputResolution())
 			++secondCheckNeuron;
@@ -141,44 +141,43 @@ double TAgent::decodeAction(double outputVector[]){
 		}
 		++pairCount;
 	}	
-	int actionNumber = pairCount % (2 * neuralController->getInputResolution()); // Итоговый номер совершаемого действия (от 0 до 2*environmentResolution)
-	// Если вычисленный номер действия четный, то это перевод из 0 в 1, и соответственно наоброт
+	int actionNumber = pairCount % (2 * neuralController->getInputResolution()); // РС‚РѕРіРѕРІС‹Р№ РЅРѕРјРµСЂ СЃРѕРІРµСЂС€Р°РµРјРѕРіРѕ РґРµР№СЃС‚РІРёСЏ (РѕС‚ 0 РґРѕ 2*environmentResolution)
+	// Р•СЃР»Рё РІС‹С‡РёСЃР»РµРЅРЅС‹Р№ РЅРѕРјРµСЂ РґРµР№СЃС‚РІРёСЏ С‡РµС‚РЅС‹Р№, С‚Рѕ СЌС‚Рѕ РїРµСЂРµРІРѕРґ РёР· 0 РІ 1, Рё СЃРѕРѕС‚РІРµС‚СЃС‚РІРµРЅРЅРѕ РЅР°РѕР±СЂРѕС‚
 	double actionCode = (actionNumber % 2 ? -1 : 1) * (actionNumber / 2 + 1);
 
 	return actionCode;
 }
 
-// Моделирование жизни агента
+// РњРѕРґРµР»РёСЂРѕРІР°РЅРёРµ Р¶РёР·РЅРё Р°РіРµРЅС‚Р°
 void TAgent::life(TEnvironment& environment, int agentLifeTime){
 	double* environmentVector = new double[neuralController->getInputResolution()];
 	double* outputVector = new double[neuralController->getOutputResolution()];
+	if (agentLife) delete []agentLife;
 	agentLife = new double[agentLifeTime];
 
 	neuralController->reset();
 	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
-		// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
+		// Р—РґРµСЃСЊ РІ С‚РµРѕСЂРёРё РЅР°РґРѕ РІРјРµСЃС‚Рѕ РїСЂРѕСЃС‚Рѕ РїРѕР»СѓС‡РµРЅРёСЏ РІРµРєС‚РѕСЂР° СЃСЂРµРґС‹ РїРѕСЃС‚Р°РІРёС‚СЊ РїСЂРѕС†РµРґСѓСЂСѓ РєРѕРґРёСЂРѕРІС‰РёРєР°
 		environment.getCurrentEnvironmentVector(environmentVector);
 		neuralController->calculateNetwork(environmentVector);
 		neuralController->getOutputVector(outputVector);
 		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
-		// Действуем на среду и проверяем успешно ли действие
+		// Р”РµР№СЃС‚РІСѓРµРј РЅР° СЃСЂРµРґСѓ Рё РїСЂРѕРІРµСЂСЏРµРј СѓСЃРїРµС€РЅРѕ Р»Рё РґРµР№СЃС‚РІРёРµ
 		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
 		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
 	}
 	reward = environment.calculateReward(agentLife, agentLifeTime);
-	delete []agentLife;
-	agentLife = 0;
 	delete []outputVector;
 	delete []environmentVector;
 }
 
-// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
+// РћРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ (С„Р°РєС‚РёС‡РµСЃРєРё РїРѕР»РЅРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ Р°РіРµРЅС‚Р°, РІРєР»СЋС‡Р°СЏ РіРµРЅРѕРј, РЅРѕ РЅРµ РІРєР»СЋС‡Р°СЏ РєРѕРЅС‚СЂРѕР»Р»РµСЂ - СЃРѕР·РґР°РЅРёРµ РЅРѕРІС‹С… СЃС‚СЂСѓРєС‚СѓСЂ)
 TAgent& TAgent::operator=(const TAgent& sourceAgent){
 	*genome = *sourceAgent.genome;
 	reward = sourceAgent.reward;
 	parents[0] = sourceAgent.parents[0];
 	parents[1] = sourceAgent.parents[1];
-	// Копируем настройки первичного системогенеза
+	// РљРѕРїРёСЂСѓРµРј РЅР°СЃС‚СЂРѕР№РєРё РїРµСЂРІРёС‡РЅРѕРіРѕ СЃРёСЃС‚РµРјРѕРіРµРЅРµР·Р°
 	primarySystemogenesisSettings.initialPoolCapacity = sourceAgent.primarySystemogenesisSettings.initialPoolCapacity;
 	primarySystemogenesisSettings.initialDevelopSynapseProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability;
 	primarySystemogenesisSettings.initialDevelopPredConnectionProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability;
@@ -190,12 +189,12 @@ TAgent& TAgent::operator=(const TAgent& sourceAgent){
 	return *this;
 }
 
-// Временная процедура печати жизни агента
+// Р’СЂРµРјРµРЅРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР° РїРµС‡Р°С‚Рё Р¶РёР·РЅРё Р°РіРµРЅС‚Р°
 void TAgent::printLife(TEnvironment& environment, int agentLifeTime){
 	double* environmentVector = new double[neuralController->getInputResolution()];
 	double* outputVector = new double[neuralController->getOutputResolution()];
 	agentLife = new double[agentLifeTime];
-	// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
+	// Р—РґРµСЃСЊ РІ С‚РµРѕСЂРёРё РЅР°РґРѕ РІРјРµСЃС‚Рѕ РїСЂРѕСЃС‚Рѕ РїРѕР»СѓС‡РµРЅРёСЏ РІРµРєС‚РѕСЂР° СЃСЂРµРґС‹ РїРѕСЃС‚Р°РІРёС‚СЊ РїСЂРѕС†РµРґСѓСЂСѓ РєРѕРґРёСЂРѕРІС‰РёРєР°
 	environment.getCurrentEnvironmentVector(environmentVector);
 	cout << "Environment: ";
 	for (int currentBit = 1; currentBit <= neuralController->getInputResolution(); ++currentBit)
@@ -211,7 +210,7 @@ void TAgent::printLife(TEnvironment& environment, int agentLifeTime){
 			cout << outputVector[currentBit - 1] << "\t";
 		cout << endl;
 		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
-		// Действуем на среду и проверяем успешно ли действие
+		// Р”РµР№СЃС‚РІСѓРµРј РЅР° СЃСЂРµРґСѓ Рё РїСЂРѕРІРµСЂСЏРµРј СѓСЃРїРµС€РЅРѕ Р»Рё РґРµР№СЃС‚РІРёРµ
 		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
 		environment.getCurrentEnvironmentVector(environmentVector);
 		cout << "Environment: ";

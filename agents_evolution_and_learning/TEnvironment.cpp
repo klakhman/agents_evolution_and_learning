@@ -1,4 +1,4 @@
-#include "TEnvironment.h"
+п»ї#include "TEnvironment.h"
 #include "service.h"
 
 #include <iostream>
@@ -9,50 +9,50 @@
 
 using namespace std;
 
-// Загрузка структуры целей среды из файла
+// Р—Р°РіСЂСѓР·РєР° СЃС‚СЂСѓРєС‚СѓСЂС‹ С†РµР»РµР№ СЃСЂРµРґС‹ РёР· С„Р°Р№Р»Р°
 void TEnvironment::loadAims(string aimsFilename){
-	// Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
+	// РЎС‚РёСЂР°РµРј С‚РµРєСѓС‰РёР№ РІРµРєС‚РѕСЂ СЃСЂРµРґС‹ (С‚Р°Рє РєР°Рє РјС‹ РјРѕР¶РµРј Р·Р°РіСЂСѓР¶Р°С‚СЊ СЃСЂРµРґСѓ РґСЂСѓРіРѕР№ СЂР°Р·РјРµСЂРЅРѕСЃС‚Рё)
 	if (environmentResolution) delete []currentEnvironmentVector;
 
 	ifstream environmentFile;
 	environmentFile.open(aimsFilename.c_str());
 	string tmp_str;
-	environmentFile >> tmp_str; // Считываем размерность среды
+	environmentFile >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ СЃСЂРµРґС‹
 	environmentResolution = atoi(tmp_str.c_str());
-	environmentFile >> tmp_str; // Считываем кол-во целей
+	environmentFile >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј РєРѕР»-РІРѕ С†РµР»РµР№
 	aimsQuantity = atoi(tmp_str.c_str());
-	// Заполняем все цели
+	// Р—Р°РїРѕР»РЅСЏРµРј РІСЃРµ С†РµР»Рё
 	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
-		environmentFile >> tmp_str; // Считываем сложность цели
+		environmentFile >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј СЃР»РѕР¶РЅРѕСЃС‚СЊ С†РµР»Рё
 		aimsSet[currentAim - 1].aimComplexity = atoi(tmp_str.c_str());
-		environmentFile >> tmp_str; // Считываем награду за достижение цели
+		environmentFile >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј РЅР°РіСЂР°РґСѓ Р·Р° РґРѕСЃС‚РёР¶РµРЅРёРµ С†РµР»Рё
 		aimsSet[currentAim - 1].reward = atof(tmp_str.c_str());
-		// Заполняем цель
+		// Р—Р°РїРѕР»РЅСЏРµРј С†РµР»СЊ
 		for (int currentAction = 1; currentAction <= aimsSet[currentAim - 1].aimComplexity; ++currentAction){
-			environmentFile >> tmp_str; // Считываем номер изменяемого бита
+			environmentFile >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РёР·РјРµРЅСЏРµРјРѕРіРѕ Р±РёС‚Р°
 			aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber = atoi(tmp_str.c_str());
-			environmentFile >> tmp_str; // Считываем желаемое значение бита
+			environmentFile >> tmp_str; // РЎС‡РёС‚С‹РІР°РµРј Р¶РµР»Р°РµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ Р±РёС‚Р°
 			aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue = (atoi(tmp_str.c_str()) == 1);
 		}
 	}
 	environmentFile.close();
 
-	// Создаем новый вектор и сразу заполняем нулями
+	// РЎРѕР·РґР°РµРј РЅРѕРІС‹Р№ РІРµРєС‚РѕСЂ Рё СЃСЂР°Р·Сѓ Р·Р°РїРѕР»РЅСЏРµРј РЅСѓР»СЏРјРё
 	currentEnvironmentVector = new bool[environmentResolution];
 	memset(currentEnvironmentVector, 0, environmentResolution * sizeof(*currentEnvironmentVector));
 }
 
-// Выгрузка структуры целей в файл
+// Р’С‹РіСЂСѓР·РєР° СЃС‚СЂСѓРєС‚СѓСЂС‹ С†РµР»РµР№ РІ С„Р°Р№Р»
 void TEnvironment::uploadAims(string aimsFilename) const{
 	ofstream environmentFile;
 	environmentFile.open(aimsFilename.c_str());
-	// Записываем размерность среды и кол-во целей
+	// Р—Р°РїРёСЃС‹РІР°РµРј СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ СЃСЂРµРґС‹ Рё РєРѕР»-РІРѕ С†РµР»РµР№
 	environmentFile << environmentResolution << "\t" << aimsQuantity << endl;
-	// Записываем все цели
+	// Р—Р°РїРёСЃС‹РІР°РµРј РІСЃРµ С†РµР»Рё
 	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
-		// Записываем сложность цели и награду
+		// Р—Р°РїРёСЃС‹РІР°РµРј СЃР»РѕР¶РЅРѕСЃС‚СЊ С†РµР»Рё Рё РЅР°РіСЂР°РґСѓ
 		environmentFile << aimsSet[currentAim - 1].aimComplexity << "\t" << aimsSet[currentAim - 1].reward << endl;
-		// Записываем цель
+		// Р—Р°РїРёСЃС‹РІР°РµРј С†РµР»СЊ
 		for (int currentAction = 1; currentAction <= aimsSet[currentAim - 1]. aimComplexity; ++currentAction)
 			environmentFile << aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber << "\t"
 									<< aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue << "\t";
@@ -60,27 +60,27 @@ void TEnvironment::uploadAims(string aimsFilename) const{
 	}
 }
 
-// Подсчет коэффициента заполненности всей среды
+// РџРѕРґСЃС‡РµС‚ РєРѕСЌС„С„РёС†РёРµРЅС‚Р° Р·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё РІСЃРµР№ СЃСЂРµРґС‹
 double TEnvironment::calculateOccupancyCoefficient() const{
 	if (!environmentResolution) return 0;
-	// Массив вхождения какого-либо бита в цель
+	// РњР°СЃСЃРёРІ РІС…РѕР¶РґРµРЅРёСЏ РєР°РєРѕРіРѕ-Р»РёР±Рѕ Р±РёС‚Р° РІ С†РµР»СЊ
 	bool* bitsOccurrence = new bool[environmentResolution];
 	double occupancyCoefficient = 0;
 
 	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
-		// Очищаем массив вхождений
+		// РћС‡РёС‰Р°РµРј РјР°СЃСЃРёРІ РІС…РѕР¶РґРµРЅРёР№
 		memset(bitsOccurrence, 0, environmentResolution * sizeof(*bitsOccurrence));
-		// Заполнения массива вхождений
+		// Р—Р°РїРѕР»РЅРµРЅРёСЏ РјР°СЃСЃРёРІР° РІС…РѕР¶РґРµРЅРёР№
 		for (int currentAction = 1; currentAction <= aimsSet[currentAim - 1].aimComplexity; ++currentAction)
 			bitsOccurrence[aimsSet[currentAim - 1].actionsSequence[currentAction-1].bitNumber - 1] = true;
 
-		// Кол-во различных бит, входящих в цель
+		// РљРѕР»-РІРѕ СЂР°Р·Р»РёС‡РЅС‹С… Р±РёС‚, РІС…РѕРґСЏС‰РёС… РІ С†РµР»СЊ
 		int differentBitsQuantity = 0;
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			differentBitsQuantity += 1 * bitsOccurrence[currentBit - 1];
-		// Вероятность совершения k последовательных действий (с учетом что перевод из нуля в единицу и обратно - это разные действия)
+		// Р’РµСЂРѕСЏС‚РЅРѕСЃС‚СЊ СЃРѕРІРµСЂС€РµРЅРёСЏ k РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅС‹С… РґРµР№СЃС‚РІРёР№ (СЃ СѓС‡РµС‚РѕРј С‡С‚Рѕ РїРµСЂРµРІРѕРґ РёР· РЅСѓР»СЏ РІ РµРґРёРЅРёС†Сѓ Рё РѕР±СЂР°С‚РЅРѕ - СЌС‚Рѕ СЂР°Р·РЅС‹Рµ РґРµР№СЃС‚РІРёСЏ)
 		double sequenceProbability = 1.0 / pow(2.0*environmentResolution, aimsSet[currentAim - 1].aimComplexity);
-		// Часть заполненности, которую вносит эта цель
+		// Р§Р°СЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё, РєРѕС‚РѕСЂСѓСЋ РІРЅРѕСЃРёС‚ СЌС‚Р° С†РµР»СЊ
 		double aimOccupancyPart = sequenceProbability * pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
 		
 		occupancyCoefficient += aimOccupancyPart;
@@ -90,27 +90,27 @@ double TEnvironment::calculateOccupancyCoefficient() const{
 	return occupancyCoefficient;
 }
 
-// Процедура случайных изменений среды согласно степени нестационарности
+// РџСЂРѕС†РµРґСѓСЂР° СЃР»СѓС‡Р°Р№РЅС‹С… РёР·РјРµРЅРµРЅРёР№ СЃСЂРµРґС‹ СЃРѕРіР»Р°СЃРЅРѕ СЃС‚РµРїРµРЅРё РЅРµСЃС‚Р°С†РёРѕРЅР°СЂРЅРѕСЃС‚Рё
 void TEnvironment::randomizeEnvironment(){
 	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit){
-		// Не включаем начало интервала, чтобы при нулевой вероятности условие никогда не срабатывало, а при вероятности равной единице, условие всегда срабатывало
+		// РќРµ РІРєР»СЋС‡Р°РµРј РЅР°С‡Р°Р»Рѕ РёРЅС‚РµСЂРІР°Р»Р°, С‡С‚РѕР±С‹ РїСЂРё РЅСѓР»РµРІРѕР№ РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё СѓСЃР»РѕРІРёРµ РЅРёРєРѕРіРґР° РЅРµ СЃСЂР°Р±Р°С‚С‹РІР°Р»Рѕ, Р° РїСЂРё РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё СЂР°РІРЅРѕР№ РµРґРёРЅРёС†Рµ, СѓСЃР»РѕРІРёРµ РІСЃРµРіРґР° СЃСЂР°Р±Р°С‚С‹РІР°Р»Рѕ
 		if (service::uniformDistribution(0, 1, true, false) < nonstaionarityCoefficient)
 			currentEnvironmentVector[currentBit - 1] = !currentEnvironmentVector[currentBit - 1];
 	}
 }
 
 /* 
-Изменение среды под действием агента (возвращает совершено ли действие (true) или его невозможно совершить(false))
-В рамках данной архитектуры actionID кодируется как +-(bitNumber), при этом знак определяет в какую сторону изменяется бит (+ это с нуля на единицу)
+РР·РјРµРЅРµРЅРёРµ СЃСЂРµРґС‹ РїРѕРґ РґРµР№СЃС‚РІРёРµРј Р°РіРµРЅС‚Р° (РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРѕРІРµСЂС€РµРЅРѕ Р»Рё РґРµР№СЃС‚РІРёРµ (true) РёР»Рё РµРіРѕ РЅРµРІРѕР·РјРѕР¶РЅРѕ СЃРѕРІРµСЂС€РёС‚СЊ(false))
+Р’ СЂР°РјРєР°С… РґР°РЅРЅРѕР№ Р°СЂС…РёС‚РµРєС‚СѓСЂС‹ actionID РєРѕРґРёСЂСѓРµС‚СЃСЏ РєР°Рє +-(bitNumber), РїСЂРё СЌС‚РѕРј Р·РЅР°Рє РѕРїСЂРµРґРµР»СЏРµС‚ РІ РєР°РєСѓСЋ СЃС‚РѕСЂРѕРЅСѓ РёР·РјРµРЅСЏРµС‚СЃСЏ Р±РёС‚ (+ СЌС‚Рѕ СЃ РЅСѓР»СЏ РЅР° РµРґРёРЅРёС†Сѓ)
 */
 bool TEnvironment::forceEnvironment(double actionID){
-	// Признак успешности совершаемого действия
+	// РџСЂРёР·РЅР°Рє СѓСЃРїРµС€РЅРѕСЃС‚Рё СЃРѕРІРµСЂС€Р°РµРјРѕРіРѕ РґРµР№СЃС‚РІРёСЏ
 	bool actionSuccess = false;
-	//Направление изменения
+	//РќР°РїСЂР°РІР»РµРЅРёРµ РёР·РјРµРЅРµРЅРёСЏ
 	bool changeDirection = (actionID > 0);
-	// Номер изменяемого бита
+	// РќРѕРјРµСЂ РёР·РјРµРЅСЏРµРјРѕРіРѕ Р±РёС‚Р°
 	int changeBit = static_cast<int>(fabs(actionID));
-	// Если бит в противоположной позиции, то действие совершается
+	// Р•СЃР»Рё Р±РёС‚ РІ РїСЂРѕС‚РёРІРѕРїРѕР»РѕР¶РЅРѕР№ РїРѕР·РёС†РёРё, С‚Рѕ РґРµР№СЃС‚РІРёРµ СЃРѕРІРµСЂС€Р°РµС‚СЃСЏ
 	if (currentEnvironmentVector[changeBit -1] != changeDirection){
 		currentEnvironmentVector[changeBit - 1] = changeDirection;
 		actionSuccess = true;
@@ -121,68 +121,68 @@ bool TEnvironment::forceEnvironment(double actionID){
 	return actionSuccess;
 }
 
-// Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
+// РџРѕРґСЃС‡РµС‚ РЅР°РіСЂР°РґС‹ Р°РіРµРЅС‚Р° - РїСЂРё СЌС‚РѕРј РїРµСЂРµРґР°РµС‚СЃСЏ РІСЃСЏ Р·Р°РїРёСЃР°РЅРЅР°СЏ Р¶РёР·РЅСЊ Р°РіРµРЅС‚Р° - РІРѕР·РІСЂР°С‰Р°РµС‚ РЅР°РіСЂР°РґСѓ
 double TEnvironment::calculateReward(double actionsIDs[], int actionsQuantity) const{
-	double accumulatedReward = 0.0; // Награда агента
-	// Времена последнего достижения цели агентом
+	double accumulatedReward = 0.0; // РќР°РіСЂР°РґР° Р°РіРµРЅС‚Р°
+	// Р’СЂРµРјРµРЅР° РїРѕСЃР»РµРґРЅРµРіРѕ РґРѕСЃС‚РёР¶РµРЅРёСЏ С†РµР»Рё Р°РіРµРЅС‚РѕРј
 	int* achievingTime = new int[aimsQuantity];
-	// Заполняем времена достижения целей так, чтобы вначале они все имели полную награду
+	// Р—Р°РїРѕР»РЅСЏРµРј РІСЂРµРјРµРЅР° РґРѕСЃС‚РёР¶РµРЅРёСЏ С†РµР»РµР№ С‚Р°Рє, С‡С‚РѕР±С‹ РІРЅР°С‡Р°Р»Рµ РѕРЅРё РІСЃРµ РёРјРµР»Рё РїРѕР»РЅСѓСЋ РЅР°РіСЂР°РґСѓ
 	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim)
 		achievingTime[currentAim - 1] = -rewardRecoveryTime - 1;
-	// Проходимся по всем действиям агент
+	// РџСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РІСЃРµРј РґРµР№СЃС‚РІРёСЏРј Р°РіРµРЅС‚
 	for (int currentTimeStep = 1; currentTimeStep <= actionsQuantity; ++currentTimeStep){
-		// Проверяем все цели относительно конкретного шага вермени
+		// РџСЂРѕРІРµСЂСЏРµРј РІСЃРµ С†РµР»Рё РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ С€Р°РіР° РІРµСЂРјРµРЅРё
 		for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
-			if (aimsSet[currentAim-1].aimComplexity <= currentTimeStep){ // Проверяем успел ли бы вообще агент достичь эту цель в начале "жизни" (для экономии времени)
-				int achivedFlag = 1; // Признак того, что цель достигнута
-				int currentAction = 1; // Текущее проверяемое действие
-				// Пока не найдено нарушение последовательности цели или проверка цели закончена
+			if (aimsSet[currentAim-1].aimComplexity <= currentTimeStep){ // РџСЂРѕРІРµСЂСЏРµРј СѓСЃРїРµР» Р»Рё Р±С‹ РІРѕРѕР±С‰Рµ Р°РіРµРЅС‚ РґРѕСЃС‚РёС‡СЊ СЌС‚Сѓ С†РµР»СЊ РІ РЅР°С‡Р°Р»Рµ "Р¶РёР·РЅРё" (РґР»СЏ СЌРєРѕРЅРѕРјРёРё РІСЂРµРјРµРЅРё)
+				int achivedFlag = 1; // РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ С†РµР»СЊ РґРѕСЃС‚РёРіРЅСѓС‚Р°
+				int currentAction = 1; // РўРµРєСѓС‰РµРµ РїСЂРѕРІРµСЂСЏРµРјРѕРµ РґРµР№СЃС‚РІРёРµ
+				// РџРѕРєР° РЅРµ РЅР°Р№РґРµРЅРѕ РЅР°СЂСѓС€РµРЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё С†РµР»Рё РёР»Рё РїСЂРѕРІРµСЂРєР° С†РµР»Рё Р·Р°РєРѕРЅС‡РµРЅР°
 				while (achivedFlag && (currentAction <= aimsSet[currentAim - 1].aimComplexity)){
-					// Определение направления изменения и изменяемого бита (с откатыванием времени назад)
+					// РћРїСЂРµРґРµР»РµРЅРёРµ РЅР°РїСЂР°РІР»РµРЅРёСЏ РёР·РјРµРЅРµРЅРёСЏ Рё РёР·РјРµРЅСЏРµРјРѕРіРѕ Р±РёС‚Р° (СЃ РѕС‚РєР°С‚С‹РІР°РЅРёРµРј РІСЂРµРјРµРЅРё РЅР°Р·Р°Рґ)
 					bool changedDirection = (actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction] > 0);
 					int changedBit = static_cast<int>(fabs(actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction]));
-					/* Проверяем совпадает ли реальное действие с действием в цели на нужном месте 
-						Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
+					/* РџСЂРѕРІРµСЂСЏРµРј СЃРѕРІРїР°РґР°РµС‚ Р»Рё СЂРµР°Р»СЊРЅРѕРµ РґРµР№СЃС‚РІРёРµ СЃ РґРµР№СЃС‚РІРёРµРј РІ С†РµР»Рё РЅР° РЅСѓР¶РЅРѕРј РјРµСЃС‚Рµ 
+						РћР¶РёРґР°РµС‚СЃСЏ, С‡С‚Рѕ Р±РµР·РґРµР№СЃС‚РІРёРµ Р°РіРµРЅС‚Р° Р±СѓРґРµС‚ Р·Р°РєРѕРґРёСЂРѕРІР°РЅРѕ СЃ РїРѕРјРѕС‰СЊСЋ Р±РёС‚Р° 0 Рё РїРѕСЌС‚РѕРјСѓ РЅРµ СЃРѕРІРїР°РґРµС‚ РЅРё СЃ РѕРґРЅРёРј РґРµР№СЃС‚РІРёРµРј РІ С†РµР»Рё*/
 					if ((changedBit != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber) ||
 									(changedDirection != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue))
 						achivedFlag = false;
 					++currentAction;
 				}
-				// Если не было нарушения последовательности, то цель достигнута
+				// Р•СЃР»Рё РЅРµ Р±С‹Р»Рѕ РЅР°СЂСѓС€РµРЅРёСЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё, С‚Рѕ С†РµР»СЊ РґРѕСЃС‚РёРіРЅСѓС‚Р°
 				if (achivedFlag){
-					// Награда линейно восстанавливается до максимального (исходного) уровня за фиксированное кол-во тактов
+					// РќР°РіСЂР°РґР° Р»РёРЅРµР№РЅРѕ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ РґРѕ РјР°РєСЃРёРјР°Р»СЊРЅРѕРіРѕ (РёСЃС…РѕРґРЅРѕРіРѕ) СѓСЂРѕРІРЅСЏ Р·Р° С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕРµ РєРѕР»-РІРѕ С‚Р°РєС‚РѕРІ
 					accumulatedReward += aimsSet[currentAim - 1].reward * min(1.0, (currentTimeStep - achievingTime[currentAim - 1])/static_cast<double>(rewardRecoveryTime));
 					achievingTime[currentAim - 1] = currentTimeStep;
 				}
-			} // Конец проверки одной цели
-		} // Конец проверки всех целей относительно одного фронта времени
-	} // Конец проверки всей "жизни"
+			} // РљРѕРЅРµС† РїСЂРѕРІРµСЂРєРё РѕРґРЅРѕР№ С†РµР»Рё
+		} // РљРѕРЅРµС† РїСЂРѕРІРµСЂРєРё РІСЃРµС… С†РµР»РµР№ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РѕРґРЅРѕРіРѕ С„СЂРѕРЅС‚Р° РІСЂРµРјРµРЅРё
+	} // РљРѕРЅРµС† РїСЂРѕРІРµСЂРєРё РІСЃРµР№ "Р¶РёР·РЅРё"
 	delete []achievingTime;
 	return accumulatedReward;
 }
 
-// Сравнение двух полных целей для процедуры генерации среды (возвращает true - если есть хотя бы одна совпадающая подцель)
+// РЎСЂР°РІРЅРµРЅРёРµ РґРІСѓС… РїРѕР»РЅС‹С… С†РµР»РµР№ РґР»СЏ РїСЂРѕС†РµРґСѓСЂС‹ РіРµРЅРµСЂР°С†РёРё СЃСЂРµРґС‹ (РІРѕР·РІСЂР°С‰Р°РµС‚ true - РµСЃР»Рё РµСЃС‚СЊ С…РѕС‚СЏ Р±С‹ РѕРґРЅР° СЃРѕРІРїР°РґР°СЋС‰Р°СЏ РїРѕРґС†РµР»СЊ)
 bool TEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSubAimComplexity, TAim& secondAim, int minSecondSubAimComplexity){
-	// Основная цель данной процедуры понять равны ли минимальные подцели равной длины у двух целей
-	// Если длина минимальной подцели у первой цели больше
+	// РћСЃРЅРѕРІРЅР°СЏ С†РµР»СЊ РґР°РЅРЅРѕР№ РїСЂРѕС†РµРґСѓСЂС‹ РїРѕРЅСЏС‚СЊ СЂР°РІРЅС‹ Р»Рё РјРёРЅРёРјР°Р»СЊРЅС‹Рµ РїРѕРґС†РµР»Рё СЂР°РІРЅРѕР№ РґР»РёРЅС‹ Сѓ РґРІСѓС… С†РµР»РµР№
+	// Р•СЃР»Рё РґР»РёРЅР° РјРёРЅРёРјР°Р»СЊРЅРѕР№ РїРѕРґС†РµР»Рё Сѓ РїРµСЂРІРѕР№ С†РµР»Рё Р±РѕР»СЊС€Рµ
 	if (minFirstSubAimComplexity > minSecondSubAimComplexity)
-		// Если длина минимальной подцели первой цели больше, чем общая длина второй цели, то они не могут быть идентичны
+		// Р•СЃР»Рё РґР»РёРЅР° РјРёРЅРёРјР°Р»СЊРЅРѕР№ РїРѕРґС†РµР»Рё РїРµСЂРІРѕР№ С†РµР»Рё Р±РѕР»СЊС€Рµ, С‡РµРј РѕР±С‰Р°СЏ РґР»РёРЅР° РІС‚РѕСЂРѕР№ С†РµР»Рё, С‚Рѕ РѕРЅРё РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РёРґРµРЅС‚РёС‡РЅС‹
 		if (minFirstSubAimComplexity > secondAim.aimComplexity) return false;
 		else {
-			// Проходимся по всем действиям цели до минимальной длины первой цели
+			// РџСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РІСЃРµРј РґРµР№СЃС‚РІРёСЏРј С†РµР»Рё РґРѕ РјРёРЅРёРјР°Р»СЊРЅРѕР№ РґР»РёРЅС‹ РїРµСЂРІРѕР№ С†РµР»Рё
 			for (int currentAction = 1; currentAction <= minFirstSubAimComplexity; ++currentAction)
-				// Если хотя бы одно действие неравно, то цели неравны
+				// Р•СЃР»Рё С…РѕС‚СЏ Р±С‹ РѕРґРЅРѕ РґРµР№СЃС‚РІРёРµ РЅРµСЂР°РІРЅРѕ, С‚Рѕ С†РµР»Рё РЅРµСЂР°РІРЅС‹
 					if ((firstAim.actionsSequence[currentAction-1].bitNumber != secondAim.actionsSequence[currentAction - 1].bitNumber) ||
 							(firstAim.actionsSequence[currentAction-1].desiredValue != secondAim.actionsSequence[currentAction - 1].desiredValue))
 						return false;
 		}
 	else
-		// Если длина минимальной подцели второй цели больше, чем общая длина первой цели, то они не могут быть идентичны
+		// Р•СЃР»Рё РґР»РёРЅР° РјРёРЅРёРјР°Р»СЊРЅРѕР№ РїРѕРґС†РµР»Рё РІС‚РѕСЂРѕР№ С†РµР»Рё Р±РѕР»СЊС€Рµ, С‡РµРј РѕР±С‰Р°СЏ РґР»РёРЅР° РїРµСЂРІРѕР№ С†РµР»Рё, С‚Рѕ РѕРЅРё РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РёРґРµРЅС‚РёС‡РЅС‹
 		if (minSecondSubAimComplexity > firstAim.aimComplexity) return false;
 		else {
-			// Проходимся по всем действиям цели до минимальной длины второй цели
+			// РџСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РІСЃРµРј РґРµР№СЃС‚РІРёСЏРј С†РµР»Рё РґРѕ РјРёРЅРёРјР°Р»СЊРЅРѕР№ РґР»РёРЅС‹ РІС‚РѕСЂРѕР№ С†РµР»Рё
 			for (int currentAction = 1; currentAction <= minSecondSubAimComplexity; ++currentAction)
-				// Если хотя бы одно действие неравно, то цели неравны
+				// Р•СЃР»Рё С…РѕС‚СЏ Р±С‹ РѕРґРЅРѕ РґРµР№СЃС‚РІРёРµ РЅРµСЂР°РІРЅРѕ, С‚Рѕ С†РµР»Рё РЅРµСЂР°РІРЅС‹
 					if ((firstAim.actionsSequence[currentAction-1].bitNumber != secondAim.actionsSequence[currentAction - 1].bitNumber) ||
 							(firstAim.actionsSequence[currentAction-1].desiredValue != secondAim.actionsSequence[currentAction - 1].desiredValue))
 						return false;
@@ -191,7 +191,7 @@ bool TEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSu
 	return true;
 }
 
-// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
+// РџСЂРѕС†РµРґСѓСЂР° РіРµРЅРµСЂР°С†РёРё СЃСЂРµРґС‹ РїРѕ С‚СЂРµР±СѓРµРјРѕРјСѓ РєРѕСЌС„С„РёС†РёРµРЅС‚Сѓ Р·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё, eps - С‚РѕС‡РЅРѕСЃС‚СЊ РіРµРЅРµСЂР°С†РёРё, С‚Р°РєР¶Рµ РїРµСЂРµРґР°РµС‚СЃСЏ РјРёРЅРёРјР°Р»СЊРЅР°СЏ СЃР»РѕР¶РЅРѕСЃС‚СЊ С†РµР»Рё Рё РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ, Р° С‚Р°РєР¶Рµ РјРёРЅРёРјР°Р»СЊРЅР°СЏ РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ СЃР»РѕР¶РЅРѕСЃС‚СЊ
 double TEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps /*=0.001*/, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/){
 	if (environmentResolution) delete []currentEnvironmentVector;
 	environmentResolution = _environmentResolution;
@@ -200,58 +200,58 @@ double TEnvironment::generateEnvironment(int _environmentResolution, double requ
 
 	double occupancyCoef = 0.0;
 	do {
-		// !!!! Количество полных целей (которые потом будут разбиты на подцели) !!!
+		// !!!! РљРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР»РЅС‹С… С†РµР»РµР№ (РєРѕС‚РѕСЂС‹Рµ РїРѕС‚РѕРј Р±СѓРґСѓС‚ СЂР°Р·Р±РёС‚С‹ РЅР° РїРѕРґС†РµР»Рё) !!!
 		const int MAX_FULL_AIMS = 1000; //1000
 		int fullAimsQuantity = service::uniformDiscreteDistribution(1, MAX_FULL_AIMS);
-		// Создаем среду, в которую будут записываться полные цели
+		// РЎРѕР·РґР°РµРј СЃСЂРµРґСѓ, РІ РєРѕС‚РѕСЂСѓСЋ Р±СѓРґСѓС‚ Р·Р°РїРёСЃС‹РІР°С‚СЊСЃСЏ РїРѕР»РЅС‹Рµ С†РµР»Рё
 		TEnvironment environmentWithFullAims;
 		environmentWithFullAims.environmentResolution = environmentResolution;
-		// Создаем фиктивный вектор среды (чтобы при удалении типа не происходило ошибки)
+		// РЎРѕР·РґР°РµРј С„РёРєС‚РёРІРЅС‹Р№ РІРµРєС‚РѕСЂ СЃСЂРµРґС‹ (С‡С‚РѕР±С‹ РїСЂРё СѓРґР°Р»РµРЅРёРё С‚РёРїР° РЅРµ РїСЂРѕРёСЃС…РѕРґРёР»Рѕ РѕС€РёР±РєРё)
 		environmentWithFullAims.currentEnvironmentVector = new bool[environmentResolution];
 		environmentWithFullAims.aimsQuantity = fullAimsQuantity;
-		// Массив со сложностями минимальной подцели в полной цели
+		// РњР°СЃСЃРёРІ СЃРѕ СЃР»РѕР¶РЅРѕСЃС‚СЏРјРё РјРёРЅРёРјР°Р»СЊРЅРѕР№ РїРѕРґС†РµР»Рё РІ РїРѕР»РЅРѕР№ С†РµР»Рё
 		int* minSubAimComplexity = new int[environmentWithFullAims.aimsQuantity];
-		// Генерируем полные цели
+		// Р“РµРЅРµСЂРёСЂСѓРµРј РїРѕР»РЅС‹Рµ С†РµР»Рё
 		for (int currentAim = 1; currentAim <= environmentWithFullAims.aimsQuantity; ++currentAim){
-			// Находим длину полной цели
+			// РќР°С…РѕРґРёРј РґР»РёРЅСѓ РїРѕР»РЅРѕР№ С†РµР»Рё
 			environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity = service::uniformDiscreteDistribution(minMaxAimComplexity, maxAimComplexity);
-			// Находим длину минимальной подцели
+			// РќР°С…РѕРґРёРј РґР»РёРЅСѓ РјРёРЅРёРјР°Р»СЊРЅРѕР№ РїРѕРґС†РµР»Рё
 			minSubAimComplexity[currentAim - 1] = service::uniformDiscreteDistribution(minAimComplexity, environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity);
-			// Генерируем новую (неидентичную старым) цель
-			bool identicAimFound = false; // Признак того, что найдена идентичная цель
+			// Р“РµРЅРµСЂРёСЂСѓРµРј РЅРѕРІСѓСЋ (РЅРµРёРґРµРЅС‚РёС‡РЅСѓСЋ СЃС‚Р°СЂС‹Рј) С†РµР»СЊ
+			bool identicAimFound = false; // РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ РЅР°Р№РґРµРЅР° РёРґРµРЅС‚РёС‡РЅР°СЏ С†РµР»СЊ
 			do {
-				// Генерируем действия цели
+				// Р“РµРЅРµСЂРёСЂСѓРµРј РґРµР№СЃС‚РІРёСЏ С†РµР»Рё
 				for (int currentAction = 1; currentAction <= environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity; ++currentAction){
-					int currentBit = 0; // Новый бит
-					bool currentDirection = false; // Направление изменения
-					bool stop = false; // Признак того, что сгенерированный бит противоречит предыдущим
+					int currentBit = 0; // РќРѕРІС‹Р№ Р±РёС‚
+					bool currentDirection = false; // РќР°РїСЂР°РІР»РµРЅРёРµ РёР·РјРµРЅРµРЅРёСЏ
+					bool stop = false; // РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅРЅС‹Р№ Р±РёС‚ РїСЂРѕС‚РёРІРѕСЂРµС‡РёС‚ РїСЂРµРґС‹РґСѓС‰РёРј
 					do {
 						stop = false;
 						currentBit = service::uniformDiscreteDistribution(1, environmentWithFullAims.environmentResolution);
 						currentDirection = (service::uniformDiscreteDistribution(0, 1) == 1);
-						// Находим последнее действие в цели, которое использует тот же бит, что и сгенерированное
+						// РќР°С…РѕРґРёРј РїРѕСЃР»РµРґРЅРµРµ РґРµР№СЃС‚РІРёРµ РІ С†РµР»Рё, РєРѕС‚РѕСЂРѕРµ РёСЃРїРѕР»СЊР·СѓРµС‚ С‚РѕС‚ Р¶Рµ Р±РёС‚, С‡С‚Рѕ Рё СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅРЅРѕРµ
 						int currentCompareAction = 0;
 						for (currentCompareAction = currentAction - 1; currentCompareAction > 0; --currentCompareAction){
 							if (environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentCompareAction - 1].bitNumber == currentBit){
 								if (environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentCompareAction - 1].desiredValue != currentDirection)
 									stop = true;
-								break; // Не идем дальше по цели
+								break; // РќРµ РёРґРµРј РґР°Р»СЊС€Рµ РїРѕ С†РµР»Рё
 							}
 						}
-						// Если мы дошли до конца и не встретили нужного бита
+						// Р•СЃР»Рё РјС‹ РґРѕС€Р»Рё РґРѕ РєРѕРЅС†Р° Рё РЅРµ РІСЃС‚СЂРµС‚РёР»Рё РЅСѓР¶РЅРѕРіРѕ Р±РёС‚Р°
 						if (currentCompareAction == 0) stop = true;
-					} while (!stop); // Конец генерирования действий цели
+					} while (!stop); // РљРѕРЅРµС† РіРµРЅРµСЂРёСЂРѕРІР°РЅРёСЏ РґРµР№СЃС‚РІРёР№ С†РµР»Рё
 					environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber = currentBit;
 					environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue = currentDirection;
 				}
-				// После генерации новой цели нужно сравнить ее с предыдущими на факт идентичности
-				identicAimFound = false; // Признак того, что найдена идентичная цель
+				// РџРѕСЃР»Рµ РіРµРЅРµСЂР°С†РёРё РЅРѕРІРѕР№ С†РµР»Рё РЅСѓР¶РЅРѕ СЃСЂР°РІРЅРёС‚СЊ РµРµ СЃ РїСЂРµРґС‹РґСѓС‰РёРјРё РЅР° С„Р°РєС‚ РёРґРµРЅС‚РёС‡РЅРѕСЃС‚Рё
+				identicAimFound = false; // РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ РЅР°Р№РґРµРЅР° РёРґРµРЅС‚РёС‡РЅР°СЏ С†РµР»СЊ
 				int currentCompareAim = 1;
 				while ((currentCompareAim < currentAim) && (!identicAimFound)){
-					//Сравниваем две цели
+					//РЎСЂР°РІРЅРёРІР°РµРј РґРІРµ С†РµР»Рё
 					identicAimFound = compareDifferentLengthFullAims(environmentWithFullAims.aimsSet[currentAim - 1], minSubAimComplexity[currentAim - 1], 
 																					environmentWithFullAims.aimsSet[currentCompareAim - 1], minSubAimComplexity[currentCompareAim - 1]);
-					// Если сравнение показывает, что цели идентичны, то пытаемся увеличить минимальную сложность подцели пока цели не станут не идентичны
+					// Р•СЃР»Рё СЃСЂР°РІРЅРµРЅРёРµ РїРѕРєР°Р·С‹РІР°РµС‚, С‡С‚Рѕ С†РµР»Рё РёРґРµРЅС‚РёС‡РЅС‹, С‚Рѕ РїС‹С‚Р°РµРјСЃСЏ СѓРІРµР»РёС‡РёС‚СЊ РјРёРЅРёРјР°Р»СЊРЅСѓСЋ СЃР»РѕР¶РЅРѕСЃС‚СЊ РїРѕРґС†РµР»Рё РїРѕРєР° С†РµР»Рё РЅРµ СЃС‚Р°РЅСѓС‚ РЅРµ РёРґРµРЅС‚РёС‡РЅС‹
 					while ((identicAimFound) && (++minSubAimComplexity[currentAim - 1] <= environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity))
 						identicAimFound = compareDifferentLengthFullAims(environmentWithFullAims.aimsSet[currentAim - 1], minSubAimComplexity[currentAim - 1], 
 																						environmentWithFullAims.aimsSet[currentCompareAim - 1], minSubAimComplexity[currentCompareAim - 1]);
@@ -260,12 +260,12 @@ double TEnvironment::generateEnvironment(int _environmentResolution, double requ
 
 			} while (identicAimFound);
 		}
-		// После генерации всех полных целей необходимо сгенерировать итоговую среду с подцелями
+		// РџРѕСЃР»Рµ РіРµРЅРµСЂР°С†РёРё РІСЃРµС… РїРѕР»РЅС‹С… С†РµР»РµР№ РЅРµРѕР±С…РѕРґРёРјРѕ СЃРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ РёС‚РѕРіРѕРІСѓСЋ СЃСЂРµРґСѓ СЃ РїРѕРґС†РµР»СЏРјРё
 		aimsQuantity = 0;
 		for (int currentFullAim = 1; currentFullAim <= environmentWithFullAims.aimsQuantity; ++currentFullAim)
 			for (int currentSubAim = 1; currentSubAim <= environmentWithFullAims.aimsSet[currentFullAim - 1].aimComplexity - minSubAimComplexity[currentFullAim - 1] + 1; ++currentSubAim){
 				aimsSet[aimsQuantity++].aimComplexity = minSubAimComplexity[currentFullAim - 1] + currentSubAim - 1;
-				//!!!! Здесь можно менять схему начисления награды
+				//!!!! Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РјРµРЅСЏС‚СЊ СЃС…РµРјСѓ РЅР°С‡РёСЃР»РµРЅРёСЏ РЅР°РіСЂР°РґС‹
 				aimsSet[aimsQuantity - 1].reward = 20 + 10*(aimsSet[aimsQuantity - 1].aimComplexity - 2);
 				for (int currentAction = 1; currentAction <= aimsSet[aimsQuantity - 1].aimComplexity; ++currentAction){
 					aimsSet[aimsQuantity - 1].actionsSequence[currentAction - 1].bitNumber = environmentWithFullAims.aimsSet[currentFullAim - 1].actionsSequence[currentAction - 1].bitNumber;

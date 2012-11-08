@@ -1,52 +1,52 @@
-#ifndef TPARALLELEVOLUTIONARYPROCESS_H
+п»ї#ifndef TPARALLELEVOLUTIONARYPROCESS_H
 #define TPARALLELEVOLUTIONARYPROCESS_H
 
 #include "mpi.h"
 #include <string>
 
-// Процесс параллельного запуска нескольких эволюций (с помощью MPI)
+// РџСЂРѕС†РµСЃСЃ РїР°СЂР°Р»Р»РµР»СЊРЅРѕРіРѕ Р·Р°РїСѓСЃРєР° РЅРµСЃРєРѕР»СЊРєРёС… СЌРІРѕР»СЋС†РёР№ (СЃ РїРѕРјРѕС‰СЊСЋ MPI)
 class TParallelEvolutionaryProcess{
-	// Номер процесса
+	// РќРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°
 	int processRank;
-	// Общее кол-во процессов
+	// РћР±С‰РµРµ РєРѕР»-РІРѕ РїСЂРѕС†РµСЃСЃРѕРІ
 	int processesQuantity;
-	// Стандартная максимальная длина сообщения
+	// РЎС‚Р°РЅРґР°СЂС‚РЅР°СЏ РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° СЃРѕРѕР±С‰РµРЅРёСЏ
 	static const int messageLength = 100;
-	// Стандартный служебный тип сообщения
+	// РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ СЃР»СѓР¶РµР±РЅС‹Р№ С‚РёРї СЃРѕРѕР±С‰РµРЅРёСЏ
 	static const int messageType = 99;
-	// Служебная перемення статуса процесса
+	// РЎР»СѓР¶РµР±РЅР°СЏ РїРµСЂРµРјРµРЅРЅСЏ СЃС‚Р°С‚СѓСЃР° РїСЂРѕС†РµСЃСЃР°
 	MPI_Status status;
 
-	//Директории для записи файлов
+	//Р”РёСЂРµРєС‚РѕСЂРёРё РґР»СЏ Р·Р°РїРёСЃРё С„Р°Р№Р»РѕРІ
 	struct {
 		std::string workDirectory;
 		std::string environmentDirectory;
 		std::string resultsDirectory;
 	} directoriesSettings;
-	// Файл настроек
+	// Р¤Р°Р№Р» РЅР°СЃС‚СЂРѕРµРє
 	std::string settingsFilename;
 
-	// Заполнение параметров директорий для записи файлов
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ РґРёСЂРµРєС‚РѕСЂРёР№ РґР»СЏ Р·Р°РїРёСЃРё С„Р°Р№Р»РѕРІ
 	void fillDirectoriesSettings();
-	// Расишифровка парметров командной строки
+	// Р Р°СЃРёС€РёС„СЂРѕРІРєР° РїР°СЂРјРµС‚СЂРѕРІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
 	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string& runSign);
-	// Расшифровка сообщения от рабочего процесса 
+	// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР° 
 	void decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry);
-	// Выполнение управляющего процесса
+	// Р’С‹РїРѕР»РЅРµРЅРёРµ СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 	void rootProcess(int argc, char **argv);
-	// Расшифровка сообщения от рутового процесса 
+	// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂСѓС‚РѕРІРѕРіРѕ РїСЂРѕС†РµСЃСЃР° 
 	void decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, std::string& runSign);
-	// Выполнение рабочего процесса
+	// Р’С‹РїРѕР»РЅРµРЅРёРµ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 	void workProcess(int argc, char **argv);
 public:
-	// Конструктор
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	TParallelEvolutionaryProcess(){
 		processRank = 0;
 		processesQuantity = 0;
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TParallelEvolutionaryProcess(){ }
-	// Запуск эволюционного процесса
+	// Р—Р°РїСѓСЃРє СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°
 	void start(int argc, char **argv);
 };
 

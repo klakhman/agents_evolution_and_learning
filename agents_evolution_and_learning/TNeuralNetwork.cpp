@@ -1,4 +1,4 @@
-#include "TNeuralNetwork.h"
+п»ї#include "TNeuralNetwork.h"
 #include "TSynapse.h"
 #include "TPredConnection.h"
 #include "service.h"
@@ -11,13 +11,13 @@
 
 using namespace std;
 
-// Корректировка ID нейронов (например после удаления)
+// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID РЅРµР№СЂРѕРЅРѕРІ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 void TNeuralNetwork::fixNeuronsIDs(){
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 		neuronsStructure[currentNeuron - 1]->setID(currentNeuron);
 }
 
-// Процедура увеличения размера массива нейронов
+// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РЅРµР№СЂРѕРЅРѕРІ
 void TNeuralNetwork::inflateNeuronsStructure(int inflateSize){
 	TNeuron** newNeuronsStructure = new TNeuron*[neuronsStructureSize + inflateSize];
 	memset(newNeuronsStructure, 0, (neuronsStructureSize + inflateSize) * sizeof(TNeuron*));
@@ -27,7 +27,7 @@ void TNeuralNetwork::inflateNeuronsStructure(int inflateSize){
 	neuronsStructureSize += inflateSize;
 }
 
-// Декструктор
+// Р”РµРєСЃС‚СЂСѓРєС‚РѕСЂ
 TNeuralNetwork::~TNeuralNetwork(){
 	if (neuronsStructure){
 		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
@@ -36,35 +36,35 @@ TNeuralNetwork::~TNeuralNetwork(){
 	}
 }
 
-//Добавление нейрона в сеть
+//Р”РѕР±Р°РІР»РµРЅРёРµ РЅРµР№СЂРѕРЅР° РІ СЃРµС‚СЊ
 void TNeuralNetwork::addNeuron(int newID, int newType, double newBias, int newLayer, bool newActive /*=true*/, int newParentneuralID /*=0*/){
-	if (neuronsQuantity >= neuronsStructureSize) // Если не хватает места в массиве
+	if (neuronsQuantity >= neuronsStructureSize) // Р•СЃР»Рё РЅРµ С…РІР°С‚Р°РµС‚ РјРµСЃС‚Р° РІ РјР°СЃСЃРёРІРµ
 		inflateNeuronsStructure(INFLATE_NEURONS_SIZE);
 	neuronsStructure[neuronsQuantity++] = new TNeuron(newID, newType, newBias, newLayer, newActive, newParentneuralID);
-	// Если нейрон входной
+	// Р•СЃР»Рё РЅРµР№СЂРѕРЅ РІС…РѕРґРЅРѕР№
 	if (0 == newType) ++inputResolution;
-	// Если нейрон выходной
+	// Р•СЃР»Рё РЅРµР№СЂРѕРЅ РІС‹С…РѕРґРЅРѕР№
 	if (2 == newType) ++outputResolution;
-	// Смотрим на слой нейрона
+	// РЎРјРѕС‚СЂРёРј РЅР° СЃР»РѕР№ РЅРµР№СЂРѕРЅР°
 	if (newLayer > layersQuantity) layersQuantity = newLayer;
 }
 
-// Удаление нейрона из сети (с удалением также всех входных и выходных связей из этого нейрона)
+// РЈРґР°Р»РµРЅРёРµ РЅРµР№СЂРѕРЅР° РёР· СЃРµС‚Рё (СЃ СѓРґР°Р»РµРЅРёРµРј С‚Р°РєР¶Рµ РІСЃРµС… РІС…РѕРґРЅС‹С… Рё РІС‹С…РѕРґРЅС‹С… СЃРІСЏР·РµР№ РёР· СЌС‚РѕРіРѕ РЅРµР№СЂРѕРЅР°)
 void TNeuralNetwork::deleteNeuron(int neuronNumber){
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		if (currentNeuron != neuronNumber){ // Если это не стираемый нейрон (пропускаем просто для экономии времени)
+		if (currentNeuron != neuronNumber){ // Р•СЃР»Рё СЌС‚Рѕ РЅРµ СЃС‚РёСЂР°РµРјС‹Р№ РЅРµР№СЂРѕРЅ (РїСЂРѕРїСѓСЃРєР°РµРј РїСЂРѕСЃС‚Рѕ РґР»СЏ СЌРєРѕРЅРѕРјРёРё РІСЂРµРјРµРЅРё)
 			for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
-				if (neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getID() == neuronNumber) // Если это синапс от стираемого нейрона
+				if (neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getID() == neuronNumber) // Р•СЃР»Рё СЌС‚Рѕ СЃРёРЅР°РїСЃ РѕС‚ СЃС‚РёСЂР°РµРјРѕРіРѕ РЅРµР№СЂРѕРЅР°
 					deleteSynapse(currentNeuron, currentSynapse);
 			for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-				if (neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getID() == neuronNumber) // Если это пред. связь от стираемого нейрона
+				if (neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getID() == neuronNumber) // Р•СЃР»Рё СЌС‚Рѕ РїСЂРµРґ. СЃРІСЏР·СЊ РѕС‚ СЃС‚РёСЂР°РµРјРѕРіРѕ РЅРµР№СЂРѕРЅР°
 					deletePredConnection(currentNeuron, currentPredConnection);
 		}
-	// Если нейрон входной
+	// Р•СЃР»Рё РЅРµР№СЂРѕРЅ РІС…РѕРґРЅРѕР№
 	if (0 == neuronsStructure[neuronNumber - 1]->getType()) --inputResolution;
-	// Если нейрон выходной
+	// Р•СЃР»Рё РЅРµР№СЂРѕРЅ РІС‹С…РѕРґРЅРѕР№
 	if (2 == neuronsStructure[neuronNumber - 1]->getType()) --outputResolution;
-	// Стираем нейрон и сдвигаем массив
+	// РЎС‚РёСЂР°РµРј РЅРµР№СЂРѕРЅ Рё СЃРґРІРёРіР°РµРј РјР°СЃСЃРёРІ
 	synapsesQuantity -= neuronsStructure[neuronNumber - 1]->getInputSynapsesQuantity();
 	predConnectionsQuantity -= neuronsStructure[neuronNumber - 1]->getInputPredConnectionsQuantity();
 	delete neuronsStructure[neuronNumber - 1];
@@ -75,7 +75,7 @@ void TNeuralNetwork::deleteNeuron(int neuronNumber){
 	fixNeuronsIDs();
 }
 
-// Стирание сети
+// РЎС‚РёСЂР°РЅРёРµ СЃРµС‚Рё
 void TNeuralNetwork::eraseNeuralNetwork(){
 	if (neuronsStructure) {
 		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
@@ -92,53 +92,53 @@ void TNeuralNetwork::eraseNeuralNetwork(){
 	outputResolution = 0;
 }
 
-// "Перезагрузка" сети
+// "РџРµСЂРµР·Р°РіСЂСѓР·РєР°" СЃРµС‚Рё
 void TNeuralNetwork::reset(){
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 		neuronsStructure[currentNeuron - 1]->reset();
 }
 
-// Обсчет одного такта работы сети
+// РћР±СЃС‡РµС‚ РѕРґРЅРѕРіРѕ С‚Р°РєС‚Р° СЂР°Р±РѕС‚С‹ СЃРµС‚Рё
 void TNeuralNetwork::calculateNetwork(double inputVector[]){
-	// Сначала подготавливаем все нейроны
+	// РЎРЅР°С‡Р°Р»Р° РїРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РІСЃРµ РЅРµР№СЂРѕРЅС‹
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 		neuronsStructure[currentNeuron - 1]->prepare();
-	// Заполняем входные нейроны
+	// Р—Р°РїРѕР»РЅСЏРµРј РІС…РѕРґРЅС‹Рµ РЅРµР№СЂРѕРЅС‹
 	for (int currentBit = 1; currentBit <= inputResolution; ++currentBit)
 		neuronsStructure[currentBit - 1]->setCurrentOut(inputVector[currentBit - 1]);
-	// Проходимся по нейронам по слоям (начинаем со второго)
+	// РџСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РЅРµР№СЂРѕРЅР°Рј РїРѕ СЃР»РѕСЏРј (РЅР°С‡РёРЅР°РµРј СЃРѕ РІС‚РѕСЂРѕРіРѕ)
 	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
 		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 			if (neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer)
 				neuronsStructure[currentNeuron - 1]->calculateOut();
 }
 
-// Получение текущего выходного вектора сети
+// РџРѕР»СѓС‡РµРЅРёРµ С‚РµРєСѓС‰РµРіРѕ РІС‹С…РѕРґРЅРѕРіРѕ РІРµРєС‚РѕСЂР° СЃРµС‚Рё
 void TNeuralNetwork::getOutputVector(double outputVector[]){
 	for (int currentBit = 1; currentBit <= outputResolution; ++currentBit)
 		outputVector[currentBit - 1] = neuronsStructure[currentBit - 1 + inputResolution]->getCurrentOut(); 
 }
 
-// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
-// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
-void TNeuralNetwork::printGraphNetwork(string graphFilename){
+// Р’С‹РІРѕРґ СЃРµС‚Рё РІ С„Р°Р№Р» РєР°Рє РіСЂР°С„Р° (СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј СЃС‚РѕСЂРѕРЅРЅРµР№ СѓС‚РёР»РёС‚С‹ dot.exe РёР· РїР°РєРµС‚Р° GraphViz) 
+// Р”Р»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ СЂР°Р±РѕС‚С‹ РЅРµРѕР±С…РѕРґРёРјРѕ С‡С‚РѕР±С‹ РїСѓС‚СЊ Рє dot.exe Р±С‹Р» РїСЂРѕРїРёСЃР°РЅ РІ $PATH
+void TNeuralNetwork::printGraphNetwork(string graphFilename, bool printWeights /*=false*/) const{
 	ofstream hDotGraphFile;
 	hDotGraphFile.open((graphFilename + ".dot").c_str());
-	// Инициализируем и указываем, что слои должны следовать слево на право
+	// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј Рё СѓРєР°Р·С‹РІР°РµРј, С‡С‚Рѕ СЃР»РѕРё РґРѕР»Р¶РЅС‹ СЃР»РµРґРѕРІР°С‚СЊ СЃР»РµРІРѕ РЅР° РїСЂР°РІРѕ
 	hDotGraphFile << "digraph G { \n\trankdir=LR;\n";
-	// Подсчитываем кол-во пулов сети
+	// РџРѕРґСЃС‡РёС‚С‹РІР°РµРј РєРѕР»-РІРѕ РїСѓР»РѕРІ СЃРµС‚Рё
 	int poolsQuantity = 0;
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 		if (neuronsStructure[currentNeuron - 1]->getParentPoolID() > poolsQuantity)
 			poolsQuantity = neuronsStructure[currentNeuron - 1]->getParentPoolID();
-	// Записываем нейроны послойно
+	// Р—Р°РїРёСЃС‹РІР°РµРј РЅРµР№СЂРѕРЅС‹ РїРѕСЃР»РѕР№РЅРѕ
 	for (int currentLayer = 1; currentLayer <= layersQuantity; ++ currentLayer){
-		// Указываем, что это один слой и нейроны должны идти в столбец
+		// РЈРєР°Р·С‹РІР°РµРј, С‡С‚Рѕ СЌС‚Рѕ РѕРґРёРЅ СЃР»РѕР№ Рё РЅРµР№СЂРѕРЅС‹ РґРѕР»Р¶РЅС‹ РёРґС‚Рё РІ СЃС‚РѕР»Р±РµС†
 		hDotGraphFile << "\t{ rank = same; \n";
 		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-			// !! Не отображаем неактивные нейроны
+			// !! РќРµ РѕС‚РѕР±СЂР°Р¶Р°РµРј РЅРµР°РєС‚РёРІРЅС‹Рµ РЅРµР№СЂРѕРЅС‹
 			if ((neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer) && (neuronsStructure[currentNeuron - 1]->getActive())){
-				// Определяем насыщенность цвета нейрона (отражает принадлежность к пулу)
+				// РћРїСЂРµРґРµР»СЏРµРј РЅР°СЃС‹С‰РµРЅРЅРѕСЃС‚СЊ С†РІРµС‚Р° РЅРµР№СЂРѕРЅР° (РѕС‚СЂР°Р¶Р°РµС‚ РїСЂРёРЅР°РґР»РµР¶РЅРѕСЃС‚СЊ Рє РїСѓР»Сѓ)
 				string hex;
 				service::decToHex((poolsQuantity - neuronsStructure[currentNeuron-1]->getParentPoolID() + 1) * (255 - 30) / poolsQuantity + 30, hex, 2);
 				string color = hex + hex + hex;
@@ -146,13 +146,13 @@ void TNeuralNetwork::printGraphNetwork(string graphFilename){
 					"\t\t\t\"" << neuronsStructure[currentNeuron - 1]->getID() << "\"[label=\"" << neuronsStructure[currentNeuron - 1]->getID() << "; " << neuronsStructure[currentNeuron - 1]->getParentPoolID() <<
 					"\", shape=\"circle\", style=filled, fillcolor=\"#" << color << "\"];\n\t\t}\n";
 			}
-		hDotGraphFile << "\t}\n"; // Заканчиваем запись слоя
+		hDotGraphFile << "\t}\n"; // Р—Р°РєР°РЅС‡РёРІР°РµРј Р·Р°РїРёСЃСЊ СЃР»РѕСЏ
 	}
-	// Записываем синапсы
+	// Р—Р°РїРёСЃС‹РІР°РµРј СЃРёРЅР°РїСЃС‹
 	double maxWeightValue = 1.0;
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 		for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
-			//Отображаем связи только между активными нейронами
+			//РћС‚РѕР±СЂР°Р¶Р°РµРј СЃРІСЏР·Рё С‚РѕР»СЊРєРѕ РјРµР¶РґСѓ Р°РєС‚РёРІРЅС‹РјРё РЅРµР№СЂРѕРЅР°РјРё
 			if ((neuronsStructure[currentNeuron - 1]->getSynapseEnabled(currentSynapse)) &&
 					(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive()) && 
 						(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive())){
@@ -160,14 +160,16 @@ void TNeuralNetwork::printGraphNetwork(string graphFilename){
 				service::decToHex(static_cast<int>(min(fabs(255 * neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) / maxWeightValue), 255.0)), hex, 2);
 				string color;
 				if (neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) < 0)
-					color = "0000" + hex; // Оттенок синего
+					color = "0000" + hex; // РћС‚С‚РµРЅРѕРє СЃРёРЅРµРіРѕ
 				else
-					color = hex + "0000"; // Оттенок красного
+					color = hex + "0000"; // РћС‚С‚РµРЅРѕРє РєСЂР°СЃРЅРѕРіРѕ
 				hDotGraphFile << "\t\"" << neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getID() << "\" -> \"" <<
-					neuronsStructure[currentNeuron - 1]->getSynapsePostNeuron(currentSynapse)->getID() << "\" [label=\"" << neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) << 
-					"\", arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
+					neuronsStructure[currentNeuron - 1]->getSynapsePostNeuron(currentSynapse)->getID() << "\" [ ";
+				if (printWeights) // Р•СЃР»Рё РЅР°РґРѕ РЅР°РїРµС‡Р°С‚Р°С‚СЊ РІРµСЃР°
+					hDotGraphFile << "label=\"" << neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) << "\", ";
+				hDotGraphFile << "arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
 			}
-	// Записываем предикторные связи
+	// Р—Р°РїРёСЃС‹РІР°РµРј РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 		for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
 			if ((neuronsStructure[currentNeuron - 1]->getPredConnectionEnabled(currentPredConnection)) &&
@@ -180,64 +182,64 @@ void TNeuralNetwork::printGraphNetwork(string graphFilename){
 	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
 }
 
-//Печать сети в файл или на экран
+//РџРµС‡Р°С‚СЊ СЃРµС‚Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 ostream& operator<<(ostream& os, const TNeuralNetwork& neuralNetwork){
 	for (int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsQuantity; ++currentNeuron)
 		os << *(neuralNetwork.neuronsStructure[currentNeuron - 1]);
-	os << "|\n"; // Записываем разделитель между нейронами и синапсами
+	os << "|\n"; // Р—Р°РїРёСЃС‹РІР°РµРј СЂР°Р·РґРµР»РёС‚РµР»СЊ РјРµР¶РґСѓ РЅРµР№СЂРѕРЅР°РјРё Рё СЃРёРЅР°РїСЃР°РјРё
 	for (int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsQuantity; ++currentNeuron)
 		for (int currentSynapse = 1; currentSynapse <= neuralNetwork.neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
 			os << *(neuralNetwork.neuronsStructure[currentNeuron-1]->inputSynapsesSet[currentSynapse-1]); 
-	os << "||\n"; // Записываем разделитель между синапсами и предикторными связями
+	os << "||\n"; // Р—Р°РїРёСЃС‹РІР°РµРј СЂР°Р·РґРµР»РёС‚РµР»СЊ РјРµР¶РґСѓ СЃРёРЅР°РїСЃР°РјРё Рё РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё
 	for (int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsQuantity; ++currentNeuron)
 		for (int currentPredConnection = 1; currentPredConnection <= neuralNetwork.neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
 			os << *(neuralNetwork.neuronsStructure[currentNeuron-1]->inputPredConnectionsSet[currentPredConnection-1]); 
-	os << "|||\n"; // Записываем разделитель между сетями
+	os << "|||\n"; // Р—Р°РїРёСЃС‹РІР°РµРј СЂР°Р·РґРµР»РёС‚РµР»СЊ РјРµР¶РґСѓ СЃРµС‚СЏРјРё
 	return os;
 }
 
-//Считывание сети из файла или экрана
+//РЎС‡РёС‚С‹РІР°РЅРёРµ СЃРµС‚Рё РёР· С„Р°Р№Р»Р° РёР»Рё СЌРєСЂР°РЅР°
 istream& operator>>(istream& is, TNeuralNetwork& neuralNetwork){
-	neuralNetwork.eraseNeuralNetwork(); // На всякий случай опустошаем сеть
+	neuralNetwork.eraseNeuralNetwork(); // РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ РѕРїСѓСЃС‚РѕС€Р°РµРј СЃРµС‚СЊ
 	string tmp_string;
-	// Создаем все нейроны сети
-	is >> tmp_string; // Считываем тип нейрона
-	while (tmp_string != "|"){ // Считываем до разделителя между пулами и связями
+	// РЎРѕР·РґР°РµРј РІСЃРµ РЅРµР№СЂРѕРЅС‹ СЃРµС‚Рё
+	is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј С‚РёРї РЅРµР№СЂРѕРЅР°
+	while (tmp_string != "|"){ // РЎС‡РёС‚С‹РІР°РµРј РґРѕ СЂР°Р·РґРµР»РёС‚РµР»СЏ РјРµР¶РґСѓ РїСѓР»Р°РјРё Рё СЃРІСЏР·СЏРјРё
 		int newType = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем смещение нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј СЃРјРµС‰РµРЅРёРµ РЅРµР№СЂРѕРЅР°
 		double newBias = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем слой нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј СЃР»РѕР№ РЅРµР№СЂРѕРЅР°
 		int newLayer = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем признак активности нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РїСЂРёР·РЅР°Рє Р°РєС‚РёРІРЅРѕСЃС‚Рё РЅРµР№СЂРѕРЅР°
 		bool newActive = (atoi(tmp_string.c_str()) != 0);
-		is >> tmp_string; // Считываем номер родительского пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РїСѓР»Р°
 		int newParentPoolID = atoi(tmp_string.c_str());
 		neuralNetwork.addNeuron(neuralNetwork.getNeuronsQuantity() + 1, newType, newBias, newLayer, newActive, newParentPoolID);
-		is >> tmp_string; // Считываем типа нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј С‚РёРїР° РЅРµР№СЂРѕРЅР°
 	}
-	// Создаем все синапсы между пулами
-	is >> tmp_string; // Считываем номер пресинаптического нейрона
-	while (tmp_string != "||"){ // Считываем до разделителя между синапсами и предикторными связями
+	// РЎРѕР·РґР°РµРј РІСЃРµ СЃРёРЅР°РїСЃС‹ РјРµР¶РґСѓ РїСѓР»Р°РјРё
+	is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РЅРµР№СЂРѕРЅР°
+	while (tmp_string != "||"){ // РЎС‡РёС‚С‹РІР°РµРј РґРѕ СЂР°Р·РґРµР»РёС‚РµР»СЏ РјРµР¶РґСѓ СЃРёРЅР°РїСЃР°РјРё Рё РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё
 		int preNeuronNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем номер постсинаптического нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РЅРµР№СЂРѕРЅР°
 		int postNeuronNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем вес синапса
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РІРµСЃ СЃРёРЅР°РїСЃР°
 		double newWeight = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем признак экспресии синапса
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РїСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРёРЅР°РїСЃР°
 		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
 		neuralNetwork.addSynapse(preNeuronNumber, postNeuronNumber, neuralNetwork.getSynapsesQuantity() + 1, newWeight, newEnabled);
-		is >> tmp_string; // Считываем номер пресинаптического нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РЅРµР№СЂРѕРЅР°
 	}
-	// Создаем все предикторные связи между нейронами
-	is >> tmp_string; // Считываем номер пресинаптического нейрона
-	while (tmp_string != "|||"){ // Считываем до разделителя между предикторными связями и концом сети
+	// РЎРѕР·РґР°РµРј РІСЃРµ РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё РјРµР¶РґСѓ РЅРµР№СЂРѕРЅР°РјРё
+	is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РЅРµР№СЂРѕРЅР°
+	while (tmp_string != "|||"){ // РЎС‡РёС‚С‹РІР°РµРј РґРѕ СЂР°Р·РґРµР»РёС‚РµР»СЏ РјРµР¶РґСѓ РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё Рё РєРѕРЅС†РѕРј СЃРµС‚Рё
 		int preNeuronNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем номер постсинаптического нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РЅРµР№СЂРѕРЅР°
 		int postNeuronNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем признак экспресии связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РїСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРІСЏР·Рё
 		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
 		neuralNetwork.addPredConnection(preNeuronNumber, postNeuronNumber, neuralNetwork.getPredConnectionsQuantity() + 1, newEnabled);
-		is >> tmp_string; // Считываем номер пресинаптического нейрона
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РЅРµР№СЂРѕРЅР°
 	}
 
 	return is;

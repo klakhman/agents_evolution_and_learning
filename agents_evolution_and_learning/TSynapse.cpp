@@ -1,4 +1,4 @@
-#include "TSynapse.h"
+п»ї#include "TSynapse.h"
 #include "TNeuron.h"
 
 #include <iostream>
@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Запись связи в файл
+// Р—Р°РїРёСЃСЊ СЃРІСЏР·Рё РІ С„Р°Р№Р»
 ostream& operator<<(ostream& os, const TSynapse& synapse){
 	os << synapse.preNeuron->getID() << "\t" << synapse.postNeuron->getID() 
 		<< "\t" << synapse.weight << "\t" << synapse.enabled << endl;

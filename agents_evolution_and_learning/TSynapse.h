@@ -1,4 +1,4 @@
-#ifndef TSYNAPSE_H
+п»ї#ifndef TSYNAPSE_H
 #define TSYNAPSE_H
 
 #include <iostream>
@@ -7,17 +7,17 @@
 class TNeuron;
 
 /* 
-Класс синапса нейронной сети 
+РљР»Р°СЃСЃ СЃРёРЅР°РїСЃР° РЅРµР№СЂРѕРЅРЅРѕР№ СЃРµС‚Рё 
 */
 class TSynapse{
-	int ID; // ID синапса
-	double weight; // Вес синапса (синаптический коэффициент)
-	bool enabled; // Признак экспресии синапса
-	TNeuron* preNeuron; // Ссылка на пресинаптический нейрон
-	TNeuron* postNeuron; // Ссылка на постсинаптический нейрон
+	int ID; // ID СЃРёРЅР°РїСЃР°
+	double weight; // Р’РµСЃ СЃРёРЅР°РїСЃР° (СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РєРѕСЌС„С„РёС†РёРµРЅС‚)
+	bool enabled; // РџСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРёРЅР°РїСЃР°
+	TNeuron* preNeuron; // РЎСЃС‹Р»РєР° РЅР° РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РЅРµР№СЂРѕРЅ
+	TNeuron* postNeuron; // РЎСЃС‹Р»РєР° РЅР° РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РЅРµР№СЂРѕРЅ
 
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TSynapse(){
 		ID = 0;
 		weight = 0;
@@ -25,14 +25,14 @@ public:
 		preNeuron = NULL;
 		postNeuron = NULL;
 	}
-	// Полный конструктор
+	// РџРѕР»РЅС‹Р№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	TSynapse(int newID, double newWeight, bool newEnabled = true, TNeuron* newPreNeuron = NULL, TNeuron* newPostNeuron = NULL){
 		setAll(newID, newWeight, newEnabled, newPreNeuron, newPostNeuron);
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TSynapse() {}
 
-	// Геттеры и сеттеры для всех внутренних переменных
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РІРЅСѓС‚СЂРµРЅРЅРёС… РїРµСЂРµРјРµРЅРЅС‹С…
 	int getID() const { return ID; }
 	void setID(int newID) { ID = newID; }
 	double getWeight() const { return weight; }
@@ -43,7 +43,7 @@ public:
 	void setPreNeuron(TNeuron* newPreNeuron) { preNeuron = newPreNeuron; }
 	TNeuron* getPostNeuron() const { return postNeuron; }
 	void setPostNeuron(TNeuron* newPostNeuron) { postNeuron = newPostNeuron; }
-	// Заполнение всех характеристик синапса
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РІСЃРµС… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє СЃРёРЅР°РїСЃР°
 	void setAll(int newID, double newWeight, bool newEnabled = true, TNeuron* newPreNeuron = NULL, TNeuron* newPostNeuron = NULL){
 		ID = newID;
 		weight = newWeight;
@@ -51,7 +51,7 @@ public:
 		preNeuron = newPreNeuron;
 		postNeuron = newPostNeuron;
 	}
-	// Запись синапса в файл или на экран
+	// Р—Р°РїРёСЃСЊ СЃРёРЅР°РїСЃР° РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& ofs, const TSynapse& synapse);
 };
 

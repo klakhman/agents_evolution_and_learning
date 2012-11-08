@@ -1,4 +1,4 @@
-#ifndef TEVOLUTIONARYPROCESS_H
+п»ї#ifndef TEVOLUTIONARYPROCESS_H
 #define TEVOLUTIONARYPROCESS_H
 
 #include "TPopulation.h"
@@ -8,20 +8,20 @@
 #include <fstream>
 
 class TEvolutionaryProcess{
-	// Загрузка параметров популяции из файла
+	// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ РїРѕРїСѓР»СЏС†РёРё РёР· С„Р°Р№Р»Р°
 	void fillPopulationSettingsFromFile();
-	// Загрузка параметров среды из файла
+	// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ СЃСЂРµРґС‹ РёР· С„Р°Р№Р»Р°
 	void fillEnvironmentSettingsFromFile();
-	// Загрузка параметров агента из файла
+	// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ Р°РіРµРЅС‚Р° РёР· С„Р°Р№Р»Р°
 	void fillAgentSettingsFromFile();
-	// Популяция агентов
+	// РџРѕРїСѓР»СЏС†РёСЏ Р°РіРµРЅС‚РѕРІ
 	TPopulation* agentsPopulation;
-	// Среда для агентов
+	// РЎСЂРµРґР° РґР»СЏ Р°РіРµРЅС‚РѕРІ
 	TEnvironment* environment;
-	// Лучшая средняя награда по популяции в текущем запуске
+	// Р›СѓС‡С€Р°СЏ СЃСЂРµРґРЅСЏСЏ РЅР°РіСЂР°РґР° РїРѕ РїРѕРїСѓР»СЏС†РёРё РІ С‚РµРєСѓС‰РµРј Р·Р°РїСѓСЃРєРµ
 	double bestAverageReward;
 public:
-	// Настройки файлов процесса
+	// РќР°СЃС‚СЂРѕР№РєРё С„Р°Р№Р»РѕРІ РїСЂРѕС†РµСЃСЃР°
 	struct SFilenameSettings{
 		std::string environmentFilename;
 		std::string resultsFilename;
@@ -29,25 +29,25 @@ public:
 		std::string bestAgentsFilename;
 		std::string settingsFilename;
 	} filenameSettings;
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TEvolutionaryProcess(){
 		agentsPopulation = 0;
 		environment = 0;
 		bestAverageReward = 0.0;
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TEvolutionaryProcess(){
 		if (agentsPopulation) delete agentsPopulation;
 		if (environment) delete environment;
 	}
 	
-	// Вывод логовых сообщений (прогресса) на консоль или в файл
+	// Р’С‹РІРѕРґ Р»РѕРіРѕРІС‹С… СЃРѕРѕР±С‰РµРЅРёР№ (РїСЂРѕРіСЂРµСЃСЃР°) РЅР° РєРѕРЅСЃРѕР»СЊ РёР»Рё РІ С„Р°Р№Р»
 	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation* bestPopulation, int currentEvolutionStep /*=0*/);
 	
-	// Создание и заполнение предварительного файла основных результатов
+	// РЎРѕР·РґР°РЅРёРµ Рё Р·Р°РїРѕР»РЅРµРЅРёРµ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅРѕРіРѕ С„Р°Р№Р»Р° РѕСЃРЅРѕРІРЅС‹С… СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 	void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
 
-	// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
+	// Р—Р°РїСѓСЃРє СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° (РїРµСЂРµРґР°РµС‚СЃСЏ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё, РµСЃР»Рё 0, С‚Рѕ СЂР°РЅРґРѕРјРёР·Р°С‚РѕСЂ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚СЃСЏ СЃС‚Р°РЅРґР°СЂС‚РЅРѕ)
 	void start(unsigned int randomSeed = 0);
 };
 

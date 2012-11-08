@@ -1,4 +1,4 @@
-#ifndef TNEURON_H
+п»ї#ifndef TNEURON_H
 #define TNEURON_H
 
 #include <iostream>
@@ -9,45 +9,45 @@ class TSynapse;
 class TPredConnection;
 
 /* 
-Класс нейрона нейронной сети 
+РљР»Р°СЃСЃ РЅРµР№СЂРѕРЅР° РЅРµР№СЂРѕРЅРЅРѕР№ СЃРµС‚Рё 
 */
 class TNeuron{
-	int ID; // ID нейрона
-	int type; // Тип нейрона (0 - сенсорный, 1 - скрытый, 2 - выходной)
-	double bias; // Смещение нейрона
-	int layer; // Номер слоя, в котором находится нейрон
-	bool active; // Признак активности нейрона (0 - молчащий нейрон, 1 - активный нейрон)
+	int ID; // ID РЅРµР№СЂРѕРЅР°
+	int type; // РўРёРї РЅРµР№СЂРѕРЅР° (0 - СЃРµРЅСЃРѕСЂРЅС‹Р№, 1 - СЃРєСЂС‹С‚С‹Р№, 2 - РІС‹С…РѕРґРЅРѕР№)
+	double bias; // РЎРјРµС‰РµРЅРёРµ РЅРµР№СЂРѕРЅР°
+	int layer; // РќРѕРјРµСЂ СЃР»РѕСЏ, РІ РєРѕС‚РѕСЂРѕРј РЅР°С…РѕРґРёС‚СЃСЏ РЅРµР№СЂРѕРЅ
+	bool active; // РџСЂРёР·РЅР°Рє Р°РєС‚РёРІРЅРѕСЃС‚Рё РЅРµР№СЂРѕРЅР° (0 - РјРѕР»С‡Р°С‰РёР№ РЅРµР№СЂРѕРЅ, 1 - Р°РєС‚РёРІРЅС‹Р№ РЅРµР№СЂРѕРЅ)
 
-	//TNeuralPool* ParentPool; // Ссылка на пул из которого образовался нейрон (не всегда есть)
-	int parentPoolID; // Номер родительского пула
+	//TNeuralPool* ParentPool; // РЎСЃС‹Р»РєР° РЅР° РїСѓР» РёР· РєРѕС‚РѕСЂРѕРіРѕ РѕР±СЂР°Р·РѕРІР°Р»СЃСЏ РЅРµР№СЂРѕРЅ (РЅРµ РІСЃРµРіРґР° РµСЃС‚СЊ)
+	int parentPoolID; // РќРѕРјРµСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РїСѓР»Р°
 
-	TSynapse** inputSynapsesSet; // Массив входных синапсов нейрона
-	int inputSynapsesSetSize; // Текущий размер массива входных синапсов
-	int inputSynapsesQuantity; // Количество входных синапсов нейрона
+	TSynapse** inputSynapsesSet; // РњР°СЃСЃРёРІ РІС…РѕРґРЅС‹С… СЃРёРЅР°РїСЃРѕРІ РЅРµР№СЂРѕРЅР°
+	int inputSynapsesSetSize; // РўРµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… СЃРёРЅР°РїСЃРѕРІ
+	int inputSynapsesQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕРґРЅС‹С… СЃРёРЅР°РїСЃРѕРІ РЅРµР№СЂРѕРЅР°
 
-	TPredConnection** inputPredConnectionsSet; // Массив входных предикторных связей нейрона
-	int inputPredConnectionsSetSize; // Текущий размер массива входных предикторных связей
-	int inputPredConnectionsQuantity; // Количество входных предикторных связей нейрона
+	TPredConnection** inputPredConnectionsSet; // РњР°СЃСЃРёРІ РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РЅРµР№СЂРѕРЅР°
+	int inputPredConnectionsSetSize; // РўРµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№
+	int inputPredConnectionsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РЅРµР№СЂРѕРЅР°
 
-	double currentOut; // Текущий выход нейрона
-	double potential; // Текущий потенциал нейрона
-	double previousOut; // Предыдущий выход нейрона
+	double currentOut; // РўРµРєСѓС‰РёР№ РІС‹С…РѕРґ РЅРµР№СЂРѕРЅР°
+	double potential; // РўРµРєСѓС‰РёР№ РїРѕС‚РµРЅС†РёР°Р» РЅРµР№СЂРѕРЅР°
+	double previousOut; // РџСЂРµРґС‹РґСѓС‰РёР№ РІС‹С…РѕРґ РЅРµР№СЂРѕРЅР°
 
-	// Установка значения выхода нейрона (только для дружественного TNeuralNetwork для заполнения нейронов среды)
+	// РЈСЃС‚Р°РЅРѕРІРєР° Р·РЅР°С‡РµРЅРёСЏ РІС‹С…РѕРґР° РЅРµР№СЂРѕРЅР° (С‚РѕР»СЊРєРѕ РґР»СЏ РґСЂСѓР¶РµСЃС‚РІРµРЅРЅРѕРіРѕ TNeuralNetwork РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РЅРµР№СЂРѕРЅРѕРІ СЃСЂРµРґС‹)
 	void setCurrentOut(double newCurrentOut) { currentOut = newCurrentOut; }
 
-	// Процедура увеличения размера массива входных синапсов
+	// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… СЃРёРЅР°РїСЃРѕРІ
 	void inflateSynapsesSet(int inflateSize);
-	// Процедура увеличения размера массива входных предикторных связей
+	// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№
 	void inflatePredConnectionsSet(int inflateSize);
 
-	static const double EMPTY_OUT; // Признак неозначенного выхода нейрона
-	static const double ACTIVITY_TRESHOLD; // Порог активности, при котором сигнал передается по выходным связям
-	static const int INFLATE_SYNAPSES_SIZE = 10; // Размер увеличения массива с входным синапсами в случае переполнения
-	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным предикторными связями в случае переполнения
+	static const double EMPTY_OUT; // РџСЂРёР·РЅР°Рє РЅРµРѕР·РЅР°С‡РµРЅРЅРѕРіРѕ РІС‹С…РѕРґР° РЅРµР№СЂРѕРЅР°
+	static const double ACTIVITY_TRESHOLD; // РџРѕСЂРѕРі Р°РєС‚РёРІРЅРѕСЃС‚Рё, РїСЂРё РєРѕС‚РѕСЂРѕРј СЃРёРіРЅР°Р» РїРµСЂРµРґР°РµС‚СЃСЏ РїРѕ РІС‹С…РѕРґРЅС‹Рј СЃРІСЏР·СЏРј
+	static const int INFLATE_SYNAPSES_SIZE = 10; // Р Р°Р·РјРµСЂ СѓРІРµР»РёС‡РµРЅРёСЏ РјР°СЃСЃРёРІР° СЃ РІС…РѕРґРЅС‹Рј СЃРёРЅР°РїСЃР°РјРё РІ СЃР»СѓС‡Р°Рµ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ
+	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Р Р°Р·РјРµСЂ СѓРІРµР»РёС‡РµРЅРёСЏ РјР°СЃСЃРёРІР° СЃ РІС…РѕРґРЅС‹Рј РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё РІ СЃР»СѓС‡Р°Рµ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ
 
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TNeuron(){
 		ID = 0;
 		type = 0;
@@ -66,7 +66,7 @@ public:
 		potential = 0;
 		previousOut = 0;
 	}
-	// Полный конструктор
+	// РџРѕР»РЅС‹Р№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	TNeuron(int newID, int newType, double newBias, int newLayer, bool newActive = true, int newParentPoolID = 0){
 		setAll(newID, newType, newBias, newLayer, newActive, newParentPoolID);
 		inputSynapsesSet = 0;
@@ -80,10 +80,10 @@ public:
 		potential = 0;
 		previousOut = 0;
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TNeuron();
 
-	// Геттеры и сеттеры для всех внутренних переменных
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РІРЅСѓС‚СЂРµРЅРЅРёС… РїРµСЂРµРјРµРЅРЅС‹С…
 	int getID() const { return ID; }
 	void setID(int newID) { ID = newID; }
 	int getType() const { return type; }
@@ -96,11 +96,11 @@ public:
 	void setActive(bool newActive) { active = newActive; }
 	int getParentPoolID() const { return parentPoolID; }
 	void setParentPoolID(int newParentPoolID) { parentPoolID = newParentPoolID; }
-	// Получение количества входных синапсов нейрона
+	// РџРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° РІС…РѕРґРЅС‹С… СЃРёРЅР°РїСЃРѕРІ РЅРµР№СЂРѕРЅР°
 	int getInputSynapsesQuantity() const { return inputSynapsesQuantity; }
-	// Получение количества входных предикторных связей нейрона
+	// РџРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РЅРµР№СЂРѕРЅР°
 	int getInputPredConnectionsQuantity() const { return inputPredConnectionsQuantity; }
-	// Заполнение всех характеристик нейрона
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РІСЃРµС… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє РЅРµР№СЂРѕРЅР°
 	void setAll(int newID, int newType, double newBias, int newLayer, bool newActive, int newParentPoolID){
 		ID = newID;
 		type = newType;
@@ -109,12 +109,12 @@ public:
 		active = newActive;
 		parentPoolID = newParentPoolID;
 	}
-	// Получение динамических характеристик нейрона
+	// РџРѕР»СѓС‡РµРЅРёРµ РґРёРЅР°РјРёС‡РµСЃРєРёС… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє РЅРµР№СЂРѕРЅР°
 	double getCurrentOut() { return currentOut; }
 	double getCurrentPotential() { return potential; }
 	double getPreviousOut() { return previousOut; }
 
-	// Геттеры и сеттеры для синапсов данного пула (во всех случаях передается номер синапса в массиве синапсов)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ СЃРёРЅР°РїСЃРѕРІ РґР°РЅРЅРѕРіРѕ РїСѓР»Р° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРёРЅР°РїСЃР° РІ РјР°СЃСЃРёРІРµ СЃРёРЅР°РїСЃРѕРІ)
 	int getSynapseID(int synapseNumber) const;
 	void setSynapseID(int synapseNumber, int newID);
 	double getSynapseWeight(int synapseNumber) const;
@@ -126,7 +126,7 @@ public:
 	TNeuron* getSynapsePostNeuron(int synapseNumber) const;
 	void setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron);
 
-	// Геттеры и сеттеры для предикторных связей данного нейрона (во всех случаях передается номер связи в массиве связей)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РґР°РЅРЅРѕРіРѕ РЅРµР№СЂРѕРЅР° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 	int getPredConnectionID(int predConnectionNumber) const;
 	void setPredConnectionID(int predConnectionNumber, int newID);
 	bool getPredConnectionEnabled(int predConnectionNumber) const;
@@ -136,38 +136,38 @@ public:
 	TNeuron* getPredConnectionPostNeuron(int predConnectionNumber) const;
 	void setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron);
 
-	// Добавление входного синапса в нейрон
+	// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕРіРѕ СЃРёРЅР°РїСЃР° РІ РЅРµР№СЂРѕРЅ
 	void addSynapse(int newID, double newWeight, bool newEnabled = true, TNeuron* newPreNeuron = 0);
-	// Удаление синапса из нейрона
+	// РЈРґР°Р»РµРЅРёРµ СЃРёРЅР°РїСЃР° РёР· РЅРµР№СЂРѕРЅР°
 	void deleteSynapse(int synapseNumber);
 
-	// Добавление входной предикторной связи в нейрон
+	// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ РЅРµР№СЂРѕРЅ
 	void addPredConnection(int newID, bool newEnabled = true, TNeuron* newPreNeuron = 0);
-	// Удаление предикторной связи из нейрона
+	// РЈРґР°Р»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РёР· РЅРµР№СЂРѕРЅР°
 	void deletePredConnection(int predConnectionNumber);
 
-	// "Перезагрузка нейрона"
+	// "РџРµСЂРµР·Р°РіСЂСѓР·РєР° РЅРµР№СЂРѕРЅР°"
 	void reset(){
 		currentOut = 0;
 		potential = 0;
 		previousOut = 0;
 	}
 
-	// Подготовка нейрона к обсчету на следующем такте времени
+	// РџРѕРґРіРѕС‚РѕРІРєР° РЅРµР№СЂРѕРЅР° Рє РѕР±СЃС‡РµС‚Сѓ РЅР° СЃР»РµРґСѓСЋС‰РµРј С‚Р°РєС‚Рµ РІСЂРµРјРµРЅРё
 	void prepare(){
 		previousOut = currentOut;
 		currentOut = EMPTY_OUT;
 		potential = 0;
 	}
 
-	// Рассчет выхода нейрона
+	// Р Р°СЃСЃС‡РµС‚ РІС‹С…РѕРґР° РЅРµР№СЂРѕРЅР°
 	void calculateOut();
 
-	// Печать сведений о нейроне в файл или на экран
+	// РџРµС‡Р°С‚СЊ СЃРІРµРґРµРЅРёР№ Рѕ РЅРµР№СЂРѕРЅРµ РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& os, const TNeuron& neuron);
 
-	//Печать сети в файл или на экран
-	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& neuralNetwork); // Функция вывода сети объявлена дружественной, чтобы она имела прямой доступ к списку связей нейрона
+	//РџРµС‡Р°С‚СЊ СЃРµС‚Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
+	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& neuralNetwork); // Р¤СѓРЅРєС†РёСЏ РІС‹РІРѕРґР° СЃРµС‚Рё РѕР±СЉСЏРІР»РµРЅР° РґСЂСѓР¶РµСЃС‚РІРµРЅРЅРѕР№, С‡С‚РѕР±С‹ РѕРЅР° РёРјРµР»Р° РїСЂСЏРјРѕР№ РґРѕСЃС‚СѓРї Рє СЃРїРёСЃРєСѓ СЃРІСЏР·РµР№ РЅРµР№СЂРѕРЅР°
 
 	friend class TNeuralNetwork;
 };

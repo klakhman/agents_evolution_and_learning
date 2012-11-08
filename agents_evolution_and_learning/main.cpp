@@ -1,4 +1,4 @@
-#include "TEvolutionaryProcess.h"
+п»ї#include "TEvolutionaryProcess.h"
 #include "TParallelEvolutionaryProcess.h"
 #include "service.h"
 #include "TAnalysis.h"
@@ -17,18 +17,18 @@
 
 using namespace std;
 
-// Обработчик нехватки памяти
+// РћР±СЂР°Р±РѕС‚С‡РёРє РЅРµС…РІР°С‚РєРё РїР°РјСЏС‚Рё
 void out_of_memory(){
 	cout << "\nnew() error : not enough memory\n";
 	exit(999);
 }
 
-// Определение режима запуска комплекса ("E" - эволюция, "BPA" - анализ методом прогона лучшей популяции)
+// РћРїСЂРµРґРµР»РµРЅРёРµ СЂРµР¶РёРјР° Р·Р°РїСѓСЃРєР° РєРѕРјРїР»РµРєСЃР° ("E" - СЌРІРѕР»СЋС†РёСЏ, "BPA" - Р°РЅР°Р»РёР· РјРµС‚РѕРґРѕРј РїСЂРѕРіРѕРЅР° Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё)
 void decodeProgramMode(string& programMode, int argc, char** argv){
-	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+	int currentArgNumber = 2; // РўРµРєСѓС‰РёР№ РЅРѕРјРµСЂ РїР°СЂР°РјРµС‚СЂР° (РІ РїРµСЂРІРѕРј Р·Р°РїРёСЃР°РЅ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ РЅР°СЃС‚СЂРѕРµРє)
 	while (currentArgNumber < argc){
-		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
-			case 'm': // Если это режим запуска программного комплекса
+		switch (argv[currentArgNumber][1]){ // Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂ (РІ РїРµСЂРІРѕРј РїРѕР»Рµ "-")
+			case 'm': // Р•СЃР»Рё СЌС‚Рѕ СЂРµР¶РёРј Р·Р°РїСѓСЃРєР° РїСЂРѕРіСЂР°РјРјРЅРѕРіРѕ РєРѕРјРїР»РµРєСЃР°
 				programMode = argv[++currentArgNumber];
 				break;
 		}
@@ -37,21 +37,21 @@ void decodeProgramMode(string& programMode, int argc, char** argv){
 }
 
 int main(int argc, char** argv){
-	// Устанавливаем обработчик нехватки памяти
+	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РѕР±СЂР°Р±РѕС‚С‡РёРє РЅРµС…РІР°С‚РєРё РїР°РјСЏС‚Рё
 	set_new_handler(out_of_memory);
 
 	TAnalysis analysis;
 	analysis.makeBestPopulationAnalysisSummary("C:/Tests/Experiments/Test_on_standart_environments_set/BestPopulation_analysis_En1001-1360_testdeterm.txt",
 																	"C:/Tests/Experiments/Test_on_standart_environments_set/analysis_testdeterm_summary.txt", 18, 20, 10); 
 	return 0;
-	string programMode; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
+	string programMode; // Р РµР¶РёРј СЂР°Р±РѕС‚С‹ РїСЂРѕРіСЂР°РјРјС‹ - "E" - СЌРІРѕР»СЋС†РёСЏ, "BPA" - Р°РЅР°Р»РёР· РјРµС‚РѕРґРѕРј РїСЂРѕРіРѕРЅР° Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё
 	decodeProgramMode(programMode, argc, argv);
-	if (programMode == "E"){ // Режим эволюции
+	if (programMode == "E"){ // Р РµР¶РёРј СЌРІРѕР»СЋС†РёРё
 		TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
 		parallelProcess->start(argc, argv);
 		delete parallelProcess;	
 	}
-	else if (programMode == "BPA"){ // Режим анализа методом прогона лучшей популяции
+	else if (programMode == "BPA"){ // Р РµР¶РёРј Р°РЅР°Р»РёР·Р° РјРµС‚РѕРґРѕРј РїСЂРѕРіРѕРЅР° Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё
 			TAnalysis* bestPopulationAnalysis = new TAnalysis;
 			bestPopulationAnalysis->startParallelBestPopulationAnalysis(argc, argv);
 			delete bestPopulationAnalysis;

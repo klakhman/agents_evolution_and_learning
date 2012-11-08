@@ -1,4 +1,4 @@
-//
+﻿//
 //  TBehaviorAnalysis.cpp
 //  agents_evolution_and_learning
 //
@@ -7,3 +7,5 @@
 //
 
 #include "TBehaviorAnalysis.h"
+
+

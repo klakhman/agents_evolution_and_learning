@@ -1,4 +1,4 @@
-#ifndef TPOOLPREDCONNECTION_H
+п»ї#ifndef TPOOLPREDCONNECTION_H
 #define TPOOLPREDCONNECTION_H
 
 #include <iostream>
@@ -7,18 +7,18 @@
 class TNeuralPool;
 
 /* 
-Класс предикторной связи сети из пулов
+РљР»Р°СЃСЃ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё СЃРµС‚Рё РёР· РїСѓР»РѕРІ
 */
 class TPoolPredConnection{
-	int ID; // ID предикторной связи
-	bool enabled; // Признак экспресии связи
-	int disabledStep; // Номер популяции (такта эволюции), в которой связь была выключена (0 - если включена)
-	double developPredConnectionProb; // Вероятность развития предикторной связи между нейронами по этой связи
-	long innovationNumber; // Номер инновации связи
-	TNeuralPool* prePool; // Ссылка на пресинаптический пул
-	TNeuralPool* postPool; // Ссылка на постсинаптический пул
+	int ID; // ID РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
+	bool enabled; // РџСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРІСЏР·Рё
+	int disabledStep; // РќРѕРјРµСЂ РїРѕРїСѓР»СЏС†РёРё (С‚Р°РєС‚Р° СЌРІРѕР»СЋС†РёРё), РІ РєРѕС‚РѕСЂРѕР№ СЃРІСЏР·СЊ Р±С‹Р»Р° РІС‹РєР»СЋС‡РµРЅР° (0 - РµСЃР»Рё РІРєР»СЋС‡РµРЅР°)
+	double developPredConnectionProb; // Р’РµСЂРѕСЏС‚РЅРѕСЃС‚СЊ СЂР°Р·РІРёС‚РёСЏ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РјРµР¶РґСѓ РЅРµР№СЂРѕРЅР°РјРё РїРѕ СЌС‚РѕР№ СЃРІСЏР·Рё
+	long innovationNumber; // РќРѕРјРµСЂ РёРЅРЅРѕРІР°С†РёРё СЃРІСЏР·Рё
+	TNeuralPool* prePool; // РЎСЃС‹Р»РєР° РЅР° РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР»
+	TNeuralPool* postPool; // РЎСЃС‹Р»РєР° РЅР° РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР»
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TPoolPredConnection(){
 		ID = 0;
 		enabled = false;
@@ -28,14 +28,14 @@ public:
 		prePool = 0;
 		postPool = 0;
 	}
-	// Полный конструктор
+	// РџРѕР»РЅС‹Р№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	TPoolPredConnection(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		setAll(newID, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber, newPrePool, newPostPool);
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TPoolPredConnection() {}
 
-	// Геттеры и сеттеры для всех внутренних переменных
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РІРЅСѓС‚СЂРµРЅРЅРёС… РїРµСЂРµРјРµРЅРЅС‹С…
 	int getID() const { return ID; }
 	void setID(int newID) { ID = newID; }
 	bool getEnabled() const { return enabled; }
@@ -50,7 +50,7 @@ public:
 	void setPrePool(TNeuralPool* newPrePool) { prePool = newPrePool; }
 	TNeuralPool* getPostPool() const { return postPool; }
 	void setPostPool(TNeuralPool* newPostPool) { postPool = newPostPool; }
-	// Заполнение всех характеристик связи
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РІСЃРµС… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє СЃРІСЏР·Рё
 	void setAll(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		ID = newID;
 		enabled = newEnabled;
@@ -60,7 +60,7 @@ public:
 		prePool = newPrePool;
 		postPool = newPostPool;
 	}
-	// Запись предикторной связи в файл или на экран
+	// Р—Р°РїРёСЃСЊ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& ofs, const TPoolPredConnection& poolPredConnection);
 };
 

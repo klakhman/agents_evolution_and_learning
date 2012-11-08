@@ -1,4 +1,4 @@
-#include "TNeuron.h"
+п»ї#include "TNeuron.h"
 #include "TSynapse.h"
 #include "TPredConnection.h"
 #include "service.h"
@@ -10,10 +10,10 @@
 
 using namespace std;
 
-const double TNeuron::EMPTY_OUT = -10.0; // Признак неозначенного выхода нейрона
-const double TNeuron::ACTIVITY_TRESHOLD = 0.5; // Порог активности, при котором сигнал передается по выходным связям
+const double TNeuron::EMPTY_OUT = -10.0; // РџСЂРёР·РЅР°Рє РЅРµРѕР·РЅР°С‡РµРЅРЅРѕРіРѕ РІС‹С…РѕРґР° РЅРµР№СЂРѕРЅР°
+const double TNeuron::ACTIVITY_TRESHOLD = 0.5; // РџРѕСЂРѕРі Р°РєС‚РёРІРЅРѕСЃС‚Рё, РїСЂРё РєРѕС‚РѕСЂРѕРј СЃРёРіРЅР°Р» РїРµСЂРµРґР°РµС‚СЃСЏ РїРѕ РІС‹С…РѕРґРЅС‹Рј СЃРІСЏР·СЏРј
 
-// Процедура увеличения размера массива входных синапсов
+// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… СЃРёРЅР°РїСЃРѕРІ
 void TNeuron::inflateSynapsesSet(int inflateSize){
 	TSynapse** newInputSynapsesSet = new TSynapse*[inputSynapsesSetSize + inflateSize];
 	memset(newInputSynapsesSet, 0, (inputSynapsesSetSize + inflateSize) * sizeof(TSynapse*));
@@ -23,7 +23,7 @@ void TNeuron::inflateSynapsesSet(int inflateSize){
 	inputSynapsesSetSize += inflateSize;
 }
 
-// Процедура увеличения размера массива входных предикторных связей
+// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№
 void TNeuron::inflatePredConnectionsSet(int inflateSize){
 	TPredConnection** newPredConnectionsSet = new TPredConnection*[inputPredConnectionsSetSize + inflateSize];
 	memset(newPredConnectionsSet, 0, (inputPredConnectionsSetSize + inflateSize) * sizeof(TPredConnection*));
@@ -33,7 +33,7 @@ void TNeuron::inflatePredConnectionsSet(int inflateSize){
 	inputPredConnectionsSetSize += inflateSize;
 }
 
-// Деструктор
+// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 TNeuron::~TNeuron(){
 	for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
 		delete inputSynapsesSet[currentSynapse-1];
@@ -43,7 +43,7 @@ TNeuron::~TNeuron(){
 	delete []inputPredConnectionsSet;
 }
 
-	// Геттеры и сеттеры для синапсов данного пула (во всех случаях передается номер синапса в массиве синапсов)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ СЃРёРЅР°РїСЃРѕРІ РґР°РЅРЅРѕРіРѕ РїСѓР»Р° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРёРЅР°РїСЃР° РІ РјР°СЃСЃРёРІРµ СЃРёРЅР°РїСЃРѕРІ)
 int TNeuron::getSynapseID(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getID(); }
 void TNeuron::setSynapseID(int synapseNumber, int newID) { inputSynapsesSet[synapseNumber-1]->setID(newID); }
 double TNeuron::getSynapseWeight(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getWeight(); }
@@ -55,7 +55,7 @@ void TNeuron::setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron) { in
 TNeuron* TNeuron::getSynapsePostNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getPostNeuron(); }
 void TNeuron::setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron) { inputSynapsesSet[synapseNumber-1]->setPostNeuron(newPostNeuron); }
 
-// Геттеры и сеттеры для предикторных связей данного нейрона (во всех случаях передается номер связи в массиве связей)
+// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РґР°РЅРЅРѕРіРѕ РЅРµР№СЂРѕРЅР° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 int TNeuron::getPredConnectionID(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getID(); }
 void TNeuron::setPredConnectionID(int predConnectionNumber, int newID) { inputPredConnectionsSet[predConnectionNumber-1]->setID(newID); }
 bool TNeuron::getPredConnectionEnabled(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getEnabled(); }
@@ -65,64 +65,64 @@ void TNeuron::setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newP
 TNeuron* TNeuron::getPredConnectionPostNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getPostNeuron(); }
 void TNeuron::setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron) { inputPredConnectionsSet[predConnectionNumber-1]->setPostNeuron(newPostNeuron); }
 
-// Добавление входного синапса в нейрон
+// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕРіРѕ СЃРёРЅР°РїСЃР° РІ РЅРµР№СЂРѕРЅ
 void TNeuron::addSynapse(int newID, double newWeight, bool newEnabled /* = true*/, TNeuron* newPreNeuron /* = 0*/){
-	if (inputSynapsesQuantity >= inputSynapsesSetSize) // Если у нас не хватает объема массива
+	if (inputSynapsesQuantity >= inputSynapsesSetSize) // Р•СЃР»Рё Сѓ РЅР°СЃ РЅРµ С…РІР°С‚Р°РµС‚ РѕР±СЉРµРјР° РјР°СЃСЃРёРІР°
 		inflateSynapsesSet(INFLATE_SYNAPSES_SIZE);
 	inputSynapsesSet[inputSynapsesQuantity++] = new TSynapse(newID, newWeight, newEnabled, newPreNeuron, this);
 }
 
-// Удаление синапса из нейрона
+// РЈРґР°Р»РµРЅРёРµ СЃРёРЅР°РїСЃР° РёР· РЅРµР№СЂРѕРЅР°
 void TNeuron::deleteSynapse(int synapseNumber){
 	TSynapse* deletingSynapse = inputSynapsesSet[synapseNumber - 1];
 	delete deletingSynapse;
-	// Сдвигаем массив
+	// РЎРґРІРёРіР°РµРј РјР°СЃСЃРёРІ
 	for (int currentSynapse = synapseNumber - 1; currentSynapse < inputSynapsesQuantity - 1; ++currentSynapse)
 		inputSynapsesSet[currentSynapse] = inputSynapsesSet[currentSynapse + 1];
 	//memcpy(connectednessSet[connectionNumber - 1], connectednessSet[connectionNumber], (inputConnectionsQuantity - connectionNumber) * sizeof(TPoolConnection*));
-	inputSynapsesSet[inputSynapsesQuantity - 1] = 0; // Обнуляем указатель последнего синапса
+	inputSynapsesSet[inputSynapsesQuantity - 1] = 0; // РћР±РЅСѓР»СЏРµРј СѓРєР°Р·Р°С‚РµР»СЊ РїРѕСЃР»РµРґРЅРµРіРѕ СЃРёРЅР°РїСЃР°
 	--inputSynapsesQuantity;
 }
 
-// Добавление входной предикторной связи в нейрон
+// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ РЅРµР№СЂРѕРЅ
 void TNeuron::addPredConnection(int newID, bool newEnabled /* = true*/, TNeuron* newPreNeuron /* = 0*/){
-	if (inputPredConnectionsQuantity >= inputPredConnectionsSetSize) // Если у нас не хватает объема массива
+	if (inputPredConnectionsQuantity >= inputPredConnectionsSetSize) // Р•СЃР»Рё Сѓ РЅР°СЃ РЅРµ С…РІР°С‚Р°РµС‚ РѕР±СЉРµРјР° РјР°СЃСЃРёРІР°
 		inflatePredConnectionsSet(INFLATE_PRED_CONNECTIONS_SIZE);
 	inputPredConnectionsSet[inputPredConnectionsQuantity++] = new TPredConnection(newID, newEnabled, newPreNeuron, this);
 }
 
-// Удаление предикторной связи из пула
+// РЈРґР°Р»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РёР· РїСѓР»Р°
 void TNeuron::deletePredConnection(int predConnectionNumber){
 	TPredConnection* deletingPredConnection = inputPredConnectionsSet[predConnectionNumber - 1];
 	delete deletingPredConnection;
-	// Сдвигаем массив
+	// РЎРґРІРёРіР°РµРј РјР°СЃСЃРёРІ
 	for (int currentPredConnection = predConnectionNumber - 1; currentPredConnection < inputPredConnectionsQuantity - 1; ++currentPredConnection)
 		inputPredConnectionsSet[currentPredConnection] = inputPredConnectionsSet[currentPredConnection + 1];
 	//memcpy(connectednessSet[connectionNumber - 1], connectednessSet[connectionNumber], (inputConnectionsQuantity - connectionNumber) * sizeof(TPoolConnection*));
-	inputPredConnectionsSet[inputPredConnectionsQuantity - 1] = 0; // Обнуляем указатель последней связи
+	inputPredConnectionsSet[inputPredConnectionsQuantity - 1] = 0; // РћР±РЅСѓР»СЏРµРј СѓРєР°Р·Р°С‚РµР»СЊ РїРѕСЃР»РµРґРЅРµР№ СЃРІСЏР·Рё
 	--inputPredConnectionsQuantity;
 }
 
-// Рассчет выхода нейрона
+// Р Р°СЃСЃС‡РµС‚ РІС‹С…РѕРґР° РЅРµР№СЂРѕРЅР°
 void TNeuron::calculateOut(){
-	potential = 0; // На всякий случай
-	potential += bias; // Добавляем смещение
+	potential = 0; // РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№
+	potential += bias; // Р”РѕР±Р°РІР»СЏРµРј СЃРјРµС‰РµРЅРёРµ
 	for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
 	{
-		// Определяем какая связь - рекуррентная или прямая
+		// РћРїСЂРµРґРµР»СЏРµРј РєР°РєР°СЏ СЃРІСЏР·СЊ - СЂРµРєСѓСЂСЂРµРЅС‚РЅР°СЏ РёР»Рё РїСЂСЏРјР°СЏ
 		double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getLayer()) ? 
 													inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getCurrentOut():
 													inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getPreviousOut();
-		// Если выход не означен, то что-то пошло не так (эта строчка больше для отладки)
+		// Р•СЃР»Рё РІС‹С…РѕРґ РЅРµ РѕР·РЅР°С‡РµРЅ, С‚Рѕ С‡С‚Рѕ-С‚Рѕ РїРѕС€Р»Рѕ РЅРµ С‚Р°Рє (СЌС‚Р° СЃС‚СЂРѕС‡РєР° Р±РѕР»СЊС€Рµ РґР»СЏ РѕС‚Р»Р°РґРєРё)
 		if (preNeuronOut == EMPTY_OUT) exit(2);
-		if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
+		if (preNeuronOut > ACTIVITY_TRESHOLD) // Р•СЃР»Рё РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ СЃРёРіРЅР°Р» РїСЂРѕС…РѕРґРёС‚ РїРѕ СЃРёРЅР°РїСЃСѓ
 			potential += inputSynapsesSet[currentSynapse - 1]->getWeight() * preNeuronOut;
 	}
 
 	currentOut = service::tansig(potential);
 }
 
-// Печать сведений о нейроне в файл или на экран
+// РџРµС‡Р°С‚СЊ СЃРІРµРґРµРЅРёР№ Рѕ РЅРµР№СЂРѕРЅРµ РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 std::ostream& operator<<(std::ostream& os, const TNeuron& neuron){
 	os << neuron.type << "\t" << neuron.bias << "\t" << neuron.layer 
 		<< "\t" << neuron.active << "\t" << neuron.parentPoolID << std::endl;

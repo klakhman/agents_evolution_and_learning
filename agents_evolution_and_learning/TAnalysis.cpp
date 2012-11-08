@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+п»ї#define _CRT_SECURE_NO_WARNINGS
 
 #include "TAnalysis.h"
 
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-// Загрузка параметров среды из файла
+// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ СЃСЂРµРґС‹ РёР· С„Р°Р№Р»Р°
 void TAnalysis::fillEnvironmentSettingsFromFile(TEnvironment& environment, string settingsFilename){
 	string optionString;
 	ifstream settingsFile;
@@ -26,7 +26,7 @@ void TAnalysis::fillEnvironmentSettingsFromFile(TEnvironment& environment, strin
 	settingsFile.close();
 }
 
-// Загрузка параметров популяции из файла
+// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ РїРѕРїСѓР»СЏС†РёРё РёР· С„Р°Р№Р»Р°
 void TAnalysis::fillPopulationSettingsFromFile(TPopulation& agentsPopulation, string settingsFilename){
 	string optionString;
 	ifstream settingsFile;
@@ -35,7 +35,7 @@ void TAnalysis::fillPopulationSettingsFromFile(TPopulation& agentsPopulation, st
 		if (optionString == "population-size") { settingsFile >> optionString; agentsPopulation.setPopulationSize(atoi(optionString.c_str())); }
 		if (optionString == "agent-lifetime") { settingsFile >> optionString; agentsPopulation.evolutionSettings.agentLifetime = atoi(optionString.c_str()); }
 		if (optionString == "evolution-time") { settingsFile >> optionString; agentsPopulation.evolutionSettings.evolutionTime = atoi(optionString.c_str()); }
-		// Мутационные параметры
+		// РњСѓС‚Р°С†РёРѕРЅРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
 		if (optionString == "mut-weight-probability") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightProbability = atof(optionString.c_str()); }
 		if (optionString == "mut-weight-mean-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightMeanDisp = atof(optionString.c_str()); }
 		if (optionString == "mut-weight-disp-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightDispDisp = atof(optionString.c_str()); }
@@ -56,7 +56,7 @@ void TAnalysis::fillPopulationSettingsFromFile(TPopulation& agentsPopulation, st
 	settingsFile.close();
 }
 
-// Загрузка параметров агента из файла
+// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ Р°РіРµРЅС‚Р° РёР· С„Р°Р№Р»Р°
 void TAnalysis::fillAgentSettingsFromFile(TPopulation& agentsPopulation, string settingsFilename){
 	string optionString;
 	ifstream settingsFile;
@@ -87,33 +87,33 @@ void TAnalysis::fillAgentSettingsFromFile(TPopulation& agentsPopulation, string 
 	settingsFile.close();
 }
 
-// Запуск процедуры анализа путем прогона лучшей популяции (возвращает среднее значений награды по популяции после прогона всех агентов из всех состояний)
+// Р—Р°РїСѓСЃРє РїСЂРѕС†РµРґСѓСЂС‹ Р°РЅР°Р»РёР·Р° РїСѓС‚РµРј РїСЂРѕРіРѕРЅР° Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё (РІРѕР·РІСЂР°С‰Р°РµС‚ СЃСЂРµРґРЅРµРµ Р·РЅР°С‡РµРЅРёР№ РЅР°РіСЂР°РґС‹ РїРѕ РїРѕРїСѓР»СЏС†РёРё РїРѕСЃР»Рµ РїСЂРѕРіРѕРЅР° РІСЃРµС… Р°РіРµРЅС‚РѕРІ РёР· РІСЃРµС… СЃРѕСЃС‚РѕСЏРЅРёР№)
 double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, string environmentFilename, string settingsFilename, unsigned int randomSeed /*=0*/){
-	// Если не было передано зерно рандомизации
+	// Р•СЃР»Рё РЅРµ Р±С‹Р»Рѕ РїРµСЂРµРґР°РЅРѕ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё
 	if (!randomSeed)
 		randomSeed = static_cast<unsigned int>(time(0));
 	srand(randomSeed);
-	// Запуски генератора случайных чисел, чтобы развести значения
+	// Р—Р°РїСѓСЃРєРё РіРµРЅРµСЂР°С‚РѕСЂР° СЃР»СѓС‡Р°Р№РЅС‹С… С‡РёСЃРµР», С‡С‚РѕР±С‹ СЂР°Р·РІРµСЃС‚Рё Р·РЅР°С‡РµРЅРёСЏ
 	rand();
 	rand();
 	rand();
 	TEnvironment* environment = new TEnvironment(environmentFilename);
 	fillEnvironmentSettingsFromFile(*environment, settingsFilename);
-	//!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
+	//!!! РћР±РЅСѓР»СЏРµРј СЃС‚РµРїРµРЅСЊ СЃС‚РѕС…Р°СЃС‚РёС‡РЅРѕСЃС‚Рё СЃСЂРµРґС‹ (С‡С‚РѕР±С‹ РІСЃРµ Р±С‹Р»Рѕ РґРµС‚РµСЂРјРёРЅРёСЂРѕРІР°РЅРѕ)
 	environment->setNonstationarityCoefficient(0.0);
 	TPopulation* agentsPopulation = new TPopulation;
 	fillPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
-	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
+	// Р¤РёР·РёС‡РµСЃРєРё Р°РіРµРЅС‚С‹ РІ РїРѕРїСѓР»СЏС†РёРё СѓР¶Рµ СЃРѕР·РґР°РЅС‹ (РїРѕСЃР»Рµ С‚РѕРіРѕ, РєР°Рє Р·Р°РіСЂСѓР·РёР»СЃСЏ СЂР°Р·РјРµСЂ РїРѕРїСѓР»СЏС†РёРё), РїРѕСЌС‚РѕРјСѓ РјРѕР¶РµРј Р·Р°РіСЂСѓР·РёС‚СЊ РІ РЅРёС… РЅР°СЃС‚СЂРѕР№РєРё
 	fillAgentSettingsFromFile(*agentsPopulation, settingsFilename);
 	agentsPopulation->loadPopulation(bestPopulationFilename);
-	// Создаем массив наград всех агентов при запуске из всех начальных состояний (чтобы если что, то можно было проводить более сложный анализ)
+	// РЎРѕР·РґР°РµРј РјР°СЃСЃРёРІ РЅР°РіСЂР°Рґ РІСЃРµС… Р°РіРµРЅС‚РѕРІ РїСЂРё Р·Р°РїСѓСЃРєРµ РёР· РІСЃРµС… РЅР°С‡Р°Р»СЊРЅС‹С… СЃРѕСЃС‚РѕСЏРЅРёР№ (С‡С‚РѕР±С‹ РµСЃР»Рё С‡С‚Рѕ, С‚Рѕ РјРѕР¶РЅРѕ Р±С‹Р»Рѕ РїСЂРѕРІРѕРґРёС‚СЊ Р±РѕР»РµРµ СЃР»РѕР¶РЅС‹Р№ Р°РЅР°Р»РёР·)
 	int intitalStatesQuantity = environment->getInitialStatesQuantity();
 	double** agentsRewards = new double*[agentsPopulation->getPopulationSize()];
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
 		agentsRewards[currentAgent - 1] = new double[intitalStatesQuantity];
 	double maxReward = 0.0;
 	long double averageReward = 0.0;
-	// Прогоняем всех агентов и записываем награды в массив
+	// РџСЂРѕРіРѕРЅСЏРµРј РІСЃРµС… Р°РіРµРЅС‚РѕРІ Рё Р·Р°РїРёСЃС‹РІР°РµРј РЅР°РіСЂР°РґС‹ РІ РјР°СЃСЃРёРІ
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
 		agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
 		for (int currentInitialState = 0; currentInitialState < intitalStatesQuantity; ++currentInitialState){
@@ -126,7 +126,7 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 				maxReward = agentsRewards[currentAgent - 1][currentInitialState];
 		}
 	}
-	// Удаляем все переменные
+	// РЈРґР°Р»СЏРµРј РІСЃРµ РїРµСЂРµРјРµРЅРЅС‹Рµ
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
 		delete []agentsRewards[currentAgent - 1];
 	delete []agentsRewards;
@@ -136,8 +136,8 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 }
 
 
-// ---------------- Процедуры параллельного анализа по лучшим популяциям в каждом запуске -----------------------
-// Заполнение параметров директорий для записи файлов
+// ---------------- РџСЂРѕС†РµРґСѓСЂС‹ РїР°СЂР°Р»Р»РµР»СЊРЅРѕРіРѕ Р°РЅР°Р»РёР·Р° РїРѕ Р»СѓС‡С€РёРј РїРѕРїСѓР»СЏС†РёСЏРј РІ РєР°Р¶РґРѕРј Р·Р°РїСѓСЃРєРµ -----------------------
+// Р—Р°РїРѕР»РЅРµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ РґРёСЂРµРєС‚РѕСЂРёР№ РґР»СЏ Р·Р°РїРёСЃРё С„Р°Р№Р»РѕРІ
 void TAnalysis::fillDirectoriesSettings(string settingsFilename, string& workDirectory, string& environmentDirectory, string& resultsDirectory){
 	string optionString;
 	ifstream settingsFile;
@@ -150,24 +150,24 @@ void TAnalysis::fillDirectoriesSettings(string settingsFilename, string& workDir
 	settingsFile.close();
 }
 
-// Расшифровка парметров командной строки
+// Р Р°СЃС€РёС„СЂРѕРІРєР° РїР°СЂРјРµС‚СЂРѕРІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
 void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign){
-	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+	int currentArgNumber = 2; // РўРµРєСѓС‰РёР№ РЅРѕРјРµСЂ РїР°СЂР°РјРµС‚СЂР° (РІ РїРµСЂРІРѕРј Р·Р°РїРёСЃР°РЅ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ РЅР°СЃС‚СЂРѕРµРє)
 	while (currentArgNumber < argc){
-		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
-			case 'e': // Если это диапозон номеров сред
+		switch (argv[currentArgNumber][1]){ // Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂ (РІ РїРµСЂРІРѕРј РїРѕР»Рµ "-")
+			case 'e': // Р•СЃР»Рё СЌС‚Рѕ РґРёР°РїРѕР·РѕРЅ РЅРѕРјРµСЂРѕРІ СЃСЂРµРґ
 				++currentArgNumber;
 				firstEnvironmentNumber = atoi(argv[currentArgNumber]);
 				++currentArgNumber;
 				lastEnvironmentNumber = atoi(argv[currentArgNumber]);
 				break;
-			case 't': // Если это диапазон попыток
+			case 't': // Р•СЃР»Рё СЌС‚Рѕ РґРёР°РїР°Р·РѕРЅ РїРѕРїС‹С‚РѕРє
 				++currentArgNumber;
 				firstTryNumber = atoi(argv[currentArgNumber]);
 				++currentArgNumber;
 				lastTryNumber = atoi(argv[currentArgNumber]);
 				break;
-			case 's': // Если это признак конктретного запуска
+			case 's': // Р•СЃР»Рё СЌС‚Рѕ РїСЂРёР·РЅР°Рє РєРѕРЅРєС‚СЂРµС‚РЅРѕРіРѕ Р·Р°РїСѓСЃРєР°
 				++currentArgNumber;
 				runSign = argv[currentArgNumber];
 		}
@@ -175,24 +175,24 @@ void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentN
 	}
 }
 
-// Расшифровка сообщения от рабочего процесса 
+// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР° 
 void TAnalysis::decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry, double& averageReward){
 	string tmpString;
 	for (unsigned int i=0; i < strlen(inputMessage); ++i)
-		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || (inputMessage[i] == '.')) // Если символ число или точка
+		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || (inputMessage[i] == '.')) // Р•СЃР»Рё СЃРёРјРІРѕР» С‡РёСЃР»Рѕ РёР»Рё С‚РѕС‡РєР°
 			tmpString += inputMessage[i];
 		else {
 			switch (inputMessage[i]){
-				case 'e': // Если это номер среды
+				case 'e': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ СЃСЂРµРґС‹
 					finishedEnvironment = atoi(tmpString.c_str());
 					break;
-				case 't': // Если это номер попытки
+				case 't': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїРѕРїС‹С‚РєРё
 					finishedTry = atoi(tmpString.c_str());
 					break;
-				case 'p': // Если это номер процесса
+				case 'p': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°
 					processRankSend = atoi(tmpString.c_str());
 					break;
-				case 'r': // Если это средняя награда
+				case 'r': // Р•СЃР»Рё СЌС‚Рѕ СЃСЂРµРґРЅСЏСЏ РЅР°РіСЂР°РґР°
 					averageReward = atof(tmpString.c_str());
 					break;
 			}
@@ -200,10 +200,10 @@ void TAnalysis::decodeFinishedWorkMessage(char inputMessage[], int& processRankS
 		}
 }
 
-// Выполнение управляющего процесса (важно, чтобы количество общих заданий не было меньше кол-ва выделенных процессов!!!)
+// Р’С‹РїРѕР»РЅРµРЅРёРµ СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР° (РІР°Р¶РЅРѕ, С‡С‚РѕР±С‹ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕР±С‰РёС… Р·Р°РґР°РЅРёР№ РЅРµ Р±С‹Р»Рѕ РјРµРЅСЊС€Рµ РєРѕР»-РІР° РІС‹РґРµР»РµРЅРЅС‹С… РїСЂРѕС†РµСЃСЃРѕРІ!!!)
 void TAnalysis::rootProcess(int argc, char **argv){
 	int processesQuantity;	
-	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // Определение общего количества процессов
+	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // РћРїСЂРµРґРµР»РµРЅРёРµ РѕР±С‰РµРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° РїСЂРѕС†РµСЃСЃРѕРІ
 	MPI_Status status;
 	const int messageLength = 100;
 	const int messageType = 99;
@@ -212,86 +212,86 @@ void TAnalysis::rootProcess(int argc, char **argv){
 	string workDirectory, environmentDirectory, resultsDirectory;
 	fillDirectoriesSettings(settingsFilename, workDirectory, environmentDirectory, resultsDirectory);
 
-	unsigned long startTime = static_cast<unsigned long>(time(0)); // Время старта процесса анализа
-	int firstEnvironmentNumber; // Диапазон номеров сред
+	unsigned long startTime = static_cast<unsigned long>(time(0)); // Р’СЂРµРјСЏ СЃС‚Р°СЂС‚Р° РїСЂРѕС†РµСЃСЃР° Р°РЅР°Р»РёР·Р°
+	int firstEnvironmentNumber; // Р”РёР°РїР°Р·РѕРЅ РЅРѕРјРµСЂРѕРІ СЃСЂРµРґ
 	int lastEnvironmentNumber;
-	int firstTryNumber; // Диапазон попыток
+	int firstTryNumber; // Р”РёР°РїР°Р·РѕРЅ РїРѕРїС‹С‚РѕРє
 	int lastTryNumber;
-	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
+	string runSign; // РќРµРєРѕС‚РѕСЂС‹Р№ РѕС‚Р»РёС‡РёС‚РµР»СЊРЅС‹Р№ РїСЂРёР·РЅР°Рє РґР°РЅРЅРѕРіРѕ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ РЅР°Р±РѕСЂР° РїР°СЂР°РјРµС‚СЂРѕРІ РёР»Рё РІРµСЂСЃРёРё Р°Р»РіРѕСЂРёС‚РјР°
 	decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign);
-	// Создаем файл с логом
+	// РЎРѕР·РґР°РµРј С„Р°Р№Р» СЃ Р»РѕРіРѕРј
 	stringstream logFilename;
 	logFilename << workDirectory << "/Analysis_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << runSign << ".txt";
 	ofstream logFile;
 	logFile.open(logFilename.str().c_str());
-	// Создаем массив со всеми средними наградами по запускам
+	// РЎРѕР·РґР°РµРј РјР°СЃСЃРёРІ СЃРѕ РІСЃРµРјРё СЃСЂРµРґРЅРёРјРё РЅР°РіСЂР°РґР°РјРё РїРѕ Р·Р°РїСѓСЃРєР°Рј
 	double** averageRewards = new double*[lastEnvironmentNumber - firstEnvironmentNumber + 1];
 	for (int currentEnvironment = 1; currentEnvironment <= lastEnvironmentNumber - firstEnvironmentNumber + 1; ++currentEnvironment)
 		averageRewards[currentEnvironment - 1] = new double[lastTryNumber - firstTryNumber + 1];
 
-	// Выдача дочерним процессам всех заданий данных на выполнение программе
+	// Р’С‹РґР°С‡Р° РґРѕС‡РµСЂРЅРёРј РїСЂРѕС†РµСЃСЃР°Рј РІСЃРµС… Р·Р°РґР°РЅРёР№ РґР°РЅРЅС‹С… РЅР° РІС‹РїРѕР»РЅРµРЅРёРµ РїСЂРѕРіСЂР°РјРјРµ
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment)
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)
-			// Если не всем процессам выданы изначальные задания (простой подсчет)
+			// Р•СЃР»Рё РЅРµ РІСЃРµРј РїСЂРѕС†РµСЃСЃР°Рј РІС‹РґР°РЅС‹ РёР·РЅР°С‡Р°Р»СЊРЅС‹Рµ Р·Р°РґР°РЅРёСЏ (РїСЂРѕСЃС‚РѕР№ РїРѕРґСЃС‡РµС‚)
 			if ((currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1 <= processesQuantity - 1){
-				// Подсчитываем номер следущего процесса для посылки задания
+				// РџРѕРґСЃС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ СЃР»РµРґСѓС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР° РґР»СЏ РїРѕСЃС‹Р»РєРё Р·Р°РґР°РЅРёСЏ
 				int processRankSend = (currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1;
-				// Составляем сообщение для рабочего процесса
+				// РЎРѕСЃС‚Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 				stringstream outStream;
 				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
 				char outMessage[messageLength];
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
-				// Записываем в лог выдачу задания
+				// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РІС‹РґР°С‡Сѓ Р·Р°РґР°РЅРёСЏ
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
 					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
-			} // Если все процессы получили задание,  то ждем завершения выполнения и по ходу выдаем оставшиеся задания
+			} // Р•СЃР»Рё РІСЃРµ РїСЂРѕС†РµСЃСЃС‹ РїРѕР»СѓС‡РёР»Рё Р·Р°РґР°РЅРёРµ,  С‚Рѕ Р¶РґРµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ Рё РїРѕ С…РѕРґСѓ РІС‹РґР°РµРј РѕСЃС‚Р°РІС€РёРµСЃСЏ Р·Р°РґР°РЅРёСЏ
 			else {
 				char inputMessage[messageLength];
-				// Ждем входящее сообщение о том, что процесс выполнил задание
+				// Р–РґРµРј РІС…РѕРґСЏС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ С‚РѕРј, С‡С‚Рѕ РїСЂРѕС†РµСЃСЃ РІС‹РїРѕР»РЅРёР» Р·Р°РґР°РЅРёРµ
 				MPI_Recv(inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
-				// Расшифровываем сообщение от рабочего процесса
+				// Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 				int processRankSend, finishedEnvironment, finishedTry;
 				double averageReward;
 				decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry, averageReward);
 				averageRewards[finishedEnvironment - firstEnvironmentNumber][finishedTry - firstTryNumber] = averageReward;
-				// Записываем в лог прием задания
+				// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РїСЂРёРµРј Р·Р°РґР°РЅРёСЏ
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
 					<< "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-				// Составляем сообщение и высылаем задание рабочему процессу
+				// РЎРѕСЃС‚Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ Рё РІС‹СЃС‹Р»Р°РµРј Р·Р°РґР°РЅРёРµ СЂР°Р±РѕС‡РµРјСѓ РїСЂРѕС†РµСЃСЃСѓ
 				stringstream outStream;
 				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
 				char outMessage[messageLength];
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
-				// Записываем в лог выдачу задания
+				// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РІС‹РґР°С‡Сѓ Р·Р°РґР°РЅРёСЏ
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
 					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
 			}
-	// Когда все задания закончились, ждем пока все они будут выполнены и по ходу посылаем всем процессам команду о завершении
-	int processTillQuit = processesQuantity - 1; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
+	// РљРѕРіРґР° РІСЃРµ Р·Р°РґР°РЅРёСЏ Р·Р°РєРѕРЅС‡РёР»РёСЃСЊ, Р¶РґРµРј РїРѕРєР° РІСЃРµ РѕРЅРё Р±СѓРґСѓС‚ РІС‹РїРѕР»РЅРµРЅС‹ Рё РїРѕ С…РѕРґСѓ РїРѕСЃС‹Р»Р°РµРј РІСЃРµРј РїСЂРѕС†РµСЃСЃР°Рј РєРѕРјР°РЅРґСѓ Рѕ Р·Р°РІРµСЂС€РµРЅРёРё
+	int processTillQuit = processesQuantity - 1; // РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕС†РµСЃСЃРѕРІ РєРѕС‚РѕСЂС‹Рµ РµС‰Рµ РІС‹РїРѕР»РЅСЏСЋС‚СЃСЏ Рё РЅРµРѕР±С…РѕРґРёРјРѕ РґРѕР¶РґР°С‚СЊСЃСЏ РёС… РѕРєРѕРЅС‡Р°РЅРёСЏ
 	while (processTillQuit > 0){
 		char inputMessage[messageLength];
 		MPI_Recv(inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
-		// Расшифровываем сообщение от рабочего процесса
+		// Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 		int processRankSend, finishedEnvironment, finishedTry;
 		double averageReward;
 		decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry, averageReward);
 		averageRewards[finishedEnvironment - firstEnvironmentNumber][finishedTry - firstTryNumber] = averageReward;
-		// Записываем в лог прием задания
+		// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РїСЂРёРµРј Р·Р°РґР°РЅРёСЏ
 		unsigned long currentTime = static_cast<unsigned long>(time(0));
 		logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
 			<< "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-		// Составляем сообщение о выходе и высылаем
+		// РЎРѕСЃС‚Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ Рѕ РІС‹С…РѕРґРµ Рё РІС‹СЃС‹Р»Р°РµРј
 		char outMessage[messageLength];
 		strcpy(outMessage, "q");
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 		--processTillQuit;
 	}
 	logFile.close();
-	// Записываем файл с полными данными по всем попыткам и усредненные по средам
+	// Р—Р°РїРёСЃС‹РІР°РµРј С„Р°Р№Р» СЃ РїРѕР»РЅС‹РјРё РґР°РЅРЅС‹РјРё РїРѕ РІСЃРµРј РїРѕРїС‹С‚РєР°Рј Рё СѓСЃСЂРµРґРЅРµРЅРЅС‹Рµ РїРѕ СЃСЂРµРґР°Рј
 	stringstream analysisResultFilename;
 	analysisResultFilename << resultsDirectory << "/Analysis/BestPopulation_analysis_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << runSign << ".txt";
 	ofstream analysisResultFile;
@@ -316,21 +316,21 @@ void TAnalysis::rootProcess(int argc, char **argv){
 	delete []averageRewards;
 }
 
-// Расшифровка сообщения от рутового процесса 
+// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂСѓС‚РѕРІРѕРіРѕ РїСЂРѕС†РµСЃСЃР° 
 void TAnalysis::decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, string& runSign){
 	string tmpString;
 	for (unsigned int i=0; i < strlen(inputMessage); ++i)
-		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || ((inputMessage[i] >= 'a') && (inputMessage[i] <= 'z')) ) // Если символ число или маленькая буква
+		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || ((inputMessage[i] >= 'a') && (inputMessage[i] <= 'z')) ) // Р•СЃР»Рё СЃРёРјРІРѕР» С‡РёСЃР»Рѕ РёР»Рё РјР°Р»РµРЅСЊРєР°СЏ Р±СѓРєРІР°
 			tmpString += inputMessage[i];
 		else {
 			switch (inputMessage[i]){
-				case 'E': // Если это номер среды
+				case 'E': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ СЃСЂРµРґС‹
 					currentEnvironment = atoi(tmpString.c_str());
 					break;
-				case 'T': // Если это номер попытки
+				case 'T': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїРѕРїС‹С‚РєРё
 					currentTry = atoi(tmpString.c_str());
 					break;
-				case 'S': // Если это номер процесса
+				case 'S': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°
 					runSign = tmpString;
 					break;
 			}
@@ -338,12 +338,12 @@ void TAnalysis::decodeTaskMessage(char inputMessage[], int& currentEnvironment, 
 		}
 }
 
-// Выполнение рабочего процесса
+// Р’С‹РїРѕР»РЅРµРЅРёРµ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 void TAnalysis::workProcess(int argc, char **argv){
 	int processRank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // Определение процессом своего номера
+	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // РћРїСЂРµРґРµР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃРѕРј СЃРІРѕРµРіРѕ РЅРѕРјРµСЂР°
 	int processesQuantity;	
-	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // Определение общего количества процессов
+	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // РћРїСЂРµРґРµР»РµРЅРёРµ РѕР±С‰РµРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° РїСЂРѕС†РµСЃСЃРѕРІ
 	MPI_Status status;
 	const int messageLength = 100;
 	const int messageType = 99;
@@ -353,49 +353,49 @@ void TAnalysis::workProcess(int argc, char **argv){
 	fillDirectoriesSettings(settingsFilename, workDirectory, environmentDirectory, resultsDirectory);
 
 	char inputMessage[messageLength];
-	MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status); // Ждем сообщения с заданием
-	while (strcmp(inputMessage, "q")){ // Пока не было команды о выходе
-		// Декодируем сообщение с заданием
+	MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status); // Р–РґРµРј СЃРѕРѕР±С‰РµРЅРёСЏ СЃ Р·Р°РґР°РЅРёРµРј
+	while (strcmp(inputMessage, "q")){ // РџРѕРєР° РЅРµ Р±С‹Р»Рѕ РєРѕРјР°РЅРґС‹ Рѕ РІС‹С…РѕРґРµ
+		// Р”РµРєРѕРґРёСЂСѓРµРј СЃРѕРѕР±С‰РµРЅРёРµ СЃ Р·Р°РґР°РЅРёРµРј
 		int currentEnvironment, currentTry;
 		string runSign;
 		decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign);
-		// Определяем уникальное ядро рандомизации
-		// К ядру инициализации случайных чисел добавляется номер процесса, чтобы развести изначально инициализируемые процессы
+		// РћРїСЂРµРґРµР»СЏРµРј СѓРЅРёРєР°Р»СЊРЅРѕРµ СЏРґСЂРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё
+		// Рљ СЏРґСЂСѓ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СЃР»СѓС‡Р°Р№РЅС‹С… С‡РёСЃРµР» РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РЅРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°, С‡С‚РѕР±С‹ СЂР°Р·РІРµСЃС‚Рё РёР·РЅР°С‡Р°Р»СЊРЅРѕ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРјС‹Рµ РїСЂРѕС†РµСЃСЃС‹
 		unsigned int randomSeed = static_cast<unsigned int>(time(0)) + processRank;
-		// Определяем параметры анализа и запускаем анализ на одной популяции
+		// РћРїСЂРµРґРµР»СЏРµРј РїР°СЂР°РјРµС‚СЂС‹ Р°РЅР°Р»РёР·Р° Рё Р·Р°РїСѓСЃРєР°РµРј Р°РЅР°Р»РёР· РЅР° РѕРґРЅРѕР№ РїРѕРїСѓР»СЏС†РёРё
 		stringstream tmpStream;
 		tmpStream << environmentDirectory << "/Environment" << currentEnvironment << ".txt";
 		string environmentFilename = tmpStream.str();
-		tmpStream.str(""); // Очищаем поток
+		tmpStream.str(""); // РћС‡РёС‰Р°РµРј РїРѕС‚РѕРє
 		tmpStream << resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestpopulation.txt";
 		string bestPopulationFilename = tmpStream.str();
 		double averageReward = startBestPopulationAnalysis(bestPopulationFilename, environmentFilename, settingsFilename,randomSeed);
-		// Посылаем ответ о завершении работы над заданием
-		tmpStream.str(""); // Очищаем поток
+		// РџРѕСЃС‹Р»Р°РµРј РѕС‚РІРµС‚ Рѕ Р·Р°РІРµСЂС€РµРЅРёРё СЂР°Р±РѕС‚С‹ РЅР°Рґ Р·Р°РґР°РЅРёРµРј
+		tmpStream.str(""); // РћС‡РёС‰Р°РµРј РїРѕС‚РѕРє
 		tmpStream << currentEnvironment << "e" << currentTry << "t" << processRank << "p" << averageReward << "r";
 		char outMessage[messageLength];
 		tmpStream >> outMessage;
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD);
 
-		//Ожидание нового задания
+		//РћР¶РёРґР°РЅРёРµ РЅРѕРІРѕРіРѕ Р·Р°РґР°РЅРёСЏ
 		MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status);
 	}
 }
 
-// Запуск параллельного процесса анализа по методу лучшей популяции в каждом запуске (!!!в папке с результатами должна быть папка "/Analysis"!!!)
+// Р—Р°РїСѓСЃРє РїР°СЂР°Р»Р»РµР»СЊРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° Р°РЅР°Р»РёР·Р° РїРѕ РјРµС‚РѕРґСѓ Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё РІ РєР°Р¶РґРѕРј Р·Р°РїСѓСЃРєРµ (!!!РІ РїР°РїРєРµ СЃ СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїР°РїРєР° "/Analysis"!!!)
 void TAnalysis::startParallelBestPopulationAnalysis(int argc, char **argv){
 	MPI_Init(&argc, &argv);
 	int processRank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // Определение процессом своего номера
-	if (processRank == 0) // Если это рутовый процесс
+	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // РћРїСЂРµРґРµР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃРѕРј СЃРІРѕРµРіРѕ РЅРѕРјРµСЂР°
+	if (processRank == 0) // Р•СЃР»Рё СЌС‚Рѕ СЂСѓС‚РѕРІС‹Р№ РїСЂРѕС†РµСЃСЃ
 		rootProcess(argc, argv);
-	else // Если это рабочий процесс
+	else // Р•СЃР»Рё СЌС‚Рѕ СЂР°Р±РѕС‡РёР№ РїСЂРѕС†РµСЃСЃ
 		workProcess(argc, argv);
 
 	MPI_Finalize();
 }
 
-// Процедура усреднение параметров анализа по лучшей популяции по глобальным сложностям сред (membersQuantity - кол-во сред в рамках одного коэффициента заполненности)
+// РџСЂРѕС†РµРґСѓСЂР° СѓСЃСЂРµРґРЅРµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ Р°РЅР°Р»РёР·Р° РїРѕ Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё РїРѕ РіР»РѕР±Р°Р»СЊРЅС‹Рј СЃР»РѕР¶РЅРѕСЃС‚СЏРј СЃСЂРµРґ (membersQuantity - РєРѕР»-РІРѕ СЃСЂРµРґ РІ СЂР°РјРєР°С… РѕРґРЅРѕРіРѕ РєРѕСЌС„С„РёС†РёРµРЅС‚Р° Р·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё)
 void TAnalysis::makeBestPopulationAnalysisSummary(string analysisFilename, string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity){
 	ifstream analysisFile;
 	analysisFile.open(analysisFilename.c_str());
@@ -406,9 +406,9 @@ void TAnalysis::makeBestPopulationAnalysisSummary(string analysisFilename, strin
 		for (int currentMember = 1; currentMember <= membersQuantity; ++currentMember)
 			for (int currentTry = 1; currentTry <= tryQuantity; ++currentTry){
 				string tmpStr;
-				analysisFile >> tmpStr; // Считываем среду
-				analysisFile >> tmpStr; // Считываем попытку
-				analysisFile >> tmpStr; // Считываем среднюю награду за попытку
+				analysisFile >> tmpStr; // РЎС‡РёС‚С‹РІР°РµРј СЃСЂРµРґСѓ
+				analysisFile >> tmpStr; // РЎС‡РёС‚С‹РІР°РµРј РїРѕРїС‹С‚РєСѓ
+				analysisFile >> tmpStr; // РЎС‡РёС‚С‹РІР°РµРј СЃСЂРµРґРЅСЋСЋ РЅР°РіСЂР°РґСѓ Р·Р° РїРѕРїС‹С‚РєСѓ
 				averageReward += atof(tmpStr.c_str()) / (membersQuantity * tryQuantity);
 			}
 		summaryFile << averageReward << endl;

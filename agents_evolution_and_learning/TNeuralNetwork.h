@@ -1,4 +1,4 @@
-#ifndef TNEURALNETWORK_H
+п»ї#ifndef TNEURALNETWORK_H
 #define TNEURALNETWORK_H
 
 #include "TNeuron.h"
@@ -7,30 +7,30 @@
 #include <fstream>
 
 /*
-Класс нейронной сети
+РљР»Р°СЃСЃ РЅРµР№СЂРѕРЅРЅРѕР№ СЃРµС‚Рё
 */
 class TNeuralNetwork{
-	TNeuron** neuronsStructure; // Список из нейронов 
-	int neuronsStructureSize; // Текущий размер массива нейронв
-	int neuronsQuantity; // Количество нейронов в сети
+	TNeuron** neuronsStructure; // РЎРїРёСЃРѕРє РёР· РЅРµР№СЂРѕРЅРѕРІ 
+	int neuronsStructureSize; // РўРµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° РЅРµР№СЂРѕРЅРІ
+	int neuronsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РЅРµР№СЂРѕРЅРѕРІ РІ СЃРµС‚Рё
 
-	int synapsesQuantity; // Количество синапсов в сети
-	int predConnectionsQuantity; // Количество предикторных связей в сети
+	int synapsesQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ СЃРёРЅР°РїСЃРѕРІ РІ СЃРµС‚Рё
+	int predConnectionsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РІ СЃРµС‚Рё
 
-	int layersQuantity; // Количество слоев в сети (!!!! не уменьшается при удалении нейронов !!!)
-	int inputResolution; // Размер входного пр-ва сети
-	int outputResolution; // Размер выходного пр-ва сети
+	int layersQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ СЃР»РѕРµРІ РІ СЃРµС‚Рё (!!!! РЅРµ СѓРјРµРЅСЊС€Р°РµС‚СЃСЏ РїСЂРё СѓРґР°Р»РµРЅРёРё РЅРµР№СЂРѕРЅРѕРІ !!!)
+	int inputResolution; // Р Р°Р·РјРµСЂ РІС…РѕРґРЅРѕРіРѕ РїСЂ-РІР° СЃРµС‚Рё
+	int outputResolution; // Р Р°Р·РјРµСЂ РІС‹С…РѕРґРЅРѕРіРѕ РїСЂ-РІР° СЃРµС‚Рё
 
-	static const int INFLATE_NEURONS_SIZE = 10; // Размер увеличения массива с нейронами в случае переполнения
+	static const int INFLATE_NEURONS_SIZE = 10; // Р Р°Р·РјРµСЂ СѓРІРµР»РёС‡РµРЅРёСЏ РјР°СЃСЃРёРІР° СЃ РЅРµР№СЂРѕРЅР°РјРё РІ СЃР»СѓС‡Р°Рµ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ
 
-	// Корректировка ID нейронов (например после удаления)
+	// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID РЅРµР№СЂРѕРЅРѕРІ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 	void fixNeuronsIDs();
 	
-	// Процедура увеличения размера массива нейронов
+	// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РЅРµР№СЂРѕРЅРѕРІ
 	void inflateNeuronsStructure(int inflateSize);
 
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TNeuralNetwork(){
 		neuronsStructure = 0;
 		neuronsStructureSize = 0;
@@ -41,17 +41,17 @@ public:
 		inputResolution = 0;
 		outputResolution = 0;
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TNeuralNetwork();
 
-	//Геттеры для параметров сети
+	//Р“РµС‚С‚РµСЂС‹ РґР»СЏ РїР°СЂР°РјРµС‚СЂРѕРІ СЃРµС‚Рё
 	int getNeuronsQuantity() { return neuronsQuantity; }
 	int getSynapsesQuantity() { return synapsesQuantity; }
 	int getPredConnectionsQuantity() { return predConnectionsQuantity; }
 	int getInputResolution() { return inputResolution; }
 	int getOutputResolution() { return outputResolution; }
 
-	// Геттеры и сеттеры для всех нейронов сети (во всех случаях передается номер нейрона в массиве нейронов)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РЅРµР№СЂРѕРЅРѕРІ СЃРµС‚Рё (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ РЅРµР№СЂРѕРЅР° РІ РјР°СЃСЃРёРІРµ РЅРµР№СЂРѕРЅРѕРІ)
 	int getNeuronID(int neuronNumber){ return neuronsStructure[neuronNumber-1]->getID(); }
 	void setNeuronID(int neuronNumber, int newID){ neuronsStructure[neuronNumber-1]->setID(newID); }
 	int getNeuronType(int neuronNumber) { return neuronsStructure[neuronNumber-1]->getType(); }
@@ -64,7 +64,7 @@ public:
 	int getNeuronInputSynapsesQuantity(int neuronNumber){ return neuronsStructure[neuronNumber-1]->getInputSynapsesQuantity(); }
 	int getNeuronInputPredConnectionsQuantity(int neuronNumber){ return neuronsStructure[neuronNumber-1]->getInputPredConnectionsQuantity(); }
 
-	// Геттеры и сеттеры для синапсов данной сети (во всех случаях передается номер нейрона в массиве нейронов и номер синапса в массиве синапсов)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ СЃРёРЅР°РїСЃРѕРІ РґР°РЅРЅРѕР№ СЃРµС‚Рё (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ РЅРµР№СЂРѕРЅР° РІ РјР°СЃСЃРёРІРµ РЅРµР№СЂРѕРЅРѕРІ Рё РЅРѕРјРµСЂ СЃРёРЅР°РїСЃР° РІ РјР°СЃСЃРёРІРµ СЃРёРЅР°РїСЃРѕРІ)
 	int getSynapseID(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapseID(synapseNumber); }
 	void setSynapseID(int neuronNumber, int synapseNumber, int newID) { neuronsStructure[neuronNumber-1]->setSynapseID(synapseNumber, newID); }
 	double getSynapseWeight(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapseWeight(synapseNumber); }
@@ -76,7 +76,7 @@ public:
 	TNeuron* getSynapsePostNeuron(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapsePostNeuron(synapseNumber); }
 	void setSynapsePostNeuron(int neuronNumber, int synapseNumber, TNeuron* newPostNeuron) { neuronsStructure[neuronNumber-1]->setSynapsePostNeuron(synapseNumber, newPostNeuron); }
 
-	// Геттеры и сеттеры для предикторных связей данной сети (во всех случаях передается номер нейрона в массиве нейронов и номер связи в массиве связей)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РґР°РЅРЅРѕР№ СЃРµС‚Рё (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ РЅРµР№СЂРѕРЅР° РІ РјР°СЃСЃРёРІРµ РЅРµР№СЂРѕРЅРѕРІ Рё РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 	int getPredConnectionID(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionID(predConnectionNumber); }
 	void setPredConnectionID(int neuronNumber, int predConnectionNumber, int newID) { neuronsStructure[neuronNumber-1]->setPredConnectionID(predConnectionNumber, newID); }
 	bool getPredConnectionEnabled(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionEnabled(predConnectionNumber); }
@@ -86,56 +86,56 @@ public:
 	TNeuron* getPredConnectionPostNeuron(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionPostNeuron(predConnectionNumber); }
 	void setPredConnectionPostNeuron(int neuronNumber, int predConnectionNumber, TNeuron* newPostNeuron) { neuronsStructure[neuronNumber-1]->setPredConnectionPostNeuron(predConnectionNumber, newPostNeuron); }
 
-	//Добавление нейрона в сеть
+	//Р”РѕР±Р°РІР»РµРЅРёРµ РЅРµР№СЂРѕРЅР° РІ СЃРµС‚СЊ
 	void addNeuron(int newID, int newType, double newBias, int newLayer, bool newActive = true, int newParentNeuronID = 0);
 
-	//Добавление синапса в сеть
+	//Р”РѕР±Р°РІР»РµРЅРёРµ СЃРёРЅР°РїСЃР° РІ СЃРµС‚СЊ
 	void addSynapse(int preNeuronNumber, int postNeuronNumber, int newID, double newWeight, bool newEnabled){
 		neuronsStructure[postNeuronNumber-1]->addSynapse(newID, newWeight, newEnabled, neuronsStructure[preNeuronNumber-1]); 
 		++synapsesQuantity;
 	}
 
-	// Добавление предикторной связи в сеть
+	// Р”РѕР±Р°РІР»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ СЃРµС‚СЊ
 	void addPredConnection(int preNeuronNumber, int postNeuronNumber, int newID, bool newEnabled){
 		neuronsStructure[postNeuronNumber-1]->addPredConnection(newID, newEnabled, neuronsStructure[preNeuronNumber-1]); 
 		++predConnectionsQuantity;
 	}
 
-	// Удаление нейрона из сети (с удалением также всех входных и выходных связей из этого нейрона)
+	// РЈРґР°Р»РµРЅРёРµ РЅРµР№СЂРѕРЅР° РёР· СЃРµС‚Рё (СЃ СѓРґР°Р»РµРЅРёРµРј С‚Р°РєР¶Рµ РІСЃРµС… РІС…РѕРґРЅС‹С… Рё РІС‹С…РѕРґРЅС‹С… СЃРІСЏР·РµР№ РёР· СЌС‚РѕРіРѕ РЅРµР№СЂРѕРЅР°)
 	void deleteNeuron(int neuronNumber);
 
-	//Удаление связи из сети
+	//РЈРґР°Р»РµРЅРёРµ СЃРІСЏР·Рё РёР· СЃРµС‚Рё
 	void deleteSynapse(int neuronNumber, int synapseNumber){
 		neuronsStructure[neuronNumber-1]->deleteSynapse(synapseNumber);
 		--synapsesQuantity;
 	}
 
-	// Удаление предикторной связи из сети
+	// РЈРґР°Р»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РёР· СЃРµС‚Рё
 	void deletePredConnection(int neuronNumber, int predConnectionNumber){
 		neuronsStructure[neuronNumber-1]->deletePredConnection(predConnectionNumber);
 		--predConnectionsQuantity;
 	}
 
-	// Стирание сети
+	// РЎС‚РёСЂР°РЅРёРµ СЃРµС‚Рё
 	void eraseNeuralNetwork();
 
-	// "Перезагрузка" сети
+	// "РџРµСЂРµР·Р°РіСЂСѓР·РєР°" СЃРµС‚Рё
 	void reset();
 
-	// Обсчет одного такта работы сети
+	// РћР±СЃС‡РµС‚ РѕРґРЅРѕРіРѕ С‚Р°РєС‚Р° СЂР°Р±РѕС‚С‹ СЃРµС‚Рё
 	void calculateNetwork(double inputVector[]);
 
-	// Получение текущего выходного вектора сети
+	// РџРѕР»СѓС‡РµРЅРёРµ С‚РµРєСѓС‰РµРіРѕ РІС‹С…РѕРґРЅРѕРіРѕ РІРµРєС‚РѕСЂР° СЃРµС‚Рё
 	void getOutputVector(double outputVector[]);
 
-	// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
-	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH	
-	void printGraphNetwork(std::string graphFilename);
+	// Р’С‹РІРѕРґ СЃРµС‚Рё РІ С„Р°Р№Р» РєР°Рє РіСЂР°С„Р° (СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј СЃС‚РѕСЂРѕРЅРЅРµР№ СѓС‚РёР»РёС‚С‹ dot.exe РёР· РїР°РєРµС‚Р° GraphViz) 
+	// Р”Р»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ СЂР°Р±РѕС‚С‹ РЅРµРѕР±С…РѕРґРёРјРѕ С‡С‚РѕР±С‹ РїСѓС‚СЊ Рє dot.exe Р±С‹Р» РїСЂРѕРїРёСЃР°РЅ РІ $PATH	
+	void printGraphNetwork(std::string graphFilename, bool printWeights = false) const;
 
-	//Печать сети в файл или на экран
+	//РџРµС‡Р°С‚СЊ СЃРµС‚Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& NeuralNetwork);
 
-	//Считывание сети из файла или экрана
+	//РЎС‡РёС‚С‹РІР°РЅРёРµ СЃРµС‚Рё РёР· С„Р°Р№Р»Р° РёР»Рё СЌРєСЂР°РЅР°
 	friend std::istream& operator>>(std::istream& is, TNeuralNetwork& NeuralNetwork);
 };
 

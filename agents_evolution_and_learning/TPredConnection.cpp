@@ -1,4 +1,4 @@
-#include "TPredConnection.h"
+п»ї#include "TPredConnection.h"
 #include "TNeuron.h"
 
 #include <iostream>
@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Запись предикторной связи в файл или на экран
+// Р—Р°РїРёСЃСЊ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 ostream& operator<<(ostream& os, const TPredConnection& predConnection){
 	os << predConnection.preNeuron->getID() << "\t" << predConnection.postNeuron->getID() << "\t" << predConnection.enabled  << endl;
 	return os;

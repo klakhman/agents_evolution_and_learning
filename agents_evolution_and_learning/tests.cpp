@@ -1,4 +1,4 @@
-#include "tests.h"
+п»ї#include "tests.h"
 
 #include "TPoolNetwork.h"
 #include "TNeuralNetwork.h"
@@ -98,8 +98,8 @@ int tests::testNeuralNetwork(string outputFilename){
 void tests::testEnvironment(string firstOutputEnvironmentFilename, string secondOutputEnvironmentFilename){
 	ofstream ofs;
 	ofs.open(firstOutputEnvironmentFilename.c_str());
-	ofs << 8 << "\t" << 5 << endl; // Размерность и кол-во целей
-	// Записываем цели
+	ofs << 8 << "\t" << 5 << endl; // Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ Рё РєРѕР»-РІРѕ С†РµР»РµР№
+	// Р—Р°РїРёСЃС‹РІР°РµРј С†РµР»Рё
 	ofs << 2 << "\t" << 20 << endl << 1 << "\t" << 1 << "\t" << 5 << "\t" << 0 << endl;
 	ofs << 3 << "\t" << 30 << endl << 1 << "\t" << 1 << "\t" << 5 << "\t" << 0 << "\t" << 2 << "\t" << 1 << endl;
 	ofs << 4 << "\t" << 40 << endl << 1 << "\t" << 1 << "\t" << 5 << "\t" << 0 << "\t" << 2 << "\t" << 1 << "\t" << 1 << "\t" << 0 << endl;
@@ -125,7 +125,7 @@ void tests::testEnvironment(string firstOutputEnvironmentFilename, string second
 	cout << environment.calculateReward(_life, 6) << endl;
 }
 
-//Процедура тестирования прогона нейронной сети (0 - без ошибок, 1 - есть ошибки)
+//РџСЂРѕС†РµРґСѓСЂР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ РїСЂРѕРіРѕРЅР° РЅРµР№СЂРѕРЅРЅРѕР№ СЃРµС‚Рё (0 - Р±РµР· РѕС€РёР±РѕРє, 1 - РµСЃС‚СЊ РѕС€РёР±РєРё)
 int tests::testNeuralNetworkProcessing(string inputNetworkFilename){
 	int checkStatus = 0;
 	cout << endl << "------------------+ TEST FOR NEURAL NETWORK PROCESSING +------------------" << endl;
@@ -162,7 +162,7 @@ int tests::testNeuralNetworkProcessing(string inputNetworkFilename){
 	return checkStatus;
 }
 
-// Тестирование процедуры подсчета заполненности среды (0 - без ошибок, 1 - есть ошибки)
+// РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµРґСѓСЂС‹ РїРѕРґСЃС‡РµС‚Р° Р·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё СЃСЂРµРґС‹ (0 - Р±РµР· РѕС€РёР±РѕРє, 1 - РµСЃС‚СЊ РѕС€РёР±РєРё)
 int tests::testCalculateOccupancyCoeffcient(string environmentFilename){
 	int checkStatus = 0;
 	cout << endl << "--------------------+ TEST FOR ENVIRONMENT'S OCCUPANCY +--------------------" << endl;
@@ -178,15 +178,15 @@ int tests::testCalculateOccupancyCoeffcient(string environmentFilename){
 	return checkStatus;
 }
 
-// Проверка непротиворечивости цели (true - цель противоречива, false - цель непротиворечива)
+// РџСЂРѕРІРµСЂРєР° РЅРµРїСЂРѕС‚РёРІРѕСЂРµС‡РёРІРѕСЃС‚Рё С†РµР»Рё (true - С†РµР»СЊ РїСЂРѕС‚РёРІРѕСЂРµС‡РёРІР°, false - С†РµР»СЊ РЅРµРїСЂРѕС‚РёРІРѕСЂРµС‡РёРІР°)
 bool tests::checkAimInconsistency(TEnvironment::TAim& aim, int environmentResolution){
-	// Массив последних действий в отношении битов среды (-1 - действия еще не было, 0 - перевод в ноль, 1 - перевод в единицу)
+	// РњР°СЃСЃРёРІ РїРѕСЃР»РµРґРЅРёС… РґРµР№СЃС‚РІРёР№ РІ РѕС‚РЅРѕС€РµРЅРёРё Р±РёС‚РѕРІ СЃСЂРµРґС‹ (-1 - РґРµР№СЃС‚РІРёСЏ РµС‰Рµ РЅРµ Р±С‹Р»Рѕ, 0 - РїРµСЂРµРІРѕРґ РІ РЅРѕР»СЊ, 1 - РїРµСЂРµРІРѕРґ РІ РµРґРёРЅРёС†Сѓ)
 	int* lastAction = new int[environmentResolution];
 	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 		lastAction[currentBit - 1] = -1;
 
 	for (int currentAction = 1; currentAction <= aim.aimComplexity; ++currentAction)
-		// Если еще не совершали действия над этим битом
+		// Р•СЃР»Рё РµС‰Рµ РЅРµ СЃРѕРІРµСЂС€Р°Р»Рё РґРµР№СЃС‚РІРёСЏ РЅР°Рґ СЌС‚РёРј Р±РёС‚РѕРј
 		if (lastAction[aim.actionsSequence[currentAction - 1].bitNumber - 1] == -1)
 			lastAction[aim.actionsSequence[currentAction - 1].bitNumber - 1] = static_cast<int>(aim.actionsSequence[currentAction - 1].desiredValue);
 		else
@@ -199,7 +199,7 @@ bool tests::checkAimInconsistency(TEnvironment::TAim& aim, int environmentResolu
 	return false;
 }
 
-// Сравнение двух целей среды (true - цели равны, false - цели неравны)
+// РЎСЂР°РІРЅРµРЅРёРµ РґРІСѓС… С†РµР»РµР№ СЃСЂРµРґС‹ (true - С†РµР»Рё СЂР°РІРЅС‹, false - С†РµР»Рё РЅРµСЂР°РІРЅС‹)
 bool tests::compareTwoAims(TEnvironment::TAim& firstAim, TEnvironment::TAim& secondAim){
 	if (firstAim.aimComplexity != secondAim.aimComplexity)
 		return false;
@@ -211,7 +211,7 @@ bool tests::compareTwoAims(TEnvironment::TAim& firstAim, TEnvironment::TAim& sec
 	return true;
 }
 
-// Тестирование процедуры генерации среды (0 - все хорошо, 1 - есть противоречивая цель, 2 - есть равные цели)
+// РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµРґСѓСЂС‹ РіРµРЅРµСЂР°С†РёРё СЃСЂРµРґС‹ (0 - РІСЃРµ С…РѕСЂРѕС€Рѕ, 1 - РµСЃС‚СЊ РїСЂРѕС‚РёРІРѕСЂРµС‡РёРІР°СЏ С†РµР»СЊ, 2 - РµСЃС‚СЊ СЂР°РІРЅС‹Рµ С†РµР»Рё)
 int tests::testGenerateEnvironment(){
 	int checkStatus = 0;
 
@@ -223,7 +223,7 @@ int tests::testGenerateEnvironment(){
 		environment->generateEnvironment(environmentResolution, occupancySet[currentOccupancy - 1]);
 		cout << "Done! Occupancy of the environment : " << environment->calculateOccupancyCoefficient() << 
 										", desired occupancy: " << occupancySet[currentOccupancy - 1] << endl;
-		// Проверяем непротиворечивость структуры целей
+		// РџСЂРѕРІРµСЂСЏРµРј РЅРµРїСЂРѕС‚РёРІРѕСЂРµС‡РёРІРѕСЃС‚СЊ СЃС‚СЂСѓРєС‚СѓСЂС‹ С†РµР»РµР№
 		for (int currentAim = 1; currentAim <= environment->getAimsQuantity(); ++currentAim){
 			if (static_cast<int>(checkAimInconsistency(environment->aimsSet[currentAim - 1], environment->getEnvironmentResolution()))){
 				cout << "Aim #" << currentAim << "is inconsistent." << endl;
@@ -233,7 +233,7 @@ int tests::testGenerateEnvironment(){
 				cout << endl;
 				checkStatus = 1;
 			}
-			// Сравниваем со всеми остальными целями
+			// РЎСЂР°РІРЅРёРІР°РµРј СЃРѕ РІСЃРµРјРё РѕСЃС‚Р°Р»СЊРЅС‹РјРё С†РµР»СЏРјРё
 			for (int currentCompareAim = 1; currentCompareAim <= environment->getAimsQuantity(); ++currentCompareAim)
 				if (currentAim != currentCompareAim)
 					if (compareTwoAims(environment->aimsSet[currentAim - 1], environment->aimsSet[currentCompareAim-1])){
@@ -255,7 +255,7 @@ int tests::testGenerateEnvironment(){
 	return checkStatus;
 }
 
-// Процедура тестирования степени равномерности распределения, получаемого с помощью слабой функции
+// РџСЂРѕС†РµРґСѓСЂР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ СЃС‚РµРїРµРЅРё СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚Рё СЂР°СЃРїСЂРµРґРµР»РµРЅРёСЏ, РїРѕР»СѓС‡Р°РµРјРѕРіРѕ СЃ РїРѕРјРѕС‰СЊСЋ СЃР»Р°Р±РѕР№ С„СѓРЅРєС†РёРё
 /*int tests::testWeakUniformDistribution(){
 	int checkStatus = 0;
 	cout << endl << "--------------------+ TEST FOR WEAK UNIFORM DISTRIBUTION +--------------------" << endl;
@@ -306,23 +306,23 @@ int tests::testGenerateEnvironment(){
 	return checkStatus;
 }*/
 
-//------------------ Тестирование различных процедур мутации ---------------------------
+//------------------ РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЂР°Р·Р»РёС‡РЅС‹С… РїСЂРѕС†РµРґСѓСЂ РјСѓС‚Р°С†РёРё ---------------------------
 
-// Создание тестовой сети из пулов
+// РЎРѕР·РґР°РЅРёРµ С‚РµСЃС‚РѕРІРѕР№ СЃРµС‚Рё РёР· РїСѓР»РѕРІ
 void tests::createTestPoolNetwork(TPoolNetwork& poolNetwork){
 	poolNetwork.erasePoolNetwork();
-	// Входные пулы
+	// Р’С…РѕРґРЅС‹Рµ РїСѓР»С‹
 	poolNetwork.addPool(1, 0, 1, -0.5, 0.1, 1);
 	poolNetwork.addPool(2, 0, 1, 0.4, 0.1, 1);
 	poolNetwork.addPool(3, 0, 1, 0.1, 0.1, 1);
-	// Выходные пулы
+	// Р’С‹С…РѕРґРЅС‹Рµ РїСѓР»С‹
 	poolNetwork.addPool(4, 2, 1, 0.5, 0.1, 3);
 	poolNetwork.addPool(5, 2, 1, 0.6, 0.1, 3);
-	// Интер-пулы
+	// РРЅС‚РµСЂ-РїСѓР»С‹
 	poolNetwork.addPool(6, 1, 10, -0.5, 0.1, 2);
 	poolNetwork.addPool(7, 1, 1, 0.3, 0.1, 2);
 
-	// Добавляем связи
+	// Р”РѕР±Р°РІР»СЏРµРј СЃРІСЏР·Рё
 	poolNetwork.addConnection(1, 6, 1, 0.4, 0.1, 1, 0, 1, 1);
 	poolNetwork.addConnection(1, 7, 2, 0.3, 0.1, 1, 0, 1, 2);
 	poolNetwork.addConnection(2, 6, 3, 0.21, 0.1, 1, 0, 1, 3);
@@ -335,12 +335,12 @@ void tests::createTestPoolNetwork(TPoolNetwork& poolNetwork){
 	poolNetwork.addConnection(7, 4, 8, 0.50, 0.1, 1, 0, 1, 8);
 	poolNetwork.addConnection(5, 7, 9, 0.33, 0.1, 1, 0, 1, 9);
 
-	// Добавляем предикторные связи
+	// Р”РѕР±Р°РІР»СЏРµРј РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё
 	poolNetwork.addPredConnection(6, 7, 1, 1, 0, 1, 1);
 	poolNetwork.addPredConnection(4, 6, 2, 1, 0, 1, 2);
 }
 
-// Тестирование процедуры мутации весов
+// РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµРґСѓСЂС‹ РјСѓС‚Р°С†РёРё РІРµСЃРѕРІ
 void tests::testWeigthsMutation(string testDirectory){
 	TPoolNetwork* testNetwork = new TPoolNetwork;
 	createTestPoolNetwork(*testNetwork);
@@ -377,7 +377,7 @@ void tests::testWeigthsMutation(string testDirectory){
 	delete testNetwork;
 }
 
-//Тестирование процедуры добавления связи
+//РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµРґСѓСЂС‹ РґРѕР±Р°РІР»РµРЅРёСЏ СЃРІСЏР·Рё
 void tests::testAddConnection(string testDirectory){
 	TPoolNetwork* testNetwork = new TPoolNetwork;
 	createTestPoolNetwork(*testNetwork);
@@ -397,7 +397,7 @@ void tests::testAddConnection(string testDirectory){
 	delete testNetwork;
 }
 
-// Тестирование процедуры удаления связи
+// РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµРґСѓСЂС‹ СѓРґР°Р»РµРЅРёСЏ СЃРІСЏР·Рё
 void tests::testDeleteConnection(string testDirectory){
 	TPoolNetwork* testNetwork = new TPoolNetwork;
 	createTestPoolNetwork(*testNetwork);
@@ -417,7 +417,7 @@ void tests::testDeleteConnection(string testDirectory){
 	delete testNetwork;
 }
 
-// Тестирование процедуры дупликации пула
+// РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµРґСѓСЂС‹ РґСѓРїР»РёРєР°С†РёРё РїСѓР»Р°
 void tests::testDuplicatePool(string testDirectory){
 	TPoolNetwork* testNetwork = new TPoolNetwork;
 	createTestPoolNetwork(*testNetwork);

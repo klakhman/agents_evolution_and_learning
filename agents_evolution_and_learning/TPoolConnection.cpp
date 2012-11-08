@@ -1,4 +1,4 @@
-#include "TPoolConnection.h"
+п»ї#include "TPoolConnection.h"
 #include "TNeuralPool.h"
 
 #include <iostream>
@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Запись связи в файл
+// Р—Р°РїРёСЃСЊ СЃРІСЏР·Рё РІ С„Р°Р№Р»
 ostream& operator<<(ostream& ofs, const TPoolConnection& poolConnection){
 	ofs << poolConnection.prePool->getID() << "\t" << poolConnection.postPool->getID() 
 		<< "\t" << poolConnection.weightMean << "\t" << poolConnection.weightVariance

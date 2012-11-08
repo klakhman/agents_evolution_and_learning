@@ -1,4 +1,4 @@
-#include "TPoolNetwork.h"
+п»ї#include "TPoolNetwork.h"
 #include "TPoolConnection.h"
 #include "TPoolPredConnection.h"
 #include "service.h"
@@ -12,13 +12,13 @@
 
 using namespace std;
 
-// Корректировка ID пулов (например после удаления)
+// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID РїСѓР»РѕРІ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 void TPoolNetwork::fixPoolsIDs(){
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
 		poolsStructure[currentPool - 1]->setID(currentPool);
 }
 
-// Корректировка ID связей (например после удаления)
+// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID СЃРІСЏР·РµР№ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 void TPoolNetwork::fixConnectionsIDs(){
 	int _connectionsQuantity = 0;
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
@@ -26,7 +26,7 @@ void TPoolNetwork::fixConnectionsIDs(){
 			poolsStructure[currentPool - 1]->setConnectionID(currentConnection, ++_connectionsQuantity);
 }
 
-// Корректировка ID предикторных связей (например после удаления)
+// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 void TPoolNetwork::fixPredConnectionsIDs(){
 	int _predConnectionsQuantity = 0;
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
@@ -34,7 +34,7 @@ void TPoolNetwork::fixPredConnectionsIDs(){
 			poolsStructure[currentPool - 1]->setPredConnectionID(currentPredConnection, ++_predConnectionsQuantity);
 }
 
-// Процедура увеличения размера массива пулов
+// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РїСѓР»РѕРІ
 void TPoolNetwork::inflatePoolsStructure(int inflateSize){
 	TNeuralPool** newPoolsStructure = new TNeuralPool*[poolsStructureSize + inflateSize];
 	memset(newPoolsStructure, 0, (poolsStructureSize + inflateSize) * sizeof(TNeuralPool*));
@@ -44,46 +44,46 @@ void TPoolNetwork::inflatePoolsStructure(int inflateSize){
 	poolsStructureSize += inflateSize;
 }
 
-// Декструктор
+// Р”РµРєСЃС‚СЂСѓРєС‚РѕСЂ
 TPoolNetwork::~TPoolNetwork(){
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
 		delete poolsStructure[currentPool - 1];
 	delete []poolsStructure;
 }
 
-//Добавление нейронального пула в сеть
+//Р”РѕР±Р°РІР»РµРЅРёРµ РЅРµР№СЂРѕРЅР°Р»СЊРЅРѕРіРѕ РїСѓР»Р° РІ СЃРµС‚СЊ
 void TPoolNetwork::addPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer){
-	if (poolsQuantity >= poolsStructureSize) // Если не хватает места в массиве
+	if (poolsQuantity >= poolsStructureSize) // Р•СЃР»Рё РЅРµ С…РІР°С‚Р°РµС‚ РјРµСЃС‚Р° РІ РјР°СЃСЃРёРІРµ
 		inflatePoolsStructure(INFLATE_POOLS_SIZE);
 	poolsStructure[poolsQuantity++] = new TNeuralPool(newID, newType, newCapacity, newBiasMean, newBiasVariance, newLayer);
-	// Если пул входной
+	// Р•СЃР»Рё РїСѓР» РІС…РѕРґРЅРѕР№
 	if (0 == newType) ++inputResolution;
-	// Если пул выходной
+	// Р•СЃР»Рё РїСѓР» РІС‹С…РѕРґРЅРѕР№
 	if (2 == newType) ++outputResolution;
-	// Смотрим на слой пула
+	// РЎРјРѕС‚СЂРёРј РЅР° СЃР»РѕР№ РїСѓР»Р°
 	if (newLayer > layersQuantity) layersQuantity = newLayer;
 }
 
-// Удаление пула из сети (с удалением также всех входных и выходных связей из этого пула)
+// РЈРґР°Р»РµРЅРёРµ РїСѓР»Р° РёР· СЃРµС‚Рё (СЃ СѓРґР°Р»РµРЅРёРµРј С‚Р°РєР¶Рµ РІСЃРµС… РІС…РѕРґРЅС‹С… Рё РІС‹С…РѕРґРЅС‹С… СЃРІСЏР·РµР№ РёР· СЌС‚РѕРіРѕ РїСѓР»Р°)
 void TPoolNetwork::deletePool(int poolNumber){
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		if (currentPool != poolNumber){ // Если это не стираемый пул (пропускаем просто для экономии времени)
+		if (currentPool != poolNumber){ // Р•СЃР»Рё СЌС‚Рѕ РЅРµ СЃС‚РёСЂР°РµРјС‹Р№ РїСѓР» (РїСЂРѕРїСѓСЃРєР°РµРј РїСЂРѕСЃС‚Рѕ РґР»СЏ СЌРєРѕРЅРѕРјРёРё РІСЂРµРјРµРЅРё)
 			for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
-				if (poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() == poolNumber){ // Если это связь от стираемого пула
+				if (poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() == poolNumber){ // Р•СЃР»Рё СЌС‚Рѕ СЃРІСЏР·СЊ РѕС‚ СЃС‚РёСЂР°РµРјРѕРіРѕ РїСѓР»Р°
 					deleteConnection(currentPool, currentConnection);
-					--currentConnection; // Чтобы мы остались на той же самой позиции
+					--currentConnection; // Р§С‚РѕР±С‹ РјС‹ РѕСЃС‚Р°Р»РёСЃСЊ РЅР° С‚РѕР№ Р¶Рµ СЃР°РјРѕР№ РїРѕР·РёС†РёРё
 				}
 			for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-				if (poolsStructure[currentPool - 1]->getPredConnectionPrePool(currentPredConnection)->getID() == poolNumber){ // Если это пред. связь от стираемого пула
+				if (poolsStructure[currentPool - 1]->getPredConnectionPrePool(currentPredConnection)->getID() == poolNumber){ // Р•СЃР»Рё СЌС‚Рѕ РїСЂРµРґ. СЃРІСЏР·СЊ РѕС‚ СЃС‚РёСЂР°РµРјРѕРіРѕ РїСѓР»Р°
 					deletePredConnection(currentPool, currentPredConnection);
 					--currentPredConnection;
 				}
 		}
-	// Если пул входной
+	// Р•СЃР»Рё РїСѓР» РІС…РѕРґРЅРѕР№
 	if (0 == poolsStructure[poolNumber - 1]->getType()) --inputResolution;
-	// Если пул выходной
+	// Р•СЃР»Рё РїСѓР» РІС‹С…РѕРґРЅРѕР№
 	if (2 == poolsStructure[poolNumber - 1]->getType()) --outputResolution;
-	// Стираем пул и сдвигаем массив
+	// РЎС‚РёСЂР°РµРј РїСѓР» Рё СЃРґРІРёРіР°РµРј РјР°СЃСЃРёРІ
 	connectionsQuantity -= poolsStructure[poolNumber - 1]->getInputConnectionsQuantity();
 	predConnectionsQuantity -= poolsStructure[poolNumber - 1]->getInputPredConnectionsQuantity();
 	delete poolsStructure[poolNumber - 1];
@@ -94,7 +94,7 @@ void TPoolNetwork::deletePool(int poolNumber){
 	fixPoolsIDs();
 }
 
-// Проверка существования связи в сети
+// РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЃРІСЏР·Рё РІ СЃРµС‚Рё
 bool TPoolNetwork::checkConnectionExistance(int prePoolNumber, int postPoolNumber){
 	for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[postPoolNumber - 1]->getInputConnectionsQuantity(); ++currentPoolConnection)
 		if (poolsStructure[postPoolNumber - 1]->getConnectionPrePool(currentPoolConnection)->getID() == prePoolNumber)
@@ -103,7 +103,7 @@ bool TPoolNetwork::checkConnectionExistance(int prePoolNumber, int postPoolNumbe
 	return false;
 }
 
-// Проверка существования предикторной связи в сети
+// РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ СЃРµС‚Рё
 bool TPoolNetwork::checkPredConnectionExistance(int prePoolNumber, int postPoolNumber){
 	for (int currentPoolPredConnection = 1; currentPoolPredConnection <= poolsStructure[postPoolNumber - 1]->getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
 		if (poolsStructure[postPoolNumber - 1]->getPredConnectionPrePool(currentPoolPredConnection)->getID() == prePoolNumber)
@@ -112,7 +112,7 @@ bool TPoolNetwork::checkPredConnectionExistance(int prePoolNumber, int postPoolN
 	return false;
 }
 
-// Стирание сети
+// РЎС‚РёСЂР°РЅРёРµ СЃРµС‚Рё
 void TPoolNetwork::erasePoolNetwork(){
 	if (poolsStructure){
 		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
@@ -129,14 +129,14 @@ void TPoolNetwork::erasePoolNetwork(){
 	outputResolution = 0;
 }
 
-// Оператор присваивания (фактически полное копирование сети - создание новых структур)
+// РћРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ (С„Р°РєС‚РёС‡РµСЃРєРё РїРѕР»РЅРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ СЃРµС‚Рё - СЃРѕР·РґР°РЅРёРµ РЅРѕРІС‹С… СЃС‚СЂСѓРєС‚СѓСЂ)
 TPoolNetwork& TPoolNetwork::operator=(const TPoolNetwork& sourcePoolNetwork){
-	erasePoolNetwork(); // На всякий случай опустошаем сеть
-	// Копируем пулы
+	erasePoolNetwork(); // РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ РѕРїСѓСЃС‚РѕС€Р°РµРј СЃРµС‚СЊ
+	// РљРѕРїРёСЂСѓРµРј РїСѓР»С‹
 	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool)
 		addPool(sourcePoolNetwork.getPoolID(currentPool), sourcePoolNetwork.getPoolType(currentPool), sourcePoolNetwork.getPoolCapacity(currentPool),
 					sourcePoolNetwork.getPoolBiasMean(currentPool), sourcePoolNetwork.getPoolBiasVariance(currentPool), sourcePoolNetwork.getPoolLayer(currentPool));
-	// Копируем все связи сети
+	// РљРѕРїРёСЂСѓРµРј РІСЃРµ СЃРІСЏР·Рё СЃРµС‚Рё
 	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool){
 		for (int currentPoolConnection = 1; currentPoolConnection <= sourcePoolNetwork.getPoolInputConnectionsQuantity(currentPool); ++ currentPoolConnection)
 			addConnection(sourcePoolNetwork.getConnectionPrePool(currentPool, currentPoolConnection)->getID(), sourcePoolNetwork.getConnectionPostPool(currentPool, currentPoolConnection)->getID(),
@@ -153,23 +153,23 @@ TPoolNetwork& TPoolNetwork::operator=(const TPoolNetwork& sourcePoolNetwork){
 	return *this;
 }
 
-// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
-// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
-void TPoolNetwork::printGraphNetwork(string graphFilename){
+// Р’С‹РІРѕРґ СЃРµС‚Рё РІ С„Р°Р№Р» РєР°Рє РіСЂР°С„Р° (СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј СЃС‚РѕСЂРѕРЅРЅРµР№ СѓС‚РёР»РёС‚С‹ dot.exe РёР· РїР°РєРµС‚Р° GraphViz) 
+// Р”Р»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ СЂР°Р±РѕС‚С‹ РЅРµРѕР±С…РѕРґРёРјРѕ С‡С‚РѕР±С‹ РїСѓС‚СЊ Рє dot.exe Р±С‹Р» РїСЂРѕРїРёСЃР°РЅ РІ $PATH
+void TPoolNetwork::printGraphNetwork(string graphFilename, bool printWeights /*=false*/) const{
 	ofstream hDotGraphFile;
 	hDotGraphFile.open((graphFilename + ".dot").c_str());
-	// Инициализируем и указываем, что слои должны следовать слево на право
+	// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј Рё СѓРєР°Р·С‹РІР°РµРј, С‡С‚Рѕ СЃР»РѕРё РґРѕР»Р¶РЅС‹ СЃР»РµРґРѕРІР°С‚СЊ СЃР»РµРІРѕ РЅР° РїСЂР°РІРѕ
 	hDotGraphFile << "digraph G { \n\trankdir=LR;\n";
-	// Записываем пулы послойно
+	// Р—Р°РїРёСЃС‹РІР°РµРј РїСѓР»С‹ РїРѕСЃР»РѕР№РЅРѕ
 	for (int currentLayer = 1; currentLayer <= layersQuantity; ++ currentLayer){
-		// Указываем, что это один слой и пулы должны идти в столбец
+		// РЈРєР°Р·С‹РІР°РµРј, С‡С‚Рѕ СЌС‚Рѕ РѕРґРёРЅ СЃР»РѕР№ Рё РїСѓР»С‹ РґРѕР»Р¶РЅС‹ РёРґС‚Рё РІ СЃС‚РѕР»Р±РµС†
 		hDotGraphFile << "\t{ rank = same; \n";
 		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
 			if (poolsStructure[currentPool - 1]->getLayer() == currentLayer)
 				hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"circle\"];\n" ;
-		hDotGraphFile << "\t}\n"; // Заканчиваем запись слоя
+		hDotGraphFile << "\t}\n"; // Р—Р°РєР°РЅС‡РёРІР°РµРј Р·Р°РїРёСЃСЊ СЃР»РѕСЏ
 	}
-	// Записываем связи
+	// Р—Р°РїРёСЃС‹РІР°РµРј СЃРІСЏР·Рё
 	double maxWeightValue = 1.0;
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
 		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
@@ -178,16 +178,16 @@ void TPoolNetwork::printGraphNetwork(string graphFilename){
 				service::decToHex(static_cast<int>(min(fabs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue), 255.0)), hex, 2);
 				string color;
 				if (poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) < 0)
-					color = "0000" + hex; // Оттенок синего
+					color = "0000" + hex; // РћС‚С‚РµРЅРѕРє СЃРёРЅРµРіРѕ
 				else
-					color = hex + "0000"; // Оттенок красного
-				/*hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() << "\" -> \"" <<
-					poolsStructure[currentPool - 1]->getConnectionPostPool(currentConnection)->getID() << "\" [label=\"" << poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) << 
-					"\", arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";*/
+					color = hex + "0000"; // РћС‚С‚РµРЅРѕРє РєСЂР°СЃРЅРѕРіРѕ
 				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() << "\" -> \"" <<
-					poolsStructure[currentPool - 1]->getConnectionPostPool(currentConnection)->getID() << "\" [ arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
+					poolsStructure[currentPool - 1]->getConnectionPostPool(currentConnection)->getID() << "\" [ ";
+				if (printWeights) //  Р•СЃР»Рё РЅР°РґРѕ РЅР°РїРµС‡Р°С‚Р°С‚СЊ РІРµСЃР°
+					hDotGraphFile << "label=\"" << poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) << "\", ";
+				hDotGraphFile <<"arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
 			}
-	// Записываем предикторные связи
+	// Р—Р°РїРёСЃС‹РІР°РµРј РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
 		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
 			if (poolsStructure[currentPool - 1]->getPredConnectionEnabled(currentPredConnection))
@@ -198,78 +198,78 @@ void TPoolNetwork::printGraphNetwork(string graphFilename){
 	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
 }
 
-//Печать сети в файл или на экран
+//РџРµС‡Р°С‚СЊ СЃРµС‚Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 ostream& operator<<(ostream& os, const TPoolNetwork& poolNetwork){
 	for (int currentPool = 1; currentPool <= poolNetwork.poolsQuantity; ++currentPool)
 		os << *(poolNetwork.poolsStructure[currentPool - 1]);
-	os << "|\n"; // Записываем разделитель между пулами и связями
+	os << "|\n"; // Р—Р°РїРёСЃС‹РІР°РµРј СЂР°Р·РґРµР»РёС‚РµР»СЊ РјРµР¶РґСѓ РїСѓР»Р°РјРё Рё СЃРІСЏР·СЏРјРё
 	for (int currentPool = 1; currentPool <= poolNetwork.poolsQuantity; ++currentPool)
 		for (int currentConnection = 1; currentConnection <= poolNetwork.poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
 			os << *(poolNetwork.poolsStructure[currentPool-1]->connectednessSet[currentConnection-1]); 
-	os << "||\n"; // Записываем разделитель между связями и предикторными связями
+	os << "||\n"; // Р—Р°РїРёСЃС‹РІР°РµРј СЂР°Р·РґРµР»РёС‚РµР»СЊ РјРµР¶РґСѓ СЃРІСЏР·СЏРјРё Рё РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё
 	for (int currentPool = 1; currentPool <= poolNetwork.poolsQuantity; ++currentPool)
 		for (int currentPredConnection = 1; currentPredConnection <= poolNetwork.poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
 			os << *(poolNetwork.poolsStructure[currentPool-1]->predConnectednessSet[currentPredConnection-1]); 
-	os << "|||\n"; // Записываем разделитель между сетями
+	os << "|||\n"; // Р—Р°РїРёСЃС‹РІР°РµРј СЂР°Р·РґРµР»РёС‚РµР»СЊ РјРµР¶РґСѓ СЃРµС‚СЏРјРё
 	return os;
 }
 
-//Считывание сети из файла или экрана
+//РЎС‡РёС‚С‹РІР°РЅРёРµ СЃРµС‚Рё РёР· С„Р°Р№Р»Р° РёР»Рё СЌРєСЂР°РЅР°
 istream& operator>>(istream& is, TPoolNetwork& poolNetwork){
-	poolNetwork.erasePoolNetwork(); // На всякий случай опустошаем сеть
+	poolNetwork.erasePoolNetwork(); // РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ РѕРїСѓСЃС‚РѕС€Р°РµРј СЃРµС‚СЊ
 	string tmp_string;
-	// Создаем все пулы сети
-	is >> tmp_string; // Считываем тип пула
-	while (tmp_string != "|"){ // Считываем до разделителя между пулами и связями
+	// РЎРѕР·РґР°РµРј РІСЃРµ РїСѓР»С‹ СЃРµС‚Рё
+	is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј С‚РёРї РїСѓР»Р°
+	while (tmp_string != "|"){ // РЎС‡РёС‚С‹РІР°РµРј РґРѕ СЂР°Р·РґРµР»РёС‚РµР»СЏ РјРµР¶РґСѓ РїСѓР»Р°РјРё Рё СЃРІСЏР·СЏРјРё
 		int newType = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем объем пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РѕР±СЉРµРј РїСѓР»Р°
 		int newCapacity = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем среднее смещения нейронов пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј СЃСЂРµРґРЅРµРµ СЃРјРµС‰РµРЅРёСЏ РЅРµР№СЂРѕРЅРѕРІ РїСѓР»Р°
 		double newBiasMean = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем дисперсию смещения нейронов пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РґРёСЃРїРµСЂСЃРёСЋ СЃРјРµС‰РµРЅРёСЏ РЅРµР№СЂРѕРЅРѕРІ РїСѓР»Р°
 		double newBiasVariance = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем слой пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј СЃР»РѕР№ РїСѓР»Р°
 		int newLayer = atoi(tmp_string.c_str());
 		poolNetwork.addPool(poolNetwork.getPoolsQuantity() + 1, newType, newCapacity, newBiasMean, newBiasVariance, newLayer);
-		is >> tmp_string; // Считываем типа пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј С‚РёРїР° РїСѓР»Р°
 	}
-	// Создаем все связи между пулами
-	is >> tmp_string; // Считываем номер пресинаптического пула
-	while (tmp_string != "||"){ // Считываем до разделителя между связями и предикторными связями
+	// РЎРѕР·РґР°РµРј РІСЃРµ СЃРІСЏР·Рё РјРµР¶РґСѓ РїСѓР»Р°РјРё
+	is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РїСѓР»Р°
+	while (tmp_string != "||"){ // РЎС‡РёС‚С‹РІР°РµРј РґРѕ СЂР°Р·РґРµР»РёС‚РµР»СЏ РјРµР¶РґСѓ СЃРІСЏР·СЏРјРё Рё РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё
 		int prePoolNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем номер постсинаптического пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РїСѓР»Р°
 		int postPoolNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем среднее веса связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј СЃСЂРµРґРЅРµРµ РІРµСЃР° СЃРІСЏР·Рё
 		double newWeightMean = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем дисперсию веса связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РґРёСЃРїРµСЂСЃРёСЋ РІРµСЃР° СЃРІСЏР·Рё
 		double newWeightVariance = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем признак экспресии связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РїСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРІСЏР·Рё
 		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
-		is >> tmp_string; // Считываем так выключения связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј С‚Р°Рє РІС‹РєР»СЋС‡РµРЅРёСЏ СЃРІСЏР·Рё
 		int newDisabledStep = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем вероятность образования синапса по этой связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ РѕР±СЂР°Р·РѕРІР°РЅРёСЏ СЃРёРЅР°РїСЃР° РїРѕ СЌС‚РѕР№ СЃРІСЏР·Рё
 		double newDevelopSynapseProb = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем номер инновации этой связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РёРЅРЅРѕРІР°С†РёРё СЌС‚РѕР№ СЃРІСЏР·Рё
 		long newInnovationNumber = atoi(tmp_string.c_str());
 		poolNetwork.addConnection(prePoolNumber, postPoolNumber, poolNetwork.getConnectionsQuantity() + 1, newWeightMean, newWeightVariance, newEnabled, newDisabledStep, newDevelopSynapseProb, newInnovationNumber);
-		is >> tmp_string; // Считываем номер пресинаптического пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РїСѓР»Р°
 	}
-	// Создаем все предикторные связи между пулами
-	is >> tmp_string; // Считываем номер пресинаптического пула
-	while (tmp_string != "|||"){ // Считываем до разделителя между предикторными связями и концом сети
+	// РЎРѕР·РґР°РµРј РІСЃРµ РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё РјРµР¶РґСѓ РїСѓР»Р°РјРё
+	is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РїСѓР»Р°
+	while (tmp_string != "|||"){ // РЎС‡РёС‚С‹РІР°РµРј РґРѕ СЂР°Р·РґРµР»РёС‚РµР»СЏ РјРµР¶РґСѓ РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё Рё РєРѕРЅС†РѕРј СЃРµС‚Рё
 		int prePoolNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем номер постсинаптического пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РїСѓР»Р°
 		int postPoolNumber = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем признак экспресии связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РїСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРІСЏР·Рё
 		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
-		is >> tmp_string; // Считываем так выключения связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј С‚Р°Рє РІС‹РєР»СЋС‡РµРЅРёСЏ СЃРІСЏР·Рё
 		int newDisabledStep = atoi(tmp_string.c_str());
-		is >> tmp_string; // Считываем вероятность образования предикторной связи по этой связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РїРѕ СЌС‚РѕР№ СЃРІСЏР·Рё
 		double newDevelopPredConnectionProb = atof(tmp_string.c_str());
-		is >> tmp_string; // Считываем номер инновации этой связи
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РёРЅРЅРѕРІР°С†РёРё СЌС‚РѕР№ СЃРІСЏР·Рё
 		long newInnovationNumber = atoi(tmp_string.c_str());
 		poolNetwork.addPredConnection(prePoolNumber, postPoolNumber, poolNetwork.getPredConnectionsQuantity() + 1, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber);
-		is >> tmp_string; // Считываем номер пресинаптического пула
+		is >> tmp_string; // РЎС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РїСѓР»Р°
 	}
 
 	return is;

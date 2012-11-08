@@ -1,4 +1,4 @@
-#include "TEvolutionaryProcess.h"
+п»ї#include "TEvolutionaryProcess.h"
 #include "TPopulation.h"
 #include "TEnvironment.h"
 #include <ctime>
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-// Загрузка параметров популяции из файла
+// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ РїРѕРїСѓР»СЏС†РёРё РёР· С„Р°Р№Р»Р°
 void TEvolutionaryProcess::fillPopulationSettingsFromFile(){
 	string optionString;
 	ifstream settingsFile;
@@ -20,7 +20,7 @@ void TEvolutionaryProcess::fillPopulationSettingsFromFile(){
 		if (optionString == "population-size") { settingsFile >> optionString; agentsPopulation->setPopulationSize(atoi(optionString.c_str())); }
 		if (optionString == "agent-lifetime") { settingsFile >> optionString; agentsPopulation->evolutionSettings.agentLifetime = atoi(optionString.c_str()); }
 		if (optionString == "evolution-time") { settingsFile >> optionString; agentsPopulation->evolutionSettings.evolutionTime = atoi(optionString.c_str()); }
-		// Мутационные параметры
+		// РњСѓС‚Р°С†РёРѕРЅРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
 		if (optionString == "mut-weight-probability") { settingsFile >> optionString; agentsPopulation->mutationSettings.mutWeightProbability = atof(optionString.c_str()); }
 		if (optionString == "mut-weight-mean-disp") { settingsFile >> optionString; agentsPopulation->mutationSettings.mutWeightMeanDisp = atof(optionString.c_str()); }
 		if (optionString == "mut-weight-disp-disp") { settingsFile >> optionString; agentsPopulation->mutationSettings.mutWeightDispDisp = atof(optionString.c_str()); }
@@ -41,7 +41,7 @@ void TEvolutionaryProcess::fillPopulationSettingsFromFile(){
 	settingsFile.close();
 }
 
-// Загрузка параметров среды из файла
+// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ СЃСЂРµРґС‹ РёР· С„Р°Р№Р»Р°
 void TEvolutionaryProcess::fillEnvironmentSettingsFromFile(){
 	string optionString;
 	ifstream settingsFile;
@@ -53,7 +53,7 @@ void TEvolutionaryProcess::fillEnvironmentSettingsFromFile(){
 	settingsFile.close();
 }
 
-// Загрузка параметров агента из файла
+// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ Р°РіРµРЅС‚Р° РёР· С„Р°Р№Р»Р°
 void TEvolutionaryProcess::fillAgentSettingsFromFile(){
 	string optionString;
 	ifstream settingsFile;
@@ -84,9 +84,9 @@ void TEvolutionaryProcess::fillAgentSettingsFromFile(){
 	settingsFile.close();
 }
 
-// Вывод логовых сообщений (прогресса) на консоль или в файл
+// Р’С‹РІРѕРґ Р»РѕРіРѕРІС‹С… СЃРѕРѕР±С‰РµРЅРёР№ (РїСЂРѕРіСЂРµСЃСЃР°) РЅР° РєРѕРЅСЃРѕР»СЊ РёР»Рё РІ С„Р°Р№Р»
 void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgentsConsole, TPopulation* bestPopulation, int currentEvolutionStep /*=0*/){
-	// Подсчитываем средние характеристики
+	// РџРѕРґСЃС‡РёС‚С‹РІР°РµРј СЃСЂРµРґРЅРёРµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё
 	double averagePoolsQuantity = 0;
 	double averageConnectionsQuantity = 0;
 	double averagePredConnectionsQuantity = 0;
@@ -110,10 +110,10 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgen
 	averageReward /= agentsPopulation->getPopulationSize();
 	//outputConsole << currentEvolutionStep << ": " << averageReward << "\t" << maxReward << "\t" <<
 	//	averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
-	// Также записываем в файл результатов
+	// РўР°РєР¶Рµ Р·Р°РїРёСЃС‹РІР°РµРј РІ С„Р°Р№Р» СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 	outputConsole <<  currentEvolutionStep << "\t" << averageReward << "\t" << maxReward << "\t" <<
 		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
-	// Записываем лучшего агента и всю популяцию, если нужно
+	// Р—Р°РїРёСЃС‹РІР°РµРј Р»СѓС‡С€РµРіРѕ Р°РіРµРЅС‚Р° Рё РІСЃСЋ РїРѕРїСѓР»СЏС†РёСЋ, РµСЃР»Рё РЅСѓР¶РЅРѕ
 	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsConsole);
 
 	if (averageReward > bestAverageReward){
@@ -123,15 +123,15 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgen
 	}
 }
 
-// Создание и заполнение предварительного файла основных результатов
+// РЎРѕР·РґР°РЅРёРµ Рё Р·Р°РїРѕР»РЅРµРЅРёРµ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅРѕРіРѕ С„Р°Р№Р»Р° РѕСЃРЅРѕРІРЅС‹С… СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 void TEvolutionaryProcess::createMainResultsFile(ofstream& resultsFile, unsigned int randomSeed){
-	// Опустошаем файлы если они есть
+	// РћРїСѓСЃС‚РѕС€Р°РµРј С„Р°Р№Р»С‹ РµСЃР»Рё РѕРЅРё РµСЃС‚СЊ
 	//ofstream resultsFile;
 	resultsFile.open(filenameSettings.resultsFilename.c_str());
-	//Записываем параметры эволюции
+	//Р—Р°РїРёСЃС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂС‹ СЌРІРѕР»СЋС†РёРё
 	resultsFile << "Evolutionary_parameters:" << "\tpopulation-size=" << agentsPopulation->getPopulationSize() << "\tagent-lifetime=" << agentsPopulation->evolutionSettings.agentLifetime
 		<< "\tevolution-time=" << agentsPopulation->evolutionSettings.evolutionTime << endl << endl;
-	// Записываем параметры мутаций
+	// Р—Р°РїРёСЃС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РјСѓС‚Р°С†РёР№
 	resultsFile << "Mutation_parameters:" << "\tmut-weight-probability=" << agentsPopulation->mutationSettings.mutWeightProbability << "\tmut-weight-mean-disp=" << agentsPopulation->mutationSettings.mutWeightMeanDisp
 		<< "\tmut-weight-disp-disp=" << agentsPopulation->mutationSettings.mutWeightDispDisp << "\tdis-limit=" << agentsPopulation->mutationSettings.disLimit << "\tenable-connection-prob=" << agentsPopulation->mutationSettings.enableConnectionProb
 		<< "\tdisable-connection-prob=" << agentsPopulation->mutationSettings.disableConnectionProb << "\tadd-connection-prob=" << agentsPopulation->mutationSettings.addConnectionProb
@@ -141,57 +141,57 @@ void TEvolutionaryProcess::createMainResultsFile(ofstream& resultsFile, unsigned
 		<< "\tconnection-standart-amount=" << agentsPopulation->mutationSettings.connectionStandartAmount << "\tmut-develop-con-prob-prob=" << agentsPopulation->mutationSettings.mutDevelopConProbProb
 		<< "\tmut-develop-con-prob-disp=" << agentsPopulation->mutationSettings.mutDevelopConProbDisp << endl << endl;
 	TAgent* pointerToAgent = agentsPopulation->getPointertoAgent(1);
-	// Записываем параметры первичного системогенеза
+	// Р—Р°РїРёСЃС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РїРµСЂРІРёС‡РЅРѕРіРѕ СЃРёСЃС‚РµРјРѕРіРµРЅРµР·Р°
 	resultsFile << "Primary_systemogenesis_parameters:" << "\tinitial-pool-capacity=" << pointerToAgent->primarySystemogenesisSettings.initialPoolCapacity
 		<< "\tinitial-develop-synapse-probability=" << pointerToAgent->primarySystemogenesisSettings.initialDevelopSynapseProbability << "\tinitial-develop-predconnection-prob=" << pointerToAgent->primarySystemogenesisSettings.initialDevelopPredConnectionProbability
 		<< "\tprimary-systemogenesis-time=" << pointerToAgent->primarySystemogenesisSettings.primarySystemogenesisTime << "\tspontaneous-acivity-prob=" << pointerToAgent->primarySystemogenesisSettings.spontaneousActivityProb
 		<< "\tactive-neurons-percent=" << pointerToAgent->primarySystemogenesisSettings.activeNeuronsPercent << "\tsynapses-activity-treshold=" << pointerToAgent->primarySystemogenesisSettings.synapsesActivityTreshold
 		<< "\tsignificance-treshold=" << pointerToAgent->primarySystemogenesisSettings.significanceTreshold << endl << endl;
-	// Записываем параметры среды
+	// Р—Р°РїРёСЃС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂС‹ СЃСЂРµРґС‹
 	resultsFile << "Environment_parameters:" << "\tnonstationarity-coefficient=" << environment->getNonstationarityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
-	//Записываем уникальное ядро рандомизации
+	//Р—Р°РїРёСЃС‹РІР°РµРј СѓРЅРёРєР°Р»СЊРЅРѕРµ СЏРґСЂРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё
 	resultsFile << "Random_seed:\t" << randomSeed << endl << endl; 
-	// Записываем заголовки
+	// Р—Р°РїРёСЃС‹РІР°РµРј Р·Р°РіРѕР»РѕРІРєРё
 	resultsFile << "Step\tAverage_reward\tMax_reward\tPools\tConnections\tPredConnections" << endl;
 	//resultsFile.close();
 }
 
-// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
+// Р—Р°РїСѓСЃРє СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° (РїРµСЂРµРґР°РµС‚СЃСЏ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё, РµСЃР»Рё 0, С‚Рѕ СЂР°РЅРґРѕРјРёР·Р°С‚РѕСЂ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚СЃСЏ СЃС‚Р°РЅРґР°СЂС‚РЅРѕ)
 void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
-	// Если не было передано зерно рандомизации
+	// Р•СЃР»Рё РЅРµ Р±С‹Р»Рѕ РїРµСЂРµРґР°РЅРѕ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё
 	if (!randomSeed)
 		randomSeed = static_cast<unsigned int>(time(0));
 	srand(randomSeed);
-	// Запуски генератора случайных чисел, чтобы развести значения
+	// Р—Р°РїСѓСЃРєРё РіРµРЅРµСЂР°С‚РѕСЂР° СЃР»СѓС‡Р°Р№РЅС‹С… С‡РёСЃРµР», С‡С‚РѕР±С‹ СЂР°Р·РІРµСЃС‚Рё Р·РЅР°С‡РµРЅРёСЏ
 	rand();
 	rand();
 	rand();
-	// Загружаем среду
+	// Р—Р°РіСЂСѓР¶Р°РµРј СЃСЂРµРґСѓ
 	if (environment)
 		delete environment;
 	environment = new TEnvironment(filenameSettings.environmentFilename);
 	fillEnvironmentSettingsFromFile();
-	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
+	// Р•СЃР»Рё СЌС‚РѕС‚ РїСЂРѕС†РµСЃСЃ СѓР¶Рµ Р·Р°РїСѓСЃРєР°Р»СЃСЏ (Р’РћРћР‘Р©Р• РќРђР”Рћ Р‘Р« РЎР”Р•Р›РђРўР¬ Р’РћР—РњРћР–РќРћРЎРўР¬ РџР РћРЎРўРћР“Рћ РџР РћР”РћР›Р–Р•РќРРЇ Р­Р’РћР›Р®Р¦РР)
 	if (agentsPopulation)
 		delete agentsPopulation;
 	agentsPopulation = new TPopulation;
 	fillPopulationSettingsFromFile();
-	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
+	// Р¤РёР·РёС‡РµСЃРєРё Р°РіРµРЅС‚С‹ РІ РїРѕРїСѓР»СЏС†РёРё СѓР¶Рµ СЃРѕР·РґР°РЅС‹ (РїРѕСЃР»Рµ С‚РѕРіРѕ, РєР°Рє Р·Р°РіСЂСѓР·РёР»СЃСЏ СЂР°Р·РјРµСЂ РїРѕРїСѓР»СЏС†РёРё), РїРѕСЌС‚РѕРјСѓ РјРѕР¶РµРј Р·Р°РіСЂСѓР·РёС‚СЊ РІ РЅРёС… РЅР°СЃС‚СЂРѕР№РєРё
 	fillAgentSettingsFromFile();
-	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
+	// РћРїСѓСЃС‚РѕС€Р°РµРј С„Р°Р№Р» Р»СѓС‡С€РёС… Р°РіРµРЅС‚РѕРІ РµСЃР»Рё РѕРЅ РµСЃС‚СЊ Рё СЃРѕР·РґР°РµРј С„Р°Р№Р» СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 	ofstream resultsFile;
 	createMainResultsFile(resultsFile, randomSeed);
 	ofstream bestAgentsFile;
 	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str());
-	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
+	// РќР°СЃС‚СЂРѕР№РєРё СѓР¶Рµ Р·Р°РіСЂСѓР¶РµРЅС‹ РІ Р°РіРµРЅС‚РѕРІ, РїРѕСЌС‚РѕРјСѓ РјРѕР¶РµРј РіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ РјРёРЅРёРјР°Р»СЊРЅСѓСЋ РїРѕРїСѓР»СЏС†РёСЋ
 	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
-	// Создаем структуру лучшей популяции (если процессор достаточно быстрый, то копирование популяций будет быстрее чем каждый раз записывать популяцию в файл)
+	// РЎРѕР·РґР°РµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё (РµСЃР»Рё РїСЂРѕС†РµСЃСЃРѕСЂ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ Р±С‹СЃС‚СЂС‹Р№, С‚Рѕ РєРѕРїРёСЂРѕРІР°РЅРёРµ РїРѕРїСѓР»СЏС†РёР№ Р±СѓРґРµС‚ Р±С‹СЃС‚СЂРµРµ С‡РµРј РєР°Р¶РґС‹Р№ СЂР°Р· Р·Р°РїРёСЃС‹РІР°С‚СЊ РїРѕРїСѓР»СЏС†РёСЋ РІ С„Р°Р№Р»)
 	TPopulation* bestPopulation = new TPopulation;
 	for (int currentEvolutionStep = 1; currentEvolutionStep <= agentsPopulation->evolutionSettings.evolutionTime; ++currentEvolutionStep){
 		agentsPopulation->evolutionaryStep(*environment, currentEvolutionStep); 
 		makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
 	}
-	// Заспиываем лучшую популяцию
+	// Р—Р°СЃРїРёС‹РІР°РµРј Р»СѓС‡С€СѓСЋ РїРѕРїСѓР»СЏС†РёСЋ
 	bestPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
 	delete bestPopulation;
 

@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+п»ї#define _CRT_SECURE_NO_WARNINGS
 
 #include "TParallelEvolutionaryProcess.h"
 
@@ -13,7 +13,7 @@
 
 using namespace std;
 
-// Заполнение параметров директорий для записи файлов
+// Р—Р°РїРѕР»РЅРµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ РґРёСЂРµРєС‚РѕСЂРёР№ РґР»СЏ Р·Р°РїРёСЃРё С„Р°Р№Р»РѕРІ
 void TParallelEvolutionaryProcess::fillDirectoriesSettings(){
 	string optionString;
 	ifstream settingsFile;
@@ -26,41 +26,41 @@ void TParallelEvolutionaryProcess::fillDirectoriesSettings(){
 	settingsFile.close();
 }
 
-// Расишифровка парметров командной строки
+// Р Р°СЃРёС€РёС„СЂРѕРІРєР° РїР°СЂРјРµС‚СЂРѕРІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
 void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign){
-	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+	int currentArgNumber = 2; // РўРµРєСѓС‰РёР№ РЅРѕРјРµСЂ РїР°СЂР°РјРµС‚СЂР° (РІ РїРµСЂРІРѕРј Р·Р°РїРёСЃР°РЅ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ РЅР°СЃС‚СЂРѕРµРє)
 	while (currentArgNumber < argc){
-		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
-			case 'e': // Если это диапозон номеров сред
+		switch (argv[currentArgNumber][1]){ // Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РїР°СЂР°РјРµС‚СЂ (РІ РїРµСЂРІРѕРј РїРѕР»Рµ "-")
+			case 'e': // Р•СЃР»Рё СЌС‚Рѕ РґРёР°РїРѕР·РѕРЅ РЅРѕРјРµСЂРѕРІ СЃСЂРµРґ
 				firstEnvironmentNumber = atoi(argv[++currentArgNumber]);
 				lastEnvironmentNumber = atoi(argv[++currentArgNumber]);
 				break;
-			case 't': // Если это диапазон попыток
+			case 't': // Р•СЃР»Рё СЌС‚Рѕ РґРёР°РїР°Р·РѕРЅ РїРѕРїС‹С‚РѕРє
 				firstTryNumber = atoi(argv[++currentArgNumber]);
 				lastTryNumber = atoi(argv[++currentArgNumber]);
 				break;
-			case 's': // Если это признак конктретного запуска
+			case 's': // Р•СЃР»Рё СЌС‚Рѕ РїСЂРёР·РЅР°Рє РєРѕРЅРєС‚СЂРµС‚РЅРѕРіРѕ Р·Р°РїСѓСЃРєР°
 				runSign = argv[++currentArgNumber];
 		}
 		++currentArgNumber;
 	}
 }
 
-// Расшифровка сообщения от рабочего процесса 
+// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР° 
 void TParallelEvolutionaryProcess::decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry){
 	string tmpString;
 	for (unsigned int i=0; i < strlen(inputMessage); ++i)
-		if ( (inputMessage[i] >= '0') && (inputMessage[i] <= '9') ) // Если символ число
+		if ( (inputMessage[i] >= '0') && (inputMessage[i] <= '9') ) // Р•СЃР»Рё СЃРёРјРІРѕР» С‡РёСЃР»Рѕ
 			tmpString += inputMessage[i];
 		else {
 			switch (inputMessage[i]){
-				case 'e': // Если это номер среды
+				case 'e': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ СЃСЂРµРґС‹
 					finishedEnvironment = atoi(tmpString.c_str());
 					break;
-				case 't': // Если это номер попытки
+				case 't': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїРѕРїС‹С‚РєРё
 					finishedTry = atoi(tmpString.c_str());
 					break;
-				case 'p': // Если это номер процесса
+				case 'p': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°
 					processRankSend = atoi(tmpString.c_str());
 					break;
 			}
@@ -68,72 +68,72 @@ void TParallelEvolutionaryProcess::decodeFinishedWorkMessage(char inputMessage[]
 		}
 }
 
-// Выполнение управляющего процесса (важно, чтобы количество общих заданий не было меньше кол-ва выделенных процессов!!!)
+// Р’С‹РїРѕР»РЅРµРЅРёРµ СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР° (РІР°Р¶РЅРѕ, С‡С‚РѕР±С‹ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕР±С‰РёС… Р·Р°РґР°РЅРёР№ РЅРµ Р±С‹Р»Рѕ РјРµРЅСЊС€Рµ РєРѕР»-РІР° РІС‹РґРµР»РµРЅРЅС‹С… РїСЂРѕС†РµСЃСЃРѕРІ!!!)
 void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
-	int firstEnvironmentNumber; // Диапазон номеров сред
+	int firstEnvironmentNumber; // Р”РёР°РїР°Р·РѕРЅ РЅРѕРјРµСЂРѕРІ СЃСЂРµРґ
 	int lastEnvironmentNumber;
-	int firstTryNumber; // Диапазон попыток
+	int firstTryNumber; // Р”РёР°РїР°Р·РѕРЅ РїРѕРїС‹С‚РѕРє
 	int lastTryNumber;
-	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
-	unsigned long startTime = static_cast<unsigned long>(time(0)); // Время старта процесса эволюции
+	string runSign; // РќРµРєРѕС‚РѕСЂС‹Р№ РѕС‚Р»РёС‡РёС‚РµР»СЊРЅС‹Р№ РїСЂРёР·РЅР°Рє РґР°РЅРЅРѕРіРѕ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ РЅР°Р±РѕСЂР° РїР°СЂР°РјРµС‚СЂРѕРІ РёР»Рё РІРµСЂСЃРёРё Р°Р»РіРѕСЂРёС‚РјР°
+	unsigned long startTime = static_cast<unsigned long>(time(0)); // Р’СЂРµРјСЏ СЃС‚Р°СЂС‚Р° РїСЂРѕС†РµСЃСЃР° СЌРІРѕР»СЋС†РёРё
 	decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign);
-	// Создаем файл с логом
+	// РЎРѕР·РґР°РµРј С„Р°Р№Р» СЃ Р»РѕРіРѕРј
 	stringstream logFilename;
 	logFilename << directoriesSettings.workDirectory << "/Evolution_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << runSign << ".txt";
 	ofstream logFile;
 	logFile.open(logFilename.str().c_str());
-	// Выдача дочерним процессам всех заданий данных на выполнение программе
+	// Р’С‹РґР°С‡Р° РґРѕС‡РµСЂРЅРёРј РїСЂРѕС†РµСЃСЃР°Рј РІСЃРµС… Р·Р°РґР°РЅРёР№ РґР°РЅРЅС‹С… РЅР° РІС‹РїРѕР»РЅРµРЅРёРµ РїСЂРѕРіСЂР°РјРјРµ
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment)
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)
-			// Если не всем процессам выданы изначальные задания (простой подсчет)
+			// Р•СЃР»Рё РЅРµ РІСЃРµРј РїСЂРѕС†РµСЃСЃР°Рј РІС‹РґР°РЅС‹ РёР·РЅР°С‡Р°Р»СЊРЅС‹Рµ Р·Р°РґР°РЅРёСЏ (РїСЂРѕСЃС‚РѕР№ РїРѕРґСЃС‡РµС‚)
 			if ((currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1 <= processesQuantity - 1){
-				// Подсчитываем номер следущего процесса для посылки задания
+				// РџРѕРґСЃС‡РёС‚С‹РІР°РµРј РЅРѕРјРµСЂ СЃР»РµРґСѓС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР° РґР»СЏ РїРѕСЃС‹Р»РєРё Р·Р°РґР°РЅРёСЏ
 				int processRankSend = (currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1;
-				// Составляем сообщение для рабочего процесса
+				// РЎРѕСЃС‚Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 				stringstream outStream;
 				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
 				char outMessage[messageLength];
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
-				// Записываем в лог выдачу задания
+				// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РІС‹РґР°С‡Сѓ Р·Р°РґР°РЅРёСЏ
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
 					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
-			} // Если все процессы получили задание,  то ждем завершения выполнения и по ходу выдаем оставшиеся задания
+			} // Р•СЃР»Рё РІСЃРµ РїСЂРѕС†РµСЃСЃС‹ РїРѕР»СѓС‡РёР»Рё Р·Р°РґР°РЅРёРµ,  С‚Рѕ Р¶РґРµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ Рё РїРѕ С…РѕРґСѓ РІС‹РґР°РµРј РѕСЃС‚Р°РІС€РёРµСЃСЏ Р·Р°РґР°РЅРёСЏ
 			else {
 				char inputMessage[messageLength];
-				// Ждем входящее сообщение о том, что процесс выполнил задание
+				// Р–РґРµРј РІС…РѕРґСЏС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ С‚РѕРј, С‡С‚Рѕ РїСЂРѕС†РµСЃСЃ РІС‹РїРѕР»РЅРёР» Р·Р°РґР°РЅРёРµ
 				MPI_Recv(inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
-				// Расшифровываем сообщение от рабочего процесса
+				// Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 				int processRankSend, finishedEnvironment, finishedTry;
 				decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
-				// Записываем в лог прием задания
+				// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РїСЂРёРµРј Р·Р°РґР°РЅРёСЏ
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
 					<< "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-				// Составляем сообщение и высылаем задание рабочему процессу
+				// РЎРѕСЃС‚Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ Рё РІС‹СЃС‹Р»Р°РµРј Р·Р°РґР°РЅРёРµ СЂР°Р±РѕС‡РµРјСѓ РїСЂРѕС†РµСЃСЃСѓ
 				stringstream outStream;
 				outStream << currentEnvironment << "E" << currentTry << "T" << runSign << "S";
 				char outMessage[messageLength];
 				outStream >> outMessage;
 				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
-				// Записываем в лог выдачу задания
+				// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РІС‹РґР°С‡Сѓ Р·Р°РґР°РЅРёСЏ
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
 					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
 			}
-	// Когда все задания закончились, ждем пока все они будут выполнены и по ходу посылаем всем процессам команду о завершении
-	int processTillQuit = processesQuantity - 1; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
+	// РљРѕРіРґР° РІСЃРµ Р·Р°РґР°РЅРёСЏ Р·Р°РєРѕРЅС‡РёР»РёСЃСЊ, Р¶РґРµРј РїРѕРєР° РІСЃРµ РѕРЅРё Р±СѓРґСѓС‚ РІС‹РїРѕР»РЅРµРЅС‹ Рё РїРѕ С…РѕРґСѓ РїРѕСЃС‹Р»Р°РµРј РІСЃРµРј РїСЂРѕС†РµСЃСЃР°Рј РєРѕРјР°РЅРґСѓ Рѕ Р·Р°РІРµСЂС€РµРЅРёРё
+	int processTillQuit = processesQuantity - 1; // РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕС†РµСЃСЃРѕРІ РєРѕС‚РѕСЂС‹Рµ РµС‰Рµ РІС‹РїРѕР»РЅСЏСЋС‚СЃСЏ Рё РЅРµРѕР±С…РѕРґРёРјРѕ РґРѕР¶РґР°С‚СЊСЃСЏ РёС… РѕРєРѕРЅС‡Р°РЅРёСЏ
 	while (processTillQuit > 0){
 		char inputMessage[messageLength];
 		MPI_Recv(inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
-		// Расшифровываем сообщение от рабочего процесса
+		// Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 		int processRankSend, finishedEnvironment, finishedTry;
 		decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
-		// Записываем в лог прием задания
+		// Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі РїСЂРёРµРј Р·Р°РґР°РЅРёСЏ
 		unsigned long currentTime = static_cast<unsigned long>(time(0));
 		logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
 			<< "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-		// Составляем сообщение о выходе и высылаем
+		// РЎРѕСЃС‚Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ Рѕ РІС‹С…РѕРґРµ Рё РІС‹СЃС‹Р»Р°РµРј
 		char outMessage[messageLength];
 		strcpy(outMessage, "q");
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
@@ -143,21 +143,21 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	logFile.close();
 }
 
-// Расшифровка сообщения от рутового процесса 
+// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂСѓС‚РѕРІРѕРіРѕ РїСЂРѕС†РµСЃСЃР° 
 void TParallelEvolutionaryProcess::decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, string& runSign){
 	string tmpString;
 	for (unsigned int i=0; i < strlen(inputMessage); ++i)
-		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || ((inputMessage[i] >= 'a') && (inputMessage[i] <= 'z')) ) // Если символ число или маленькая буква
+		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || ((inputMessage[i] >= 'a') && (inputMessage[i] <= 'z')) ) // Р•СЃР»Рё СЃРёРјРІРѕР» С‡РёСЃР»Рѕ РёР»Рё РјР°Р»РµРЅСЊРєР°СЏ Р±СѓРєРІР°
 			tmpString += inputMessage[i];
 		else {
 			switch (inputMessage[i]){
-				case 'E': // Если это номер среды
+				case 'E': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ СЃСЂРµРґС‹
 					currentEnvironment = atoi(tmpString.c_str());
 					break;
-				case 'T': // Если это номер попытки
+				case 'T': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїРѕРїС‹С‚РєРё
 					currentTry = atoi(tmpString.c_str());
 					break;
-				case 'S': // Если это номер процесса
+				case 'S': // Р•СЃР»Рё СЌС‚Рѕ РЅРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°
 					runSign = tmpString;
 					break;
 			}
@@ -165,57 +165,57 @@ void TParallelEvolutionaryProcess::decodeTaskMessage(char inputMessage[], int& c
 		}
 }
 
-// Выполнение рабочего процесса
+// Р’С‹РїРѕР»РЅРµРЅРёРµ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 	char inputMessage[messageLength];
-	MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status); // Ждем сообщения с заданием
-	while (strcmp(inputMessage, "q")){ // Пока не было команды о выходе
-		// Декодируем сообщение с заданием
+	MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status); // Р–РґРµРј СЃРѕРѕР±С‰РµРЅРёСЏ СЃ Р·Р°РґР°РЅРёРµРј
+	while (strcmp(inputMessage, "q")){ // РџРѕРєР° РЅРµ Р±С‹Р»Рѕ РєРѕРјР°РЅРґС‹ Рѕ РІС‹С…РѕРґРµ
+		// Р”РµРєРѕРґРёСЂСѓРµРј СЃРѕРѕР±С‰РµРЅРёРµ СЃ Р·Р°РґР°РЅРёРµРј
 		int currentEnvironment, currentTry;
 		string runSign;
 		decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign);
-		// Определяем уникальное ядро рандомизации
-		// К ядру инициализации случайных чисел добавляется номер процесса, чтобы развести изначально инициализируемые процессы
+		// РћРїСЂРµРґРµР»СЏРµРј СѓРЅРёРєР°Р»СЊРЅРѕРµ СЏРґСЂРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё
+		// Рљ СЏРґСЂСѓ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СЃР»СѓС‡Р°Р№РЅС‹С… С‡РёСЃРµР» РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РЅРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°, С‡С‚РѕР±С‹ СЂР°Р·РІРµСЃС‚Рё РёР·РЅР°С‡Р°Р»СЊРЅРѕ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРјС‹Рµ РїСЂРѕС†РµСЃСЃС‹
 		unsigned int randomSeed = static_cast<unsigned int>(time(0)) + processRank;
-		// Заполняем параметры эволюционного процесса и запускаем его
+		// Р—Р°РїРѕР»РЅСЏРµРј РїР°СЂР°РјРµС‚СЂС‹ СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° Рё Р·Р°РїСѓСЃРєР°РµРј РµРіРѕ
 		TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
 		stringstream tmpStream;
 		tmpStream << directoriesSettings.environmentDirectory << "/Environment" << currentEnvironment << ".txt";
 		evolutionaryProcess->filenameSettings.environmentFilename = tmpStream.str();
-		tmpStream.str(""); // Очищаем поток
+		tmpStream.str(""); // РћС‡РёС‰Р°РµРј РїРѕС‚РѕРє
 		tmpStream << directoriesSettings.resultsDirectory << "/En" << currentEnvironment << "/Results_En" << currentEnvironment << "_" << runSign << "(" << currentTry << ").txt";
 		evolutionaryProcess->filenameSettings.resultsFilename = tmpStream.str();
-		tmpStream.str(""); // Очищаем поток
+		tmpStream.str(""); // РћС‡РёС‰Р°РµРј РїРѕС‚РѕРє
 		tmpStream << directoriesSettings.resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestpopulation.txt";
 		evolutionaryProcess->filenameSettings.bestPopulationFilename = tmpStream.str();
-		tmpStream.str(""); // Очищаем поток
+		tmpStream.str(""); // РћС‡РёС‰Р°РµРј РїРѕС‚РѕРє
 		tmpStream << directoriesSettings.resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestagents.txt";
 		evolutionaryProcess->filenameSettings.bestAgentsFilename = tmpStream.str();
 		evolutionaryProcess->filenameSettings.settingsFilename = settingsFilename;
 		evolutionaryProcess->start(randomSeed);
 		delete evolutionaryProcess;
-		// Посылаем ответ о завершении работы над заданием
-		tmpStream.str(""); // Очищаем поток
+		// РџРѕСЃС‹Р»Р°РµРј РѕС‚РІРµС‚ Рѕ Р·Р°РІРµСЂС€РµРЅРёРё СЂР°Р±РѕС‚С‹ РЅР°Рґ Р·Р°РґР°РЅРёРµРј
+		tmpStream.str(""); // РћС‡РёС‰Р°РµРј РїРѕС‚РѕРє
 		tmpStream << currentEnvironment << "e" << currentTry << "t" << processRank << "p";
 		char outMessage[messageLength];
 		tmpStream >> outMessage;
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD);
 
-		//Ожидание нового задания
+		//РћР¶РёРґР°РЅРёРµ РЅРѕРІРѕРіРѕ Р·Р°РґР°РЅРёСЏ
 		MPI_Recv(inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status);
 	}
 }
 
-// Запуск эволюционного процесса
+// Р—Р°РїСѓСЃРє СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°
 void TParallelEvolutionaryProcess::start(int argc, char **argv){
 	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // Определение общего количества процессов
-	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // Определение процессом своего номера
-	settingsFilename = argv[1]; // В первом аргументе должен быть записан путь к файлу настроек
+	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // РћРїСЂРµРґРµР»РµРЅРёРµ РѕР±С‰РµРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° РїСЂРѕС†РµСЃСЃРѕРІ
+	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // РћРїСЂРµРґРµР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃРѕРј СЃРІРѕРµРіРѕ РЅРѕРјРµСЂР°
+	settingsFilename = argv[1]; // Р’ РїРµСЂРІРѕРј Р°СЂРіСѓРјРµРЅС‚Рµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р·Р°РїРёСЃР°РЅ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ РЅР°СЃС‚СЂРѕРµРє
 	fillDirectoriesSettings();
-	if (processRank == 0) // Если это рутовый процесс
+	if (processRank == 0) // Р•СЃР»Рё СЌС‚Рѕ СЂСѓС‚РѕРІС‹Р№ РїСЂРѕС†РµСЃСЃ
 		rootProcess(argc, argv);
-	else // Если это рабочий процесс
+	else // Р•СЃР»Рё СЌС‚Рѕ СЂР°Р±РѕС‡РёР№ РїСЂРѕС†РµСЃСЃ
 		workProcess(argc, argv);
 
 	MPI_Finalize();

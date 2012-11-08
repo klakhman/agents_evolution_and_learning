@@ -1,4 +1,4 @@
-#include "TNeuralPool.h"
+п»ї#include "TNeuralPool.h"
 #include "TPoolConnection.h"
 #include "TPoolPredConnection.h"
 
@@ -8,7 +8,7 @@
 
 using namespace std;
 
-// Процедура увеличения размера массива входных связей
+// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… СЃРІСЏР·РµР№
 void TNeuralPool::inflateConnectednessSet(int inflateSize){
 	TPoolConnection** newConnectednessSet = new TPoolConnection*[connectednessSetSize + inflateSize];
 	memset(newConnectednessSet, 0, (connectednessSetSize + inflateSize) * sizeof(TPoolConnection*));
@@ -18,7 +18,7 @@ void TNeuralPool::inflateConnectednessSet(int inflateSize){
 	connectednessSetSize += inflateSize;
 }
 
-// Процедура увеличения размера массива входных предикторных связей
+// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№
 void TNeuralPool::inflatePredConnectednessSet(int inflateSize){
 	TPoolPredConnection** newPredConnectednessSet = new TPoolPredConnection*[predConnectednessSetSize + inflateSize];
 	memset(newPredConnectednessSet, 0, (predConnectednessSetSize + inflateSize) * sizeof(TPoolPredConnection*));
@@ -28,7 +28,7 @@ void TNeuralPool::inflatePredConnectednessSet(int inflateSize){
 	predConnectednessSetSize += inflateSize;
 }
 
-// Деструктор
+// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 TNeuralPool::~TNeuralPool(){
 	for (int currentConnection = 1; currentConnection <= inputConnectionsQuantity; ++currentConnection)
 		delete connectednessSet[currentConnection-1];
@@ -38,7 +38,7 @@ TNeuralPool::~TNeuralPool(){
 	delete []predConnectednessSet;
 }
 
-// Геттеры и сеттеры для связей данного пула (во всех случаях передается номер связи в массиве связей)
+// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ СЃРІСЏР·РµР№ РґР°РЅРЅРѕРіРѕ РїСѓР»Р° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 int TNeuralPool::getConnectionID(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getID(); }
 void TNeuralPool::setConnectionID(int connectionNumber, int newID) { connectednessSet[connectionNumber-1]->setID(newID); }
 double TNeuralPool::getConnectionWeightMean(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getWeightMean(); }
@@ -58,7 +58,7 @@ void TNeuralPool::setConnectionPrePool(int connectionNumber, TNeuralPool* newPre
 TNeuralPool* TNeuralPool::getConnectionPostPool(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getPostPool(); }
 void TNeuralPool::setConnectionPostPool(int connectionNumber, TNeuralPool* newPostPool) { connectednessSet[connectionNumber-1]->setPostPool(newPostPool); }
 
-// Геттеры и сеттеры для предикторных связей данного пула (во всех случаях передается номер связи в массиве связей)
+// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РґР°РЅРЅРѕРіРѕ РїСѓР»Р° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 int TNeuralPool::getPredConnectionID(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getID(); }
 void TNeuralPool::setPredConnectionID(int predConnectionNumber, int newID) { predConnectednessSet[predConnectionNumber-1]->setID(newID); }
 bool TNeuralPool::getPredConnectionEnabled(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getEnabled(); }
@@ -74,45 +74,45 @@ void TNeuralPool::setPredConnectionPrePool(int predConnectionNumber, TNeuralPool
 TNeuralPool* TNeuralPool::getPredConnectionPostPool(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getPostPool(); }
 void TNeuralPool::setPredConnectionPostPool(int predConnectionNumber, TNeuralPool* newPostPool) { predConnectednessSet[predConnectionNumber-1]->setPostPool(newPostPool); }
 
-// Добавление входной связи в пул
+// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕР№ СЃРІСЏР·Рё РІ РїСѓР»
 void TNeuralPool::addConnection(int newID, double newWeightMean, double newWeightVariance, bool newEnabled /*=true*/, int newDisabledStep /*=0*/, double newDevelopSynapseProb /*=1*/, long newInnovationNumber /*=0*/, TNeuralPool* newPrePool /*=0*/){
-	if (inputConnectionsQuantity >= connectednessSetSize) // Если у нас не хватает объема массива
+	if (inputConnectionsQuantity >= connectednessSetSize) // Р•СЃР»Рё Сѓ РЅР°СЃ РЅРµ С…РІР°С‚Р°РµС‚ РѕР±СЉРµРјР° РјР°СЃСЃРёРІР°
 		inflateConnectednessSet(INFLATE_CONNECTIONS_SIZE);
 	connectednessSet[inputConnectionsQuantity++] = new TPoolConnection(newID, newWeightMean, newWeightVariance, newEnabled, newDisabledStep, newDevelopSynapseProb, newInnovationNumber, newPrePool, this);
 }
 
-// Удаление связи из пула
+// РЈРґР°Р»РµРЅРёРµ СЃРІСЏР·Рё РёР· РїСѓР»Р°
 void TNeuralPool::deleteConnection(int connectionNumber){
 	TPoolConnection* deletingConnection = connectednessSet[connectionNumber - 1];
 	delete deletingConnection;
-	// Сдвигаем массив
+	// РЎРґРІРёРіР°РµРј РјР°СЃСЃРёРІ
 	for (int currentConnection = connectionNumber - 1; currentConnection < inputConnectionsQuantity - 1; ++currentConnection)
 		connectednessSet[currentConnection] = connectednessSet[currentConnection + 1];
 	//memcpy(connectednessSet[connectionNumber - 1], connectednessSet[connectionNumber], (inputConnectionsQuantity - connectionNumber) * sizeof(TPoolConnection*));
-	connectednessSet[inputConnectionsQuantity - 1] = 0; // Обнуляем указатель последней связи
+	connectednessSet[inputConnectionsQuantity - 1] = 0; // РћР±РЅСѓР»СЏРµРј СѓРєР°Р·Р°С‚РµР»СЊ РїРѕСЃР»РµРґРЅРµР№ СЃРІСЏР·Рё
 	--inputConnectionsQuantity;
 }
 
-// Добавление входной предикторной связи в пул
+// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ РїСѓР»
 void TNeuralPool::addPredConnection(int newID, bool newEnabled /*=true*/, int newDisabledStep /*=0*/, double newDevelopPredConnectionProb /*=1*/, long newInnovationNumber /*=0*/, TNeuralPool* newPrePool /*=0*/){
-	if (inputPredConnectionsQuantity >= predConnectednessSetSize) // Если у нас не хватает объема массива
+	if (inputPredConnectionsQuantity >= predConnectednessSetSize) // Р•СЃР»Рё Сѓ РЅР°СЃ РЅРµ С…РІР°С‚Р°РµС‚ РѕР±СЉРµРјР° РјР°СЃСЃРёРІР°
 		inflatePredConnectednessSet(INFLATE_PRED_CONNECTIONS_SIZE);
 	predConnectednessSet[inputPredConnectionsQuantity++] = new TPoolPredConnection(newID, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber, newPrePool, this);
 }
 
-// Удаление предикторной связи из пула
+// РЈРґР°Р»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РёР· РїСѓР»Р°
 void TNeuralPool::deletePredConnection(int predConnectionNumber){
 	TPoolPredConnection* deletingPredConnection = predConnectednessSet[predConnectionNumber - 1];
 	delete deletingPredConnection;
-	// Сдвигаем массив
+	// РЎРґРІРёРіР°РµРј РјР°СЃСЃРёРІ
 	for (int currentPredConnection = predConnectionNumber - 1; currentPredConnection < inputPredConnectionsQuantity - 1; ++currentPredConnection)
 		predConnectednessSet[currentPredConnection] = predConnectednessSet[currentPredConnection + 1];
 	//memcpy(connectednessSet[connectionNumber - 1], connectednessSet[connectionNumber], (inputConnectionsQuantity - connectionNumber) * sizeof(TPoolConnection*));
-	predConnectednessSet[inputPredConnectionsQuantity - 1] = 0; // Обнуляем указатель последней связи
+	predConnectednessSet[inputPredConnectionsQuantity - 1] = 0; // РћР±РЅСѓР»СЏРµРј СѓРєР°Р·Р°С‚РµР»СЊ РїРѕСЃР»РµРґРЅРµР№ СЃРІСЏР·Рё
 	--inputPredConnectionsQuantity;
 }
 
-// Печать сведений о пуле в файл или на экран
+// РџРµС‡Р°С‚СЊ СЃРІРµРґРµРЅРёР№ Рѕ РїСѓР»Рµ РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 ostream& operator<<(ostream& os, const TNeuralPool& neuralPool){
 	os << neuralPool.type << "\t" << neuralPool.capacity << "\t" << neuralPool.biasMean
 		<<	"\t" << neuralPool.biasVariance << "\t" << neuralPool.layer << endl;

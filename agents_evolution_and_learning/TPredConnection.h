@@ -1,4 +1,4 @@
-#ifndef TPREDCONNECTION_H
+п»ї#ifndef TPREDCONNECTION_H
 #define TPREDCONNECTION_H
 
 #include <iostream>
@@ -7,29 +7,29 @@
 class TNeuron;
 
 /* 
-Класс предикторной связи нейронной сети
+РљР»Р°СЃСЃ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РЅРµР№СЂРѕРЅРЅРѕР№ СЃРµС‚Рё
 */
 class TPredConnection{
-	int ID; // ID предикторной связи
-	bool enabled; // Признак экспресии связи
-	TNeuron* preNeuron; // Ссылка на пресинаптический нейрон
-	TNeuron* postNeuron; // Ссылка на постсинаптический нейрон
+	int ID; // ID РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
+	bool enabled; // РџСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРІСЏР·Рё
+	TNeuron* preNeuron; // РЎСЃС‹Р»РєР° РЅР° РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РЅРµР№СЂРѕРЅ
+	TNeuron* postNeuron; // РЎСЃС‹Р»РєР° РЅР° РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РЅРµР№СЂРѕРЅ
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TPredConnection(){
 		ID = 0;
 		enabled = false;
 		preNeuron = 0;
 		postNeuron = 0;
 	}
-	// Полный конструктор
+	// РџРѕР»РЅС‹Р№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	TPredConnection(int newID, bool newEnabled = true, TNeuron* newPreNeuron = 0, TNeuron* newPostNeuron = 0){
 		setAll(newID, newEnabled, newPreNeuron, newPostNeuron);
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TPredConnection() {}
 
-	// Геттеры и сеттеры для всех внутренних переменных
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РІРЅСѓС‚СЂРµРЅРЅРёС… РїРµСЂРµРјРµРЅРЅС‹С…
 	int getID() const { return ID; }
 	void setID(int newID) { ID = newID; }
 	bool getEnabled() const { return enabled; }
@@ -38,14 +38,14 @@ public:
 	void setPreNeuron(TNeuron* newPreNeuron) { preNeuron = newPreNeuron; }
 	TNeuron* getPostNeuron() const { return postNeuron; }
 	void setPostNeuron(TNeuron* newPostNeuron) { postNeuron = newPostNeuron; }
-	// Заполнение всех характеристик связи
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РІСЃРµС… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє СЃРІСЏР·Рё
 	void setAll(int newID, bool newEnabled = true, TNeuron* newPreNeuron = 0, TNeuron* newPostNeuron = 0){
 		ID = newID;
 		enabled = newEnabled;
 		preNeuron = newPreNeuron;
 		postNeuron = newPostNeuron;
 	}
-	// Запись предикторной связи в файл или на экран
+	// Р—Р°РїРёСЃСЊ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& os, const TPredConnection& poolPredConnection);
 };
 

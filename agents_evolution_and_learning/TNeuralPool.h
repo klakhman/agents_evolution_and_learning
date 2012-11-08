@@ -1,4 +1,4 @@
-#ifndef TNEURALPOOL_H
+п»ї#ifndef TNEURALPOOL_H
 #define TNEURALPOOL_H
 
 #include <iostream>
@@ -9,34 +9,34 @@ class TPoolConnection;
 class TPoolPredConnection;
 
 /* 
-Класс нейронального пула
+РљР»Р°СЃСЃ РЅРµР№СЂРѕРЅР°Р»СЊРЅРѕРіРѕ РїСѓР»Р°
 */
 class TNeuralPool{
-	int ID; // ID пула
-	int type; // Тип пула (0 - сенсорный, 1 - скрытый, 2 - выходной)
-	int capacity; // Объем пула
-	double biasMean; // Среднее смещения нейронов пула
-	double biasVariance; // Дисперсия смещения нейронов пула
-	int layer; // Номер слоя нейронов пула
+	int ID; // ID РїСѓР»Р°
+	int type; // РўРёРї РїСѓР»Р° (0 - СЃРµРЅСЃРѕСЂРЅС‹Р№, 1 - СЃРєСЂС‹С‚С‹Р№, 2 - РІС‹С…РѕРґРЅРѕР№)
+	int capacity; // РћР±СЉРµРј РїСѓР»Р°
+	double biasMean; // РЎСЂРµРґРЅРµРµ СЃРјРµС‰РµРЅРёСЏ РЅРµР№СЂРѕРЅРѕРІ РїСѓР»Р°
+	double biasVariance; // Р”РёСЃРїРµСЂСЃРёСЏ СЃРјРµС‰РµРЅРёСЏ РЅРµР№СЂРѕРЅРѕРІ РїСѓР»Р°
+	int layer; // РќРѕРјРµСЂ СЃР»РѕСЏ РЅРµР№СЂРѕРЅРѕРІ РїСѓР»Р°
 	
-	TPoolConnection** connectednessSet; // Массив входных связей пула
-	int connectednessSetSize; // Текущий размер массива входных связей
-	int inputConnectionsQuantity; // Количество входных связей пула
+	TPoolConnection** connectednessSet; // РњР°СЃСЃРёРІ РІС…РѕРґРЅС‹С… СЃРІСЏР·РµР№ РїСѓР»Р°
+	int connectednessSetSize; // РўРµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… СЃРІСЏР·РµР№
+	int inputConnectionsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕРґРЅС‹С… СЃРІСЏР·РµР№ РїСѓР»Р°
 
-	TPoolPredConnection** predConnectednessSet; // Массив входных предикторных связей пула
-	int predConnectednessSetSize; // Текущий размер массива входных предикторных связей
-	int inputPredConnectionsQuantity; // Количество входных предикторных связей пула
+	TPoolPredConnection** predConnectednessSet; // РњР°СЃСЃРёРІ РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РїСѓР»Р°
+	int predConnectednessSetSize; // РўРµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№
+	int inputPredConnectionsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РїСѓР»Р°
 
-	static const int INFLATE_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным связями в случае переполнения
-	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным предикторными связями в случае переполнения
+	static const int INFLATE_CONNECTIONS_SIZE = 10; // Р Р°Р·РјРµСЂ СѓРІРµР»РёС‡РµРЅРёСЏ РјР°СЃСЃРёРІР° СЃ РІС…РѕРґРЅС‹Рј СЃРІСЏР·СЏРјРё РІ СЃР»СѓС‡Р°Рµ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ
+	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Р Р°Р·РјРµСЂ СѓРІРµР»РёС‡РµРЅРёСЏ РјР°СЃСЃРёРІР° СЃ РІС…РѕРґРЅС‹Рј РїСЂРµРґРёРєС‚РѕСЂРЅС‹РјРё СЃРІСЏР·СЏРјРё РІ СЃР»СѓС‡Р°Рµ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ
 	
-	// Процедура увеличения размера массива входных связей
+	// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… СЃРІСЏР·РµР№
 	void inflateConnectednessSet(int inflateSize);
-	// Процедура увеличения размера массива входных предикторных связей
+	// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№
 	void inflatePredConnectednessSet(int inflateSize);
 
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TNeuralPool(){
 		ID = 0;
 		type = 0;
@@ -51,7 +51,7 @@ public:
 		predConnectednessSetSize = 0;
 		inputPredConnectionsQuantity = 0;
 	}
-	// Полный конструктор
+	// РџРѕР»РЅС‹Р№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	TNeuralPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer){
 		setAll(newID, newType, newCapacity, newBiasMean, newBiasVariance, newLayer);
 		connectednessSet = 0;
@@ -61,10 +61,10 @@ public:
 		predConnectednessSetSize = 0;
 		inputPredConnectionsQuantity = 0;
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TNeuralPool();
 
-	// Геттеры и сеттеры для всех внутренних переменных
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РІРЅСѓС‚СЂРµРЅРЅРёС… РїРµСЂРµРјРµРЅРЅС‹С…
 	int getID() const { return ID; }
 	void setID(int newID) { ID = newID; }
 	int getType() const { return type; }
@@ -77,11 +77,11 @@ public:
 	void setBiasVariance(double newBiasVariance) { biasVariance = newBiasVariance; }
 	int getLayer() const { return layer; }
 	void setLayer(int newLayer) { layer = newLayer; }
-	// Получение количества входных связей пула
+	// РџРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° РІС…РѕРґРЅС‹С… СЃРІСЏР·РµР№ РїСѓР»Р°
 	int getInputConnectionsQuantity() const { return inputConnectionsQuantity; }
-	// Получение количества входных предикторных связей пула
+	// РџРѕР»СѓС‡РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° РІС…РѕРґРЅС‹С… РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РїСѓР»Р°
 	int getInputPredConnectionsQuantity() const { return inputPredConnectionsQuantity; }
-	// Заполнение всех характеристик пула
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РІСЃРµС… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє РїСѓР»Р°
 	void setAll(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer){
 		ID = newID;
 		type = newType;
@@ -91,7 +91,7 @@ public:
 		layer = newLayer;
 	}
 
-	// Геттеры и сеттеры для связей данного пула (во всех случаях передается номер связи в массиве связей)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ СЃРІСЏР·РµР№ РґР°РЅРЅРѕРіРѕ РїСѓР»Р° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 	int getConnectionID(int connectionNumber) const;
 	void setConnectionID(int connectionNumber, int newID);
 	double getConnectionWeightMean(int connectionNumber) const;
@@ -111,7 +111,7 @@ public:
 	TNeuralPool* getConnectionPostPool(int connectionNumber) const;
 	void setConnectionPostPool(int connectionNumber, TNeuralPool* newPostPool);
 
-	// Геттеры и сеттеры для предикторных связей данного пула (во всех случаях передается номер связи в массиве связей)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РґР°РЅРЅРѕРіРѕ РїСѓР»Р° (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 	int getPredConnectionID(int predConnectionNumber) const;
 	void setPredConnectionID(int predConnectionNumber, int newID);
 	bool getPredConnectionEnabled(int predConnectionNumber) const;
@@ -127,21 +127,21 @@ public:
 	TNeuralPool* getPredConnectionPostPool(int predConnectionNumber) const;
 	void setPredConnectionPostPool(int predConnectionNumber, TNeuralPool* newPostPool);
 
-	// Добавление входной связи в пул
+	// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕР№ СЃРІСЏР·Рё РІ РїСѓР»
 	void addConnection(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0);
-	// Удаление связи из пула
+	// РЈРґР°Р»РµРЅРёРµ СЃРІСЏР·Рё РёР· РїСѓР»Р°
 	void deleteConnection(int connectionNumber);
 
-	// Добавление входной предикторной связи в пул
+	// Р”РѕР±Р°РІР»РµРЅРёРµ РІС…РѕРґРЅРѕР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ РїСѓР»
 	void addPredConnection(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0);
-	// Удаление предикторной связи из пула
+	// РЈРґР°Р»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РёР· РїСѓР»Р°
 	void deletePredConnection(int predConnectionNumber);
 
-	// Печать сведений о пуле в файл или на экран
+	// РџРµС‡Р°С‚СЊ СЃРІРµРґРµРЅРёР№ Рѕ РїСѓР»Рµ РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralPool& neuralPool);
 
-	//Печать сети в файл или на экран
-	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork); // Функция вывода сети объявлена дружественной, чтобы она имела прямой доступ к списку связей пула
+	//РџРµС‡Р°С‚СЊ СЃРµС‚Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
+	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork); // Р¤СѓРЅРєС†РёСЏ РІС‹РІРѕРґР° СЃРµС‚Рё РѕР±СЉСЏРІР»РµРЅР° РґСЂСѓР¶РµСЃС‚РІРµРЅРЅРѕР№, С‡С‚РѕР±С‹ РѕРЅР° РёРјРµР»Р° РїСЂСЏРјРѕР№ РґРѕСЃС‚СѓРї Рє СЃРїРёСЃРєСѓ СЃРІСЏР·РµР№ РїСѓР»Р°
 };
 
 #endif // TNEURALPOOL_H

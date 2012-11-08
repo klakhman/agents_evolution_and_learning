@@ -1,43 +1,43 @@
-#ifndef TANALYSIS_H
+п»ї#ifndef TANALYSIS_H
 #define TANALYSIS_H
 
 #include <string>
 #include "TEnvironment.h"
 #include "TPopulation.h"
 
-// Класс основного анализа
+// РљР»Р°СЃСЃ РѕСЃРЅРѕРІРЅРѕРіРѕ Р°РЅР°Р»РёР·Р°
 class TAnalysis{
 
-	// Загрузка параметров среды из файла
+	// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ СЃСЂРµРґС‹ РёР· С„Р°Р№Р»Р°
 	void fillEnvironmentSettingsFromFile(TEnvironment& environment, std::string settingsFilename);
-	// Загрузка параметров популяции из файла
+	// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ РїРѕРїСѓР»СЏС†РёРё РёР· С„Р°Р№Р»Р°
 	void fillPopulationSettingsFromFile(TPopulation& agentsPopulation, std::string settingsFilename);
-	// Загрузка параметров агента из файла
+	// Р—Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ Р°РіРµРЅС‚Р° РёР· С„Р°Р№Р»Р°
 	void fillAgentSettingsFromFile(TPopulation& agentsPopulation, std::string settingsFilename);
 	
-	// ----------- Методы для параллельного стандартного анализа лучших популяций ----------------
-	// Заполнение параметров директорий для записи файлов
+	// ----------- РњРµС‚РѕРґС‹ РґР»СЏ РїР°СЂР°Р»Р»РµР»СЊРЅРѕРіРѕ СЃС‚Р°РЅРґР°СЂС‚РЅРѕРіРѕ Р°РЅР°Р»РёР·Р° Р»СѓС‡С€РёС… РїРѕРїСѓР»СЏС†РёР№ ----------------
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ РґРёСЂРµРєС‚РѕСЂРёР№ РґР»СЏ Р·Р°РїРёСЃРё С„Р°Р№Р»РѕРІ
 	void fillDirectoriesSettings(std::string settingsFilename, std::string& workDirectory, std::string& environmentDirectory, std::string& resultsDirectory);
-	// Расишифровка парметров командной строки
+	// Р Р°СЃРёС€РёС„СЂРѕРІРєР° РїР°СЂРјРµС‚СЂРѕРІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
 	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string& runSign);
-	// Расшифровка сообщения от рабочего процесса 
+	// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР° 
 	void decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry, double& averageReward);
-	// Выполнение управляющего процесса (важно, чтобы количество общих заданий не было меньше кол-ва выделенных процессов!!!)
+	// Р’С‹РїРѕР»РЅРµРЅРёРµ СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР° (РІР°Р¶РЅРѕ, С‡С‚РѕР±С‹ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕР±С‰РёС… Р·Р°РґР°РЅРёР№ РЅРµ Р±С‹Р»Рѕ РјРµРЅСЊС€Рµ РєРѕР»-РІР° РІС‹РґРµР»РµРЅРЅС‹С… РїСЂРѕС†РµСЃСЃРѕРІ!!!)
 	void rootProcess(int argc, char **argv);
-	// Расшифровка сообщения от рутового процесса 
+	// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂСѓС‚РѕРІРѕРіРѕ РїСЂРѕС†РµСЃСЃР° 
 	void decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, std::string& runSign);
-	// Выполнение рабочего процесса
+	// Р’С‹РїРѕР»РЅРµРЅРёРµ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
 	void workProcess(int argc, char **argv);
 
 public:
 	TAnalysis() {};
 	~TAnalysis() {};
 
-	// Запуск процедуры анализа путем прогона лучшей популяции (возвращает среднее значений награды по популяции после прогона всех агентов из всех состояний)
+	// Р—Р°РїСѓСЃРє РїСЂРѕС†РµРґСѓСЂС‹ Р°РЅР°Р»РёР·Р° РїСѓС‚РµРј РїСЂРѕРіРѕРЅР° Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё (РІРѕР·РІСЂР°С‰Р°РµС‚ СЃСЂРµРґРЅРµРµ Р·РЅР°С‡РµРЅРёР№ РЅР°РіСЂР°РґС‹ РїРѕ РїРѕРїСѓР»СЏС†РёРё РїРѕСЃР»Рµ РїСЂРѕРіРѕРЅР° РІСЃРµС… Р°РіРµРЅС‚РѕРІ РёР· РІСЃРµС… СЃРѕСЃС‚РѕСЏРЅРёР№)
 	double startBestPopulationAnalysis(std::string bestPopulationFilename, std::string environmentFilename, std::string settingsFilename, unsigned int randomSeed = 0);
-	// Запуск параллельного процесса анализа по методу лучшей популяции в каждом запуске (!!!в папке с результатами должна быть папка "/Analysis"!!!)
+	// Р—Р°РїСѓСЃРє РїР°СЂР°Р»Р»РµР»СЊРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° Р°РЅР°Р»РёР·Р° РїРѕ РјРµС‚РѕРґСѓ Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё РІ РєР°Р¶РґРѕРј Р·Р°РїСѓСЃРєРµ (!!!РІ РїР°РїРєРµ СЃ СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїР°РїРєР° "/Analysis"!!!)
 	void startParallelBestPopulationAnalysis(int argc, char **argv);
-	// Процедура усреднение параметров анализа по лучшей популяции по глобальным сложностям сред (membersQuantity - кол-во сред в рамках одного коэффициента заполненности)
+	// РџСЂРѕС†РµРґСѓСЂР° СѓСЃСЂРµРґРЅРµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ Р°РЅР°Р»РёР·Р° РїРѕ Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё РїРѕ РіР»РѕР±Р°Р»СЊРЅС‹Рј СЃР»РѕР¶РЅРѕСЃС‚СЏРј СЃСЂРµРґ (membersQuantity - РєРѕР»-РІРѕ СЃСЂРµРґ РІ СЂР°РјРєР°С… РѕРґРЅРѕРіРѕ РєРѕСЌС„С„РёС†РёРµРЅС‚Р° Р·Р°РїРѕР»РЅРµРЅРЅРѕСЃС‚Рё)
 	void makeBestPopulationAnalysisSummary(std::string analysisFilename, std::string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity);
 };
 

@@ -1,12 +1,12 @@
-#include "TPopulation.h"
+п»ї#include "TPopulation.h"
 #include <fstream>
 #include "service.h"
 
 using namespace std;
 
-	// Загрузка популяции геномов из файла (если размер популяции не передается, то значение берется из текущих параметров популяции)
+	// Р—Р°РіСЂСѓР·РєР° РїРѕРїСѓР»СЏС†РёРё РіРµРЅРѕРјРѕРІ РёР· С„Р°Р№Р»Р° (РµСЃР»Рё СЂР°Р·РјРµСЂ РїРѕРїСѓР»СЏС†РёРё РЅРµ РїРµСЂРµРґР°РµС‚СЃСЏ, С‚Рѕ Р·РЅР°С‡РµРЅРёРµ Р±РµСЂРµС‚СЃСЏ РёР· С‚РµРєСѓС‰РёС… РїР°СЂР°РјРµС‚СЂРѕРІ РїРѕРїСѓР»СЏС†РёРё)
 void TPopulation::loadPopulation(string populationFilename, int _populationSize /*=0*/){
-	//!!! Возможно надо как-то по другому обходится с номерами инноваций
+	//!!! Р’РѕР·РјРѕР¶РЅРѕ РЅР°РґРѕ РєР°Рє-С‚Рѕ РїРѕ РґСЂСѓРіРѕРјСѓ РѕР±С…РѕРґРёС‚СЃСЏ СЃ РЅРѕРјРµСЂР°РјРё РёРЅРЅРѕРІР°С†РёР№
 	connectionInnovationNumber = 0;
 	predConnectionInnovationNumber = 0;
 	if (_populationSize) setPopulationSize(_populationSize);
@@ -18,7 +18,7 @@ void TPopulation::loadPopulation(string populationFilename, int _populationSize 
 	populationFile.close();
 }
 
-// Выгрузка популяции геномов в файл
+// Р’С‹РіСЂСѓР·РєР° РїРѕРїСѓР»СЏС†РёРё РіРµРЅРѕРјРѕРІ РІ С„Р°Р№Р»
 void TPopulation::uploadPopulation(string populationFilename) const{
 	ofstream populationFile;
 	populationFile.open(populationFilename.c_str());
@@ -27,7 +27,7 @@ void TPopulation::uploadPopulation(string populationFilename) const{
 	populationFile.close();
 }
 
-// Генерация минимальной популяции
+// Р“РµРЅРµСЂР°С†РёСЏ РјРёРЅРёРјР°Р»СЊРЅРѕР№ РїРѕРїСѓР»СЏС†РёРё
 void TPopulation::generateMinimalPopulation(int inputResolution, int _populationSize /*= 0*/){
 	if (_populationSize) populationSize = _populationSize;
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
@@ -37,36 +37,36 @@ void TPopulation::generateMinimalPopulation(int inputResolution, int _population
 		predConnectionInnovationNumber = agents[0]->getPointerToAgentGenome()->getPredConnectionsQuantity();
 	}
 }
-// Шаг эволюционного процесса
+// РЁР°Рі СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°
 void TPopulation::evolutionaryStep(TEnvironment& environment, int evolutionStepNumber){
-	// Сначала мутируем популяцию (чтобы можно потом было отчеты составлять и всегда текущая популяция уже была прогнана на среде)
+	// РЎРЅР°С‡Р°Р»Р° РјСѓС‚РёСЂСѓРµРј РїРѕРїСѓР»СЏС†РёСЋ (С‡С‚РѕР±С‹ РјРѕР¶РЅРѕ РїРѕС‚РѕРј Р±С‹Р»Рѕ РѕС‚С‡РµС‚С‹ СЃРѕСЃС‚Р°РІР»СЏС‚СЊ Рё РІСЃРµРіРґР° С‚РµРєСѓС‰Р°СЏ РїРѕРїСѓР»СЏС†РёСЏ СѓР¶Рµ Р±С‹Р»Р° РїСЂРѕРіРЅР°РЅР° РЅР° СЃСЂРµРґРµ)
 	if (evolutionStepNumber != 1) generateNextPopulation(evolutionStepNumber);
-	// Прогоняем всех агентов
+	// РџСЂРѕРіРѕРЅСЏРµРј РІСЃРµС… Р°РіРµРЅС‚РѕРІ
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
-		// Проводим первичный системогенез
+		// РџСЂРѕРІРѕРґРёРј РїРµСЂРІРёС‡РЅС‹Р№ СЃРёСЃС‚РµРјРѕРіРµРЅРµР·
 		agents[currentAgent - 1]->linearSystemogenesis();
 		environment.setRandomEnvironmentState();
 		agents[currentAgent - 1]->life(environment, evolutionSettings.agentLifetime);
 	}
 }
 
-// Процедура эволюции популяции
+// РџСЂРѕС†РµРґСѓСЂР° СЌРІРѕР»СЋС†РёРё РїРѕРїСѓР»СЏС†РёРё
 void TPopulation::evolution(TEnvironment& environment){
 	for (int evolutionStep = 1; evolutionStep <= evolutionSettings.evolutionTime; ++evolutionStep){
 		evolutionaryStep(environment, evolutionStep);
 	}
 }
 
-// Копирование популяции (создание всех новых структур)
+// РљРѕРїРёСЂРѕРІР°РЅРёРµ РїРѕРїСѓР»СЏС†РёРё (СЃРѕР·РґР°РЅРёРµ РІСЃРµС… РЅРѕРІС‹С… СЃС‚СЂСѓРєС‚СѓСЂ)
 TPopulation& TPopulation::operator=(const TPopulation& sourcePopulation){
-	// Сразу изменяем кол-во агентов
+	// РЎСЂР°Р·Сѓ РёР·РјРµРЅСЏРµРј РєРѕР»-РІРѕ Р°РіРµРЅС‚РѕРІ
 	setPopulationSize(sourcePopulation.getPopulationSize());	
 	connectionInnovationNumber = sourcePopulation.connectionInnovationNumber;
 	predConnectionInnovationNumber = sourcePopulation.predConnectionInnovationNumber;
-	// Копируем параметры эволюции
+	// РљРѕРїРёСЂСѓРµРј РїР°СЂР°РјРµС‚СЂС‹ СЌРІРѕР»СЋС†РёРё
 	evolutionSettings.agentLifetime = sourcePopulation.evolutionSettings.agentLifetime;
 	evolutionSettings.evolutionTime = sourcePopulation.evolutionSettings.evolutionTime;
-	// Копируем параметры мутаций
+	// РљРѕРїРёСЂСѓРµРј РїР°СЂР°РјРµС‚СЂС‹ РјСѓС‚Р°С†РёР№
 	mutationSettings.mutWeightProbability = sourcePopulation.mutationSettings.mutWeightProbability;
 	mutationSettings.mutWeightMeanDisp = sourcePopulation.mutationSettings.mutWeightMeanDisp;
 	mutationSettings.mutWeightDispDisp = sourcePopulation.mutationSettings.mutWeightDispDisp; 
@@ -83,39 +83,39 @@ TPopulation& TPopulation::operator=(const TPopulation& sourcePopulation){
 	mutationSettings.connectionStandartAmount = sourcePopulation.mutationSettings.connectionStandartAmount;
 	mutationSettings.mutDevelopConProbProb = sourcePopulation.mutationSettings.mutDevelopConProbProb;
 	mutationSettings.mutDevelopConProbDisp = sourcePopulation.mutationSettings.mutDevelopConProbDisp;
-	// Копируем всех агентов
+	// РљРѕРїРёСЂСѓРµРј РІСЃРµС… Р°РіРµРЅС‚РѕРІ
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
 		*(agents[currentAgent - 1]) = *(sourcePopulation.agents[currentAgent - 1]);
 
 	return *this;
 }
 
-// ---------------  Различные процедуры мутации -------------------------
-// Процедура мутации - мутация весовых коэффициентов связи
+// ---------------  Р Р°Р·Р»РёС‡РЅС‹Рµ РїСЂРѕС†РµРґСѓСЂС‹ РјСѓС‚Р°С†РёРё -------------------------
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - РјСѓС‚Р°С†РёСЏ РІРµСЃРѕРІС‹С… РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ СЃРІСЏР·Рё
 void  TPopulation::mutationConnectionsWeight(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool){
-		// Сначала мутируем смещение
+		// РЎРЅР°С‡Р°Р»Р° РјСѓС‚РёСЂСѓРµРј СЃРјРµС‰РµРЅРёРµ
 		if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutWeightProbability){
 			kidGenome->setPoolBiasMean(currentPool, kidGenome->getPoolBiasMean(currentPool) +
 																service::uniformDistribution(-mutationSettings.mutWeightMeanDisp, mutationSettings.mutWeightMeanDisp));
-			// Важно, чтобы дисперсия была не меньше нуля
+			// Р’Р°Р¶РЅРѕ, С‡С‚РѕР±С‹ РґРёСЃРїРµСЂСЃРёСЏ Р±С‹Р»Р° РЅРµ РјРµРЅСЊС€Рµ РЅСѓР»СЏ
 			kidGenome->setPoolBiasVariance(currentPool, fabs(kidGenome->getPoolBiasVariance(currentPool) + 
 															service::uniformDistribution(-mutationSettings.mutWeightDispDisp, mutationSettings.mutWeightDispDisp)));
 		}
 		for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
-			 // Если мутация имеет место быть и связь включена
+			 // Р•СЃР»Рё РјСѓС‚Р°С†РёСЏ РёРјРµРµС‚ РјРµСЃС‚Рѕ Р±С‹С‚СЊ Рё СЃРІСЏР·СЊ РІРєР»СЋС‡РµРЅР°
 			if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.mutWeightProbability) && (kidGenome->getConnectionEnabled(currentPool, currentPoolConnection))) {
 				kidGenome->setConnectionWeightMean(currentPool, currentPoolConnection, kidGenome->getConnectionWeightMean(currentPool, currentPoolConnection) +
 																service::uniformDistribution(-mutationSettings.mutWeightMeanDisp, mutationSettings.mutWeightMeanDisp));
-				// Важно, чтобы дисперсия была не меньше нуля
+				// Р’Р°Р¶РЅРѕ, С‡С‚РѕР±С‹ РґРёСЃРїРµСЂСЃРёСЏ Р±С‹Р»Р° РЅРµ РјРµРЅСЊС€Рµ РЅСѓР»СЏ
 				kidGenome->setConnectionWeightVariance(currentPool, currentPoolConnection, fabs(kidGenome->getConnectionWeightVariance(currentPool, currentPoolConnection) + 
 																service::uniformDistribution(-mutationSettings.mutWeightDispDisp, mutationSettings.mutWeightDispDisp)));
 			}
 	}
 }
 
-// Процедура мутации - включения/выключения связей
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - РІРєР»СЋС‡РµРЅРёСЏ/РІС‹РєР»СЋС‡РµРЅРёСЏ СЃРІСЏР·РµР№
 void TPopulation::mutationEnableDisableConnections(TAgent& kidAgent, int currentEvolutionStep){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
@@ -132,7 +132,7 @@ void TPopulation::mutationEnableDisableConnections(TAgent& kidAgent, int current
 				}
 }
 
-// Процедура мутации - включения/выключения предикторных связей
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - РІРєР»СЋС‡РµРЅРёСЏ/РІС‹РєР»СЋС‡РµРЅРёСЏ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№
 void TPopulation::mutationEnableDisablePredConnections(TAgent& kidAgent, int currentEvolutionStep){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
@@ -149,59 +149,59 @@ void TPopulation::mutationEnableDisablePredConnections(TAgent& kidAgent, int cur
 				}
 }
 
-// Процедура мутации - удаления из агента связей, которые выключены более некоторого количества поколений
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - СѓРґР°Р»РµРЅРёСЏ РёР· Р°РіРµРЅС‚Р° СЃРІСЏР·РµР№, РєРѕС‚РѕСЂС‹Рµ РІС‹РєР»СЋС‡РµРЅС‹ Р±РѕР»РµРµ РЅРµРєРѕС‚РѕСЂРѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° РїРѕРєРѕР»РµРЅРёР№
 void TPopulation::mutationDeleteConnectionPopulation(TAgent& kidAgent, int currentEvolutionStep){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
-			// Если эта связь была выключена и ее уже надо удалить из генома
+			// Р•СЃР»Рё СЌС‚Р° СЃРІСЏР·СЊ Р±С‹Р»Р° РІС‹РєР»СЋС‡РµРЅР° Рё РµРµ СѓР¶Рµ РЅР°РґРѕ СѓРґР°Р»РёС‚СЊ РёР· РіРµРЅРѕРјР°
 			if (( !kidGenome->getConnectionEnabled(currentPool, currentPoolConnection)) &&
 								(currentEvolutionStep - kidGenome->getConnectionDisabledStep(currentPool, currentPoolConnection) >= mutationSettings.disLimit)){
 				kidGenome->deleteConnection(currentPool, currentPoolConnection);
-				--currentPoolConnection; // Чтобы указатель остался на том же номере связи
+				--currentPoolConnection; // Р§С‚РѕР±С‹ СѓРєР°Р·Р°С‚РµР»СЊ РѕСЃС‚Р°Р»СЃСЏ РЅР° С‚РѕРј Р¶Рµ РЅРѕРјРµСЂРµ СЃРІСЏР·Рё
 			}
 	kidGenome->fixConnectionsIDs();
 }
 
-// Процедура мутации - удаления из агента предикторных связей, которые выключены более некоторого количества поколений
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - СѓРґР°Р»РµРЅРёСЏ РёР· Р°РіРµРЅС‚Р° РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№, РєРѕС‚РѕСЂС‹Рµ РІС‹РєР»СЋС‡РµРЅС‹ Р±РѕР»РµРµ РЅРµРєРѕС‚РѕСЂРѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° РїРѕРєРѕР»РµРЅРёР№
 void TPopulation::mutationDeletePredConnectionPopulation(TAgent& kidAgent, int currentEvolutionStep){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
-			// Если эта предикторная связь была выключена и ее уже надо удалить из генома
+			// Р•СЃР»Рё СЌС‚Р° РїСЂРµРґРёРєС‚РѕСЂРЅР°СЏ СЃРІСЏР·СЊ Р±С‹Р»Р° РІС‹РєР»СЋС‡РµРЅР° Рё РµРµ СѓР¶Рµ РЅР°РґРѕ СѓРґР°Р»РёС‚СЊ РёР· РіРµРЅРѕРјР°
 			if (( !kidGenome->getPredConnectionEnabled(currentPool, currentPoolPredConnection)) &&
 								(currentEvolutionStep - kidGenome->getPredConnectionDisabledStep(currentPool, currentPoolPredConnection) >= mutationSettings.disLimit)){
 				kidGenome->deletePredConnection(currentPool, currentPoolPredConnection);
-				--currentPoolPredConnection; // Чтобы указатель остался на том же номере предикторной связи
+				--currentPoolPredConnection; // Р§С‚РѕР±С‹ СѓРєР°Р·Р°С‚РµР»СЊ РѕСЃС‚Р°Р»СЃСЏ РЅР° С‚РѕРј Р¶Рµ РЅРѕРјРµСЂРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
 			}
 	kidGenome->fixPredConnectionsIDs();
 }
 
-// Процедура мутации - добавление связи
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - РґРѕР±Р°РІР»РµРЅРёРµ СЃРІСЏР·Рё
 void TPopulation::mutationAddPoolConnection(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addConnectionProb){ // Если имеет место мутация
-		int prePoolID, postPoolID; // Пресинаптический и постсинаптический пул потенциальной связи
-		int tryCount = 0; //Количество ложных генераций связи - введено, чтобы не было зацикливания
-		do{ // Цикл нахождения отсутствующей связи
-			do{ // Цикл нахождения корректной связи
+	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addConnectionProb){ // Р•СЃР»Рё РёРјРµРµС‚ РјРµСЃС‚Рѕ РјСѓС‚Р°С†РёСЏ
+		int prePoolID, postPoolID; // РџСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ Рё РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР» РїРѕС‚РµРЅС†РёР°Р»СЊРЅРѕР№ СЃРІСЏР·Рё
+		int tryCount = 0; //РљРѕР»РёС‡РµСЃС‚РІРѕ Р»РѕР¶РЅС‹С… РіРµРЅРµСЂР°С†РёР№ СЃРІСЏР·Рё - РІРІРµРґРµРЅРѕ, С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Рѕ Р·Р°С†РёРєР»РёРІР°РЅРёСЏ
+		do{ // Р¦РёРєР» РЅР°С…РѕР¶РґРµРЅРёСЏ РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РµР№ СЃРІСЏР·Рё
+			do{ // Р¦РёРєР» РЅР°С…РѕР¶РґРµРЅРёСЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ СЃРІСЏР·Рё
 				prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getPoolsQuantity());
-				// Постсинаптический пул точно не может быть входным
+				// РџРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР» С‚РѕС‡РЅРѕ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РІС…РѕРґРЅС‹Рј
 				postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + 1, kidGenome->getPoolsQuantity());
-				//Если постсинаптический и пресинаптический пулы не являются одновременно выходными, то значит мы нашли корректную связь
+				//Р•СЃР»Рё РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ Рё РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР»С‹ РЅРµ СЏРІР»СЏСЋС‚СЃСЏ РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ РІС‹С…РѕРґРЅС‹РјРё, С‚Рѕ Р·РЅР°С‡РёС‚ РјС‹ РЅР°С€Р»Рё РєРѕСЂСЂРµРєС‚РЅСѓСЋ СЃРІСЏР·СЊ
 			} while (! ((postPoolID > kidGenome->getInputResolution() + kidGenome->getOutputResolution()) || 
 																(prePoolID <= kidGenome->getInputResolution()) || (prePoolID > kidGenome->getInputResolution() + kidGenome->getOutputResolution())));
 			++tryCount;
-		// Пока не найдем отсутствующую связь или превысим допустимое кол-во попыток
+		// РџРѕРєР° РЅРµ РЅР°Р№РґРµРј РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰СѓСЋ СЃРІСЏР·СЊ РёР»Рё РїСЂРµРІС‹СЃРёРј РґРѕРїСѓСЃС‚РёРјРѕРµ РєРѕР»-РІРѕ РїРѕРїС‹С‚РѕРє
 		}while ((kidGenome->checkConnectionExistance(prePoolID, postPoolID)) && (tryCount <= 1000));
-		// Если отсутствующая связь найдена
+		// Р•СЃР»Рё РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰Р°СЏ СЃРІСЏР·СЊ РЅР°Р№РґРµРЅР°
 		if (! kidGenome->checkConnectionExistance(prePoolID, postPoolID)){
 			kidGenome->addConnection(prePoolID, postPoolID, kidGenome->getConnectionsQuantity() + 1, service::uniformDistribution(-0.5, 0.5), 0, true, 0, 
 												kidAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability, ++connectionInnovationNumber);
-			// Детекция необходимости сдвига постсинаптического пула в следующий слой, если появилась связь между пулами одного слоя
+			// Р”РµС‚РµРєС†РёСЏ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё СЃРґРІРёРіР° РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРѕРіРѕ РїСѓР»Р° РІ СЃР»РµРґСѓСЋС‰РёР№ СЃР»РѕР№, РµСЃР»Рё РїРѕСЏРІРёР»Р°СЃСЊ СЃРІСЏР·СЊ РјРµР¶РґСѓ РїСѓР»Р°РјРё РѕРґРЅРѕРіРѕ СЃР»РѕСЏ
 			if ((kidGenome->getPoolLayer(prePoolID) == kidGenome->getPoolLayer(postPoolID)) && (prePoolID != postPoolID))
 				for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
-					// Сдвигаем постсинапчиеский пул и все пулы в более дальних слоях
+					// РЎРґРІРёРіР°РµРј РїРѕСЃС‚СЃРёРЅР°РїС‡РёРµСЃРєРёР№ РїСѓР» Рё РІСЃРµ РїСѓР»С‹ РІ Р±РѕР»РµРµ РґР°Р»СЊРЅРёС… СЃР»РѕСЏС…
 					if ((kidGenome->getPoolLayer(currentPool) > kidGenome->getPoolLayer(prePoolID)) || (kidGenome->getPoolID(currentPool) == postPoolID))
 						kidGenome->setPoolLayer(currentPool, kidGenome->getPoolLayer(currentPool) + 1); 
 			kidGenome->fixConnectionsIDs();
@@ -209,20 +209,20 @@ void TPopulation::mutationAddPoolConnection(TAgent& kidAgent){
 	}
 }
 
-// Процедура мутации - добавление предикторной связи
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - РґРѕР±Р°РІР»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
 void TPopulation::mutationAddPoolPredConnection(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addPredConnectionProb){ // Если имеет место мутация
-		int prePoolID, postPoolID; // Пресинаптический и постсинаптический пул потенциальной предикторной связи
-		int tryCount = 0; //Количество ложных генераций предикторной связи - введено, чтобы не было зацикливания
-		do{ // Цикл нахождения отсутствующей предикторной связи
+	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addPredConnectionProb){ // Р•СЃР»Рё РёРјРµРµС‚ РјРµСЃС‚Рѕ РјСѓС‚Р°С†РёСЏ
+		int prePoolID, postPoolID; // РџСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ Рё РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР» РїРѕС‚РµРЅС†РёР°Р»СЊРЅРѕР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
+		int tryCount = 0; //РљРѕР»РёС‡РµСЃС‚РІРѕ Р»РѕР¶РЅС‹С… РіРµРЅРµСЂР°С†РёР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё - РІРІРµРґРµРЅРѕ, С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Рѕ Р·Р°С†РёРєР»РёРІР°РЅРёСЏ
+		do{ // Р¦РёРєР» РЅР°С…РѕР¶РґРµРЅРёСЏ РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РµР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
 			prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getPoolsQuantity());
-			// Постсинаптический пул точно не может быть входным или выходным
+			// РџРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР» С‚РѕС‡РЅРѕ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РІС…РѕРґРЅС‹Рј РёР»Рё РІС‹С…РѕРґРЅС‹Рј
 			postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + kidGenome->getOutputResolution() + 1, kidGenome->getPoolsQuantity());
 			++tryCount;
-		// Пока не найдем отсутствующую предикторную связь или превысим допустимое кол-во попыток
+		// РџРѕРєР° РЅРµ РЅР°Р№РґРµРј РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰СѓСЋ РїСЂРµРґРёРєС‚РѕСЂРЅСѓСЋ СЃРІСЏР·СЊ РёР»Рё РїСЂРµРІС‹СЃРёРј РґРѕРїСѓСЃС‚РёРјРѕРµ РєРѕР»-РІРѕ РїРѕРїС‹С‚РѕРє
 		}while ((kidGenome->checkPredConnectionExistance(prePoolID, postPoolID)) && (tryCount <= 1000));
-		// Если отсутствующая предикторная связь найдена
+		// Р•СЃР»Рё РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰Р°СЏ РїСЂРµРґРёРєС‚РѕСЂРЅР°СЏ СЃРІСЏР·СЊ РЅР°Р№РґРµРЅР°
 		if (! kidGenome->checkPredConnectionExistance(prePoolID, postPoolID)){
 			kidGenome->addPredConnection(prePoolID, postPoolID, kidGenome->getPredConnectionsQuantity() + 1, true, 0, 
 													kidAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability, ++predConnectionInnovationNumber); 
@@ -231,15 +231,15 @@ void TPopulation::mutationAddPoolPredConnection(TAgent& kidAgent){
 	}
 }
 
-// Процедура мутации - удаление связи
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - СѓРґР°Р»РµРЅРёРµ СЃРІСЏР·Рё
 void TPopulation::mutationDeletePoolConnection(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deleteConnectionProb) && (kidGenome->getConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
+	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deleteConnectionProb) && (kidGenome->getConnectionsQuantity())){ //  Р•СЃР»Рё РёРјРµРµС‚ РјРµСЃС‚Рѕ РјСѓС‚Р°С†РёСЏ Рё РµСЃС‚СЊ С‡С‚Рѕ СѓРґР°Р»СЏС‚СЊ
 		int deletingConnectionID = service::uniformDiscreteDistribution(1, kidGenome->getConnectionsQuantity());
-		// Нахождение удаляемой связи
+		// РќР°С…РѕР¶РґРµРЅРёРµ СѓРґР°Р»СЏРµРјРѕР№ СЃРІСЏР·Рё
 		for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 			for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
-				if (kidGenome->getConnectionID(currentPool, currentPoolConnection) == deletingConnectionID){ // Если мы нашли нужную связь
+				if (kidGenome->getConnectionID(currentPool, currentPoolConnection) == deletingConnectionID){ // Р•СЃР»Рё РјС‹ РЅР°С€Р»Рё РЅСѓР¶РЅСѓСЋ СЃРІСЏР·СЊ
 					kidGenome->deleteConnection(currentPool, currentPoolConnection);
 					break;
 				}
@@ -247,15 +247,15 @@ void TPopulation::mutationDeletePoolConnection(TAgent& kidAgent){
 	}
 }
 
-// Процедура мутации - удаление предикторной связи
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - СѓРґР°Р»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
 void TPopulation::mutationDeletePoolPredConnection(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deletePredConnectionProb) && (kidGenome->getPredConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
+	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deletePredConnectionProb) && (kidGenome->getPredConnectionsQuantity())){ //  Р•СЃР»Рё РёРјРµРµС‚ РјРµСЃС‚Рѕ РјСѓС‚Р°С†РёСЏ Рё РµСЃС‚СЊ С‡С‚Рѕ СѓРґР°Р»СЏС‚СЊ
 		int deletingPredConnectionID = service::uniformDiscreteDistribution(1, kidGenome->getPredConnectionsQuantity());
-		// Нахождение удаляемой предикторной связи
+		// РќР°С…РѕР¶РґРµРЅРёРµ СѓРґР°Р»СЏРµРјРѕР№ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё
 		for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 			for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
-				if (kidGenome->getPredConnectionID(currentPool, currentPoolPredConnection) == deletingPredConnectionID){ // Если мы нашли нужную предикторную связь
+				if (kidGenome->getPredConnectionID(currentPool, currentPoolPredConnection) == deletingPredConnectionID){ // Р•СЃР»Рё РјС‹ РЅР°С€Р»Рё РЅСѓР¶РЅСѓСЋ РїСЂРµРґРёРєС‚РѕСЂРЅСѓСЋ СЃРІСЏР·СЊ
 					kidGenome->deletePredConnection(currentPool, currentPoolPredConnection);
 					break;
 				}
@@ -263,35 +263,35 @@ void TPopulation::mutationDeletePoolPredConnection(TAgent& kidAgent){
 	}
 }
 
-// Коэффициент уменьшения вероятности дупликации пула с ростом генома
+// РљРѕСЌС„С„РёС†РёРµРЅС‚ СѓРјРµРЅСЊС€РµРЅРёСЏ РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё РґСѓРїР»РёРєР°С†РёРё РїСѓР»Р° СЃ СЂРѕСЃС‚РѕРј РіРµРЅРѕРјР°
 double TPopulation::duplicateDivision(int poolsQuantity, int connectionsQuantity){
 	return max(1.0, 0.5 * connectionsQuantity/static_cast<double>(mutationSettings.connectionStandartAmount) 
 																							+ 0.5 * (poolsQuantity - mutationSettings.poolStandartAmount));
 }
 
-// Процедура мутации - дупликация пула
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё - РґСѓРїР»РёРєР°С†РёСЏ РїСѓР»Р°
 void TPopulation::mutationPoolDuplication(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	// Исходные кол-ва элементов в сети
+	// РСЃС…РѕРґРЅС‹Рµ РєРѕР»-РІР° СЌР»РµРјРµРЅС‚РѕРІ РІ СЃРµС‚Рё
 	int initPoolsQuantity = kidGenome->getPoolsQuantity();
 	int initConnectionsQuantity = kidGenome->getConnectionsQuantity();
 	int initPredConnectionsQuantity = kidGenome->getPredConnectionsQuantity();
-	// Проходимся по всем старым пулам
+	// РџСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РІСЃРµРј СЃС‚Р°СЂС‹Рј РїСѓР»Р°Рј
 	for (int currentPool = 1; currentPool <= initPoolsQuantity; ++currentPool)
-		if (kidGenome->getPoolType(currentPool) == 1){ // Если пул внутренний
-			// Проверяем дуплицирует ли пул (с учетом введеной поправки, уменьшающей вероятность дупликации с ростом структуры генома в эволюции)
+		if (kidGenome->getPoolType(currentPool) == 1){ // Р•СЃР»Рё РїСѓР» РІРЅСѓС‚СЂРµРЅРЅРёР№
+			// РџСЂРѕРІРµСЂСЏРµРј РґСѓРїР»РёС†РёСЂСѓРµС‚ Р»Рё РїСѓР» (СЃ СѓС‡РµС‚РѕРј РІРІРµРґРµРЅРѕР№ РїРѕРїСЂР°РІРєРё, СѓРјРµРЅСЊС€Р°СЋС‰РµР№ РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ РґСѓРїР»РёРєР°С†РёРё СЃ СЂРѕСЃС‚РѕРј СЃС‚СЂСѓРєС‚СѓСЂС‹ РіРµРЅРѕРјР° РІ СЌРІРѕР»СЋС†РёРё)
 			bool duplicate = (service::uniformDistribution(0, 1, true, false) < mutationSettings.duplicatePoolProb/duplicateDivision(initPoolsQuantity, initConnectionsQuantity));
-			if (duplicate){ // Если пул дуплицирует
-				if (kidGenome->getPoolCapacity(currentPool) != 1 ) // Если в пуле не остался только один нейрон (иначе оставляем размерность = 1)
+			if (duplicate){ // Р•СЃР»Рё РїСѓР» РґСѓРїР»РёС†РёСЂСѓРµС‚
+				if (kidGenome->getPoolCapacity(currentPool) != 1 ) // Р•СЃР»Рё РІ РїСѓР»Рµ РЅРµ РѕСЃС‚Р°Р»СЃСЏ С‚РѕР»СЊРєРѕ РѕРґРёРЅ РЅРµР№СЂРѕРЅ (РёРЅР°С‡Рµ РѕСЃС‚Р°РІР»СЏРµРј СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ = 1)
 					kidGenome->setPoolCapacity(currentPool, static_cast<int>(kidGenome->getPoolCapacity(currentPool) * mutationSettings.poolDivisionCoef + 0.5));
 				kidGenome->addPool(kidGenome->getPoolsQuantity() + 1, kidGenome->getPoolType(currentPool), kidGenome->getPoolCapacity(currentPool),
 											kidGenome->getPoolBiasMean(currentPool), kidGenome->getPoolBiasVariance(currentPool), kidGenome->getPoolLayer(currentPool));
-				// Копируем все входящие связи из дуплицирующего пула в новый
+				// РљРѕРїРёСЂСѓРµРј РІСЃРµ РІС…РѕРґСЏС‰РёРµ СЃРІСЏР·Рё РёР· РґСѓРїР»РёС†РёСЂСѓСЋС‰РµРіРѕ РїСѓР»Р° РІ РЅРѕРІС‹Р№
 				for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
-					// Если это старая связь - до процедуры мутации
+					// Р•СЃР»Рё СЌС‚Рѕ СЃС‚Р°СЂР°СЏ СЃРІСЏР·СЊ - РґРѕ РїСЂРѕС†РµРґСѓСЂС‹ РјСѓС‚Р°С†РёРё
 					if (kidGenome->getConnectionID(currentPool, currentPoolConnection) <= initConnectionsQuantity){
 						int prePoolNumber;
-						// Если это не связь на самого себя
+						// Р•СЃР»Рё СЌС‚Рѕ РЅРµ СЃРІСЏР·СЊ РЅР° СЃР°РјРѕРіРѕ СЃРµР±СЏ
 						if (kidGenome->getConnectionPrePool(currentPool, currentPoolConnection)->getID() != kidGenome->getConnectionPostPool(currentPool, currentPoolConnection)->getID())
 							prePoolNumber = kidGenome->getConnectionPrePool(currentPool, currentPoolConnection)->getID();
 						else 
@@ -301,27 +301,27 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent){
 														kidGenome->getConnectionDisabledStep(currentPool, currentPoolConnection), kidGenome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection),
 														++connectionInnovationNumber);
 					}
-            // Копируем все выходящие связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
+            // РљРѕРїРёСЂСѓРµРј РІСЃРµ РІС‹С…РѕРґСЏС‰РёРµ СЃРІСЏР·Рё РёР· РґСѓРїР»РёС†РёСЂСѓСЋС‰РµРіРѕ РїСѓР»Р° (РґР»СЏ СЌС‚РѕРіРѕ РЅР°РґРѕ РїСЂРѕР№С‚РёСЃСЊ РїРѕ РІСЃРµР№ СЃРµС‚Рё, С‚Р°Рє РєР°Рє СЌС‚Рё СЃРІСЏР·Рё СЂР°Р·Р±СЂРѕСЃР°РЅС‹)
 				for (int currentPostPool = 1; currentPostPool <= initPoolsQuantity; ++currentPostPool)
-					if (currentPostPool != currentPool) // Если это не дуплицирующий пул
+					if (currentPostPool != currentPool) // Р•СЃР»Рё СЌС‚Рѕ РЅРµ РґСѓРїР»РёС†РёСЂСѓСЋС‰РёР№ РїСѓР»
 						for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPostPool); ++currentPoolConnection)
-							if (kidGenome->getConnectionID(currentPostPool, currentPoolConnection) <= initConnectionsQuantity) // Если это старая связь
-								// Если у текущего потенциального пула есть связь с текущим дублицирующим пулом
+							if (kidGenome->getConnectionID(currentPostPool, currentPoolConnection) <= initConnectionsQuantity) // Р•СЃР»Рё СЌС‚Рѕ СЃС‚Р°СЂР°СЏ СЃРІСЏР·СЊ
+								// Р•СЃР»Рё Сѓ С‚РµРєСѓС‰РµРіРѕ РїРѕС‚РµРЅС†РёР°Р»СЊРЅРѕРіРѕ РїСѓР»Р° РµСЃС‚СЊ СЃРІСЏР·СЊ СЃ С‚РµРєСѓС‰РёРј РґСѓР±Р»РёС†РёСЂСѓСЋС‰РёРј РїСѓР»РѕРј
 								if (kidGenome->getConnectionPrePool(currentPostPool, currentPoolConnection)->getID() == currentPool){
 									kidGenome->addConnection(kidGenome->getPoolsQuantity(), currentPostPool, kidGenome->getConnectionsQuantity() + 1, kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0,
 														kidGenome->getConnectionWeightVariance(currentPostPool, currentPoolConnection), kidGenome->getConnectionEnabled(currentPostPool, currentPoolConnection),
 														kidGenome->getConnectionDisabledStep(currentPostPool, currentPoolConnection), kidGenome->getConnectionDevelopSynapseProb(currentPostPool, currentPoolConnection),
 														++connectionInnovationNumber);
-									// Выходные связи дуплицирующего нейрона мы делим пополам между новым и дуплицирующим
+									// Р’С‹С…РѕРґРЅС‹Рµ СЃРІСЏР·Рё РґСѓРїР»РёС†РёСЂСѓСЋС‰РµРіРѕ РЅРµР№СЂРѕРЅР° РјС‹ РґРµР»РёРј РїРѕРїРѕР»Р°Рј РјРµР¶РґСѓ РЅРѕРІС‹Рј Рё РґСѓРїР»РёС†РёСЂСѓСЋС‰РёРј
 									kidGenome->setConnectionWeightMean(currentPostPool, currentPoolConnection, kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0); 
 								}
-				// ТЕПЕРЬ КОПИРУЕМ ВСЕ ПРЕДИКТОРНЫЕ СВЯЗИ
-				// Копируем все входящие предикторные связи из дуплицирующего пула в новый
+				// РўР•РџР•Р Р¬ РљРћРџРР РЈР•Рњ Р’РЎР• РџР Р•Р”РРљРўРћР РќР«Р• РЎР’РЇР—Р
+				// РљРѕРїРёСЂСѓРµРј РІСЃРµ РІС…РѕРґСЏС‰РёРµ РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё РёР· РґСѓРїР»РёС†РёСЂСѓСЋС‰РµРіРѕ РїСѓР»Р° РІ РЅРѕРІС‹Р№
 				for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
-					// Если это старая предикторная связь - до процедуры мутации
+					// Р•СЃР»Рё СЌС‚Рѕ СЃС‚Р°СЂР°СЏ РїСЂРµРґРёРєС‚РѕСЂРЅР°СЏ СЃРІСЏР·СЊ - РґРѕ РїСЂРѕС†РµРґСѓСЂС‹ РјСѓС‚Р°С†РёРё
 					if (kidGenome->getPredConnectionID(currentPool, currentPoolPredConnection) <= initPredConnectionsQuantity){
 						int prePoolNumber;
-						// Если это не предикторная связь на самого себя
+						// Р•СЃР»Рё СЌС‚Рѕ РЅРµ РїСЂРµРґРёРєС‚РѕСЂРЅР°СЏ СЃРІСЏР·СЊ РЅР° СЃР°РјРѕРіРѕ СЃРµР±СЏ
 						if (kidGenome->getPredConnectionPrePool(currentPool, currentPoolPredConnection)->getID() != kidGenome->getPredConnectionPostPool(currentPool, currentPoolPredConnection)->getID())
 							prePoolNumber = kidGenome->getPredConnectionPrePool(currentPool, currentPoolPredConnection)->getID();
 						else 
@@ -330,12 +330,12 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent){
 														kidGenome->getPredConnectionDisabledStep(currentPool, currentPoolPredConnection), kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection),
 														++predConnectionInnovationNumber);
 					}
-            // Копируем все выходящие предикторные связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
+            // РљРѕРїРёСЂСѓРµРј РІСЃРµ РІС‹С…РѕРґСЏС‰РёРµ РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё РёР· РґСѓРїР»РёС†РёСЂСѓСЋС‰РµРіРѕ РїСѓР»Р° (РґР»СЏ СЌС‚РѕРіРѕ РЅР°РґРѕ РїСЂРѕР№С‚РёСЃСЊ РїРѕ РІСЃРµР№ СЃРµС‚Рё, С‚Р°Рє РєР°Рє СЌС‚Рё СЃРІСЏР·Рё СЂР°Р·Р±СЂРѕСЃР°РЅС‹)
 				for (int currentPostPool = 1; currentPostPool <= initPoolsQuantity; ++currentPostPool)
-					if (currentPostPool != currentPool) // Если это не дуплицирующий пул
+					if (currentPostPool != currentPool) // Р•СЃР»Рё СЌС‚Рѕ РЅРµ РґСѓРїР»РёС†РёСЂСѓСЋС‰РёР№ РїСѓР»
 						for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPostPool); ++currentPoolPredConnection)
-							if (kidGenome->getPredConnectionID(currentPostPool, currentPoolPredConnection) <= initPredConnectionsQuantity) // Если это старая связь
-								// Если у текущего потенциального пула есть предикторная связь с текущим дублицирующим пулом
+							if (kidGenome->getPredConnectionID(currentPostPool, currentPoolPredConnection) <= initPredConnectionsQuantity) // Р•СЃР»Рё СЌС‚Рѕ СЃС‚Р°СЂР°СЏ СЃРІСЏР·СЊ
+								// Р•СЃР»Рё Сѓ С‚РµРєСѓС‰РµРіРѕ РїРѕС‚РµРЅС†РёР°Р»СЊРЅРѕРіРѕ РїСѓР»Р° РµСЃС‚СЊ РїСЂРµРґРёРєС‚РѕСЂРЅР°СЏ СЃРІСЏР·СЊ СЃ С‚РµРєСѓС‰РёРј РґСѓР±Р»РёС†РёСЂСѓСЋС‰РёРј РїСѓР»РѕРј
 								if (kidGenome->getPredConnectionPrePool(currentPostPool, currentPoolPredConnection)->getID() == currentPool)
 									kidGenome->addPredConnection(kidGenome->getPoolsQuantity(), currentPostPool, kidGenome->getPredConnectionsQuantity() + 1, kidGenome->getPredConnectionEnabled(currentPostPool, currentPoolPredConnection),
 														kidGenome->getPredConnectionDisabledStep(currentPostPool, currentPoolPredConnection), kidGenome->getDevelopPredConnectionProb(currentPostPool, currentPoolPredConnection),
@@ -346,29 +346,29 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent){
 	kidGenome->fixPredConnectionsIDs();
 }
 
-// Процедура мутации вероятности развития синапса по связи между пулами
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё СЂР°Р·РІРёС‚РёСЏ СЃРёРЅР°РїСЃР° РїРѕ СЃРІСЏР·Рё РјРµР¶РґСѓ РїСѓР»Р°РјРё
 void TPopulation::mutationDevelopSynapseProb(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
 			if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutDevelopConProbProb)
-				// Важно, чтобы вероятность была между нулем и единицей
+				// Р’Р°Р¶РЅРѕ, С‡С‚РѕР±С‹ РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ Р±С‹Р»Р° РјРµР¶РґСѓ РЅСѓР»РµРј Рё РµРґРёРЅРёС†РµР№
 					kidGenome->setConnectionDevelopSynapseProb(currentPool, currentPoolConnection, 
 						min(1.0, max(0.0, kidGenome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
 }
 
-// Процедура мутации вероятности развития предикторной связи по предикторной связи между пулами
+// РџСЂРѕС†РµРґСѓСЂР° РјСѓС‚Р°С†РёРё РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё СЂР°Р·РІРёС‚РёСЏ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РїРѕ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РјРµР¶РґСѓ РїСѓР»Р°РјРё
 void TPopulation::mutationDevelopPredConProb(TAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
 			if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutDevelopConProbProb)
-				// Важно, чтобы вероятность была между нулем и единицей
+				// Р’Р°Р¶РЅРѕ, С‡С‚РѕР±С‹ РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ Р±С‹Р»Р° РјРµР¶РґСѓ РЅСѓР»РµРј Рё РµРґРёРЅРёС†РµР№
 					kidGenome->setDevelopPredConnectionProb(currentPool, currentPoolPredConnection, 
 						min(1.0, max(0.0, kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
 }
 
-// Процедура составления потомка от двух родителей
+// РџСЂРѕС†РµРґСѓСЂР° СЃРѕСЃС‚Р°РІР»РµРЅРёСЏ РїРѕС‚РѕРјРєР° РѕС‚ РґРІСѓС… СЂРѕРґРёС‚РµР»РµР№
 void TPopulation::composeOffspringFromParents(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent){
 	if (firstParentAgent.getReward() >= secondParentAgent.getReward())
 		kidAgent = firstParentAgent;
@@ -376,7 +376,7 @@ void TPopulation::composeOffspringFromParents(TAgent& kidAgent, const TAgent& fi
 		kidAgent = secondParentAgent;
 }
 
-// Процедура генерации одного потомка
+// РџСЂРѕС†РµРґСѓСЂР° РіРµРЅРµСЂР°С†РёРё РѕРґРЅРѕРіРѕ РїРѕС‚РѕРјРєР°
 void TPopulation::generateOffspring(TAgent& kidAgent, const TAgent& firstParentAgent, const TAgent& secondParentAgent, int currentEvolutionStep){
 	
 	composeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
@@ -398,9 +398,9 @@ void TPopulation::generateOffspring(TAgent& kidAgent, const TAgent& firstParentA
 	//mutationDevelopPredConProb(kidAgent);
 }
 
-//Процедура получения номера агента, используемая в рулеточном алгоритме
+//РџСЂРѕС†РµРґСѓСЂР° РїРѕР»СѓС‡РµРЅРёСЏ РЅРѕРјРµСЂР° Р°РіРµРЅС‚Р°, РёСЃРїРѕР»СЊР·СѓРµРјР°СЏ РІ СЂСѓР»РµС‚РѕС‡РЅРѕРј Р°Р»РіРѕСЂРёС‚РјРµ
 int TPopulation::rouletteWheelSelection(double populationFitness[]){
-   double totalFitness = 0; // Полная награда популяции
+   double totalFitness = 0; // РџРѕР»РЅР°СЏ РЅР°РіСЂР°РґР° РїРѕРїСѓР»СЏС†РёРё
 	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++) 
 		totalFitness += populationFitness[currentAgent - 1];
 
@@ -413,53 +413,53 @@ int TPopulation::rouletteWheelSelection(double populationFitness[]){
    return currentAgent;
 }
 
-// Процедура генерации нового поколения и замены старого на новое
+// РџСЂРѕС†РµРґСѓСЂР° РіРµРЅРµСЂР°С†РёРё РЅРѕРІРѕРіРѕ РїРѕРєРѕР»РµРЅРёСЏ Рё Р·Р°РјРµРЅС‹ СЃС‚Р°СЂРѕРіРѕ РЅР° РЅРѕРІРѕРµ
 void TPopulation::generateNextPopulation(int currentEvolutionStep){
-	double* populationReward = new double[populationSize]; // Массив со всеми наградами популяции
-   double rewardSum = 0.0; // Сумма всех наград агентов
-	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++) // Заполняем массив с наградами популяции
+	double* populationReward = new double[populationSize]; // РњР°СЃСЃРёРІ СЃРѕ РІСЃРµРјРё РЅР°РіСЂР°РґР°РјРё РїРѕРїСѓР»СЏС†РёРё
+   double rewardSum = 0.0; // РЎСѓРјРјР° РІСЃРµС… РЅР°РіСЂР°Рґ Р°РіРµРЅС‚РѕРІ
+	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++) // Р—Р°РїРѕР»РЅСЏРµРј РјР°СЃСЃРёРІ СЃ РЅР°РіСЂР°РґР°РјРё РїРѕРїСѓР»СЏС†РёРё
 		rewardSum += (populationReward[currentAgent - 1] = agents[currentAgent - 1]->getReward());
 	TAgent** newAgents = new TAgent*[populationSize];
 
-	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++){ // Генерируем новую популяцию
+	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++){ // Р“РµРЅРµСЂРёСЂСѓРµРј РЅРѕРІСѓСЋ РїРѕРїСѓР»СЏС†РёСЋ
       int firstParentAgent;
       int secondParentAgent;
-      // Определяем номер родительского агента
-      if (rewardSum){ // Если есть хоть один агент, который набрал хоть сколько-то награды
+      // РћРїСЂРµРґРµР»СЏРµРј РЅРѕРјРµСЂ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ Р°РіРµРЅС‚Р°
+      if (rewardSum){ // Р•СЃР»Рё РµСЃС‚СЊ С…РѕС‚СЊ РѕРґРёРЅ Р°РіРµРЅС‚, РєРѕС‚РѕСЂС‹Р№ РЅР°Р±СЂР°Р» С…РѕС‚СЊ СЃРєРѕР»СЊРєРѕ-С‚Рѕ РЅР°РіСЂР°РґС‹
          firstParentAgent = rouletteWheelSelection(populationReward);
-         int checkCount = 0; // Пытаемся найти другого агента
+         int checkCount = 0; // РџС‹С‚Р°РµРјСЃСЏ РЅР°Р№С‚Рё РґСЂСѓРіРѕРіРѕ Р°РіРµРЅС‚Р°
          do{
             secondParentAgent =  rouletteWheelSelection(populationReward);
          } while ((firstParentAgent == secondParentAgent) && (++checkCount < 10));
 
-         if (firstParentAgent == secondParentAgent) //Если не удается найти другого агента (потому что у всех остальных очень маленькие награды)
+         if (firstParentAgent == secondParentAgent) //Р•СЃР»Рё РЅРµ СѓРґР°РµС‚СЃСЏ РЅР°Р№С‚Рё РґСЂСѓРіРѕРіРѕ Р°РіРµРЅС‚Р° (РїРѕС‚РѕРјСѓ С‡С‚Рѕ Сѓ РІСЃРµС… РѕСЃС‚Р°Р»СЊРЅС‹С… РѕС‡РµРЅСЊ РјР°Р»РµРЅСЊРєРёРµ РЅР°РіСЂР°РґС‹)
 				secondParentAgent = service::uniformDiscreteDistribution(1, populationSize);
-      } else{ // Если ни один из агентов не набрал никакой награды
+      } else{ // Р•СЃР»Рё РЅРё РѕРґРёРЅ РёР· Р°РіРµРЅС‚РѕРІ РЅРµ РЅР°Р±СЂР°Р» РЅРёРєР°РєРѕР№ РЅР°РіСЂР°РґС‹
 			firstParentAgent = service::uniformDiscreteDistribution(1, populationSize);
          do{
 				secondParentAgent =  service::uniformDiscreteDistribution(1, populationSize);
          } while (firstParentAgent == secondParentAgent);
       }
-      // Пусть более приспособленный родитель всегда будет на первом месте
+      // РџСѓСЃС‚СЊ Р±РѕР»РµРµ РїСЂРёСЃРїРѕСЃРѕР±Р»РµРЅРЅС‹Р№ СЂРѕРґРёС‚РµР»СЊ РІСЃРµРіРґР° Р±СѓРґРµС‚ РЅР° РїРµСЂРІРѕРј РјРµСЃС‚Рµ
 		if (agents[firstParentAgent - 1]->getReward() > agents[secondParentAgent - 1]->getReward()){
 			int tmp = firstParentAgent;
 			firstParentAgent = secondParentAgent;
 			secondParentAgent = tmp;
 		}
 		newAgents[currentAgent - 1] = new TAgent;
-		// Создаем нового агента
+		// РЎРѕР·РґР°РµРј РЅРѕРІРѕРіРѕ Р°РіРµРЅС‚Р°
 		generateOffspring(*newAgents[currentAgent - 1], *agents[firstParentAgent - 1], *agents[secondParentAgent - 1], currentEvolutionStep);
 		newAgents[currentAgent - 1]->setMoreFitParent(firstParentAgent);
 		newAgents[currentAgent - 1]->setLessFitParent(secondParentAgent);
    }
 
    delete []populationReward;
-   // Теперь перепишем новую популяцию в старую (но не физически, а только ссылки, при этом старую удаляем)
+   // РўРµРїРµСЂСЊ РїРµСЂРµРїРёС€РµРј РЅРѕРІСѓСЋ РїРѕРїСѓР»СЏС†РёСЋ РІ СЃС‚Р°СЂСѓСЋ (РЅРѕ РЅРµ С„РёР·РёС‡РµСЃРєРё, Р° С‚РѕР»СЊРєРѕ СЃСЃС‹Р»РєРё, РїСЂРё СЌС‚РѕРј СЃС‚Р°СЂСѓСЋ СѓРґР°Р»СЏРµРј)
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
 		delete agents[currentAgent - 1];
-		agents[currentAgent - 1] = newAgents[currentAgent - 1];  // Копируем только ссылку
+		agents[currentAgent - 1] = newAgents[currentAgent - 1];  // РљРѕРїРёСЂСѓРµРј С‚РѕР»СЊРєРѕ СЃСЃС‹Р»РєСѓ
    }
 
-   delete []newAgents; // Удаляем только массив ссылок, но не самих агентов
+   delete []newAgents; // РЈРґР°Р»СЏРµРј С‚РѕР»СЊРєРѕ РјР°СЃСЃРёРІ СЃСЃС‹Р»РѕРє, РЅРѕ РЅРµ СЃР°РјРёС… Р°РіРµРЅС‚РѕРІ
 }
 

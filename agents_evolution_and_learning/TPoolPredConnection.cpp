@@ -1,4 +1,4 @@
-#include "TPoolPredConnection.h"
+п»ї#include "TPoolPredConnection.h"
 #include "TNeuralPool.h"
 
 #include <iostream>
@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Запись предикторной связи в файл или на экран
+// Р—Р°РїРёСЃСЊ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 ostream& operator<<(ostream& ofs, const TPoolPredConnection& poolPredConnection){
 	ofs << poolPredConnection.prePool->getID() << "\t" << poolPredConnection.postPool->getID() 
 		<< "\t" << poolPredConnection.enabled << "\t" << poolPredConnection.disabledStep

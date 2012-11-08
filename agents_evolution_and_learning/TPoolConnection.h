@@ -1,4 +1,4 @@
-#ifndef TPOOLCONNECTION_H
+п»ї#ifndef TPOOLCONNECTION_H
 #define TPOOLCONNECTION_H
 
 #include <iostream>
@@ -7,20 +7,20 @@
 class TNeuralPool;
 
 /* 
-Класс связи сети из пулов
+РљР»Р°СЃСЃ СЃРІСЏР·Рё СЃРµС‚Рё РёР· РїСѓР»РѕРІ
 */
 class TPoolConnection{
-	int ID; // ID связи
-	double weightMean; // Среднее веса синапса, который развивается по этой связи
-	double weightVariance; // Дисперсия веса синапса, который развивается по этой связи
-	bool enabled; // Признак экспресии связи
-	int disabledStep; // Номер популяции (такта эволюции), в которой связь была выключена (0 - если включена)
-	double developSynapseProb; // Вероятность развития синапса по этой связи
-	long innovationNumber; // Номер инновации связи
-	TNeuralPool* prePool; // Ссылка на пресинаптический пул
-	TNeuralPool* postPool; // Ссылка на постсинаптический пул
+	int ID; // ID СЃРІСЏР·Рё
+	double weightMean; // РЎСЂРµРґРЅРµРµ РІРµСЃР° СЃРёРЅР°РїСЃР°, РєРѕС‚РѕСЂС‹Р№ СЂР°Р·РІРёРІР°РµС‚СЃСЏ РїРѕ СЌС‚РѕР№ СЃРІСЏР·Рё
+	double weightVariance; // Р”РёСЃРїРµСЂСЃРёСЏ РІРµСЃР° СЃРёРЅР°РїСЃР°, РєРѕС‚РѕСЂС‹Р№ СЂР°Р·РІРёРІР°РµС‚СЃСЏ РїРѕ СЌС‚РѕР№ СЃРІСЏР·Рё
+	bool enabled; // РџСЂРёР·РЅР°Рє СЌРєСЃРїСЂРµСЃРёРё СЃРІСЏР·Рё
+	int disabledStep; // РќРѕРјРµСЂ РїРѕРїСѓР»СЏС†РёРё (С‚Р°РєС‚Р° СЌРІРѕР»СЋС†РёРё), РІ РєРѕС‚РѕСЂРѕР№ СЃРІСЏР·СЊ Р±С‹Р»Р° РІС‹РєР»СЋС‡РµРЅР° (0 - РµСЃР»Рё РІРєР»СЋС‡РµРЅР°)
+	double developSynapseProb; // Р’РµСЂРѕСЏС‚РЅРѕСЃС‚СЊ СЂР°Р·РІРёС‚РёСЏ СЃРёРЅР°РїСЃР° РїРѕ СЌС‚РѕР№ СЃРІСЏР·Рё
+	long innovationNumber; // РќРѕРјРµСЂ РёРЅРЅРѕРІР°С†РёРё СЃРІСЏР·Рё
+	TNeuralPool* prePool; // РЎСЃС‹Р»РєР° РЅР° РїСЂРµСЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР»
+	TNeuralPool* postPool; // РЎСЃС‹Р»РєР° РЅР° РїРѕСЃС‚СЃРёРЅР°РїС‚РёС‡РµСЃРєРёР№ РїСѓР»
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TPoolConnection(){
 		ID = 0;
 		weightMean = 0;
@@ -32,14 +32,14 @@ public:
 		prePool = 0;
 		postPool = 0;
 	}
-	// Полный конструктор
+	// РџРѕР»РЅС‹Р№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	TPoolConnection(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		setAll(newID, newWeightMean, newWeightVariance, newEnabled, newDisabledStep, newDevelopSynapseProb, newInnovationNumber, newPrePool, newPostPool);
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TPoolConnection() {}
 
-	// Геттеры и сеттеры для всех внутренних переменных
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РІРЅСѓС‚СЂРµРЅРЅРёС… РїРµСЂРµРјРµРЅРЅС‹С…
 	int getID() const { return ID; }
 	void setID(int newID) { ID = newID; }
 	double getWeightMean() const { return weightMean; }
@@ -58,7 +58,7 @@ public:
 	void setPrePool(TNeuralPool* newPrePool) { prePool = newPrePool; }
 	TNeuralPool* getPostPool() const { return postPool; }
 	void setPostPool(TNeuralPool* newPostPool) { postPool = newPostPool; }
-	// Заполнение всех характеристик связи
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ РІСЃРµС… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє СЃРІСЏР·Рё
 	void setAll(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long newInnovationNumber = 0, TNeuralPool* newPrePool = 0, TNeuralPool* newPostPool = 0){
 		ID = newID;
 		weightMean = newWeightMean;
@@ -70,7 +70,7 @@ public:
 		prePool = newPrePool;
 		postPool = newPostPool;
 	};
-	// Запись связи в файл или на экран
+	// Р—Р°РїРёСЃСЊ СЃРІСЏР·Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& os, const TPoolConnection& poolConnection);
 };
 

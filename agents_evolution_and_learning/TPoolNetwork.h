@@ -1,4 +1,4 @@
-#ifndef TPOOLNETWORK_H
+п»ї#ifndef TPOOLNETWORK_H
 #define TPOOLNETWORK_H
 
 #include "TNeuralPool.h"
@@ -7,27 +7,27 @@
 #include <fstream>
 
 /*
-Класс cети из нейрональных пулов
+РљР»Р°СЃСЃ cРµС‚Рё РёР· РЅРµР№СЂРѕРЅР°Р»СЊРЅС‹С… РїСѓР»РѕРІ
 */
 class TPoolNetwork{
-	TNeuralPool** poolsStructure; // Список из пулов 
-	int poolsStructureSize; // Текущий размер массива пулов
-	int poolsQuantity; // Количество пулов в сети
+	TNeuralPool** poolsStructure; // РЎРїРёСЃРѕРє РёР· РїСѓР»РѕРІ 
+	int poolsStructureSize; // РўРµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° РїСѓР»РѕРІ
+	int poolsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РїСѓР»РѕРІ РІ СЃРµС‚Рё
 
-	int connectionsQuantity; // Количество связей в сети
-	int predConnectionsQuantity; // Количество предикторных связей в сети
+	int connectionsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ СЃРІСЏР·РµР№ РІ СЃРµС‚Рё
+	int predConnectionsQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РІ СЃРµС‚Рё
 	
-	int layersQuantity; // Количество слоев в сети (!!!! не уменьшается при удалении пулов !!!)
-	int inputResolution; // Размер входного пр-ва сети
-	int outputResolution; // Размер выходного пр-ва сети
+	int layersQuantity; // РљРѕР»РёС‡РµСЃС‚РІРѕ СЃР»РѕРµРІ РІ СЃРµС‚Рё (!!!! РЅРµ СѓРјРµРЅСЊС€Р°РµС‚СЃСЏ РїСЂРё СѓРґР°Р»РµРЅРёРё РїСѓР»РѕРІ !!!)
+	int inputResolution; // Р Р°Р·РјРµСЂ РІС…РѕРґРЅРѕРіРѕ РїСЂ-РІР° СЃРµС‚Рё
+	int outputResolution; // Р Р°Р·РјРµСЂ РІС‹С…РѕРґРЅРѕРіРѕ РїСЂ-РІР° СЃРµС‚Рё
 
-	static const int INFLATE_POOLS_SIZE = 10; // Размер увеличения массива с пулами в случае переполнения
+	static const int INFLATE_POOLS_SIZE = 10; // Р Р°Р·РјРµСЂ СѓРІРµР»РёС‡РµРЅРёСЏ РјР°СЃСЃРёРІР° СЃ РїСѓР»Р°РјРё РІ СЃР»СѓС‡Р°Рµ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ
 
-	// Процедура увеличения размера массива пулов
+	// РџСЂРѕС†РµРґСѓСЂР° СѓРІРµР»РёС‡РµРЅРёСЏ СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РїСѓР»РѕРІ
 	void inflatePoolsStructure(int inflateSize);
 
 public:
-	// Конструктор по умолчанию
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	TPoolNetwork(){
 		poolsStructure = 0;
 		poolsStructureSize = 0;
@@ -38,17 +38,17 @@ public:
 		inputResolution = 0;
 		outputResolution = 0;
 	}
-	// Деструктор
+	// Р”РµСЃС‚СЂСѓРєС‚РѕСЂ
 	~TPoolNetwork();
 
-	//Геттеры для параметров сети
+	//Р“РµС‚С‚РµСЂС‹ РґР»СЏ РїР°СЂР°РјРµС‚СЂРѕРІ СЃРµС‚Рё
 	int getPoolsQuantity() const{ return poolsQuantity; }
 	int getConnectionsQuantity() const { return connectionsQuantity; }
 	int getPredConnectionsQuantity() const { return predConnectionsQuantity; }
 	int getInputResolution() const { return inputResolution; }
 	int getOutputResolution() const { return outputResolution; }
 
-	// Геттеры и сеттеры для всех пулов сети (во всех случаях передается номер пула в массиве пула)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РІСЃРµС… РїСѓР»РѕРІ СЃРµС‚Рё (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ РїСѓР»Р° РІ РјР°СЃСЃРёРІРµ РїСѓР»Р°)
 	int getPoolID(int poolNumber) const { return poolsStructure[poolNumber-1]->getID(); }
 	void setPoolID(int poolNumber, int newID){ poolsStructure[poolNumber-1]->setID(newID); }
 	int getPoolType(int poolNumber) const { return poolsStructure[poolNumber-1]->getType(); }
@@ -65,7 +65,7 @@ public:
 	int getPoolInputConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputConnectionsQuantity(); }
 	int getPoolInputPredConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputPredConnectionsQuantity(); }
 
-	// Геттеры и сеттеры для связей данной сети (во всех случаях передается номер пула в массиве пулов и номер связи в массиве связей)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ СЃРІСЏР·РµР№ РґР°РЅРЅРѕР№ СЃРµС‚Рё (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ РїСѓР»Р° РІ РјР°СЃСЃРёРІРµ РїСѓР»РѕРІ Рё РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 	int getConnectionID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionID(connectionNumber); }
 	void setConnectionID(int poolNumber, int connectionNumber, int newID) { poolsStructure[poolNumber-1]->setConnectionID(connectionNumber, newID); }
 	double getConnectionWeightMean(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionWeightMean(connectionNumber); }
@@ -85,7 +85,7 @@ public:
 	TNeuralPool* getConnectionPostPool(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPostPool(connectionNumber); }
 	void setConnectionPostPool(int poolNumber, int connectionNumber, TNeuralPool* newPostPool) { poolsStructure[poolNumber-1]->setConnectionPostPool(connectionNumber, newPostPool); }
 
-	// Геттеры и сеттеры для предикторных связей данной сети (во всех случаях передается номер пула в массиве пула и номер связи в массиве связей)
+	// Р“РµС‚С‚РµСЂС‹ Рё СЃРµС‚С‚РµСЂС‹ РґР»СЏ РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ РґР°РЅРЅРѕР№ СЃРµС‚Рё (РІРѕ РІСЃРµС… СЃР»СѓС‡Р°СЏС… РїРµСЂРµРґР°РµС‚СЃСЏ РЅРѕРјРµСЂ РїСѓР»Р° РІ РјР°СЃСЃРёРІРµ РїСѓР»Р° Рё РЅРѕРјРµСЂ СЃРІСЏР·Рё РІ РјР°СЃСЃРёРІРµ СЃРІСЏР·РµР№)
 	int getPredConnectionID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionID(predConnectionNumber); }
 	void setPredConnectionID(int poolNumber, int predConnectionNumber, int newID) { poolsStructure[poolNumber-1]->setPredConnectionID(predConnectionNumber, newID); }
 	bool getPredConnectionEnabled(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionEnabled(predConnectionNumber); }
@@ -101,60 +101,60 @@ public:
 	TNeuralPool* getPredConnectionPostPool(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPostPool(predConnectionNumber); }
 	void setPredConnectionPostPool(int poolNumber, int predConnectionNumber, TNeuralPool* newPostPool) { poolsStructure[poolNumber-1]->setPredConnectionPostPool(predConnectionNumber, newPostPool); }
 
-	// Корректировка ID пулов (например после удаления)
+	// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID РїСѓР»РѕРІ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 	void fixPoolsIDs();
-	// Корректировка ID связей (например после удаления)
+	// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID СЃРІСЏР·РµР№ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 	void fixConnectionsIDs();
-	// Корректировка ID предикторных связей (например после удаления)
+	// РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР° ID РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ (РЅР°РїСЂРёРјРµСЂ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ)
 	void fixPredConnectionsIDs();
 
-	//Добавление нейронального пула в сеть
+	//Р”РѕР±Р°РІР»РµРЅРёРµ РЅРµР№СЂРѕРЅР°Р»СЊРЅРѕРіРѕ РїСѓР»Р° РІ СЃРµС‚СЊ
 	void addPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer);
 
-	//Добавление связи в сеть
+	//Р”РѕР±Р°РІР»РµРЅРёРµ СЃРІСЏР·Рё РІ СЃРµС‚СЊ
 	void addConnection(int prePoolNumber, int postPoolNumber, int newID, double newWeightMean, double newWeightVariance, bool newEnabled, int newDisabledStep, double newDevelopSynapseProb, long newInnovationNumber){
 		poolsStructure[postPoolNumber-1]->addConnection(newID, newWeightMean, newWeightVariance, newEnabled, newDisabledStep, newDevelopSynapseProb, newInnovationNumber, poolsStructure[prePoolNumber-1]); 
 		++connectionsQuantity;
 	}
 
-	// Добавление предикторной связи в сеть
+	// Р”РѕР±Р°РІР»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ СЃРµС‚СЊ
 	void addPredConnection(int prePoolNumber, int postPoolNumber, int newID, bool newEnabled, int newDisabledStep, double newDevelopPredConnectionProb, long newInnovationNumber){
 		poolsStructure[postPoolNumber-1]->addPredConnection(newID, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber, poolsStructure[prePoolNumber-1]); 
 		++predConnectionsQuantity;
 	}
-	// Удаление пула из сети (с удалением также всех входных и выходных связей из этого пула)
+	// РЈРґР°Р»РµРЅРёРµ РїСѓР»Р° РёР· СЃРµС‚Рё (СЃ СѓРґР°Р»РµРЅРёРµРј С‚Р°РєР¶Рµ РІСЃРµС… РІС…РѕРґРЅС‹С… Рё РІС‹С…РѕРґРЅС‹С… СЃРІСЏР·РµР№ РёР· СЌС‚РѕРіРѕ РїСѓР»Р°)
 	void deletePool(int poolNumber);
 
-	//Удаление связи из сети
+	//РЈРґР°Р»РµРЅРёРµ СЃРІСЏР·Рё РёР· СЃРµС‚Рё
 	void deleteConnection(int poolNumber, int connectionNumber){
 		poolsStructure[poolNumber-1]->deleteConnection(connectionNumber);
 		--connectionsQuantity;
 	}
 
-	// Удаление предикторной связи из сети
+	// РЈРґР°Р»РµРЅРёРµ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РёР· СЃРµС‚Рё
 	void deletePredConnection(int poolNumber, int predConnectionNumber){
 		poolsStructure[poolNumber-1]->deletePredConnection(predConnectionNumber);
 		--predConnectionsQuantity;
 	}
-	// Проверка существования связи в сети
+	// РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЃРІСЏР·Рё РІ СЃРµС‚Рё
 	bool checkConnectionExistance(int prePoolNumber, int postPoolNumber);
-	// Проверка существования предикторной связи в сети
+	// РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РІ СЃРµС‚Рё
 	bool checkPredConnectionExistance(int prePoolNumber, int postPoolNumber);
 
-	// Стирание сети
+	// РЎС‚РёСЂР°РЅРёРµ СЃРµС‚Рё
 	void erasePoolNetwork();
 
-	// Оператор присваивания (фактически полное копирование сети - создание новых структур)
+	// РћРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ (С„Р°РєС‚РёС‡РµСЃРєРё РїРѕР»РЅРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ СЃРµС‚Рё - СЃРѕР·РґР°РЅРёРµ РЅРѕРІС‹С… СЃС‚СЂСѓРєС‚СѓСЂ)
 	TPoolNetwork& operator=(const TPoolNetwork& sourcePoolNetwork);
 
-	// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
-	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
-	void printGraphNetwork(std::string graphFilename);
+	// Р’С‹РІРѕРґ СЃРµС‚Рё РІ С„Р°Р№Р» РєР°Рє РіСЂР°С„Р° (СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј СЃС‚РѕСЂРѕРЅРЅРµР№ СѓС‚РёР»РёС‚С‹ dot.exe РёР· РїР°РєРµС‚Р° GraphViz) 
+	// Р”Р»СЏ РєРѕСЂСЂРµРєС‚РЅРѕР№ СЂР°Р±РѕС‚С‹ РЅРµРѕР±С…РѕРґРёРјРѕ С‡С‚РѕР±С‹ РїСѓС‚СЊ Рє dot.exe Р±С‹Р» РїСЂРѕРїРёСЃР°РЅ РІ $PATH
+	void printGraphNetwork(std::string graphFilename,  bool printWeights = false) const;
 
-	//Печать сети в файл или на экран
+	//РџРµС‡Р°С‚СЊ СЃРµС‚Рё РІ С„Р°Р№Р» РёР»Рё РЅР° СЌРєСЂР°РЅ
 	friend std::ostream& operator<<(std::ostream& os, const TPoolNetwork& PoolNetwork);
 
-	//Считывание сети из файла или экрана
+	//РЎС‡РёС‚С‹РІР°РЅРёРµ СЃРµС‚Рё РёР· С„Р°Р№Р»Р° РёР»Рё СЌРєСЂР°РЅР°
 	friend std::istream& operator>>(std::istream& is, TPoolNetwork& PoolNetwork);
 
 	//friend class tests;
