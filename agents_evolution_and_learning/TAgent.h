@@ -73,7 +73,8 @@ public:
 	void setLessFitParent(int lessFitParent) { parents[1] = lessFitParent; }
 	TPoolNetwork* getPointerToAgentGenome() const { return genome; }
 	TNeuralNetwork* getPointerToAgentController() const { return neuralController; }
-	double* getPointerAgentLife() const { return agentLife; }
+	// Получение указателя на запись жизни агента
+	double* getPointerToAgentLife() const { return agentLife; }
 
 	// Загрузка нейроконтроллера агента
 	void loadController(std::istream& is);
