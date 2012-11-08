@@ -85,7 +85,7 @@ void TEvolutionaryProcess::fillAgentSettingsFromFile(){
 }
 
 // Вывод логовых сообщений (прогресса) на консоль или в файл
-void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgentsConsole, int currentEvolutionStep /*=0*/){
+void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgentsConsole, TPopulation* bestPopulation, int currentEvolutionStep /*=0*/){
 	// Подсчитываем средние характеристики
 	double averagePoolsQuantity = 0;
 	double averageConnectionsQuantity = 0;
@@ -111,30 +111,16 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgen
 	//outputConsole << currentEvolutionStep << ": " << averageReward << "\t" << maxReward << "\t" <<
 	//	averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
 	// Также записываем в файл результатов
-	//ofstream resultsFile;
-	//resultsFile.open(filenameSettings.resultsFilename.c_str(), fstream::app);
 	outputConsole <<  currentEvolutionStep << "\t" << averageReward << "\t" << maxReward << "\t" <<
 		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
-	//resultsFile.close();
 	// Записываем лучшего агента и всю популяцию, если нужно
-	//ofstream bestAgentsFile;
-	//bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str(), fstream::app);
 	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsConsole);
 
 	if (averageReward > bestAverageReward){
-		ofstream bestPopulationFile;
-		bestPopulationFile.open(filenameSettings.bestPopulationFilename.c_str());
-		for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
-			agentsPopulation->getPointertoAgent(currentAgent)->uploadGenome(bestPopulationFile);
-		bestPopulationFile.close();
+		//agentsPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
+		*bestPopulation = *agentsPopulation;
 		bestAverageReward = averageReward;
 	}
-	/*stringstream tmp_stream;
-	tmp_stream << currentEvolutionStep;
-	string tmp_str;
-	tmp_stream >> tmp_str;
-	agentsPopulation->getPointertoAgent(bestAgent)->getPointerToAgentGenome()->printGraphNetwork("C:/Tests/Networks/pool_net_" + tmp_str + ".jpg");
-	agentsPopulation->getPointertoAgent(bestAgent)->getPointerToAgentController()->printGraphNetwork("C:/Tests/Networks/neural_net_" + tmp_str + ".jpg");*/
 }
 
 // Создание и заполнение предварительного файла основных результатов
@@ -199,11 +185,16 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str());
 	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
 	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
-
+	// Создаем структуру лучшей популяции (если процессор достаточно быстрый, то копирование популяций будет быстрее чем каждый раз записывать популяцию в файл)
+	TPopulation* bestPopulation = new TPopulation;
 	for (int currentEvolutionStep = 1; currentEvolutionStep <= agentsPopulation->evolutionSettings.evolutionTime; ++currentEvolutionStep){
 		agentsPopulation->evolutionaryStep(*environment, currentEvolutionStep); 
-		makeLogNote(resultsFile, bestAgentsFile, currentEvolutionStep);
+		makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
 	}
+	// Заспиываем лучшую популяцию
+	bestPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
+	delete bestPopulation;
+
 	resultsFile.close();
 	bestAgentsFile.close();
 }

@@ -57,6 +57,38 @@ void TPopulation::evolution(TEnvironment& environment){
 	}
 }
 
+// Копирование популяции (создание всех новых структур)
+TPopulation& TPopulation::operator=(const TPopulation& sourcePopulation){
+	// Сразу изменяем кол-во агентов
+	setPopulationSize(sourcePopulation.getPopulationSize());	
+	connectionInnovationNumber = sourcePopulation.connectionInnovationNumber;
+	predConnectionInnovationNumber = sourcePopulation.predConnectionInnovationNumber;
+	// Копируем параметры эволюции
+	evolutionSettings.agentLifetime = sourcePopulation.evolutionSettings.agentLifetime;
+	evolutionSettings.evolutionTime = sourcePopulation.evolutionSettings.evolutionTime;
+	// Копируем параметры мутаций
+	mutationSettings.mutWeightProbability = sourcePopulation.mutationSettings.mutWeightProbability;
+	mutationSettings.mutWeightMeanDisp = sourcePopulation.mutationSettings.mutWeightMeanDisp;
+	mutationSettings.mutWeightDispDisp = sourcePopulation.mutationSettings.mutWeightDispDisp; 
+	mutationSettings.disLimit = sourcePopulation.mutationSettings.disLimit;
+	mutationSettings.enableConnectionProb = sourcePopulation.mutationSettings.enableConnectionProb;
+	mutationSettings.disableConnectionProb = sourcePopulation.mutationSettings.disableConnectionProb;
+	mutationSettings.addConnectionProb = sourcePopulation.mutationSettings.addConnectionProb;
+	mutationSettings.addPredConnectionProb = sourcePopulation.mutationSettings.addPredConnectionProb;
+	mutationSettings.deleteConnectionProb = sourcePopulation.mutationSettings.deleteConnectionProb;
+	mutationSettings.deletePredConnectionProb = sourcePopulation.mutationSettings.deletePredConnectionProb;
+	mutationSettings.duplicatePoolProb = sourcePopulation.mutationSettings.duplicatePoolProb;
+	mutationSettings.poolDivisionCoef = sourcePopulation.mutationSettings.poolDivisionCoef;
+	mutationSettings.poolStandartAmount = sourcePopulation.mutationSettings.poolStandartAmount;
+	mutationSettings.connectionStandartAmount = sourcePopulation.mutationSettings.connectionStandartAmount;
+	mutationSettings.mutDevelopConProbProb = sourcePopulation.mutationSettings.mutDevelopConProbProb;
+	mutationSettings.mutDevelopConProbDisp = sourcePopulation.mutationSettings.mutDevelopConProbDisp;
+	// Копируем всех агентов
+	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
+		*(agents[currentAgent - 1]) = *(sourcePopulation.agents[currentAgent - 1]);
+
+	return *this;
+}
 
 // ---------------  Различные процедуры мутации -------------------------
 // Процедура мутации - мутация весовых коэффициентов связи

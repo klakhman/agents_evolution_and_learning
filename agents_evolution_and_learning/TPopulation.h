@@ -136,6 +136,9 @@ public:
 	// Процедура эволюции популяции
 	void evolution(TEnvironment& environment);
 
+	// Копирование популяции (создание всех новых структур)
+	TPopulation& operator=(const TPopulation& sourcePopulation);
+
 	friend class tests;
 };
 

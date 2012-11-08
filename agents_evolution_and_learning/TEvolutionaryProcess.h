@@ -42,7 +42,7 @@ public:
 	}
 	
 	// Вывод логовых сообщений (прогресса) на консоль или в файл
-	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, int currentEvolutionStep /*=0*/);
+	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation* bestPopulation, int currentEvolutionStep /*=0*/);
 	
 	// Создание и заполнение предварительного файла основных результатов
 	void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);

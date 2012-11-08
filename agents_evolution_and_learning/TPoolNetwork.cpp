@@ -96,7 +96,6 @@ void TPoolNetwork::deletePool(int poolNumber){
 
 // Проверка существования связи в сети
 bool TPoolNetwork::checkConnectionExistance(int prePoolNumber, int postPoolNumber){
-	bool check = false;
 	for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[postPoolNumber - 1]->getInputConnectionsQuantity(); ++currentPoolConnection)
 		if (poolsStructure[postPoolNumber - 1]->getConnectionPrePool(currentPoolConnection)->getID() == prePoolNumber)
 			return true;
