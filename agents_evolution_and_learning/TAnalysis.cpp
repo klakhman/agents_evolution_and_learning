@@ -394,3 +394,26 @@ void TAnalysis::startParallelBestPopulationAnalysis(int argc, char **argv){
 
 	MPI_Finalize();
 }
+
+// ѕроцедура усреднение параметров анализа по лучшей попул€ции по глобальным сложност€м сред (membersQuantity - кол-во сред в рамках одного коэффициента заполненности)
+void TAnalysis::makeBestPopulationAnalysisSummary(string analysisFilename, string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity){
+	ifstream analysisFile;
+	analysisFile.open(analysisFilename.c_str());
+	ofstream summaryFile;
+	summaryFile.open(summaryFilname.c_str());
+	for (int currentOccupancyCoefficient = 1; currentOccupancyCoefficient <= occupancyCoeffcientsQuantity; ++currentOccupancyCoefficient){
+		double averageReward = 0;
+		for (int currentMember = 1; currentMember <= membersQuantity; ++currentMember)
+			for (int currentTry = 1; currentTry <= tryQuantity; ++currentTry){
+				string tmpStr;
+				analysisFile >> tmpStr; // —читываем среду
+				analysisFile >> tmpStr; // —читываем попытку
+				analysisFile >> tmpStr; // —читываем среднюю награду за попытку
+				averageReward += atof(tmpStr.c_str()) / (membersQuantity * tryQuantity);
+			}
+		summaryFile << averageReward << endl;
+	}
+	summaryFile.close();
+	analysisFile.close();
+}
+

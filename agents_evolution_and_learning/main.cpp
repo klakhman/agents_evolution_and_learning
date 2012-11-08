@@ -11,11 +11,19 @@
 
 #include "tests.h"
 #include <ctime>
+#include <new>
 
 //#include <boost/program_options.hpp>
 
 using namespace std;
 
+// Обработчик нехватки памяти
+void out_of_memory(){
+	cout << "\nnew() error : not enough memory\n";
+	exit(999);
+}
+
+// Определение режима запуска комплекса ("E" - эволюция, "BPA" - анализ методом прогона лучшей популяции)
 void decodeProgramMode(string& programMode, int argc, char** argv){
 	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
 	while (currentArgNumber < argc){
@@ -29,6 +37,13 @@ void decodeProgramMode(string& programMode, int argc, char** argv){
 }
 
 int main(int argc, char** argv){
+	// Устанавливаем обработчик нехватки памяти
+	set_new_handler(out_of_memory);
+
+	TAnalysis analysis;
+	analysis.makeBestPopulationAnalysisSummary("C:/Tests/Experiments/Test_on_standart_environments_set/BestPopulation_analysis_En1001-1360_testdeterm.txt",
+																	"C:/Tests/Experiments/Test_on_standart_environments_set/analysis_testdeterm_summary.txt", 18, 20, 10); 
+	return 0;
 	string programMode; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
 	decodeProgramMode(programMode, argc, argv);
 	if (programMode == "E"){ // Режим эволюции
