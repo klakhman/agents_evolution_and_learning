@@ -45,8 +45,8 @@ class TEnvironment{
 	int aimsQuantity;
 	// Время восстановления награды за цель после ее достижения
 	int rewardRecoveryTime;
-	// Степень нестационарности среды (передается в виде вероятности изменения одного бита среды)
-	double nonstaionarityCoefficient;
+	// Степень стохастичности среды (передается в виде вероятности изменения одного бита среды)
+	double stochasticityCoefficient;
 	// Текущий бинарный вектор среды
 	bool* currentEnvironmentVector;
 	// Размерность вектора среды
@@ -63,14 +63,14 @@ public:
 		aimsQuantity = 0;
 		environmentResolution = 0;
 		rewardRecoveryTime = 0;
-		nonstaionarityCoefficient = 0;
+		stochasticityCoefficient = 0;
 	}
 	// Конструктор сразу с загрузкой целей и возможной установкой параметров среды
 	TEnvironment(std::string aimsFilename, int _rewardRecoveryTime = 0, double _nonstaionarityCoefficient = 0){
 		aimsQuantity = 0;
 		environmentResolution = 0;
 		rewardRecoveryTime = _rewardRecoveryTime;
-		nonstaionarityCoefficient = _nonstaionarityCoefficient;
+		stochasticityCoefficient = _nonstaionarityCoefficient;
 		loadAims(aimsFilename);
 	}
 	// Деструктор
@@ -83,8 +83,8 @@ public:
 	int getEnvironmentResolution() const {return environmentResolution; }
 	int getRewardRecoveryTime() const {return rewardRecoveryTime; }
 	void setRewardRecoveryTime(int _rewardRecoveryTime) {rewardRecoveryTime = _rewardRecoveryTime; }
-	double getNonstationarityCoefficient() const { return nonstaionarityCoefficient; }
-	void setNonstationarityCoefficient(double _nonstationarityCoefficient) { nonstaionarityCoefficient = _nonstationarityCoefficient; }
+	double getStochasticityCoefficient() const { return stochasticityCoefficient; }
+	void setStochasticityCoefficient(double _stochasticityCoefficient) { stochasticityCoefficient = _stochasticityCoefficient; }
 	void getCurrentEnvironmentVector(double environmentVector[]) const {
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			environmentVector[currentBit - 1] = static_cast<double>(currentEnvironmentVector[currentBit - 1]);

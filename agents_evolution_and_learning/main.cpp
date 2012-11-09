@@ -41,8 +41,8 @@ int main(int argc, char** argv){
 	set_new_handler(out_of_memory);
 
 	TAnalysis analysis;
-	analysis.makeBestPopulationAnalysisSummary("C:/Tests/Experiments/Test_on_standart_environments_set/BestPopulation_analysis_En1001-1360_testdeterm.txt",
-																	"C:/Tests/Experiments/Test_on_standart_environments_set/analysis_testdeterm_summary.txt", 18, 20, 10); 
+	analysis.makeBestPopulationAnalysisSummary("D:/BestPopulation_analysis_En1001-1360_test.txt",
+																	"D:/analysis_testdeterm_summary.txt", 18, 20, 10); 
 	return 0;
 	string programMode; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
 	decodeProgramMode(programMode, argc, argv);

@@ -48,7 +48,7 @@ void TEvolutionaryProcess::fillEnvironmentSettingsFromFile(){
 	settingsFile.open(filenameSettings.settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "reward-recovery-time") { settingsFile >> optionString; environment->setRewardRecoveryTime(atoi(optionString.c_str())); }
-		if (optionString == "nonstationarity-coefficient") { settingsFile >> optionString; environment->setNonstationarityCoefficient(atof(optionString.c_str())); }
+		if (optionString == "stochasticity-coefficient") { settingsFile >> optionString; environment->setStochasticityCoefficient(atof(optionString.c_str())); }
 	}
 	settingsFile.close();
 }
@@ -148,7 +148,7 @@ void TEvolutionaryProcess::createMainResultsFile(ofstream& resultsFile, unsigned
 		<< "\tactive-neurons-percent=" << pointerToAgent->primarySystemogenesisSettings.activeNeuronsPercent << "\tsynapses-activity-treshold=" << pointerToAgent->primarySystemogenesisSettings.synapsesActivityTreshold
 		<< "\tsignificance-treshold=" << pointerToAgent->primarySystemogenesisSettings.significanceTreshold << endl << endl;
 	// Записываем параметры среды
-	resultsFile << "Environment_parameters:" << "\tnonstationarity-coefficient=" << environment->getNonstationarityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
+	resultsFile << "Environment_parameters:" << "\tnstochasticity-coefficient=" << environment->getStochasticityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
 	//Записываем уникальное ядро рандомизации
 	resultsFile << "Random_seed:\t" << randomSeed << endl << endl; 
 	// Записываем заголовки

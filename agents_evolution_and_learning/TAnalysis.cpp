@@ -21,7 +21,7 @@ void TAnalysis::fillEnvironmentSettingsFromFile(TEnvironment& environment, strin
 	settingsFile.open(settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "reward-recovery-time") { settingsFile >> optionString; environment.setRewardRecoveryTime(atoi(optionString.c_str())); }
-		if (optionString == "nonstationarity-coefficient") { settingsFile >> optionString; environment.setNonstationarityCoefficient(atof(optionString.c_str())); }
+		if (optionString == "nonstationarity-coefficient") { settingsFile >> optionString; environment.setStochasticityCoefficient(atof(optionString.c_str())); }
 	}
 	settingsFile.close();
 }
@@ -100,7 +100,7 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	TEnvironment* environment = new TEnvironment(environmentFilename);
 	fillEnvironmentSettingsFromFile(*environment, settingsFilename);
 	//!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
-	environment->setNonstationarityCoefficient(0.0);
+	environment->setStochasticityCoefficient(0.0);
 	TPopulation* agentsPopulation = new TPopulation;
 	fillPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки

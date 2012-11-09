@@ -94,7 +94,7 @@ double TEnvironment::calculateOccupancyCoefficient() const{
 void TEnvironment::randomizeEnvironment(){
 	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit){
 		// Не включаем начало интервала, чтобы при нулевой вероятности условие никогда не срабатывало, а при вероятности равной единице, условие всегда срабатывало
-		if (service::uniformDistribution(0, 1, true, false) < nonstaionarityCoefficient)
+		if (service::uniformDistribution(0, 1, true, false) < stochasticityCoefficient)
 			currentEnvironmentVector[currentBit - 1] = !currentEnvironmentVector[currentBit - 1];
 	}
 }
