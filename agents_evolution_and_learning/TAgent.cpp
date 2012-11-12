@@ -30,11 +30,12 @@ void TAgent::uploadController(ostream& os) const{
 	if (neuralController) os << *neuralController;
 }
 
-// Выгрузка генома агента в файл или на экран
-void TAgent::uploadGenome(ostream& os) const{
+// Выгрузка генома агента в файл или на экран (extra = true - печать полных сведений о пуле (вместе с номерами родительских пулов и временами появления в эволюции))
+void TAgent::uploadGenome(ostream& os, bool extra /*= false*/) const{
 	if (genome){
 		os << parents[0] << "\t" << parents[1] << endl;
-		os << *genome;
+		if (!extra) os << *genome;
+		else genome->printNetworkExtra(os);
 	}
 }
 

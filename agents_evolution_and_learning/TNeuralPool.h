@@ -29,6 +29,11 @@ class TNeuralPool{
 
 	static const int INFLATE_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным связями в случае переполнения
 	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным предикторными связями в случае переполнения
+
+	// Пул, от которого произошла дупликация данного пула
+	int rootPoolID;
+	// Время появления пула в эволюции
+	int appearenceEvolutionTime;
 	
 	// Процедура увеличения размера массива входных связей
 	void inflateConnectednessSet(int inflateSize);
@@ -50,6 +55,9 @@ public:
 		predConnectednessSet = 0;
 		predConnectednessSetSize = 0;
 		inputPredConnectionsQuantity = 0;
+
+		rootPoolID = 0;
+		appearenceEvolutionTime = 0;
 	}
 	// Полный конструктор
 	TNeuralPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer){
@@ -60,6 +68,9 @@ public:
 		predConnectednessSet = 0;
 		predConnectednessSetSize = 0;
 		inputPredConnectionsQuantity = 0;
+
+		rootPoolID = 0;
+		appearenceEvolutionTime = 0;
 	}
 	// Деструктор
 	~TNeuralPool();
@@ -90,6 +101,11 @@ public:
 		biasVariance = newBiasVariance;
 		layer = newLayer;
 	}
+
+	void setRootPoolID(int _rootPoolID) { rootPoolID = _rootPoolID; }
+	int getRootPoolID() const { return rootPoolID; }
+	void setAppearenceEvolutionTime(int _appearenceEvolutionTime) { appearenceEvolutionTime = _appearenceEvolutionTime; }
+	int getAppearenceEvolutionTime() const { return appearenceEvolutionTime; }
 
 	// Геттеры и сеттеры для связей данного пула (во всех случаях передается номер связи в массиве связей)
 	int getConnectionID(int connectionNumber) const;
@@ -140,8 +156,14 @@ public:
 	// Печать сведений о пуле в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralPool& neuralPool);
 
+	// Печать всех сведений о пуле в файл или на экран (вместе с номером пула родителя и временем появления в эволюции)
+	std::ostream& printPoolExtra(std::ostream& os) const;
+
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork); // Функция вывода сети объявлена дружественной, чтобы она имела прямой доступ к списку связей пула
+
+	//Печать сети со всеми сведений о пулах в файл или на экран (вместе с номером пула родителя и временем появления в эволюции)
+	friend class TPoolNetwork; // Функция вывода сети объявлена дружественной, чтобы она имела прямой доступ к списку связей пула
 };
 
 #endif // TNEURALPOOL_H

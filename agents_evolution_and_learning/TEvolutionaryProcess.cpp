@@ -42,7 +42,7 @@ void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgen
 	outputConsole <<  currentEvolutionStep << "\t" << averageReward << "\t" << maxReward << "\t" <<
 		averagePoolsQuantity << "\t" << averageConnectionsQuantity << "\t" << averagePredConnectionsQuantity << endl;
 	// Записываем лучшего агента и всю популяцию, если нужно
-	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsConsole);
+	agentsPopulation->getPointertoAgent(bestAgent)->uploadGenome(bestAgentsConsole, extraPrint);
 
 	if (averageReward > bestAverageReward){
 		//agentsPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
@@ -120,7 +120,15 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 		makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
 	}
 	// Заспиываем лучшую популяцию
-	bestPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
+	if (!extraPrint) bestPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
+	else	{
+				ofstream bestPopulationFile;
+				bestPopulationFile.open(filenameSettings.bestPopulationFilename);
+				for (int currentAgent = 1; currentAgent <= bestPopulation->getPopulationSize(); ++ currentAgent)
+					bestPopulation->getPointertoAgent(currentAgent)->uploadGenome(bestPopulationFile, extraPrint);
+				bestPopulationFile.close();
+			}
+
 	delete bestPopulation;
 
 	resultsFile.close();

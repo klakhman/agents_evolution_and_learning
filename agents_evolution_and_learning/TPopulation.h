@@ -53,7 +53,7 @@ class TPopulation{
 	// Коэффициент уменьшения вероятности дупликации пула с ростом генома
 	double duplicateDivision(int poolsQuantity, int connectionsQuantity);
 	// Процедура мутации - дупликация пула
-	void mutationPoolDuplication(TAgent& kidAgent);
+	void mutationPoolDuplication(TAgent& kidAgent, int evolutionaryTime =0);
 	// Процедура мутации вероятности развития синапса по связи между пулами
 	void mutationDevelopSynapseProb(TAgent& KidAgent);
 	// Процедура мутации вероятности развития предикторной связи по предикторной связи между пулами

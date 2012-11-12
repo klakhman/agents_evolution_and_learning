@@ -214,6 +214,22 @@ ostream& operator<<(ostream& os, const TPoolNetwork& poolNetwork){
 	return os;
 }
 
+//Печать сети со всеми сведений о пулах в файл или на экран (вместе с номером пула родителя и временем появления в эволюции)
+ostream& TPoolNetwork::printNetworkExtra(ostream& os){
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		poolsStructure[currentPool - 1]->printPoolExtra(os);
+	os << "|\n"; // Записываем разделитель между пулами и связями
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
+			os << *(poolsStructure[currentPool-1]->connectednessSet[currentConnection-1]); 
+	os << "||\n"; // Записываем разделитель между связями и предикторными связями
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <=poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+			os << *(poolsStructure[currentPool-1]->predConnectednessSet[currentPredConnection-1]); 
+	os << "|||\n"; // Записываем разделитель между сетями
+	return os;
+}
+
 //Считывание сети из файла или экрана
 istream& operator>>(istream& is, TPoolNetwork& poolNetwork){
 	poolNetwork.erasePoolNetwork(); // На всякий случай опустошаем сеть
@@ -274,4 +290,72 @@ istream& operator>>(istream& is, TPoolNetwork& poolNetwork){
 
 	return is;
 }
+
+//Считывание сети со всеми сведениями о пулах из файла или на экрана (вместе с номером пула родителя и временем появления в эволюции)
+istream& TPoolNetwork::readNetworkExtra(istream& is){
+	erasePoolNetwork(); // На всякий случай опустошаем сеть
+	string tmp_string;
+	// Создаем все пулы сети
+	is >> tmp_string; // Считываем тип пула
+	while (tmp_string != "|"){ // Считываем до разделителя между пулами и связями
+		int newType = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем объем пула
+		int newCapacity = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем среднее смещения нейронов пула
+		double newBiasMean = atof(tmp_string.c_str());
+		is >> tmp_string; // Считываем дисперсию смещения нейронов пула
+		double newBiasVariance = atof(tmp_string.c_str());
+		is >> tmp_string; // Считываем слой пула
+		int newLayer = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем номер родительского пула
+		int rootPoolID = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем время появления в эволюции
+		int appearenceEvolutionTime = atoi(tmp_string.c_str());
+		addPool(getPoolsQuantity() + 1, newType, newCapacity, newBiasMean, newBiasVariance, newLayer);
+		poolsStructure[getPoolsQuantity() - 1]->setRootPoolID(rootPoolID);
+		poolsStructure[getPoolsQuantity() - 1]->setAppearenceEvolutionTime(appearenceEvolutionTime);
+		is >> tmp_string; // Считываем типа пула
+	}
+	// Создаем все связи между пулами
+	is >> tmp_string; // Считываем номер пресинаптического пула
+	while (tmp_string != "||"){ // Считываем до разделителя между связями и предикторными связями
+		int prePoolNumber = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем номер постсинаптического пула
+		int postPoolNumber = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем среднее веса связи
+		double newWeightMean = atof(tmp_string.c_str());
+		is >> tmp_string; // Считываем дисперсию веса связи
+		double newWeightVariance = atof(tmp_string.c_str());
+		is >> tmp_string; // Считываем признак экспресии связи
+		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
+		is >> tmp_string; // Считываем так выключения связи
+		int newDisabledStep = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем вероятность образования синапса по этой связи
+		double newDevelopSynapseProb = atof(tmp_string.c_str());
+		is >> tmp_string; // Считываем номер инновации этой связи
+		long newInnovationNumber = atoi(tmp_string.c_str());
+		addConnection(prePoolNumber, postPoolNumber, getConnectionsQuantity() + 1, newWeightMean, newWeightVariance, newEnabled, newDisabledStep, newDevelopSynapseProb, newInnovationNumber);
+		is >> tmp_string; // Считываем номер пресинаптического пула
+	}
+	// Создаем все предикторные связи между пулами
+	is >> tmp_string; // Считываем номер пресинаптического пула
+	while (tmp_string != "|||"){ // Считываем до разделителя между предикторными связями и концом сети
+		int prePoolNumber = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем номер постсинаптического пула
+		int postPoolNumber = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем признак экспресии связи
+		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
+		is >> tmp_string; // Считываем так выключения связи
+		int newDisabledStep = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем вероятность образования предикторной связи по этой связи
+		double newDevelopPredConnectionProb = atof(tmp_string.c_str());
+		is >> tmp_string; // Считываем номер инновации этой связи
+		long newInnovationNumber = atoi(tmp_string.c_str());
+		addPredConnection(prePoolNumber, postPoolNumber, getPredConnectionsQuantity() + 1, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber);
+		is >> tmp_string; // Считываем номер пресинаптического пула
+	}
+
+	return is;
+}
+
 

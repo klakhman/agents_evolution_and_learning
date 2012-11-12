@@ -82,8 +82,8 @@ public:
 	void loadGenome(std::istream& is);
 	// Выгрузка нейроконтроллера агета в файл или на экран
 	void uploadController(std::ostream& os) const;
-	// Выгрузка генома агента в файл или на экран
-	void uploadGenome(std::ostream& os) const;
+	// Выгрузка генома агента в файл или на экран (extra = true - печать полных сведений о пуле (вместе с номерами родительских пулов и временами появления в эволюции))
+	void uploadGenome(std::ostream& os, bool extra = false) const;
 	// Генерация случайного минимального возможного генома агента
 	void generateMinimalAgent(int inputResolution);
 	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения

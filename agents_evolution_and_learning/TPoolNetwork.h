@@ -62,6 +62,11 @@ public:
 	int getPoolLayer(int poolNumber) const { return poolsStructure[poolNumber-1]->getLayer(); }
 	void setPoolLayer(int poolNumber, int newLayer) { poolsStructure[poolNumber-1]->setLayer(newLayer); }
 
+	void setPoolRootPoolID(int poolNumber, int _rootPoolID) { poolsStructure[poolNumber-1]->setRootPoolID(_rootPoolID); }
+	int getPoolRootPoolID(int poolNumber) const { return poolsStructure[poolNumber-1]->getRootPoolID(); }
+	void setPoolAppearenceEvolutionTime(int poolNumber, int _appearenceEvolutionTime) { poolsStructure[poolNumber-1]->setAppearenceEvolutionTime(_appearenceEvolutionTime); }
+	int getPoolAppearenceEvolutionTime(int poolNumber) const { return poolsStructure[poolNumber-1]->getAppearenceEvolutionTime(); }
+
 	int getPoolInputConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputConnectionsQuantity(); }
 	int getPoolInputPredConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputPredConnectionsQuantity(); }
 
@@ -154,8 +159,14 @@ public:
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TPoolNetwork& PoolNetwork);
 
+	//Печать сети со всеми сведений о пулах в файл или на экран (вместе с номером пула родителя и временем появления в эволюции)
+	std::ostream& printNetworkExtra(std::ostream& os);
+
 	//Считывание сети из файла или экрана
 	friend std::istream& operator>>(std::istream& is, TPoolNetwork& PoolNetwork);
+
+	//Считывание сети со всеми сведениями о пулах из файла или на экрана (вместе с номером пула родителя и временем появления в эволюции)
+	std::istream& readNetworkExtra(std::istream& oi);
 
 	//friend class tests;
 };

@@ -270,7 +270,7 @@ double TPopulation::duplicateDivision(int poolsQuantity, int connectionsQuantity
 }
 
 // Процедура мутации - дупликация пула
-void TPopulation::mutationPoolDuplication(TAgent& kidAgent){
+void TPopulation::mutationPoolDuplication(TAgent& kidAgent, int evolutionaryTime /*=0*/){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	// Исходные кол-ва элементов в сети
 	int initPoolsQuantity = kidGenome->getPoolsQuantity();
@@ -286,6 +286,9 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent){
 					kidGenome->setPoolCapacity(currentPool, static_cast<int>(kidGenome->getPoolCapacity(currentPool) * mutationSettings.poolDivisionCoef + 0.5));
 				kidGenome->addPool(kidGenome->getPoolsQuantity() + 1, kidGenome->getPoolType(currentPool), kidGenome->getPoolCapacity(currentPool),
 											kidGenome->getPoolBiasMean(currentPool), kidGenome->getPoolBiasVariance(currentPool), kidGenome->getPoolLayer(currentPool));
+				kidGenome->setPoolRootPoolID(kidGenome->getPoolsQuantity(), currentPool);
+				kidGenome->setPoolAppearenceEvolutionTime(kidGenome->getPoolsQuantity(), evolutionaryTime);
+
 				// Копируем все входящие связи из дуплицирующего пула в новый
 				for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
 					// Если это старая связь - до процедуры мутации
@@ -386,7 +389,7 @@ void TPopulation::generateOffspring(TAgent& kidAgent, const TAgent& firstParentA
 	mutationDeletePoolConnection(kidAgent);
 	//mutationDeletePoolPredConnection(kidAgent);
 
-	mutationPoolDuplication(kidAgent);
+	mutationPoolDuplication(kidAgent, currentEvolutionStep);
 
 	//mutationDeleteConnectionPopulation(kidAgent, currentEvolutionStep);
 	//mutationDeletePredConnectionPopulation(kidAgent, currentEvolutionStep);

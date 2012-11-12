@@ -14,6 +14,8 @@ class TEvolutionaryProcess{
 	TEnvironment* environment;
 	// Лучшая средняя награда по популяции в текущем запуске
 	double bestAverageReward;
+	// Признак того, что надо печатать расширенную информацию про пулы, когда мы записываем агентов
+	bool extraPrint;
 public:
 	// Настройки файлов процесса
 	struct SFilenameSettings{
@@ -28,12 +30,16 @@ public:
 		agentsPopulation = 0;
 		environment = 0;
 		bestAverageReward = 0.0;
+
+		extraPrint = false;
 	}
 	// Деструктор
 	~TEvolutionaryProcess(){
 		if (agentsPopulation) delete agentsPopulation;
 		if (environment) delete environment;
 	}
+	// Установка скрытого признака необходимости печатать расширенную информацию
+	void setExtraPrint(bool _extraPrint) { extraPrint = _extraPrint; }
 	
 	// Вывод логовых сообщений (прогресса) на консоль или в файл
 	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation* bestPopulation, int currentEvolutionStep /*=0*/);
