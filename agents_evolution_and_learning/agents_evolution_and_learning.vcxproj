@@ -80,6 +80,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="service.h" />
+    <ClInclude Include="settings.h" />
     <ClInclude Include="TAgent.h" />
     <ClInclude Include="TAnalysis.h" />
     <ClInclude Include="TBehaviorAnalysis.h" />
@@ -100,6 +101,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="service.cpp" />
+    <ClCompile Include="setttings.cpp" />
     <ClCompile Include="TAgent.cpp" />
     <ClCompile Include="TAnalysis.cpp" />
     <ClCompile Include="TBehaviorAnalysis.cpp" />

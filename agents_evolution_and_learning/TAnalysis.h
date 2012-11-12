@@ -7,17 +7,8 @@
 
 // Класс основного анализа
 class TAnalysis{
-
-	// Загрузка параметров среды из файла
-	void fillEnvironmentSettingsFromFile(TEnvironment& environment, std::string settingsFilename);
-	// Загрузка параметров популяции из файла
-	void fillPopulationSettingsFromFile(TPopulation& agentsPopulation, std::string settingsFilename);
-	// Загрузка параметров агента из файла
-	void fillAgentSettingsFromFile(TPopulation& agentsPopulation, std::string settingsFilename);
 	
 	// ----------- Методы для параллельного стандартного анализа лучших популяций ----------------
-	// Заполнение параметров директорий для записи файлов
-	void fillDirectoriesSettings(std::string settingsFilename, std::string& workDirectory, std::string& environmentDirectory, std::string& resultsDirectory);
 	// Расишифровка парметров командной строки
 	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string& runSign);
 	// Расшифровка сообщения от рабочего процесса 

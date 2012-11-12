@@ -8,12 +8,6 @@
 #include <fstream>
 
 class TEvolutionaryProcess{
-	// Загрузка параметров популяции из файла
-	void fillPopulationSettingsFromFile();
-	// Загрузка параметров среды из файла
-	void fillEnvironmentSettingsFromFile();
-	// Загрузка параметров агента из файла
-	void fillAgentSettingsFromFile();
 	// Популяция агентов
 	TPopulation* agentsPopulation;
 	// Среда для агентов

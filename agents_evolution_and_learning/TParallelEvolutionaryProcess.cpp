@@ -3,6 +3,7 @@
 #include "TParallelEvolutionaryProcess.h"
 
 #include "TEvolutionaryProcess.h"
+#include "settings.h"
 
 #include <string>
 #include <fstream>
@@ -12,19 +13,6 @@
 #include <cstring>
 
 using namespace std;
-
-// Заполнение параметров директорий для записи файлов
-void TParallelEvolutionaryProcess::fillDirectoriesSettings(){
-	string optionString;
-	ifstream settingsFile;
-	settingsFile.open(settingsFilename.c_str());
-	while (settingsFile >> optionString){
-		if (optionString == "work-directory") { settingsFile >> directoriesSettings.workDirectory; }
-		if (optionString == "environment-directory") { settingsFile >> directoriesSettings.environmentDirectory; }
-		if (optionString == "results-directory") { settingsFile >> directoriesSettings.resultsDirectory; }
-	}
-	settingsFile.close();
-}
 
 // Расишифровка парметров командной строки
 void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign){
@@ -212,7 +200,7 @@ void TParallelEvolutionaryProcess::start(int argc, char **argv){
 	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // Определение общего количества процессов
 	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // Определение процессом своего номера
 	settingsFilename = argv[1]; // В первом аргументе должен быть записан путь к файлу настроек
-	fillDirectoriesSettings();
+	settings::fillDirectoriesSettings(directoriesSettings.workDirectory, directoriesSettings.environmentDirectory, directoriesSettings.resultsDirectory, settingsFilename);
 	if (processRank == 0) // Если это рутовый процесс
 		rootProcess(argc, argv);
 	else // Если это рабочий процесс
