@@ -12,6 +12,22 @@
 
 using namespace std;
 
+// Нахождение номера связи в структуре постсинаптического пула - возвращает ноль, если связи нет
+int TPoolNetwork::findConnectionNumber(int prePoolNumber, int postPoolNumber){
+	for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[postPoolNumber - 1]->getInputConnectionsQuantity(); ++currentPoolConnection)
+		if (poolsStructure[postPoolNumber - 1]->getConnectionPrePool(currentPoolConnection)->getID() == prePoolNumber)
+			return currentPoolConnection;
+	return 0;
+}
+
+// Нахождение номера предикторной связи в структуре постсинаптического пула - возвращает ноль, если предикторной связи нет
+int TPoolNetwork::findPredConnectionNumber(int prePoolNumber, int postPoolNumber){
+	for (int currentPoolPredConnection = 1; currentPoolPredConnection <= poolsStructure[postPoolNumber - 1]->getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
+		if (poolsStructure[postPoolNumber - 1]->getPredConnectionPrePool(currentPoolPredConnection)->getID() == prePoolNumber)
+			return currentPoolPredConnection;
+	return 0;
+}
+
 // Корректировка ID пулов (например после удаления)
 void TPoolNetwork::fixPoolsIDs(){
 	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
@@ -92,24 +108,6 @@ void TPoolNetwork::deletePool(int poolNumber){
 	poolsStructure[poolsQuantity - 1] = 0;
 	--poolsQuantity;
 	fixPoolsIDs();
-}
-
-// Проверка существования связи в сети
-bool TPoolNetwork::checkConnectionExistance(int prePoolNumber, int postPoolNumber){
-	for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[postPoolNumber - 1]->getInputConnectionsQuantity(); ++currentPoolConnection)
-		if (poolsStructure[postPoolNumber - 1]->getConnectionPrePool(currentPoolConnection)->getID() == prePoolNumber)
-			return true;
-
-	return false;
-}
-
-// Проверка существования предикторной связи в сети
-bool TPoolNetwork::checkPredConnectionExistance(int prePoolNumber, int postPoolNumber){
-	for (int currentPoolPredConnection = 1; currentPoolPredConnection <= poolsStructure[postPoolNumber - 1]->getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
-		if (poolsStructure[postPoolNumber - 1]->getPredConnectionPrePool(currentPoolPredConnection)->getID() == prePoolNumber)
-			return true;
-
-	return false;
 }
 
 // Стирание сети

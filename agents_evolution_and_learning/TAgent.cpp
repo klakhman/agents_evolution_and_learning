@@ -227,3 +227,9 @@ void TAgent::printLife(TEnvironment& environment, int agentLifeTime){
 	delete []outputVector;
 	delete []environmentVector;
 }
+
+//-------------------- МЕТОДЫ, ОБЕСПЕЧИВАЮЩИЕ ПЕРВИЧНЫЙ СИСТЕМОГЕНЕЗ --------------------
+
+// Основной метод перчиного системогенеза 
+void TAgent::primarySystemogenesis(){
+}

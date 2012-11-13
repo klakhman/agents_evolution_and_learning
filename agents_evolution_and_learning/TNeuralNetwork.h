@@ -86,6 +86,12 @@ public:
 	TNeuron* getPredConnectionPostNeuron(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionPostNeuron(predConnectionNumber); }
 	void setPredConnectionPostNeuron(int neuronNumber, int predConnectionNumber, TNeuron* newPostNeuron) { neuronsStructure[neuronNumber-1]->setPredConnectionPostNeuron(predConnectionNumber, newPostNeuron); }
 
+	// Нахождение номера связи в структуре постсинаптического нейрона - возвращает ноль, если связи нет
+	int findSynapseNumber(int preNeuronNumber, int postNeuronNumber);
+
+	// Нахождение номера предикторной связи в структуре постсинаптического нейрона - возвращает ноль, если предикторной связи нет
+	int findPredConnectionNumber(int preNeuronNumber, int postNeuronNumber);
+
 	//Добавление нейрона в сеть
 	void addNeuron(int newID, int newType, double newBias, int newLayer, bool newActive = true, int newParentNeuronID = 0);
 

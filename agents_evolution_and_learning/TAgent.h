@@ -96,6 +96,9 @@ public:
 	// Временная процедура печати жизни агента
 	void printLife(TEnvironment& environment, int agentLifeTime);
 
+	// Основной метод перчиного системогенеза 
+	void primarySystemogenesis();
+
 };
 
 #endif // TAGENT_H

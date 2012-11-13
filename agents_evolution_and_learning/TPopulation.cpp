@@ -193,9 +193,9 @@ void TPopulation::mutationAddPoolConnection(TAgent& kidAgent){
 																(prePoolID <= kidGenome->getInputResolution()) || (prePoolID > kidGenome->getInputResolution() + kidGenome->getOutputResolution())));
 			++tryCount;
 		// Пока не найдем отсутствующую связь или превысим допустимое кол-во попыток
-		}while ((kidGenome->checkConnectionExistance(prePoolID, postPoolID)) && (tryCount <= 1000));
+		}while ((kidGenome->findConnectionNumber(prePoolID, postPoolID)) && (tryCount <= 1000));
 		// Если отсутствующая связь найдена
-		if (! kidGenome->checkConnectionExistance(prePoolID, postPoolID)){
+		if (! kidGenome->findConnectionNumber(prePoolID, postPoolID)){
 			kidGenome->addConnection(prePoolID, postPoolID, kidGenome->getConnectionsQuantity() + 1, service::uniformDistribution(-0.5, 0.5), 0, true, 0, 
 												kidAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability, ++connectionInnovationNumber);
 			// Детекция необходимости сдвига постсинаптического пула в следующий слой, если появилась связь между пулами одного слоя
@@ -221,9 +221,9 @@ void TPopulation::mutationAddPoolPredConnection(TAgent& kidAgent){
 			postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + kidGenome->getOutputResolution() + 1, kidGenome->getPoolsQuantity());
 			++tryCount;
 		// Пока не найдем отсутствующую предикторную связь или превысим допустимое кол-во попыток
-		}while ((kidGenome->checkPredConnectionExistance(prePoolID, postPoolID)) && (tryCount <= 1000));
+		}while ((kidGenome->findPredConnectionNumber(prePoolID, postPoolID)) && (tryCount <= 1000));
 		// Если отсутствующая предикторная связь найдена
-		if (! kidGenome->checkPredConnectionExistance(prePoolID, postPoolID)){
+		if (! kidGenome->findPredConnectionNumber(prePoolID, postPoolID)){
 			kidGenome->addPredConnection(prePoolID, postPoolID, kidGenome->getPredConnectionsQuantity() + 1, true, 0, 
 													kidAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability, ++predConnectionInnovationNumber); 
 			kidGenome->fixPredConnectionsIDs();

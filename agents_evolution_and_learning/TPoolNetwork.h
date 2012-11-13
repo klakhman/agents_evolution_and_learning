@@ -106,6 +106,12 @@ public:
 	TNeuralPool* getPredConnectionPostPool(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPostPool(predConnectionNumber); }
 	void setPredConnectionPostPool(int poolNumber, int predConnectionNumber, TNeuralPool* newPostPool) { poolsStructure[poolNumber-1]->setPredConnectionPostPool(predConnectionNumber, newPostPool); }
 
+	// Нахождение номера связи в структуре постсинаптического пула - возвращает ноль, если связи нет
+	int findConnectionNumber(int prePoolNumber, int postPoolNumber);
+
+	// Нахождение номера предикторной связи в структуре постсинаптического пула - возвращает ноль, если предикторной связи нет
+	int findPredConnectionNumber(int prePoolNumber, int postPoolNumber);
+
 	// Корректировка ID пулов (например после удаления)
 	void fixPoolsIDs();
 	// Корректировка ID связей (например после удаления)
@@ -141,10 +147,6 @@ public:
 		poolsStructure[poolNumber-1]->deletePredConnection(predConnectionNumber);
 		--predConnectionsQuantity;
 	}
-	// Проверка существования связи в сети
-	bool checkConnectionExistance(int prePoolNumber, int postPoolNumber);
-	// Проверка существования предикторной связи в сети
-	bool checkPredConnectionExistance(int prePoolNumber, int postPoolNumber);
 
 	// Стирание сети
 	void erasePoolNetwork();

@@ -11,6 +11,22 @@
 
 using namespace std;
 
+// Нахождение номера связи в структуре постсинаптического нейрона - возвращает ноль, если связи нет
+int TNeuralNetwork::findSynapseNumber(int preNeuronNumber, int postNeuronNumber){
+	for (int currentSynapse = 1; currentSynapse <= neuronsStructure[postNeuronNumber - 1]->getInputSynapsesQuantity(); ++currentSynapse)
+		if (neuronsStructure[postNeuronNumber - 1]->getSynapsePreNeuron(currentSynapse)->getID() == preNeuronNumber)
+			return currentSynapse;
+	return 0;
+}
+
+// Нахождение номера предикторной связи в структуре постсинаптического нейрона - возвращает ноль, если предикторной связи нет
+int TNeuralNetwork::findPredConnectionNumber(int preNeuronNumber, int postNeuronNumber){
+	for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[postNeuronNumber - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+		if (neuronsStructure[postNeuronNumber - 1]->getPredConnectionPreNeuron(currentPredConnection)->getID() == preNeuronNumber)
+			return currentPredConnection;
+	return 0;
+}
+
 // Корректировка ID нейронов (например после удаления)
 void TNeuralNetwork::fixNeuronsIDs(){
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
