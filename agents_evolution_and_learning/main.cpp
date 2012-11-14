@@ -25,16 +25,15 @@ void out_of_memory(){
 }
 
 // Определение режима запуска комплекса ("E" - эволюция, "BPA" - анализ методом прогона лучшей популяции)
-void decodeProgramMode(string& programMode, int argc, char** argv){
-	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+string decodeProgramMode(int argc, char** argv){
+	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
-		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
-			case 'm': // Если это режим запуска программного комплекса
-				programMode = argv[++currentArgNumber];
-				break;
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if ("-mode" == argv[currentArgNumber]) return argv[++currentArgNumber];
 		}
 		++currentArgNumber;
 	}
+	return "";
 }
 
 void decodeCommandPromt(string& environemtnFilename, string& resultsFilename, string& bestPopulationFilename, string& bestAgentsFilename, long& randomSeed, bool& extraPrint, int argc, char** argv){
@@ -68,8 +67,7 @@ int main(int argc, char** argv){
 	// Устанавливаем обработчик нехватки памяти
 	set_new_handler(out_of_memory);
 
-	string programMode; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
-	decodeProgramMode(programMode, argc, argv);
+	string programMode = decodeProgramMode(argc, argv);; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
 	if (programMode == "E"){ // Режим эволюции
 		TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
 		parallelProcess->start(argc, argv);
