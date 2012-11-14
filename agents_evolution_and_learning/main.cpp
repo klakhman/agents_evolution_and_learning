@@ -2,6 +2,7 @@
 #include "TParallelEvolutionaryProcess.h"
 #include "service.h"
 #include "TAnalysis.h"
+#include "TBehaviorAnalysis.h"
 
 #include <iostream>
 #include <fstream>
@@ -88,7 +89,13 @@ int main(int argc, char** argv){
 				evolutionaryProcess->setExtraPrint(extraPrint);
 				evolutionaryProcess->start(randomSeed);
 				delete evolutionaryProcess;
-			}
+  }
+  else if (programMode == "BCA"){//Режим анализа поведенчиских циклов
+    TBehaviorAnalysis* behaviorAnalysis = new TBehaviorAnalysis;
+    behaviorAnalysis->beginAnalysis(argc, argv);
+    delete behaviorAnalysis;
+    
+  }
 
 	/*TAnalysis* bestPopulationAnalysis = new TAnalysis;
 	bestPopulationAnalysis->startBestPopulationAnalysis("C:/Tests/Results/En1001/En1001_test(1)_bestpopulation.txt", "C:/Tests/Environments/Environment1001.txt", "C:/Tests/test_settings.txt");

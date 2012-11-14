@@ -1,4 +1,4 @@
-﻿//
+//
 //  TBehaviorAnalysis.h
 //  agents_evolution_and_learning
 //
@@ -9,30 +9,51 @@
 #ifndef TBehaviorAnalysis_H
 #define TBehaviorAnalysis_H
 
-#include <iostream>
+#include <vector>
+#include "TEnvironment.h"
+#include "TPopulation.h"
+//Максимально возможная длина цикла(чуть меньше половины длины жизни агента)
+static const int maxCycleLength = 120;
+//Минимальная длина цикла
+static const int minCycleLength = 2;
+//Число повторов, необоходимое для верификации нахождения цикла
+static const int sufficientRepeatNumber = 4;
+//Максимально возможное число циклов впринципе
+static const int maxCyclesQuantity = 3500;
 /*
- РљР»Р°СЃСЃ Р°РЅР°Р»РёР·Р° РїРѕРІРµРґРµРЅС‡РµСЃРєРёС… С†РёРєР»РѕРІ Р°РіРµРЅС‚Р°
+ Класс анализа поведенческих циклов агента
 */
 class TBehaviorAnalysis{
-  //РњР°РєСЃРёРјР°Р»СЊРЅРѕ РІРѕР·РјРѕР¶РЅР°СЏ РґР»РёРЅР° С†РёРєР»Р°(С‡СѓС‚СЊ РјРµРЅСЊС€Рµ РїРѕР»РѕРІРёРЅС‹ РґР»РёРЅС‹ Р¶РёР·РЅРё Р°РіРµРЅС‚Р°)
-  static const int MaxCycleLength = 120;
-  //РњРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° С†РёРєР»Р°
-  static const int MinCycleLength = 2;
-  //Р§РёСЃР»Рѕ РїРѕРІС‚РѕСЂРѕРІ, РЅРµРѕР±РѕС…РѕРґРёРјРѕРµ РґР»СЏ РІРµСЂРёС„РёРєР°С†РёРё РЅР°С…РѕР¶РґРµРЅРёСЏ С†РёРєР»Р°
-  static const int SufficientRepeatNumber = 4;
-  //РњР°РєСЃРёРјР°Р»СЊРЅРѕ РІРѕР·РјРѕР¶РЅРѕРµ С‡РёСЃР»Рѕ С†РёРєР»РѕРІ РІРїСЂРёРЅС†РёРїРµ
-  static const int MaxCyclesQuantity = 3500;
-  
-  //РЎС‚СЂСѓРєС‚СѓСЂР° С†РёРєР»Р°
-  struct TCycle{
-    //РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ РґРµР№СЃС‚РІРёР№ РІ С†РёРєР»Рµ
-    int CycleSequence[MaxCycleLength];
-    //Р”Р»РёРЅР° С†РёРєР»Р°
-    int CycleLength;
-    //РќР°РіСЂР°РґР°, РїРѕР»СѓС‡Р°РµРјР°СЏ Р·Р° РїСЂРѕС…РѕР¶РґРµРЅРёРµ С†РёРєР»Р°
-    double CycleReward;
+  //Структура цикла
+  struct SCycle{
+    //Последовательность действий в цикле
+    int cycleSequence[maxCycleLength];
+    //Длина цикла
+    int cycleLength;
+    //Награда, получаемая за прохождение цикла
+    double cycleReward;
   };
-  
+//Определяет режим запуска и файлы с параметрами и данными
+void decodeCommandPromt(int argc, char** argv);
+public:
+	// Настройки файлов процесса
+	struct SFilenameSettings{
+		std::string environmentFilename;
+		std::string resultsFilename;
+		std::string populationFilename;
+    std::string agentsFilename;
+		std::string settingsFilename;
+	} filenameSettings;
+public:
+	TBehaviorAnalysis() {};
+	~TBehaviorAnalysis() {};
+  //Запустить процесс анализа, какой именно - указано в argv
+  void beginAnalysis(int argc, char **argv);
+  std::vector<double> findCyclesInPopulation();
+  //Возвращает массив с последовательностью действий самого большого цикла в жизни данного агента
+  std::vector<double> findCycleInAgentLife(double *agentLife,int lifeTime);
+
+
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */
