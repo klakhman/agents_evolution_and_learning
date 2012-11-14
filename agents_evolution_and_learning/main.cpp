@@ -30,7 +30,7 @@ string decodeProgramMode(int argc, char** argv){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
-			if (strcmp("-mode", argv[currentArgNumber])) return argv[++currentArgNumber];
+			if (!strcmp("-mode", argv[currentArgNumber])) return argv[++currentArgNumber];
 		}
 		++currentArgNumber;
 	}
