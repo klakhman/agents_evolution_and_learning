@@ -7,6 +7,8 @@
 #include <string>
 
 namespace settings{
+	// Нахождение имени файла парметров
+	std::string getSettingsFilename(int argc, char** argv);
 	// Заполнение параметров директорий для записи файлов
 	void fillDirectoriesSettings(std::string& workDirectory, std::string& environmentDirectory, std::string& resultsDirectory, std::string settingsFilename);
 	// Загрузка параметров среды из файла

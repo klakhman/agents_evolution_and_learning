@@ -38,27 +38,15 @@ string decodeProgramMode(int argc, char** argv){
 }
 
 void decodeCommandPromt(string& environemtnFilename, string& resultsFilename, string& bestPopulationFilename, string& bestAgentsFilename, long& randomSeed, bool& extraPrint, int argc, char** argv){
-	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
-	switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
-			case 'e': // Если это путь к файлу среды
-				environemtnFilename = argv[++currentArgNumber];
-				break;
-			case 'r': // Если это путь к файлу результатов
-				resultsFilename = argv[++currentArgNumber];
-				break;
-			case 'p': // Если это путь к лучшей популяции
-				bestPopulationFilename = argv[++currentArgNumber];
-				break;
-			case 'a': // Если это путь к файлу с лучшими агентами
-				bestAgentsFilename = argv[++currentArgNumber];
-				break;
-			case 's': // Если это зерно рандомизации
-				randomSeed = atoi(argv[++currentArgNumber]);
-				break;
-			case 'h': // Если это признак расширенной записи пулов
-				extraPrint = !(atoi(argv[++currentArgNumber]) == 0);
-				break;
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if (!strcmp("-envfile", argv[currentArgNumber])) environemtnFilename = argv[++currentArgNumber];
+			else if (!strcmp("-resultfile", argv[currentArgNumber])) resultsFilename = argv[++currentArgNumber];
+			else if (!strcmp("-bestpopfile", argv[currentArgNumber])) bestPopulationFilename = argv[++currentArgNumber];
+			else if (!strcmp("-bestagentfile", argv[currentArgNumber])) bestAgentsFilename = argv[++currentArgNumber];
+			else if (!strcmp("-randomseed", argv[currentArgNumber])) randomSeed = atoi(argv[++currentArgNumber]);
+			else if (!strcmp("-extraprint", argv[currentArgNumber])) extraPrint = !(atoi(argv[++currentArgNumber]) == 0);
 		}
 		++currentArgNumber;
 	}
@@ -67,8 +55,9 @@ void decodeCommandPromt(string& environemtnFilename, string& resultsFilename, st
 int main(int argc, char** argv){
 	// Устанавливаем обработчик нехватки памяти
 	set_new_handler(out_of_memory);
-
 	string programMode = decodeProgramMode(argc, argv);; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
+	cout << programMode;
+	return 0;
 	if (programMode == "E"){ // Режим эволюции
 		TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
 		parallelProcess->start(argc, argv);

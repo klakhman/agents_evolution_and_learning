@@ -16,19 +16,12 @@ using namespace std;
 
 // Расишифровка парметров командной строки
 void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign){
-	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
-		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
-			case 'e': // Если это диапозон номеров сред
-				firstEnvironmentNumber = atoi(argv[++currentArgNumber]);
-				lastEnvironmentNumber = atoi(argv[++currentArgNumber]);
-				break;
-			case 't': // Если это диапазон попыток
-				firstTryNumber = atoi(argv[++currentArgNumber]);
-				lastTryNumber = atoi(argv[++currentArgNumber]);
-				break;
-			case 's': // Если это признак конктретного запуска
-				runSign = argv[++currentArgNumber];
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if (!strcmp("-env", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
+			else if (!strcmp("-try", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
+			else if (!strcmp("-sign", argv[currentArgNumber])) { runSign = argv[++currentArgNumber]; }
 		}
 		++currentArgNumber;
 	}
@@ -59,7 +52,7 @@ void TParallelEvolutionaryProcess::decodeFinishedWorkMessage(char inputMessage[]
 // Выполнение управляющего процесса (важно, чтобы количество общих заданий не было меньше кол-ва выделенных процессов!!!)
 void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	int firstEnvironmentNumber; // Диапазон номеров сред
-	int lastEnvironmentNumber;
+ 	int lastEnvironmentNumber;
 	int firstTryNumber; // Диапазон попыток
 	int lastTryNumber;
 	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
@@ -199,7 +192,7 @@ void TParallelEvolutionaryProcess::start(int argc, char **argv){
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // Определение общего количества процессов
 	MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // Определение процессом своего номера
-	settingsFilename = argv[1]; // В первом аргументе должен быть записан путь к файлу настроек
+	settingsFilename = settings::getSettingsFilename(argc, argv);
 	settings::fillDirectoriesSettings(directoriesSettings.workDirectory, directoriesSettings.environmentDirectory, directoriesSettings.resultsDirectory, settingsFilename);
 	if (processRank == 0) // Если это рутовый процесс
 		rootProcess(argc, argv);

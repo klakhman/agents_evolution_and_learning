@@ -66,26 +66,14 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 
 // ---------------- Процедуры параллельного анализа по лучшим популяциям в каждом запуске -----------------------
 
-// Расшифровка парметров командной строки
+// Расшифровка парaметров командной строки
 void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign){
-	int currentArgNumber = 2; // Текущий номер параметра (в первом записан путь к файлу настроек)
+	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
-		switch (argv[currentArgNumber][1]){ // Расшифровываем параметр (в первом поле "-")
-			case 'e': // Если это диапозон номеров сред
-				++currentArgNumber;
-				firstEnvironmentNumber = atoi(argv[currentArgNumber]);
-				++currentArgNumber;
-				lastEnvironmentNumber = atoi(argv[currentArgNumber]);
-				break;
-			case 't': // Если это диапазон попыток
-				++currentArgNumber;
-				firstTryNumber = atoi(argv[currentArgNumber]);
-				++currentArgNumber;
-				lastTryNumber = atoi(argv[currentArgNumber]);
-				break;
-			case 's': // Если это признак конктретного запуска
-				++currentArgNumber;
-				runSign = argv[currentArgNumber];
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if (!strcmp("-env", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
+			else if (!strcmp("-try", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
+			else if (!strcmp("-sign", argv[currentArgNumber])) { runSign = argv[++currentArgNumber]; }
 		}
 		++currentArgNumber;
 	}

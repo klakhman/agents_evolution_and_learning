@@ -8,6 +8,18 @@
 
 using namespace std;
 
+// Нахождение имени файла парметров
+string settings::getSettingsFilename(int argc, char** argv){
+	int currentArgNumber = 1; // Текущий номер параметра
+	while (currentArgNumber < argc){
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if (!strcmp("-settings", argv[currentArgNumber])) return argv[++currentArgNumber];
+		}
+		++currentArgNumber;
+	}
+	return "";
+}
+
 // Заполнение параметров директорий для записи файлов
 void settings::fillDirectoriesSettings(string& workDirectory, string& environmentDirectory, string& resultsDirectory, string settingsFilename){
 	string optionString;
@@ -15,8 +27,8 @@ void settings::fillDirectoriesSettings(string& workDirectory, string& environmen
 	settingsFile.open(settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "work-directory") { settingsFile >> workDirectory; }
-		if (optionString == "environment-directory") { settingsFile >> environmentDirectory; }
-		if (optionString == "results-directory") { settingsFile >> resultsDirectory; }
+		else if (optionString == "environment-directory") { settingsFile >> environmentDirectory; }
+		else if (optionString == "results-directory") { settingsFile >> resultsDirectory; }
 	}
 	settingsFile.close();
 }
@@ -28,7 +40,7 @@ void settings::fillEnvironmentSettingsFromFile(TEnvironment& environment, string
 	settingsFile.open(settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "reward-recovery-time") { settingsFile >> optionString; environment.setRewardRecoveryTime(atoi(optionString.c_str())); }
-		if (optionString == "stochasticity-coefficient") { settingsFile >> optionString; environment.setStochasticityCoefficient(atof(optionString.c_str())); }
+		else if (optionString == "stochasticity-coefficient") { settingsFile >> optionString; environment.setStochasticityCoefficient(atof(optionString.c_str())); }
 	}
 	settingsFile.close();
 }
@@ -40,25 +52,25 @@ void settings::fillPopulationSettingsFromFile(TPopulation& agentsPopulation, str
 	settingsFile.open(settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "population-size") { settingsFile >> optionString; agentsPopulation.setPopulationSize(atoi(optionString.c_str())); }
-		if (optionString == "agent-lifetime") { settingsFile >> optionString; agentsPopulation.evolutionSettings.agentLifetime = atoi(optionString.c_str()); }
-		if (optionString == "evolution-time") { settingsFile >> optionString; agentsPopulation.evolutionSettings.evolutionTime = atoi(optionString.c_str()); }
+		else if (optionString == "agent-lifetime") { settingsFile >> optionString; agentsPopulation.evolutionSettings.agentLifetime = atoi(optionString.c_str()); }
+		else if (optionString == "evolution-time") { settingsFile >> optionString; agentsPopulation.evolutionSettings.evolutionTime = atoi(optionString.c_str()); }
 		// Мутационные параметры
-		if (optionString == "mut-weight-probability") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightProbability = atof(optionString.c_str()); }
-		if (optionString == "mut-weight-mean-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightMeanDisp = atof(optionString.c_str()); }
-		if (optionString == "mut-weight-disp-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightDispDisp = atof(optionString.c_str()); }
-		if (optionString == "dis-limit") { settingsFile >> optionString; agentsPopulation.mutationSettings.disLimit = atoi(optionString.c_str()); }
-		if (optionString == "enable-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.enableConnectionProb = atof(optionString.c_str()); }
-		if (optionString == "disable-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.disableConnectionProb = atof(optionString.c_str()); }
-		if (optionString == "add-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.addConnectionProb = atof(optionString.c_str()); }
-		if (optionString == "add-predconnection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.addPredConnectionProb = atof(optionString.c_str()); }
-		if (optionString == "delete-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.deleteConnectionProb = atof(optionString.c_str()); }
-		if (optionString == "delete-predconnection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.deletePredConnectionProb = atof(optionString.c_str()); }
-		if (optionString == "duplicate-pool-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.duplicatePoolProb = atof(optionString.c_str()); }
-		if (optionString == "pool-division-coef") { settingsFile >> optionString; agentsPopulation.mutationSettings.poolDivisionCoef = atof(optionString.c_str()); }
-		if (optionString == "pool-standart-amount") { settingsFile >> optionString; agentsPopulation.mutationSettings.poolStandartAmount = atoi(optionString.c_str()); }
-		if (optionString == "connection-standart-amount") { settingsFile >> optionString; agentsPopulation.mutationSettings.connectionStandartAmount = atoi(optionString.c_str()); }
-		if (optionString == "mut-develop-con-prob-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutDevelopConProbProb = atof(optionString.c_str()); }
-		if (optionString == "mut-develop-con-prob-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutDevelopConProbDisp = atof(optionString.c_str()); }
+		else if (optionString == "mut-weight-probability") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightProbability = atof(optionString.c_str()); }
+		else if (optionString == "mut-weight-mean-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightMeanDisp = atof(optionString.c_str()); }
+		else if (optionString == "mut-weight-disp-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutWeightDispDisp = atof(optionString.c_str()); }
+		else if (optionString == "dis-limit") { settingsFile >> optionString; agentsPopulation.mutationSettings.disLimit = atoi(optionString.c_str()); }
+		else if (optionString == "enable-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.enableConnectionProb = atof(optionString.c_str()); }
+		else if (optionString == "disable-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.disableConnectionProb = atof(optionString.c_str()); }
+		else if (optionString == "add-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.addConnectionProb = atof(optionString.c_str()); }
+		else if (optionString == "add-predconnection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.addPredConnectionProb = atof(optionString.c_str()); }
+		else if (optionString == "delete-connection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.deleteConnectionProb = atof(optionString.c_str()); }
+		else if (optionString == "delete-predconnection-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.deletePredConnectionProb = atof(optionString.c_str()); }
+		else if (optionString == "duplicate-pool-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.duplicatePoolProb = atof(optionString.c_str()); }
+		else if (optionString == "pool-division-coef") { settingsFile >> optionString; agentsPopulation.mutationSettings.poolDivisionCoef = atof(optionString.c_str()); }
+		else if (optionString == "pool-standart-amount") { settingsFile >> optionString; agentsPopulation.mutationSettings.poolStandartAmount = atoi(optionString.c_str()); }
+		else if (optionString == "connection-standart-amount") { settingsFile >> optionString; agentsPopulation.mutationSettings.connectionStandartAmount = atoi(optionString.c_str()); }
+		else if (optionString == "mut-develop-con-prob-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutDevelopConProbProb = atof(optionString.c_str()); }
+		else if (optionString == "mut-develop-con-prob-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutDevelopConProbDisp = atof(optionString.c_str()); }
 	}
 	settingsFile.close();
 }
@@ -71,13 +83,13 @@ void settings::fillAgentsPopulationSettingsFromFile(TPopulation& agentsPopulatio
 	TAgent::SPrimarySystemogenesisSettings* primarySystemogenesisSettings = new TAgent::SPrimarySystemogenesisSettings;
 	while (settingsFile >> optionString){
 		if (optionString == "initial-pool-capacity") { settingsFile >> optionString; primarySystemogenesisSettings->initialPoolCapacity = atoi(optionString.c_str()); }
-		if (optionString == "initial-develop-synapse-probability") { settingsFile >> optionString; primarySystemogenesisSettings->initialDevelopSynapseProbability = atof(optionString.c_str()); }
-		if (optionString == "initial-develop-predconnection-probability") { settingsFile >> optionString; primarySystemogenesisSettings->initialDevelopPredConnectionProbability = atof(optionString.c_str()); }
-		if (optionString == "primary-systemogenesis-time") { settingsFile >> optionString; primarySystemogenesisSettings->primarySystemogenesisTime = atoi(optionString.c_str()); }
-		if (optionString == "spontaneous-activity-prob") { settingsFile >> optionString; primarySystemogenesisSettings->spontaneousActivityProb = atof(optionString.c_str()); }
-		if (optionString == "active-neurons-percent") { settingsFile >> optionString; primarySystemogenesisSettings->activeNeuronsPercent = atof(optionString.c_str()); }
-		if (optionString == "synapses-activity-treshold") { settingsFile >> optionString; primarySystemogenesisSettings->synapsesActivityTreshold = atof(optionString.c_str()); }
-		if (optionString == "significance-treshold") { settingsFile >> optionString; primarySystemogenesisSettings->significanceTreshold = atof(optionString.c_str()); }
+		else if (optionString == "initial-develop-synapse-probability") { settingsFile >> optionString; primarySystemogenesisSettings->initialDevelopSynapseProbability = atof(optionString.c_str()); }
+		else if (optionString == "initial-develop-predconnection-probability") { settingsFile >> optionString; primarySystemogenesisSettings->initialDevelopPredConnectionProbability = atof(optionString.c_str()); }
+		else if (optionString == "primary-systemogenesis-time") { settingsFile >> optionString; primarySystemogenesisSettings->primarySystemogenesisTime = atoi(optionString.c_str()); }
+		else if (optionString == "spontaneous-activity-prob") { settingsFile >> optionString; primarySystemogenesisSettings->spontaneousActivityProb = atof(optionString.c_str()); }
+		else if (optionString == "active-neurons-percent") { settingsFile >> optionString; primarySystemogenesisSettings->activeNeuronsPercent = atof(optionString.c_str()); }
+		else if (optionString == "synapses-activity-treshold") { settingsFile >> optionString; primarySystemogenesisSettings->synapsesActivityTreshold = atof(optionString.c_str()); }
+		else if (optionString == "significance-treshold") { settingsFile >> optionString; primarySystemogenesisSettings->significanceTreshold = atof(optionString.c_str()); }
 	}
 	for (int currentAgent = 1; currentAgent <= agentsPopulation.getPopulationSize(); ++currentAgent)
 	{
@@ -101,13 +113,13 @@ void settings::fillAgentSettingsFromFile(TAgent& agent, string settingsFilename)
 	settingsFile.open(settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		if (optionString == "initial-pool-capacity") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialPoolCapacity = atoi(optionString.c_str()); }
-		if (optionString == "initial-develop-synapse-probability") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialDevelopSynapseProbability = atof(optionString.c_str()); }
-		if (optionString == "initial-develop-predconnection-probability") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability = atof(optionString.c_str()); }
-		if (optionString == "primary-systemogenesis-time") { settingsFile >> optionString; agent.primarySystemogenesisSettings.primarySystemogenesisTime = atoi(optionString.c_str()); }
-		if (optionString == "spontaneous-activity-prob") { settingsFile >> optionString; agent.primarySystemogenesisSettings.spontaneousActivityProb = atof(optionString.c_str()); }
-		if (optionString == "active-neurons-percent") { settingsFile >> optionString; agent.primarySystemogenesisSettings.activeNeuronsPercent = atof(optionString.c_str()); }
-		if (optionString == "synapses-activity-treshold") { settingsFile >> optionString; agent.primarySystemogenesisSettings.synapsesActivityTreshold = atof(optionString.c_str()); }
-		if (optionString == "significance-treshold") { settingsFile >> optionString; agent.primarySystemogenesisSettings.significanceTreshold = atof(optionString.c_str()); }
+		else if (optionString == "initial-develop-synapse-probability") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialDevelopSynapseProbability = atof(optionString.c_str()); }
+		else if (optionString == "initial-develop-predconnection-probability") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability = atof(optionString.c_str()); }
+		else if (optionString == "primary-systemogenesis-time") { settingsFile >> optionString; agent.primarySystemogenesisSettings.primarySystemogenesisTime = atoi(optionString.c_str()); }
+		else if (optionString == "spontaneous-activity-prob") { settingsFile >> optionString; agent.primarySystemogenesisSettings.spontaneousActivityProb = atof(optionString.c_str()); }
+		else if (optionString == "active-neurons-percent") { settingsFile >> optionString; agent.primarySystemogenesisSettings.activeNeuronsPercent = atof(optionString.c_str()); }
+		else if (optionString == "synapses-activity-treshold") { settingsFile >> optionString; agent.primarySystemogenesisSettings.synapsesActivityTreshold = atof(optionString.c_str()); }
+		else if (optionString == "significance-treshold") { settingsFile >> optionString; agent.primarySystemogenesisSettings.significanceTreshold = atof(optionString.c_str()); }
 	}
 	settingsFile.close();
 }
