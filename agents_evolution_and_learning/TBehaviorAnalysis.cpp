@@ -18,11 +18,30 @@ using namespace std;
 
 void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
 {
-  
+  //Извлекаем данные из файлов и определяем режим анализа
+  decodeCommandPromt(argc, argv);
+  //В зависимости от выбранного режима запускаем процедуры анализа
+   switch (mode) {
+     case TBAModePoulation: {
+       TEnvironment* environment = new TEnvironment(filenameSettings.environmentFilename);
+       settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
+       //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
+       environment->setStochasticityCoefficient(0.0);
+       TPopulation* agentsPopulation = new TPopulation;
+
+      findCyclesInPopulation(*agentsPopulation);
+      break;
+     }
+    case TBAModeSingleAgent:
+      ;
+    default:
+      break;
+  }
 }
-std::vector<double> TBehaviorAnalysis::findCycleInAgentLife(double *agentLife,int lifeTime)
+SCycle TBehaviorAnalysis::findCycleInAgentLife(double *agentLife,int lifeTime)
 {
   vector<double> cycle(maxCycleLength);
+  SCycle theCycle;
   //Указатель на конец жизни агента, он, вообще говоря, выходит за рамки массива, не знаю, насколько это безопасно, но зато не надо с единичками возиться
   double *endOfLifePointer = agentLife+lifeTime;
   
@@ -44,13 +63,15 @@ std::vector<double> TBehaviorAnalysis::findCycleInAgentLife(double *agentLife,in
         break;
     }
     //Проверяем, встретилась ли последовательность достаточное количество раз
-    if (repeatCount == sufficientRepeatNumber)
-      return cycle;
+    if (repeatCount == sufficientRepeatNumber) {
+     // theCycle.cycleSequence = cycle;
+      return theCycle;
+    }
   }
   //Вот тут нужно возвращать пустой какой-то объект - подумаю над этим завтра - просто не знаю, как это лучше оформить)
-  return cycle;
+  return theCycle;
 }
-vector<double> TBehaviorAnalysis::findCyclesInPopulation(){
+vector<SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population){
   
 	TEnvironment* environment = new TEnvironment(filenameSettings.environmentFilename);
 	settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
@@ -60,21 +81,45 @@ vector<double> TBehaviorAnalysis::findCyclesInPopulation(){
 	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
+  
 	agentsPopulation->loadPopulation(filenameSettings.populationFilename);
   
   agentsPopulation->getPointertoAgent(3)->linearSystemogenesis();
   //Решил третьего проверить, например
-  TAgent *agent = agentsPopulation->getPointertoAgent(47);
+  TAgent *agent = agentsPopulation->getPointertoAgent(3);
   agent->life(*environment, 250);
-  vector<double> cycle = findCycleInAgentLife(agent->getPointerToAgentLife(),250);
- 
-  for (int initialState = 0;initialState<cycle.size();initialState++)
-    cout<<cycle[initialState]<<" ";
+  cout<<"YES";
   cout<<endl;
+  SCycle cycle = findCycleInAgentLife(agent->getPointerToAgentLife(),250);
+  vector<SCycle> cycles = *new vector<SCycle>;
+  cycles.push_back(cycle);
+//  for (int initialState = 0;initialState<cycle.size();initialState++)
+//    cout<<cycle[initialState]<<" ";
+  
   //Пока ничего путного не возвращаем, создан только базовый метод
-  return cycle;
-}
-void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
-	
+  return cycles;
 }
 
+void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
+  int currentArgNumber = 1; // Текущий номер параметра
+  while (currentArgNumber < argc){
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+      //Определяем режим
+			if (!strcmp("-analysisMode", argv[currentArgNumber])) {
+        if (!strcmp("population", argv[++currentArgNumber]))
+          mode = TBAModePoulation;
+        if (!strcmp("singleagent", argv[++currentArgNumber]))
+          mode = TBAModeSingleAgent;
+      }
+      if (!strcmp("-settings", argv[currentArgNumber]))
+        filenameSettings.settingsFilename = argv[++currentArgNumber];
+      if (!strcmp("-env", argv[currentArgNumber]))
+        filenameSettings.environmentFilename = argv[++currentArgNumber];
+      if (!strcmp("-population", argv[currentArgNumber]))
+        filenameSettings.populationFilename = argv[++currentArgNumber];
+		}
+		++currentArgNumber;
+	}
+
+	
+}
