@@ -9,6 +9,7 @@
 #include <ctime>
 #include <string>
 #include <cstdio>
+#include <cstring>
 
 #include "tests.h"
 #include <ctime>
@@ -29,7 +30,7 @@ string decodeProgramMode(int argc, char** argv){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
-			if ("-mode" == argv[currentArgNumber]) return argv[++currentArgNumber];
+			if (strcmp("-mode", argv[currentArgNumber])) return argv[++currentArgNumber];
 		}
 		++currentArgNumber;
 	}
