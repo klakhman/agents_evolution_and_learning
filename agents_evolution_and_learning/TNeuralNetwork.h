@@ -52,17 +52,23 @@ public:
 	int getOutputResolution() { return outputResolution; }
 
 	// Геттеры и сеттеры для всех нейронов сети (во всех случаях передается номер нейрона в массиве нейронов)
-	int getNeuronID(int neuronNumber){ return neuronsStructure[neuronNumber-1]->getID(); }
+	int getNeuronID(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getID(); }
 	void setNeuronID(int neuronNumber, int newID){ neuronsStructure[neuronNumber-1]->setID(newID); }
-	int getNeuronType(int neuronNumber) { return neuronsStructure[neuronNumber-1]->getType(); }
+	int getNeuronType(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getType(); }
 	void setNeuronType(int neuronNumber, int newType) { neuronsStructure[neuronNumber-1]->setType(newType); }
-	double getNeuronBias(int neuronNumber) { return neuronsStructure[neuronNumber-1]->getBias(); }
+	double getNeuronBias(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getBias(); }
 	void setNeuronBias(int neuronNumber, double newBias) { neuronsStructure[neuronNumber-1]->setBias(newBias); }
-	int getNeuronLayer(int neuronNumber) { return neuronsStructure[neuronNumber-1]->getLayer(); }
+	int getNeuronLayer(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getLayer(); }
 	void setNeuronLayer(int neuronNumber, int newLayer) { neuronsStructure[neuronNumber-1]->setLayer(newLayer); }
+	bool getNeuronActive(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getActive(); }
+	void setNeuronActive(int neuronNumber, bool newActive) { neuronsStructure[neuronNumber - 1]->setActive(newActive); }
 
-	int getNeuronInputSynapsesQuantity(int neuronNumber){ return neuronsStructure[neuronNumber-1]->getInputSynapsesQuantity(); }
-	int getNeuronInputPredConnectionsQuantity(int neuronNumber){ return neuronsStructure[neuronNumber-1]->getInputPredConnectionsQuantity(); }
+	double getNeuronPotential(int neuronNumber) const { return neuronsStructure[neuronNumber - 1]->getCurrentPotential(); }
+	double getNeuronCurrentOut(int neuronNumber) const { return neuronsStructure[neuronNumber - 1]->getCurrentOut(); }
+	double getNeuronPreviousOut(int neuronNumber) const { return neuronsStructure[neuronNumber - 1]->getPreviousOut(); }
+
+	int getNeuronInputSynapsesQuantity(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getInputSynapsesQuantity(); }
+	int getNeuronInputPredConnectionsQuantity(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getInputPredConnectionsQuantity(); }
 
 	// Геттеры и сеттеры для синапсов данной сети (во всех случаях передается номер нейрона в массиве нейронов и номер синапса в массиве синапсов)
 	int getSynapseID(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapseID(synapseNumber); }
@@ -130,6 +136,9 @@ public:
 
 	// Обсчет одного такта работы сети
 	void calculateNetwork(double inputVector[]);
+
+	// Обсчет одного такта работы сети, в условиях спонтанной активации нейронов
+	void calculateSpontaneousNetwork(double spontaneousActivityProb);
 
 	// Получение текущего выходного вектора сети
 	void getOutputVector(double outputVector[]);

@@ -27,6 +27,16 @@ class TAgent{
 	int calculateOutputResolution(int inputResolution) const;
 	// Запрещаем копирующий конструктор (чтобы экземпляры нельзя было передавать по значению)
 	TAgent(const TAgent&);
+
+	// Построение первичного контроллера агента
+	void buildPrimaryNeuralController();
+	// Функция отбора активирующихся нейронов
+	void neuronsSelection(double neuronsSummaryPotential[]);
+	// Функция отбора наиболее активных синапсов
+	void synapsesSelection(double synapsesSummaryPotential[]);
+	// Функция отбора предикторных связей
+	void predConnectionsSelection(double predictorSignificance[]);
+
 public:
 	// Структура настройки первичного системогенеза
 	struct SPrimarySystemogenesisSettings

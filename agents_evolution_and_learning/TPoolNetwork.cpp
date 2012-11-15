@@ -87,12 +87,12 @@ void TPoolNetwork::deletePool(int poolNumber){
 			for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
 				if (poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID() == poolNumber){ // Если это связь от стираемого пула
 					deleteConnection(currentPool, currentConnection);
-					--currentConnection; // Чтобы мы остались на той же самой позиции
+					break; // Выходим из цикла, так как у одного пула не может быть более одной связи от другого пула
 				}
 			for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
 				if (poolsStructure[currentPool - 1]->getPredConnectionPrePool(currentPredConnection)->getID() == poolNumber){ // Если это пред. связь от стираемого пула
 					deletePredConnection(currentPool, currentPredConnection);
-					--currentPredConnection;
+					break;
 				}
 		}
 	// Если пул входной

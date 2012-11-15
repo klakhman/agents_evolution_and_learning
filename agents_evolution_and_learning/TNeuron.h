@@ -42,11 +42,12 @@ class TNeuron{
 	void inflatePredConnectionsSet(int inflateSize);
 
 	static const double EMPTY_OUT; // Признак неозначенного выхода нейрона
-	static const double ACTIVITY_TRESHOLD; // Порог активности, при котором сигнал передается по выходным связям
 	static const int INFLATE_SYNAPSES_SIZE = 10; // Размер увеличения массива с входным синапсами в случае переполнения
 	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным предикторными связями в случае переполнения
 
 public:
+	static const double ACTIVITY_TRESHOLD; // Порог активности, при котором сигнал передается по выходным связям
+
 	// Конструктор по умолчанию
 	TNeuron(){
 		ID = 0;

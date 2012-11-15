@@ -70,11 +70,15 @@ void TNeuralNetwork::deleteNeuron(int neuronNumber){
 	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 		if (currentNeuron != neuronNumber){ // Если это не стираемый нейрон (пропускаем просто для экономии времени)
 			for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
-				if (neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getID() == neuronNumber) // Если это синапс от стираемого нейрона
+				if (neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getID() == neuronNumber){ // Если это синапс от стираемого нейрона
 					deleteSynapse(currentNeuron, currentSynapse);
+					break; // Выходим из цикла, так как у одного нейрона не может быть более одной связи от другого нейрона
+				}
 			for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-				if (neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getID() == neuronNumber) // Если это пред. связь от стираемого нейрона
+				if (neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getID() == neuronNumber){ // Если это пред. связь от стираемого нейрона
 					deletePredConnection(currentNeuron, currentPredConnection);
+					break;
+				}
 		}
 	// Если нейрон входной
 	if (0 == neuronsStructure[neuronNumber - 1]->getType()) --inputResolution;
@@ -127,6 +131,29 @@ void TNeuralNetwork::calculateNetwork(double inputVector[]){
 		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 			if (neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer)
 				neuronsStructure[currentNeuron - 1]->calculateOut();
+}
+
+// Обсчет одного такта работы сети, в условиях спонтанной активации нейронов
+void TNeuralNetwork::calculateSpontaneousNetwork(double spontaneousActivityProb){
+	// Сначала подготавливаем все нейроны
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		neuronsStructure[currentNeuron - 1]->prepare();
+	// Отдельно обсчитываем входные нейроны
+	for (int currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron)
+		// Если нейрон спотанно активируется
+		if (service::uniformDistribution(0, 1, true, false) < spontaneousActivityProb)
+			neuronsStructure[currentNeuron - 1]->setCurrentOut(service::uniformDistribution(0.5, 1, false, false));
+		else
+			neuronsStructure[currentNeuron - 1]->setCurrentOut(0.0);
+	// Проходимся по нейронам по слоям (начинаем со второго)
+	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
+		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+			if (neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer){
+				neuronsStructure[currentNeuron - 1]->calculateOut();
+				// Если нейрон спонтанно активируется, то просто заменяем выход на спонтанный (при этом оставляем потенциал, таким какой был в результате подсчета)
+				if (service::uniformDistribution(0, 1, true, false) < spontaneousActivityProb)
+					neuronsStructure[currentNeuron - 1]->setCurrentOut(service::uniformDistribution(0.5, 1, false, false));
+			}
 }
 
 // Получение текущего выходного вектора сети
