@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <cstdlib>
 
 
@@ -194,6 +195,153 @@ void TPoolNetwork::printGraphNetwork(string graphFilename, bool printWeights /*=
 	hDotGraphFile << "}";
 	hDotGraphFile.close();
 	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
+}
+
+// Вывод сети в файл как супер-графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
+void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale) const{
+	ofstream hDotGraphFile;
+	hDotGraphFile.open((graphFilename + ".dot").c_str());
+	// Инициализируем
+	hDotGraphFile << "digraph G { \n\t\n";
+
+	// массивы с координатами пулов, индексы в массиве соответствуют Id пула
+	std::vector<int> nodeXPosition;			
+	std::vector<int> nodeYPosition;
+
+	// строка вида: x,y
+	std::vector<string> nodePosition;
+
+	string nodeShape;
+
+	// костыль: чтобы индексы в массивах соответствовали id пулов, нужно их заполнять последовательно. Т.к. внутренний идет последним по id, его actualCurrentType = 2
+	int actualCurrentType;					
+
+	// Записываем пулы по типам (входной, скрытый, выходной)
+	for (int currentType = 0; currentType <= 2; ++currentType){
+		hDotGraphFile << "\t{ \n";
+
+		
+		// Задаем форму для текущего типа, и присваиваем значение костылю
+		// Входной
+		if(currentType == 0){
+			actualCurrentType = 0;
+			nodeShape = "triangle";
+		}
+		// Скрытый
+		if(currentType == 1){
+			actualCurrentType = 2;
+			nodeShape = "invtriangle";
+		}
+		// Выходной
+		if(currentType == 2){
+			actualCurrentType = 1;
+			nodeShape = "circle";
+		}
+		
+		// Обнуляем текущее расстояние по изменяемой координате
+		int distance = 0;
+
+		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+			// помни про костыль - обход упорядочен по id
+			if (poolsStructure[currentPool - 1]->getType() == actualCurrentType){
+				// На входном или выходном слое мы меняем только X-координату
+				if(actualCurrentType == 0){
+					nodeXPosition.push_back(distance += scale);
+					nodeYPosition.push_back(0);
+					nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
+					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
+				}
+				if(actualCurrentType == 2){
+					nodeXPosition.push_back(distance += scale);
+					nodeYPosition.push_back(scale * (poolsQuantity - inputResolution - outputResolution + 1));
+					nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
+					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
+				}
+				// На скрытом - только Y-координату
+				if(actualCurrentType == 1){
+					nodeYPosition.push_back(distance += scale);
+					nodeXPosition.push_back(8 * scale + scale * (inputResolution > outputResolution ? inputResolution + 1 : outputResolution + 1));
+					nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
+					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
+				}
+			}
+			
+		hDotGraphFile << "\t}\n"; // Заканчиваем запись слоя
+	}
+	
+	// ищем максимальный вес связи для нормализации
+	double maxWeightValue = 0;
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection){
+			if(poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) > maxWeightValue){
+				maxWeightValue = poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection);
+			}
+		}
+	}
+
+	// геометрический центр области ограниченной внутренним слоем справа и внешними слоями сверху и снизу
+	int geometricCenterX = 1500;
+	// геометрический центр области ограниченной внутренним слоем справа и внешними слоями сверху и снизу
+	int geometricCenterY = 2000;
+
+	string splineControlPoints;
+	int prePoolId;
+	int postPoolId;
+
+	// Записываем связи
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
+			if (poolsStructure[currentPool - 1]->getConnectionEnabled(currentConnection)){
+				string hex;
+				service::decToHex(static_cast<int>(fabs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue)), hex, 2);
+				string color;
+				if (poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) < 0)
+					color = "0000FF" + hex; // Оттенок синего
+				else
+					color = "FF0000" + hex; // Оттенок красного
+				prePoolId = poolsStructure[currentPool - 1]->getConnectionPrePool(currentConnection)->getID();
+				postPoolId = poolsStructure[currentPool - 1]->getConnectionPostPool(currentConnection)->getID();
+				hDotGraphFile << "\t\"" << prePoolId << "\" -> \"" <<
+					postPoolId << "\" [ ";
+//				if (printWeights) //  Если надо напечатать веса
+//					hDotGraphFile << "label=\"" << poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) << "\", ";
+				// для связи между внутренними и внешними пулами
+				if((poolsStructure[prePoolId - 1]->getType() == 0 || poolsStructure[prePoolId - 1]->getType() == 2 || poolsStructure[postPoolId - 1]->getType() == 0 || poolsStructure[postPoolId - 1]->getType() == 2)
+					&& !(poolsStructure[prePoolId - 1]->getType() == 0 && poolsStructure[postPoolId - 1]->getType() == 2)){
+					splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(geometricCenterX) + "," + std::to_string(geometricCenterY) + " " + std::to_string(geometricCenterX + 10) + "," + std::to_string(geometricCenterY + 10) + " " + nodePosition[postPoolId - 1] + "\", ";
+				} else {
+					// для связи между внешними пулами
+					if(poolsStructure[prePoolId - 1]->getType() == 0 && poolsStructure[postPoolId - 1]->getType() == 2){
+						splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(geometricCenterX - 1400) + "," + std::to_string(geometricCenterY - 500) + " " + std::to_string(geometricCenterX - 1400) + "," + std::to_string(geometricCenterY + 500) + " " + nodePosition[postPoolId - 1] + "\", ";
+					} else {
+						// для связи между внутренними пулами
+						if((poolsStructure[prePoolId - 1]->getType() == 1 && poolsStructure[postPoolId - 1]->getType() == 1) && (prePoolId != postPoolId)){
+							if(nodeYPosition[prePoolId - 1] < nodeYPosition[postPoolId - 1]){
+								splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]))/2 - 100) + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId -1]))/2 + 100) + " " + nodePosition[postPoolId - 1] + "\", ";
+							} else {
+								splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]))/2 + 100) + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId -1]))/2 - 100) + " " + nodePosition[postPoolId - 1] + "\", ";
+							}
+						} else {
+							splineControlPoints = "";
+						}
+					}
+				}
+
+				hDotGraphFile << splineControlPoints << "arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
+			}
+	// Записываем предикторные связи
+	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+			for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+				if (poolsStructure[currentPool - 1]->getPredConnectionEnabled(currentPredConnection)){
+					prePoolId = poolsStructure[currentPool - 1]->getPredConnectionPrePool(currentPredConnection)->getID();
+					postPoolId = poolsStructure[currentPool - 1]->getPredConnectionPostPool(currentPredConnection)->getID();
+					hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getPredConnectionPrePool(currentPredConnection)->getID() << "\" -> \"" <<
+						poolsStructure[currentPool - 1]->getPredConnectionPostPool(currentPredConnection)->getID() << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
+				}
+	hDotGraphFile << "}";
+	hDotGraphFile.close();
+	system(("dot -Kneato -n2 -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
 }
 
 //Печать сети в файл или на экран
