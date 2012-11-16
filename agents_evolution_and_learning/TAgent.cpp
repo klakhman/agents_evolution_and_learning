@@ -351,9 +351,22 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 				selectionSynapses[j+1] = selectionSynapses[j];
 				selectionSynapses[j] = tmp;
 			}
-	// Находим порог среднего потенциала по синапсу
+	// Находим порог среднего потенциала по синапсу (через персентиль общего дискретного распределения среднего потенциала через синапсы)
 	double percentileValue = selectionSynapses[static_cast<int>((100 - primarySystemogenesisSettings.synapsesActivityTreshold)/100.0*neuralController->getSynapsesQuantity())].synapseSummaryPotential;
-
+	// Проходимся через все синапсы и удаляем те, у которых суммарный потенциал меньше порога (с определенными условиями - смотри далее)
+	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
+		// Связь не подлежит проверке на отбор если один из неронов не является активным !!! или если пресинаптический нейрон входной или постсинаптический нейрон выходной !!!
+		if ((neuralController->getNeuronActive(currentNeuron)) && (neuralController->getNeuronType(currentNeuron) != 2))
+			for (int currentSynapse = 1; currentSynapse <= neuralController->getNeuronInputSynapsesQuantity(currentNeuron); ++currentSynapse){
+				int currentPreNeuron = neuralController->getSynapsePreNeuron(currentNeuron, currentSynapse)->getID();
+				// Если пресинаптический нейрон не входной и он активен
+				if ((neuralController->getNeuronActive(currentPreNeuron)) && (neuralController->getNeuronType(currentPreNeuron) != 0))
+					// Если синапс подлежит отбору и сумарный потенциал ниже порога, то надо его удалить
+					if (synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] < percentileValue){
+						neuralController->deleteSynapse(currentNeuron, currentSynapse);
+						--currentSynapse; // Остаемся на том же самом номере синапса, так как мы удалили предыдущий
+					}
+			}
 
 	// !!! ВОЗМОЖНО ЗДЕСЬ НАДО ПРАВИТЬ ID ВСЕХ СИНАПСОВ !!!
 	delete []selectionSynapses;
@@ -361,6 +374,18 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 
 // Функция отбора предикторных связей
 void TAgent::predConnectionsSelection(double predictorSignificance[]){
+	// Проходимся по всем связям, которые подлежат отбору (только между активными нейронами)
+	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
+		if (neuralController->getNeuronActive(currentNeuron)) // Если нейрон активен
+			for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron); ++currentPredConnection)
+				// Если пресинаптический нейрон тоже активен
+				if (neuralController->getNeuronActive(neuralController->getPredConnectionPreNeuron(currentNeuron, currentPredConnection)->getID()))
+					// Если значимость предсказания ниже порога, то удаляем связь
+					if (predictorSignificance[neuralController->getPredConnectionID(currentNeuron, currentPredConnection) - 1] <= primarySystemogenesisSettings.significanceTreshold){
+						neuralController->deletePredConnection(currentNeuron, currentPredConnection);
+						--currentPredConnection; // Остаемся на том же номере связи
+					}
+	// !!! ВОЗМОЖНО ЗДЕСЬ НАДО ПРАВИТЬ ID ВСЕХ СВЯЗЕЙ !!!
 }
 
 // Основной метод перчиного системогенеза 

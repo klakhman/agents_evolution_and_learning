@@ -56,8 +56,6 @@ int main(int argc, char** argv){
 	// Устанавливаем обработчик нехватки памяти
 	set_new_handler(out_of_memory);
 	string programMode = decodeProgramMode(argc, argv);; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
-	cout << programMode;
-	return 0;
 	if (programMode == "E"){ // Режим эволюции
 		TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
 		parallelProcess->start(argc, argv);
