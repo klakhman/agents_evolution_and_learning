@@ -93,7 +93,7 @@ public:
 	// Загрузка нейроконтроллера агента
 	void loadController(std::istream& is);
 	// Загрузка генома нейрононтроллера
-	void loadGenome(std::istream& is);
+	void loadGenome(std::istream& is, bool extra = false);
 	// Выгрузка нейроконтроллера агета в файл или на экран
 	void uploadController(std::ostream& os) const;
 	// Выгрузка генома агента в файл или на экран (extra = true - печать полных сведений о пуле (вместе с номерами родительских пулов и временами появления в эволюции))

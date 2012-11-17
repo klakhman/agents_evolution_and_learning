@@ -17,14 +17,15 @@ void TAgent::loadController(istream& is){
 	is >> *neuralController;
 }
 // Загрузка генома нейрононтроллера
-void TAgent::loadGenome(istream& is){
+void TAgent::loadGenome(istream& is, bool extra /*=false*/){
 	string tmp_str;
 	is >> tmp_str; // Считываем номер более приспособленного родителя
 	parents[0] = atoi(tmp_str.c_str());
 	is >> tmp_str; // Считываем номер менее приспособленного родителя
 	parents[1] = atoi(tmp_str.c_str());
 	if (!genome) genome = new TPoolNetwork;
-	is >> *genome;
+	if (!extra) is >> *genome;
+	else genome->readNetworkExtra(is);
 }
 
 // Выгрузка нейроконтроллера агета в файл или на экран
