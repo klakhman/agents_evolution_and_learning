@@ -37,6 +37,10 @@ class TAgent{
 	// Функция отбора предикторных связей
 	void predConnectionsSelection(double predictorSignificance[]);
 
+	// Детекция рассогласования на нейроне
+	// 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"
+	int mismatchDetection(int neuronNumber);
+
 public:
 	// Структура настройки первичного системогенеза
 	struct SPrimarySystemogenesisSettings
@@ -108,6 +112,9 @@ public:
 
 	// Основной метод перчиного системогенеза 
 	void primarySystemogenesis();
+	
+	// Основной метод обучения 
+	void learning();
 
 };
 

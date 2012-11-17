@@ -438,3 +438,40 @@ void TAgent::primarySystemogenesis(){
 	delete []synapsesSummaryPotential;
 	delete []predictorSignificance;
 }
+
+//-------------------- МЕТОДЫ, ОБЕСПЕЧИВАЮЩИЕ ОБУЧЕНИЕ АГЕНТА --------------------
+
+// Детекция рассогласования на нейроне
+// 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"
+int TAgent::mismatchDetection(int neuronNumber){
+	int activePrediction = 0; // Кол-во связей, предсказавшее активацию
+	int silentPrediction = 0; // Кол-во связей, предсказавшее молчание
+	for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(neuronNumber); ++currentPredConnection){
+		int currentPreNeuron = neuralController->getPredConnectionPreNeuron(neuronNumber, currentPredConnection)->getID();
+		// Если предсказывающий нейрон активен
+		if (neuralController->getNeuronActive(currentPreNeuron))
+			if (neuralController->getNeuronPreviousOut(currentPreNeuron) > TNeuron::ACTIVITY_TRESHOLD) // Если предсказывающий нейрон был возбужден на предыдущем такте
+				++activePrediction;
+			else
+				++silentPrediction;
+	}
+	int mismatchCheck = 0;
+	if (activePrediction + silentPrediction){ // Если есть хотя бы один предсказывающий нейрон
+		// Если была предсказана активация, но ее нет
+		if ((activePrediction/static_cast<double>(activePrediction+silentPrediction) > 0) && (neuralController->getNeuronCurrentOut(neuronNumber) <= TNeuron::ACTIVITY_TRESHOLD))
+			mismatchCheck = 1;
+		// Если было предсказано молчание, но была активация
+		else if ((silentPrediction/static_cast<double>(activePrediction+silentPrediction) > 0) && (neuralController->getNeuronCurrentOut(neuronNumber) > TNeuron::ACTIVITY_TRESHOLD))
+			mismatchCheck = 2;
+		else 
+			mismatchCheck = 0;
+	}
+	else
+		mismatchCheck = 0;
+	
+	return mismatchCheck;
+}
+
+// Основной метод обучения 
+void TAgent::learning(){
+}

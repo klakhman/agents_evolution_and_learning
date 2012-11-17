@@ -118,8 +118,12 @@ void TNeuron::calculateOut(){
 		if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
 			potential += inputSynapsesSet[currentSynapse - 1]->getWeight() * preNeuronOut;
 	}
-
-	currentOut = service::tansig(potential);
+	// Если нейрон активен, то вычисляем выход
+	if (active)
+		currentOut = service::tansig(potential);
+	else 
+		// Иначе нулевой выход
+		currentOut = 0;
 }
 
 // Печать сведений о нейроне в файл или на экран
