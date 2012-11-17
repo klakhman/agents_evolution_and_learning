@@ -1,6 +1,7 @@
 ﻿#include "TEvolutionaryProcess.h"
 #include "TParallelEvolutionaryProcess.h"
 #include "service.h"
+#include "settings.h"
 #include "TAnalysis.h"
 #include "TBehaviorAnalysis.h"
 
@@ -68,7 +69,7 @@ int main(int argc, char** argv){
 		}
 	else if (programMode == "SE"){ // Режим эволюционного запуска на одном процессоре
 				TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
-				evolutionaryProcess->filenameSettings.settingsFilename = argv[1];
+				evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
 				long randomSeed = 0;
 				bool extraPrint = false;
 				decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, randomSeed, extraPrint, argc, argv);
