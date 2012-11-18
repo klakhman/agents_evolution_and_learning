@@ -41,7 +41,8 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       break;
   }
 }
-vector<SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, TEnvironment &environment) {  
+vector<SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, TEnvironment &environment) {
+  time_t start_time = time(0);
 	//Вычисляем размер популяции единожды
 	int populationSize = population.getPopulationSize();
 	//Создаем вектор циклов
@@ -57,7 +58,7 @@ vector<SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population
 					detectedCycles.push_back(*singleCycle);
 			}
 		}
-    cout<<"Agent:"<<agentNumber<<" cycles:"<<detectedCycles.size()<<endl;
+    cout<<"Agent:"<<agentNumber<<" cycles:"<<detectedCycles.size()<<" time:"<<time(0)-start_time<<"sec"<<endl;
   }
   return detectedCycles;
 }
