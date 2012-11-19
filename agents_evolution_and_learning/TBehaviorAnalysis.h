@@ -16,8 +16,6 @@
 static const int maxCycleLength = 70;
 //Число повторов, необоходимое для верификации нахождения цикла
 static const int sufficientRepeatNumber = 4;
-//Максимально возможное число циклов впринципе
-static const int maxCyclesQuantity = 3500;
 //Длина жизни агента для прогона
 static const int agentLifeTime = 350;
 
@@ -31,8 +29,6 @@ typedef enum {
 struct SCycle{
   //Последовательность действий в цикле
   std::vector<double> cycleSequence;
-  //Длина цикла
-  int cycleLength;
   //Награда, получаемая за прохождение цикла
   double cycleReward;
 };
@@ -66,13 +62,12 @@ public:
   SCycle findCycleInAgentLife(TAgent &agent, TEnvironment &environment);
   TBehaviorAnalysis() {};
 	~TBehaviorAnalysis() {};
-private:
   //Вспомогательная процедура для поиска цикла в последовательности
-  SCycle findCycleInSequence(double *sequence,int sequenceLength);
+  std::vector<double> findCycleInSequence(double *sequence,int sequenceLength);
   //Поиск подциклов в цикле (проверка на то, состоит ли цикл из более коротких циклов)
-  SCycle findBaseCycleInCompoundCycle(double *cycle,int cycleLength);
+  std::vector<double> findBaseCycleInCompoundCycle(double *cycle,int cycleLength);
   //Проверить, нет ли уже этого цикла в массиве циклов
-  bool checkCycleUniqueness(SCycle &cycleToAdd,std::vector<SCycle> &existingCycles);
+  int findCycleInExistingCycles(SCycle &cycleToAdd,std::vector<SCycle> &existingCycles);
   //Сравнение двух последовательностей
   bool plainSequencesComparison(double* firstSequence, double* secondSequence, int sequenceLength);
 };
