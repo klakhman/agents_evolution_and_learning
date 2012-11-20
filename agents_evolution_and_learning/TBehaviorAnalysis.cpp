@@ -83,8 +83,8 @@ vector<SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, TEnvironme
 
 SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent, TEnvironment &environment){
   SCycle agentCycle;
-  //Прогоняем жизнь агента
-  agent.life(environment, agentLifeTime);
+  //Прогоняем жизнь агента (без подсчета награды, так как она нам не нужна)
+  agent.life(environment, agentLifeTime, false);
   //Находим цикл
   vector<double> cycle = findCycleInSequence(agent.getPointerToAgentLife(), agentLifeTime/*Продолжительность жизни, надо бы узнавать размер*/);
   //Если агент бездействовал - возвращаем пустой веткор

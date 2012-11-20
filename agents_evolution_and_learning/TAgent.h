@@ -102,8 +102,8 @@ public:
 	void generateMinimalAgent(int inputResolution);
 	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
 	void linearSystemogenesis();
-	// Моделирование жизни агента
-	void life(TEnvironment& environment, int agentLifeTime);
+	// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
+	void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
 	// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
 	TAgent& operator=(const TAgent& sourceAgent);
 

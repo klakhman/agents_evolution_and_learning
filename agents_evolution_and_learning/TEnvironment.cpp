@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <cstring>
+#include <cmath>
 
 
 using namespace std;
@@ -151,7 +152,7 @@ double TEnvironment::calculateReward(double actionsIDs[], int actionsQuantity) c
 				// Если не было нарушения последовательности, то цель достигнута
 				if (achivedFlag){
 					// Награда линейно восстанавливается до максимального (исходного) уровня за фиксированное кол-во тактов
-					accumulatedReward += aimsSet[currentAim - 1].reward * min(1.0, (currentTimeStep - achievingTime[currentAim - 1])/static_cast<double>(rewardRecoveryTime));
+					accumulatedReward += aimsSet[currentAim - 1].reward * min(1.0, (currentTimeStep - achievingTime[currentAim - 1])/static_cast<double>(max(1, rewardRecoveryTime)));
 					achievingTime[currentAim - 1] = currentTimeStep;
 				}
 			} // Конец проверки одной цели

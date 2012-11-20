@@ -152,8 +152,8 @@ double TAgent::decodeAction(double outputVector[]){
 	return actionCode;
 }
 
-// Моделирование жизни агента
-void TAgent::life(TEnvironment& environment, int agentLifeTime){
+// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
+void TAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate /*= true*/){
 	double* environmentVector = new double[neuralController->getInputResolution()];
 	double* outputVector = new double[neuralController->getOutputResolution()];
 	if (agentLife) delete []agentLife;
@@ -170,7 +170,10 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime){
 		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
 		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
 	}
-	reward = environment.calculateReward(agentLife, agentLifeTime);
+	if (rewardCalculate) 
+		reward = environment.calculateReward(agentLife, agentLifeTime);
+	else 
+		reward = 0;
 	delete []outputVector;
 	delete []environmentVector;
 }
