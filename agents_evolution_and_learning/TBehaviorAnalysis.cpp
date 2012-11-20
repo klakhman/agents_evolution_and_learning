@@ -41,12 +41,12 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       break;
   }
 }
-vector<SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, TEnvironment &environment) {
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, TEnvironment &environment) {
   time_t start_time = time(0);
 	//Вычисляем размер популяции единожды
 	int populationSize = population.getPopulationSize();
 	//Создаем вектор циклов
-	detectedCycles = *new vector<SCycle>;
+	vector<SCycle> detectedCycles;
 	//Прогрняем всех агентов в популяции
 	for (int agentNumber = 1; agentNumber <= populationSize; ++agentNumber) {
 		//Запускаем прогон агента с целью поиска циклов
@@ -62,9 +62,11 @@ vector<SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population
   }
   return detectedCycles;
 }
-vector<SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, TEnvironment &environment)
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, TEnvironment &environment)
 {
-  vector<SCycle> currentAgentCycles = *new vector<SCycle>;
+  vector<SCycle> currentAgentCycles;
+  //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
+  environment.setStochasticityCoefficient(0.0);
 	//Создаем первичный репертуар  
 	agent.linearSystemogenesis();
   int intitalStatesQuantity = environment.getInitialStatesQuantity();
@@ -81,7 +83,7 @@ vector<SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, TEnvironme
   return currentAgentCycles;
 }
 
-SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent, TEnvironment &environment){
+TBehaviorAnalysis::SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent, TEnvironment &environment){
   SCycle agentCycle;
   //Прогоняем жизнь агента (без подсчета награды, так как она нам не нужна)
   agent.life(environment, agentLifeTime, false);
