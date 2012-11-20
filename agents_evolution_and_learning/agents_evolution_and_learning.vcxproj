@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files %28x86%29\MPICH2\include;C:\Program Files\boost\boost_1_51;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\MPICH2\lib;C:\Program Files\boost\boost_1_51\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\OpenMPI_v1.6-win32\include;C:\Program Files %28x86%29\MPICH2\include;C:\Program Files\boost\boost_1_51;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\OpenMPI_v1.6-win32\bin;C:\Program Files %28x86%29\OpenMPI_v1.6-win32\lib;C:\Program Files %28x86%29\MPICH2\lib;C:\Program Files\boost\boost_1_51\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -53,13 +53,17 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;OMPI_IMPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>mpi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmpi.lib;libmpid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
