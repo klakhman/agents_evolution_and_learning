@@ -4,7 +4,9 @@
 
 #include "TEnvironment.h"
 #include "TPopulation.h"
+#include "TBehaviorAnalysis.h"
 #include "settings.h"
+#include <vector>
 
 #include "mpi.h"
 #include <string>
@@ -71,7 +73,7 @@ void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentN
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
-			if (!strcmp("-env", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
+			if (!strcmp("-env", argv[currentArgNumber])) { firstEnvironmentNumber = atoi(argv[++currentArgNumber]); lastEnvironmentNumber = atoi(argv[++currentArgNumber]);}
 			else if (!strcmp("-try", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
 			else if (!strcmp("-sign", argv[currentArgNumber])) { runSign = argv[++currentArgNumber]; }
 		}
@@ -112,7 +114,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 	const int messageLength = 100;
 	const int messageType = 99;
 
-	string settingsFilename = argv[1];
+	string settingsFilename = settings::getSettingsFilename(argc, argv);
 	string workDirectory, environmentDirectory, resultsDirectory;
 	settings::fillDirectoriesSettings(workDirectory, environmentDirectory, resultsDirectory, settingsFilename);
 
@@ -252,7 +254,7 @@ void TAnalysis::workProcess(int argc, char **argv){
 	const int messageLength = 100;
 	const int messageType = 99;
 
-	string settingsFilename = argv[1];
+	string settingsFilename = settings::getSettingsFilename(argc, argv);
 	string workDirectory, environmentDirectory, resultsDirectory;
 	settings::fillDirectoriesSettings(workDirectory, environmentDirectory, resultsDirectory, settingsFilename);
 

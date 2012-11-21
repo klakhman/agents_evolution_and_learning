@@ -61,17 +61,17 @@ public:
   //Найти все циклы в популяции путем прогона агентов через из всех начальных состояний среды
   std::vector<SCycle> findCyclesInPopulation(TPopulation &population, TEnvironment &environment);
   //Прогон агента из всех возможных состояний среды для обнаружения всех возможных циклов
-  std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, TEnvironment &environment);
+  static std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, TEnvironment &environment);
 	//Проверить, нет ли уже этого цикла в массиве циклов
-  int findCycleInExistingCycles(SCycle &cycleToAdd,std::vector<SCycle> &existingCycles);
+  static int findCycleInExistingCycles(SCycle &cycleToAdd,std::vector<SCycle> &existingCycles);
   //Находит цикл в жизни данного агента
-  SCycle findCycleInAgentLife(TAgent &agent, TEnvironment &environment);
+  static SCycle findCycleInAgentLife(TAgent &agent, TEnvironment &environment);
   //Вспомогательная процедура для поиска цикла в последовательности
-  std::vector<double> findCycleInSequence(double *sequence,int sequenceLength);
+  static std::vector<double> findCycleInSequence(double *sequence,int sequenceLength);
   //Поиск подциклов в цикле (проверка на то, состоит ли цикл из более коротких циклов)
-  std::vector<double> findBaseCycleInCompoundCycle(double *cycle,int cycleLength);
+  static std::vector<double> findBaseCycleInCompoundCycle(double *cycle,int cycleLength);
   //Сравнение двух последовательностей
-  bool plainSequencesComparison(double* firstSequence, double* secondSequence, int sequenceLength);
+  static bool plainSequencesComparison(double* firstSequence, double* secondSequence, int sequenceLength);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

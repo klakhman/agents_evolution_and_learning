@@ -30,6 +30,7 @@ public:
 	void startParallelBestPopulationAnalysis(int argc, char **argv);
 	// Процедура усреднение параметров анализа по лучшей популяции по глобальным сложностям сред (membersQuantity - кол-во сред в рамках одного коэффициента заполненности)
 	void makeBestPopulationAnalysisSummary(std::string analysisFilename, std::string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity);
+
 };
 
 #endif // TANALYSIS_H
