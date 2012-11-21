@@ -323,3 +323,50 @@ void TAnalysis::makeBestPopulationAnalysisSummary(string analysisFilename, strin
 	analysisFile.close();
 }
 
+// Процедура прогона случайного агента (на каждом такте времени действие агента определяется случайно)
+double TAnalysis::randomAgentLife(TEnvironment& environment, int agentLifeTime){
+	double* agentLife = new double[agentLifeTime];
+
+	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
+		// Определяем случайное действие агента (отличное от нуля)
+		double action = 0;
+		while (action == 0){
+			action = static_cast<double>(service::uniformDiscreteDistribution(-environment.getEnvironmentResolution(), environment.getEnvironmentResolution()));
+		}
+		agentLife[agentLifeStep - 1] = action;
+		// Действуем на среду и проверяем успешно ли действие
+		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
+		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
+	}
+	
+	double reward = environment.calculateReward(agentLife, agentLifeTime);
+	delete []agentLife;
+
+	return reward;
+}
+
+// Процедура анализа базового уровня награды для среды (путем прогона случайного агента)
+void TAnalysis::randomAgentAnalysis(string environmentDirectory, int firstEnvNumber, int lastEnvNumber, string settingsFilename, string resultsFilename){
+	ofstream resultsFile;
+	resultsFile.open(resultsFilename.c_str());
+	srand(static_cast<unsigned int>(time(0)));
+	for (int currentEnvironment = firstEnvNumber; currentEnvironment <= lastEnvNumber; ++currentEnvironment){
+		stringstream environmentFilename;
+		environmentFilename << environmentDirectory << "/Environment" << currentEnvironment << ".txt";
+		TEnvironment environment(environmentFilename.str());
+		settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+		environment.setStochasticityCoefficient(0.0);
+		long double averageReward = 0;
+		for (int currentAgent = 1; currentAgent <= 250; ++currentAgent)
+			for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+				environment.setEnvironmentState(currentState);
+				averageReward += randomAgentLife(environment, 250);
+			}
+		averageReward /= 250 * environment.getInitialStatesQuantity();
+		cout << "Env" << currentEnvironment << "\t" << averageReward << endl;
+		resultsFile << "Environment#" << currentEnvironment << "\tTry#1\t" << averageReward << endl;
+	}
+	resultsFile.close();
+}
+
+

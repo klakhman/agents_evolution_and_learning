@@ -54,6 +54,10 @@ void decodeCommandPromt(string& environemtnFilename, string& resultsFilename, st
 }
 
 int main(int argc, char** argv){
+	TAnalysis* analysis = new TAnalysis;
+	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tets/RANDOM_agent_analysis.txt");
+	delete analysis;
+	return 0;
 	// Устанавливаем обработчик нехватки памяти
 	set_new_handler(out_of_memory);
 	string programMode = decodeProgramMode(argc, argv);; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции

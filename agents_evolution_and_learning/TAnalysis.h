@@ -30,6 +30,12 @@ public:
 	void startParallelBestPopulationAnalysis(int argc, char **argv);
 	// Процедура усреднение параметров анализа по лучшей популяции по глобальным сложностям сред (membersQuantity - кол-во сред в рамках одного коэффициента заполненности)
 	void makeBestPopulationAnalysisSummary(std::string analysisFilename, std::string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity);
+	
+	// Процедура прогона случайного агента (на каждом такте времени действие агента определяется случайно)
+	double randomAgentLife(TEnvironment& environment, int agentLifeTime);
+
+	// Процедура анализа базового уровня награды для среды (путем прогона случайного агента)
+	void TAnalysis::randomAgentAnalysis(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string settingsFilename, std::string resultsFilename);
 
 };
 
