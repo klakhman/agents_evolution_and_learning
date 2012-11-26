@@ -106,6 +106,9 @@ public:
 			currentEnvironmentVector[currentBit - 1] = requiredEnvironmentVector[currentBit - 1];
 		delete []requiredEnvironmentVector;
 	}
+
+	int getEnvironmentState() const { return service::binToDec(currentEnvironmentVector, environmentResolution); }
+
 	// Задание случайного состояния среды
 	void setRandomEnvironmentState(){
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)

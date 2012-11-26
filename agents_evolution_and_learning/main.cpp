@@ -11,6 +11,7 @@
 #include <string>
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 
 #include "tests.h"
 #include <ctime>
@@ -54,10 +55,6 @@ void decodeCommandPromt(string& environemtnFilename, string& resultsFilename, st
 }
 
 int main(int argc, char** argv){
-	TAnalysis* analysis = new TAnalysis;
-	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tets/RANDOM_agent_analysis.txt");
-	delete analysis;
-	return 0;
 	// Устанавливаем обработчик нехватки памяти
 	set_new_handler(out_of_memory);
 	string programMode = decodeProgramMode(argc, argv);; // Режим работы программы - "E" - эволюция, "BPA" - анализ методом прогона лучшей популяции
@@ -87,6 +84,74 @@ int main(int argc, char** argv){
     delete behaviorAnalysis;
     
   }
+
+  /*TAnalysis* analysis = new TAnalysis;
+	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");
+	delete analysis;*/
+	/*int coefficientsQuantity = 18;
+	int environmentsQuantity = 20;
+	int initialStatesQuantity = 256;
+	int maxCycleLength = 100;
+	string runSign = "test";
+	string analysisDirectory = "C:/Advanced_Behavior/";
+	string outputDirectory = "C:/Advanced_Behavior/Summary_scaled/";
+	ofstream zeroConvergenceFile;
+	//zeroConvergenceFile.open (("C:/Advanced_Behavior/Summary/zero_convergence" + runSign + ".txt").c_str());
+
+	for (int coefficient = 1; coefficient <= 18; ++coefficient){
+		int* cyclesConvergence = new int[initialStatesQuantity];
+		memset(cyclesConvergence, 0, initialStatesQuantity * sizeof(int));
+		int* cyclesLength = new int[maxCycleLength];
+		memset(cyclesLength, 0, maxCycleLength * sizeof(int));
+		double averageZeroConvergence = 0;
+		for (int environment = 1; environment <= environmentsQuantity; ++environment){
+			int* tempCyclesConvergence = new int[initialStatesQuantity];
+			memset(tempCyclesConvergence, 0, initialStatesQuantity * sizeof(int));
+			int* tempCyclesLength = new int[maxCycleLength];
+			memset(tempCyclesLength, 0, maxCycleLength * sizeof(int));
+			double tempAverageZeroConvergence = 0;
+			
+			stringstream analysisFilename;
+			analysisFilename << analysisDirectory << "/ConvergenceAnalysisEn" << 1000 + environment + (coefficient-1) * environmentsQuantity << "_" << runSign << ".txt";
+			TAnalysis::advancedBehaviorFilesParsing(tempCyclesConvergence, initialStatesQuantity, tempAverageZeroConvergence, tempCyclesLength, maxCycleLength, analysisFilename.str());
+
+			for (int i=0; i<initialStatesQuantity; ++i)
+				cyclesConvergence[i] += tempCyclesConvergence[i];
+			for (int i=0; i<maxCycleLength; ++i)
+				cyclesLength[i] += tempCyclesLength[i];
+
+			averageZeroConvergence += tempAverageZeroConvergence;
+
+			delete []tempCyclesConvergence;
+			delete []tempCyclesLength;
+		}
+		stringstream outputFilename;
+		outputFilename << outputDirectory << "/AdvancedBehaviorCyclesConvergenceCoef" << coefficient << "_" << runSign << ".txt";
+		TAnalysis::scaleHistogram(cyclesConvergence, initialStatesQuantity, 10, outputFilename.str());
+		outputFilename.str("");
+		outputFilename << outputDirectory << "/AdvancedBehaviorCyclesLentghCoef" << coefficient << "_" << runSign << ".txt";
+		TAnalysis::scaleHistogram(cyclesLength, maxCycleLength, 10, outputFilename.str());
+		*/
+		/*ofstream outputFile;
+		outputFile.open(outputFilename.str().c_str());
+
+		for (int i=0; i<initialStatesQuantity; ++i)
+				outputFile << cyclesConvergence[i] << endl;
+		
+		outputFile << endl << endl << averageZeroConvergence / environmentsQuantity << endl << endl << endl;
+		zeroConvergenceFile << averageZeroConvergence / environmentsQuantity << endl;
+		for (int i=0; i<maxCycleLength; ++i)
+				outputFile << cyclesLength[i] << endl;
+
+		outputFile.close();*/
+//		delete []cyclesConvergence;
+	//	delete []cyclesLength;
+	//}
+
+	//zeroConvergenceFile.close();
+	/*TAnalysis analysis;
+	analysis.makeBestPopulationAnalysisSummary("C:/Tests/RANDOM_agent_analysis.txt", "C:/Tests/summarydeterm.txt", 18, 20, 1);*/
+	//return 0;
 
 	/*TAnalysis* bestPopulationAnalysis = new TAnalysis;
 	bestPopulationAnalysis->startBestPopulationAnalysis("C:/Tests/Results/En1001/En1001_test(1)_bestpopulation.txt", "C:/Tests/Environments/Environment1001.txt", "C:/Tests/test_settings.txt");

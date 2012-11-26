@@ -392,7 +392,7 @@ void TAgent::predConnectionsSelection(double predictorSignificance[]){
 	// !!! ВОЗМОЖНО ЗДЕСЬ НАДО ПРАВИТЬ ID ВСЕХ СВЯЗЕЙ !!!
 }
 
-// Основной метод перчиного системогенеза 
+// Основной метод первичного системогенеза 
 void TAgent::primarySystemogenesis(){
 	neuralController->eraseNeuralNetwork();
 	// Строим полную первичную сеть агента

@@ -369,4 +369,42 @@ void TAnalysis::randomAgentAnalysis(string environmentDirectory, int firstEnvNum
 	resultsFile.close();
 }
 
+// Масштабирование гистограммы (передается последовательность немасшабированной гистограммы - кол-во измерений начиная со значения параметра 1..., scale - значение масштабирования (напр. если передано 10, то масштабируется от 1 до 10, от 11 до 20 и т.д.))
+void TAnalysis::scaleHistogram(int* unscaledHistogram, int parametersQuantity, int scale, string resultFilename){
+	// Подсчитываем кол-во отсчетов масштабированной гистограммы
+	int scaledParamQuantity = parametersQuantity / 10 + 1 * ((parametersQuantity % 10) != 0);
+	int* scaledHistogram = new int[scaledParamQuantity];
+	memset(scaledHistogram, 0, scaledParamQuantity * sizeof(int));
+
+	for (int currentParameter = 1; currentParameter <= parametersQuantity; ++currentParameter)
+		scaledHistogram[(currentParameter - 1) / scale] += unscaledHistogram[currentParameter - 1];
+
+	ofstream resultFile;
+	resultFile.open(resultFilename.c_str());
+	for (int currentScaledParam = 0; currentScaledParam < scaledParamQuantity; ++currentScaledParam)
+		resultFile << scaledHistogram[currentScaledParam] << endl;
+	resultFile.close();
+
+	delete []scaledHistogram;
+}
+
+// Парсинг файлов углубленного анализа поведения (zeroConvergenceMean - среднее кол-во состояний, из которых агенты никуда не сходятся)
+void TAnalysis::advancedBehaviorFilesParsing(int* cyclesConvergenceHist, int statesQuantity, double& zeroConvergenceMean, int* cyclesLengthHist, int maxCyclesLength, string analysisFilename){
+	ifstream analysisFile;
+	analysisFile.open(analysisFilename.c_str());
+	string tmpStr;
+	for (int currentState = 0; currentState < statesQuantity; ++currentState){
+		analysisFile >> tmpStr;
+		cyclesConvergenceHist[currentState] = atoi(tmpStr.c_str());
+	}
+	analysisFile >> tmpStr;
+	zeroConvergenceMean = atof(tmpStr.c_str());
+	cout << zeroConvergenceMean << "\t";
+	for (int currentLength = 0; currentLength < maxCyclesLength; ++currentLength){
+		analysisFile >> tmpStr;
+		cyclesLengthHist[currentLength] = atoi(tmpStr.c_str());
+	}
+	analysisFile.close();
+}
+
 

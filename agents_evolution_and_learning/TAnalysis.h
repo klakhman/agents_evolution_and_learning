@@ -35,7 +35,13 @@ public:
 	double randomAgentLife(TEnvironment& environment, int agentLifeTime);
 
 	// Процедура анализа базового уровня награды для среды (путем прогона случайного агента)
-	void TAnalysis::randomAgentAnalysis(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string settingsFilename, std::string resultsFilename);
+	void randomAgentAnalysis(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string settingsFilename, std::string resultsFilename);
+	
+	// Масштабирование гистограммы (передается последовательность немасшабированной гистограммы - кол-во измерений начиная со значения параметра 1..., scale - значение масштабирования (напр. если передано 10, то масштабируется от 1 до 10, от 11 до 20 и т.д.))
+	static void scaleHistogram(int* unscaledHistogram, int parametersQuantity, int scale, std::string resultFilename);
+
+	// Парсинг файлов углубленного анализа поведения (zeroConvergenceMean - среднее кол-во состояний, из которых агенты никуда не сходятся)
+	static void advancedBehaviorFilesParsing(int* cyclesConvergenceHist, int statesQuantity, double& zeroConvergenceMean, int* cyclesLengthHist, int maxCyclesLength, std::string analysisFilename);
 
 };
 
