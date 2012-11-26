@@ -10,6 +10,7 @@
 #define TBehaviorAnalysis_H
 
 #include <vector>
+#include <string>
 #include "TEnvironment.h"
 #include "TPopulation.h"
 
@@ -20,6 +21,7 @@ class TBehaviorAnalysis{
 	typedef enum {
 		TBAModePoulation,//Поиск циклов во всей популяции
 		TBAModeSingleAgent,//Поиск циклов в одном агенте
+    TBAModeEvolution,//Поиск циклов в ходе эволюции
 	}TBehaviorAnalysisMode;
 
   //Режим анализа - всей популции, одного агента, и т.д.
@@ -39,6 +41,7 @@ public:
 		std::string populationFilename;
     std::string agentsFilename;
 		std::string settingsFilename;
+    std::string cyclesFilename;
 	} filenameSettings;
     
 	//Структура цикла
@@ -72,6 +75,10 @@ public:
   static std::vector<double> findBaseCycleInCompoundCycle(double *cycle,int cycleLength);
   //Сравнение двух последовательностей
   static bool plainSequencesComparison(double* firstSequence, double* secondSequence, int sequenceLength);
+  
+private:
+  void uploadCycles(std::vector<SCycle> detectedCycles,std::string cyclesFilename);
+  std::vector<SCycle> loadCycles(std::string cyclesFilename);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

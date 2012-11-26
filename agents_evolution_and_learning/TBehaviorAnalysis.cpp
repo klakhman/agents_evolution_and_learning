@@ -37,6 +37,14 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
      }
     case TBAModeSingleAgent:
       ;
+    case TBAModeEvolution: {
+      TEnvironment* environment = new TEnvironment(filenameSettings.environmentFilename);
+      settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
+      //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
+      environment->setStochasticityCoefficient(0.0);
+      //Загружаем циклы из файла
+      vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
+    }
     default:
       break;
   }
@@ -191,10 +199,12 @@ void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
       //Определяем режим
 			if (!strcmp("-analysisMode", argv[currentArgNumber])) {
-        if (!strcmp("population", argv[++currentArgNumber]))
+        if (!strcmp("population", argv[currentArgNumber+1]))
           mode = TBAModePoulation;
-        if (!strcmp("singleagent", argv[++currentArgNumber]))
+        if (!strcmp("singleagent", argv[currentArgNumber+1]))
           mode = TBAModeSingleAgent;
+        if (!strcmp("evolution", argv[currentArgNumber+1]))
+          mode = TBAModeEvolution;
       }
       if (!strcmp("-settings", argv[currentArgNumber]))
         filenameSettings.settingsFilename = argv[++currentArgNumber];
@@ -202,9 +212,49 @@ void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
         filenameSettings.environmentFilename = argv[++currentArgNumber];
       if (!strcmp("-population", argv[currentArgNumber]))
         filenameSettings.populationFilename = argv[++currentArgNumber];
+      if (!strcmp("-cycles", argv[currentArgNumber]))
+        filenameSettings.cyclesFilename = argv[++currentArgNumber];
 		}
 		++currentArgNumber;
 	}
-
-	
 }
+void TBehaviorAnalysis::uploadCycles(vector<TBehaviorAnalysis::SCycle> detectedCycles,string cyclesFilename){
+	ofstream cyclesFile;
+	cyclesFile.open(cyclesFilename.c_str());
+	cyclesFile << detectedCycles.size()<<endl; // Считываем кол-во циклов
+  
+	for (int currentCycle = 0; currentCycle < detectedCycles.size(); ++currentCycle){
+		cyclesFile << detectedCycles[currentCycle].cycleSequence.size()<< "\t"; // Считываем длину цикла
+    for(vector<double>::const_iterator i = detectedCycles[currentCycle].cycleSequence.begin(); i != detectedCycles[currentCycle].cycleSequence.end(); ++i) {
+      cyclesFile << *i <<"\t";
+    }
+    cyclesFile<<endl;
+	}
+	cyclesFile.close();
+}
+
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFilename){
+	ifstream cyclesFile;
+	cyclesFile.open(cyclesFilename.c_str());
+	string tmp_str;
+	cyclesFile >> tmp_str; // Считываем кол-во циклов
+	int cyclesQuantity = atoi(tmp_str.c_str());
+  //Создаем вектор циклов
+  vector<SCycle> detectedCycles;
+	//Считываем все циклы
+	for (int currentCycle = 1; currentCycle <= cyclesQuantity; ++currentCycle){
+		cyclesFile >> tmp_str; // Считываем длину цикла
+    int cycleLength = atoi(tmp_str.c_str());
+    SCycle newCycle;
+    // Заполняем цикл
+		for (int currentAction = 0; currentAction < cycleLength; ++currentAction){
+			cyclesFile >> tmp_str; // Считываем номер изменяемого бита
+			newCycle.cycleSequence.push_back(atoi(tmp_str.c_str()));
+		}
+    //Добавляем цикл в массив циклов
+    detectedCycles.push_back(newCycle);
+	}
+	cyclesFile.close();
+  return detectedCycles;
+}
+
