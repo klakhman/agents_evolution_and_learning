@@ -42,12 +42,58 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
       //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
       environment->setStochasticityCoefficient(0.0);
-      //Загружаем циклы из файла
-      vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
+      //Запускаем поиск циклов
+      vector<SCycle>cycles = findCyclesInEvolution(*environment);
     }
     default:
       break;
   }
+}
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvironment &environment)
+{
+  ifstream agentsFile;
+  vector<SCycle> detectedCycles;
+  ofstream cyclesFile, evoCyclesFile;
+  //Открываем файл с агентами
+  agentsFile.open(filenameSettings.populationFilename.c_str());
+  cyclesFile.open(filenameSettings.cyclesFilename.c_str());
+  evoCyclesFile.open("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt");
+  time_t start_time = time(0);
+  //Ищем появившиеся циклы на каждом шаге эволюции
+  for (int currentAgentNumber = 0; currentAgentNumber <5000; ++currentAgentNumber){
+    TAgent *currentAgent = new TAgent;
+    currentAgent->loadGenome(agentsFile);
+    
+    //Запускаем прогон агента с целью поиска циклов
+		vector<SCycle> currentAgentCycles = findAllCyclesOfAgent(*currentAgent, environment);
+		//В случае нахождения циклов, проверяем их на уникальность и добавляем в основной вектор циклов
+		if (currentAgentCycles.size()) {
+			for (vector<SCycle>::iterator singleCycle = currentAgentCycles.begin(); singleCycle!=currentAgentCycles.end();++singleCycle) {
+        int cycleInExisting = findCycleInExistingCycles(*singleCycle,detectedCycles);
+        //Если цикл новый, добавляем его и записываем как в файл со списком циклов, так и в файл с циклами для каждого шага эволюции
+				if (!cycleInExisting) {
+					detectedCycles.push_back(*singleCycle);
+          //Записываем номер агента и номер цикла - последний в векторе
+          evoCyclesFile<<currentAgentNumber<<"\t"<<detectedCycles.size()-1<<endl;
+          //Добавляем цикл в файл циклов
+          uploadSingleCycleToFile(*singleCycle, cyclesFile);
+        //Если цикл уже встречался, записываем его номер в файл с циклами для каждого шага эволюции
+        } else {
+          evoCyclesFile<<currentAgentNumber<<"\t"<<cycleInExisting-1<<endl;
+        }
+			}
+		}
+    delete currentAgent;
+    cout<<"Agent:"<<currentAgentNumber<<" cycles:"<<detectedCycles.size()<<" time:"<<time(0)-start_time<<"sec"<<endl;
+	}
+  //Записываем количество циклов в конец пока что)
+  cyclesFile<<detectedCycles.size()<<endl;
+  
+  cyclesFile.close();
+  evoCyclesFile.close();
+  agentsFile.close();
+  
+  return detectedCycles;
 }
 vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, TEnvironment &environment) {
   time_t start_time = time(0);
@@ -218,18 +264,22 @@ void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
 		++currentArgNumber;
 	}
 }
+void TBehaviorAnalysis::uploadSingleCycleToFile(TBehaviorAnalysis::SCycle& cycle, ofstream& cyclesFile)
+{
+  cyclesFile << cycle.cycleSequence.size()<< "\t"; // Считываем длину цикла
+  for (vector<double>::const_iterator i = cycle.cycleSequence.begin(); i != cycle.cycleSequence.end(); ++i) {
+    cyclesFile << *i <<"\t";
+  }
+  cyclesFile<<endl;
+}
 void TBehaviorAnalysis::uploadCycles(vector<TBehaviorAnalysis::SCycle> detectedCycles,string cyclesFilename){
 	ofstream cyclesFile;
 	cyclesFile.open(cyclesFilename.c_str());
 	cyclesFile << detectedCycles.size()<<endl; // Считываем кол-во циклов
   
-	for (int currentCycle = 0; currentCycle < detectedCycles.size(); ++currentCycle){
-		cyclesFile << detectedCycles[currentCycle].cycleSequence.size()<< "\t"; // Считываем длину цикла
-    for(vector<double>::const_iterator i = detectedCycles[currentCycle].cycleSequence.begin(); i != detectedCycles[currentCycle].cycleSequence.end(); ++i) {
-      cyclesFile << *i <<"\t";
-    }
-    cyclesFile<<endl;
-	}
+	for (int currentCycle = 0; currentCycle < detectedCycles.size(); ++currentCycle)
+		uploadSingleCycleToFile(detectedCycles[currentCycle], cyclesFile);
+  
 	cyclesFile.close();
 }
 
@@ -257,4 +307,3 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	cyclesFile.close();
   return detectedCycles;
 }
-

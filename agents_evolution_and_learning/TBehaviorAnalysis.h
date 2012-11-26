@@ -76,7 +76,12 @@ public:
   //Сравнение двух последовательностей
   static bool plainSequencesComparison(double* firstSequence, double* secondSequence, int sequenceLength);
   
+  //Поиск максимальных циклов для луших агентов в эволюционном процессе, с записью в два файла
+  std::vector<SCycle> findCyclesInEvolution(TEnvironment &environment);
+  
 private:
+  void uploadSingleCycleToFile(TBehaviorAnalysis::SCycle& cycle, std::ofstream& cyclesFile);
+  
   void uploadCycles(std::vector<SCycle> detectedCycles,std::string cyclesFilename);
   std::vector<SCycle> loadCycles(std::string cyclesFilename);
 };
