@@ -102,6 +102,9 @@ public:
   
   //Подсчитываем награду, получаемую за цикл
   static double calculateCycleReward(SCycle &actionsCycle, TEnvironment &environment);
+  
+  //Подсчитываем длину максимально памяти в цикле
+  static int measureCycleLongestMemory(SCycle &cycle, TEnvironment &environment);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

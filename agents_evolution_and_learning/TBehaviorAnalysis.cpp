@@ -45,6 +45,11 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       //Запускаем поиск циклов
       vector<SCycle>cycles = findCyclesInEvolution(*environment);
       uploadCycles(cycles, filenameSettings.cyclesFilename);
+//      loadCycles(filenameSettings.cyclesFilename);
+//      for (int index = 0; index < cycles.size(); ++index) {
+//        cout<<"agent:"<<index<<" reward: "<<calculateCycleReward(cycles[index], *environment)<<" memory: "<<measureCycleLongestMemory(cycles[index], *environment)<<endl;
+//      }
+      
     }
     default:
       break;
@@ -61,7 +66,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvi
   evoCyclesFile.open("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt");
   time_t start_time = time(0);
   //Ищем появившиеся циклы на каждом шаге эволюции
-  for (int currentAgentNumber = 0; currentAgentNumber <1000; ++currentAgentNumber){
+  for (int currentAgentNumber = 0; currentAgentNumber <5000; ++currentAgentNumber){
     TAgent *currentAgent = new TAgent;
     currentAgent->loadGenome(agentsFile);
     
@@ -247,7 +252,34 @@ bool TBehaviorAnalysis::plainSequencesComparison(double* firstSequence, double* 
   else
     return false;
 }
-
+int TBehaviorAnalysis::measureCycleLongestMemory(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment)
+{
+  int memoryDepth = 0;
+  //Проверяем глубину памяти для каждого из состояний
+  for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState) {
+    //Вектор, содержащий вхождения данного состояния в цикле
+    vector<int> statePostitions;
+    // Нахождение всех вхождений текущего состояния в поведенческий цикл
+    for (int currentActionIndex = 0; currentActionIndex < cycle.cycleSequence.size(); ++currentActionIndex)
+      if (cycle.cycleSequence[currentActionIndex] == currentState)
+        statePostitions.push_back(currentActionIndex);
+    if (statePostitions.size()) {
+      for (int currentPositionIndex = 0; currentPositionIndex < statePostitions.size()-1; ++currentPositionIndex)
+        for (int comparedPositionIndex = currentPositionIndex + 1; comparedPositionIndex <= statePostitions.size()-1; ++comparedPositionIndex) {
+          int currentDepth = 1;
+          // Находим глубину памяти
+          while (cycle.cycleSequence[(statePostitions[currentPositionIndex]-currentDepth)%cycle.cycleSequence.size()] ==
+                 cycle.cycleSequence[(statePostitions[comparedPositionIndex]-currentDepth)%cycle.cycleSequence.size()]) {
+            ++currentDepth;
+          }
+          if (currentDepth > memoryDepth) {
+            memoryDepth = currentDepth;
+          }
+        }
+    }
+  }
+  return memoryDepth;
+}
 double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
 {
   //Получаем начальный вектор цикла
