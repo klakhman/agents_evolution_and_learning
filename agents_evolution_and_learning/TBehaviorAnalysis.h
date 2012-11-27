@@ -87,8 +87,6 @@ public:
   //Поиск максимальных циклов для луших агентов в эволюционном процессе, с записью в два файла
   std::vector<SCycle> findCyclesInEvolution(TEnvironment &environment);
      
-	// Выгрузка одного цикла в файл
-	static void uploadSingleCycleToFile(SCycle& cycle, std::ofstream& cyclesFile);
 
 	// Выгрузка списка циклов в файл
 	static void TBehaviorAnalysis::uploadCycles(std::vector<SCycle> cyclesList, std::string cyclesFilename);

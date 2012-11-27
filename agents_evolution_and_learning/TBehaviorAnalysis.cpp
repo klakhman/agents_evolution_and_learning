@@ -44,6 +44,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       environment->setStochasticityCoefficient(0.0);
       //Запускаем поиск циклов
       vector<SCycle>cycles = findCyclesInEvolution(*environment);
+      uploadCycles(cycles, filenameSettings.cyclesFilename);
     }
     default:
       break;
@@ -54,14 +55,13 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvi
 {
   ifstream agentsFile;
   vector<SCycle> detectedCycles;
-  ofstream cyclesFile, evoCyclesFile;
+  ofstream evoCyclesFile;
   //Открываем файл с агентами
   agentsFile.open(filenameSettings.populationFilename.c_str());
-  cyclesFile.open(filenameSettings.cyclesFilename.c_str());
   evoCyclesFile.open("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt");
   time_t start_time = time(0);
   //Ищем появившиеся циклы на каждом шаге эволюции
-  for (int currentAgentNumber = 0; currentAgentNumber <5000; ++currentAgentNumber){
+  for (int currentAgentNumber = 0; currentAgentNumber <50; ++currentAgentNumber){
     TAgent *currentAgent = new TAgent;
     currentAgent->loadGenome(agentsFile);
     
@@ -76,8 +76,6 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvi
 					detectedCycles.push_back(*singleCycle);
           //Записываем номер агента и номер цикла - последний в векторе
           evoCyclesFile<<currentAgentNumber<<"\t"<<detectedCycles.size()-1<<endl;
-          //Добавляем цикл в файл циклов
-          uploadSingleCycleToFile(*singleCycle, cyclesFile);
         //Если цикл уже встречался, записываем его номер в файл с циклами для каждого шага эволюции
         } else {
           evoCyclesFile<<currentAgentNumber<<"\t"<<cycleInExisting-1<<endl;
@@ -87,10 +85,6 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvi
     delete currentAgent;
     cout<<"Agent:"<<currentAgentNumber<<" cycles:"<<detectedCycles.size()<<" time:"<<time(0)-start_time<<"sec"<<endl;
 	}
-  //Записываем количество циклов в конец пока что)
-  cyclesFile<<detectedCycles.size()<<endl;
-  
-  cyclesFile.close();
   evoCyclesFile.close();
   agentsFile.close();
   
@@ -261,12 +255,13 @@ void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
       //Определяем режим
 			if (!strcmp("-analysisMode", argv[currentArgNumber])) {
-			  if (!strcmp("population", argv[++currentArgNumber])) 
+			  if (!strcmp("population", argv[currentArgNumber+1]))
 				  mode = TBAModePoulation;
-			  else if (!strcmp("singleagent", argv[++currentArgNumber]))
+			  else if (!strcmp("singleagent", argv[currentArgNumber+1]))
 				  mode = TBAModeSingleAgent;
-			  else if (!strcmp("evolution", argv[++currentArgNumber]))
+			  else if (!strcmp("evolution", argv[currentArgNumber+1]))
 				  mode = TBAModeEvolution;
+        ++currentArgNumber;
 			}
 			else if (!strcmp("-settings", argv[currentArgNumber])) 
 				filenameSettings.settingsFilename = argv[++currentArgNumber];
@@ -281,15 +276,6 @@ void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
 	}
 }
 
-// Выгрузка одного цикла в файл
-void TBehaviorAnalysis::uploadSingleCycleToFile(TBehaviorAnalysis::SCycle& cycle, ofstream& cyclesFile)
-{
-  cyclesFile << cycle.cycleSequence.size() << endl; // Запиываем длину цикла
-  for (vector<double>::const_iterator i = cycle.cycleSequence.begin(); i != cycle.cycleSequence.end(); ++i) {
-    cyclesFile << *i << "\t";
-  }
-  cyclesFile << endl;
-}
 
 // Выгрузка списка циклов в файл
 void TBehaviorAnalysis::uploadCycles(vector<TBehaviorAnalysis::SCycle> cyclesList, string cyclesFilename){
@@ -300,7 +286,12 @@ void TBehaviorAnalysis::uploadCycles(vector<TBehaviorAnalysis::SCycle> cyclesLis
 	for (int currentCycle = 0; currentCycle < cyclesList.size(); ++currentCycle){
 		// Записываем технический номер цикла, чтобы из можно было искать непосредственно в файле
 		cyclesFile << "#" << currentCycle + 1 << "\t";
-		uploadSingleCycleToFile(cyclesList[currentCycle], cyclesFile);
+    cyclesFile << cyclesList[currentCycle].cycleSequence.size() << endl; // Запиываем длину цикла
+    
+    for (vector<double>::const_iterator i = cyclesList[currentCycle].cycleSequence.begin(); i != cyclesList[currentCycle].cycleSequence.end(); ++i) {
+      cyclesFile << *i << "\t";
+    }
+    cyclesFile << endl;
 	}
   
 	cyclesFile.close();
@@ -317,6 +308,8 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	vector<SCycle> detectedCycles;
 	//Считываем все циклы
 	for (int currentCycle = 1; currentCycle <= cyclesQuantity; ++currentCycle){
+    
+    cyclesFile >> tmp_str;//Считываем номер цикла в никуда
 		cyclesFile >> tmp_str; // Считываем длину цикла
 		int cycleLength = atoi(tmp_str.c_str());
 		SCycle newCycle;
