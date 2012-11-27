@@ -84,6 +84,24 @@ int main(int argc, char** argv){
     delete behaviorAnalysis;
     
   }
+  else if (programMode == "PRNT"){ // Режим визуализации лучшего агента
+	TAgent testAgent;
+	std::fstream inputFile("test_file.txt");
+	std::ofstream outputFile("out_file.txt");
+	testAgent.loadGenome(inputFile);
+	testAgent.uploadGenome(outputFile);
+	(testAgent.getPointerToAgentGenome())->printGraphNetworkAlternative("1", 200, 0);
+	return 0;
+  }
+  else if (programMode == "EVLPRNT"){
+	TAgent testAgent;
+	std::fstream inputFile("pop.txt");
+	std::ofstream outputFile("out_file.txt");
+	testAgent.loadGenome(inputFile, true);
+	testAgent.uploadGenome(outputFile, true);
+	(testAgent.getPointerToAgentGenome())->printGraphNetworkAlternative("1", 200, 1);
+	return 0;
+  }
 
   /*TAnalysis* analysis = new TAnalysis;
 	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");

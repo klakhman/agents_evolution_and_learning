@@ -160,7 +160,7 @@ public:
 
 	// Вывод сети в файл как супер-графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
 	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
-	void printGraphNetworkAlternative(std::string graphFilename, int scale) const;
+	void printGraphNetworkAlternative(std::string graphFilename, int scale, int genealogy) const;
 
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TPoolNetwork& PoolNetwork);
