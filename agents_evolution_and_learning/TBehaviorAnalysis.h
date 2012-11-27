@@ -107,6 +107,9 @@ public:
   static int measureCycleLongestMemory(SCycle &cycle, TEnvironment &environment);
   
   static void drawStatesCycleToDot(SCycle &statesCycle, TEnvironment &environment, std::string outputDotFilename, bool edgesColored);
+  static void drawAllCyclesToDot(std::vector<SCycle> &cycles,TEnvironment &environment,std::string outputDotFilename, bool edgesColored);
+  static void addSingleCycleToDot(SCycle &statesCycle, TEnvironment &environment, std::ofstream &dotFile, bool edgesColored, int cycleNumber);
+  
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

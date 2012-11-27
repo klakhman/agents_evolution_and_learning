@@ -46,6 +46,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
 //      vector<SCycle>cycles = findCyclesInEvolution(*environment);
 //      uploadCycles(cycles, filenameSettings.cyclesFilename);
      vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
+      drawAllCyclesToDot(cycles, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
 //      SCycle states = transformActionsCycleToStatesCycle(cycles[1000], *environment);
 //      drawStatesCycleToDot(states , *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
 //      for (int index = 0; index < cycles.size(); ++index) {
@@ -415,6 +416,53 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	cyclesFile.close();
 	return detectedCycles;
 }
+void TBehaviorAnalysis::addSingleCycleToDot(TBehaviorAnalysis::SCycle &statesCycle, TEnvironment &environment, ofstream &dotFile, bool edgesColored, int cycleNumber)
+{
+  //Надо как-то динамически инициализировать
+  bool currentStateVector[8];
+  //Печатаем заголовок
+  dotFile<<"subgraph G"<<cycleNumber<<" {"<<endl;
+  
+  dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[0]<<" [label=\"";
+  service::decToBin(statesCycle.cycleSequence[0], currentStateVector, environment.getEnvironmentResolution());
+  
+  for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
+    dotFile<<currentStateVector[currentBit];
+  dotFile<<"\"]"<<endl;
+  
+  for (int currentStep=1; currentStep<statesCycle.cycleSequence.size(); ++currentStep) {
+    // Записываем очередную вершину
+    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep]<<" [label=\"";
+    service::decToBin(statesCycle.cycleSequence[currentStep], currentStateVector, environment.getEnvironmentResolution());
+    
+    for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
+      dotFile<<currentStateVector[currentBit];
+    dotFile<<"\"]"<<endl;
+    // Записываем переход
+    if (!edgesColored)
+      dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep]<<" [label=\""<<currentStep<<"\"]"<<endl;
+    else
+      dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep]<<" [color=\"red\",label=\""<<currentStep<<"\",fontcolor=\"red\"]"<<endl;
+    
+  }
+  dotFile<<"}"<<endl;
+}
+void TBehaviorAnalysis::drawAllCyclesToDot(vector<TBehaviorAnalysis::SCycle> &cycles,TEnvironment &environment, string outputDotFilename, bool edgesColored)
+{
+  ofstream dotFile;
+  dotFile.open(outputDotFilename.c_str());
+  dotFile<<"digraph G {"<<endl;
+  for (int index = 1000; index < 1050; ++index) {
+    SCycle states = transformActionsCycleToStatesCycle(cycles[index], environment);
+    
+    addSingleCycleToDot(states, environment, dotFile, false, index);
+    
+  }
+  
+  dotFile<<"}"<<endl;
+  dotFile.close();
+}
+
 void TBehaviorAnalysis::drawStatesCycleToDot(TBehaviorAnalysis::SCycle &statesCycle, TEnvironment &environment, string outputDotFilename, bool edgesColored)
 {
   ofstream dotFile;
@@ -430,7 +478,7 @@ void TBehaviorAnalysis::drawStatesCycleToDot(TBehaviorAnalysis::SCycle &statesCy
     dotFile<<currentStateVector[currentBit];
   dotFile<<"\"]"<<endl;
   
-  for (int currentStep=1; currentStep<=statesCycle.cycleSequence.size(); ++currentStep) {
+  for (int currentStep=1; currentStep<statesCycle.cycleSequence.size(); ++currentStep) {
     // Записываем очередную вершину
     dotFile<<"\ts"<<statesCycle.cycleSequence[currentStep]<<" [label=\"";
     service::decToBin(statesCycle.cycleSequence[currentStep], currentStateVector, environment.getEnvironmentResolution());
