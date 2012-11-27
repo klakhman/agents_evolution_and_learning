@@ -61,29 +61,40 @@ public:
 
   //Запустить процесс анализа, какой именно - указано в argv
   void beginAnalysis(int argc, char **argv);
+
   //Найти все циклы в популяции путем прогона агентов через из всех начальных состояний среды
   std::vector<SCycle> findCyclesInPopulation(TPopulation &population, TEnvironment &environment);
+
   //Прогон агента из всех возможных состояний среды для обнаружения всех возможных циклов
   static std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, TEnvironment &environment);
-	//Проверить, нет ли уже этого цикла в массиве циклов
+
+	// Нахождение цикла в массиве существующих циклов (0 - цикла в массиве нет, иначе возвращает номер цикла, начиная с 1)
   static int findCycleInExistingCycles(SCycle &cycleToAdd,std::vector<SCycle> &existingCycles);
-  //Находит цикл в жизни данного агента
+
+  //Находит цикл в жизни данного агента - возвращает пустой цикл, если цикл не найден 
+  //(!!! состояние среды, из которого должен запускаться агент должно быть уже становлено, коэффициент стохастичности среды должен быть уже установлен!!!)
   static SCycle findCycleInAgentLife(TAgent &agent, TEnvironment &environment);
-  //Вспомогательная процедура для поиска цикла в последовательности
+
+	// Поиск цикла в последовательности (возвращает пустой вектор, если цикл не найден, но !!! может вернуть цикл из нуля длиной 1 !!!)
   static std::vector<double> findCycleInSequence(double *sequence,int sequenceLength);
-  //Поиск подциклов в цикле (проверка на то, состоит ли цикл из более коротких циклов)
-  static std::vector<double> findBaseCycleInCompoundCycle(double *cycle,int cycleLength);
-  //Сравнение двух последовательностей
+
+  //Поиск подциклов в цикле (проверка на то, состоит ли цикл из более коротких циклов) - возвращает найденный подцикл, иначе возвращает пустой цикл
+  static std::vector<double> findBaseCycleInCompoundCycle(double *cycle, int cycleLength);
+
+  //Сравнение двух последовательностей (линейное)
   static bool plainSequencesComparison(double* firstSequence, double* secondSequence, int sequenceLength);
   
   //Поиск максимальных циклов для луших агентов в эволюционном процессе, с записью в два файла
   std::vector<SCycle> findCyclesInEvolution(TEnvironment &environment);
-  
-private:
-  void uploadSingleCycleToFile(TBehaviorAnalysis::SCycle& cycle, std::ofstream& cyclesFile);
-  
-  void uploadCycles(std::vector<SCycle> detectedCycles,std::string cyclesFilename);
-  std::vector<SCycle> loadCycles(std::string cyclesFilename);
+     
+	// Выгрузка одного цикла в файл
+	static void uploadSingleCycleToFile(SCycle& cycle, std::ofstream& cyclesFile);
+
+	// Выгрузка списка циклов в файл
+	static void TBehaviorAnalysis::uploadCycles(std::vector<SCycle> cyclesList, std::string cyclesFilename);
+
+	// Загрузка циклов из файла
+	static std::vector<SCycle> loadCycles(std::string cyclesFilename);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */
