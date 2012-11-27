@@ -247,7 +247,36 @@ bool TBehaviorAnalysis::plainSequencesComparison(double* firstSequence, double* 
   else
     return false;
 }
- 
+TBehaviorAnalysis::SCycle transormActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
+{
+  TBehaviorAnalysis::SCycle statesCycle;
+  double *initialEnvironmentVector = new double[environment.getEnvironmentResolution()];
+  
+  //Заполняем начальный вектор минус единицами
+  for (int bitNumber = 0; bitNumber < environment.getEnvironmentResolution(); ++bitNumber)
+    initialEnvironmentVector[bitNumber] = -1;
+  
+  //Восстанавливаем начальный вектор
+  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
+    //Если мы нам встречается действие, которое менят бит, который мы еще не восстановили, устанавливаем бит на противоположный
+    if (initialEnvironmentVector[(int)(fabs(*action))-1] < 0)
+      initialEnvironmentVector[(int)(fabs(*action))-1] = *action>0?0:1;
+  }
+  //Оставшееся заполняем нулями
+  for (int bitNumber = 0; bitNumber < environment.getEnvironmentResolution(); ++bitNumber)
+    if (initialEnvironmentVector[bitNumber] == -1)
+      initialEnvironmentVector[bitNumber] = 0;
+  
+  environment.setEnvironmentVector(initialEnvironmentVector);
+  statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+  //Заполняем
+  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
+    environment.forceEnvironment(*action);
+    statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+  }
+  delete []initialEnvironmentVector;
+  return statesCycle;
+}
 //Определяет режим запуска и файлы с параметрами и данными
 void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
   int currentArgNumber = 1; // // Текущий номер параметра

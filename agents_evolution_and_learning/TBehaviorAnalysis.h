@@ -89,10 +89,13 @@ public:
      
 
 	// Выгрузка списка циклов в файл
-	static void TBehaviorAnalysis::uploadCycles(std::vector<SCycle> cyclesList, std::string cyclesFilename);
+	static void uploadCycles(std::vector<SCycle> cyclesList, std::string cyclesFilename);
 
 	// Загрузка циклов из файла
 	static std::vector<SCycle> loadCycles(std::string cyclesFilename);
+  
+  //Превращаем цикл переходов в цикл состояний
+  static SCycle transormActionsCycleToStatesCycle(SCycle &actionsCycle, TEnvironment &environment);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */
