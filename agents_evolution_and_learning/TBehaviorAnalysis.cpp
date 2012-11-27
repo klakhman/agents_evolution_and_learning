@@ -43,9 +43,11 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
       environment->setStochasticityCoefficient(0.0);
       //Запускаем поиск циклов
-      vector<SCycle>cycles = findCyclesInEvolution(*environment);
-      uploadCycles(cycles, filenameSettings.cyclesFilename);
-//      loadCycles(filenameSettings.cyclesFilename);
+//      vector<SCycle>cycles = findCyclesInEvolution(*environment);
+//      uploadCycles(cycles, filenameSettings.cyclesFilename);
+     vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
+//      SCycle states = transformActionsCycleToStatesCycle(cycles[1000], *environment);
+//      drawStatesCycleToDot(states , *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
 //      for (int index = 0; index < cycles.size(); ++index) {
 //        cout<<"agent:"<<index<<" reward: "<<calculateCycleReward(cycles[index], *environment)<<" memory: "<<measureCycleLongestMemory(cycles[index], *environment)<<endl;
 //      }
@@ -313,7 +315,6 @@ TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(
     environment.forceEnvironment(*action);
     statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
   }
-  delete []initialEnvironmentVector;
   return statesCycle;
 }
 
@@ -413,4 +414,37 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	}
 	cyclesFile.close();
 	return detectedCycles;
+}
+void TBehaviorAnalysis::drawStatesCycleToDot(TBehaviorAnalysis::SCycle &statesCycle, TEnvironment &environment, string outputDotFilename, bool edgesColored)
+{
+  ofstream dotFile;
+  dotFile.open(outputDotFilename.c_str());
+  //Надо как-то динамически инициализировать
+  bool currentStateVector[8];
+  //Печатаем заголовок
+  dotFile<<"digraph G {"<<endl;
+  dotFile<<"\ts"<<statesCycle.cycleSequence[0]<<" [label=\"";
+  service::decToBin(statesCycle.cycleSequence[0], currentStateVector, environment.getEnvironmentResolution());
+  
+  for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
+    dotFile<<currentStateVector[currentBit];
+  dotFile<<"\"]"<<endl;
+  
+  for (int currentStep=1; currentStep<=statesCycle.cycleSequence.size(); ++currentStep) {
+    // Записываем очередную вершину
+    dotFile<<"\ts"<<statesCycle.cycleSequence[currentStep]<<" [label=\"";
+    service::decToBin(statesCycle.cycleSequence[currentStep], currentStateVector, environment.getEnvironmentResolution());
+
+    for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
+      dotFile<<currentStateVector[currentBit];
+    dotFile<<"\"]"<<endl;
+    // Записываем переход
+    if (!edgesColored)
+      dotFile<<"\ts"<<statesCycle.cycleSequence[currentStep-1]<<" -> s"<<statesCycle.cycleSequence[currentStep]<<" [label=\""<<currentStep<<"\"]"<<endl;
+    else
+      dotFile<<"\ts"<<statesCycle.cycleSequence[currentStep-1]<<" -> s"<<statesCycle.cycleSequence[currentStep]<<" [color=\"red\",label=\""<<currentStep<<"\",fontcolor=\"red\"]"<<endl;
+      
+  }
+  dotFile<<"}"<<endl;
+  dotFile.close();
 }

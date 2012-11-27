@@ -105,6 +105,8 @@ public:
   
   //Подсчитываем длину максимально памяти в цикле
   static int measureCycleLongestMemory(SCycle &cycle, TEnvironment &environment);
+  
+  static void drawStatesCycleToDot(SCycle &statesCycle, TEnvironment &environment, std::string outputDotFilename, bool edgesColored);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */
