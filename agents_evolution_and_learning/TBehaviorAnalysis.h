@@ -95,7 +95,13 @@ public:
 	static std::vector<SCycle> loadCycles(std::string cyclesFilename);
   
   //Превращаем цикл переходов в цикл состояний
-  static SCycle transormActionsCycleToStatesCycle(SCycle &actionsCycle, TEnvironment &environment);
+  static SCycle transformActionsCycleToStatesCycle(SCycle &actionsCycle, TEnvironment &environment);
+  
+  //Получаем вектор среды, из которого стартовал цикл
+  static double * getCycleInitialStateVector(SCycle &actionsCycle, TEnvironment &environment);
+  
+  //Подсчитываем награду, получаемую за цикл
+  static double calculateCycleReward(SCycle &actionsCycle, TEnvironment &environment);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

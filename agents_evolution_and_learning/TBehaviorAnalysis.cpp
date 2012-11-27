@@ -61,7 +61,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvi
   evoCyclesFile.open("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt");
   time_t start_time = time(0);
   //Ищем появившиеся циклы на каждом шаге эволюции
-  for (int currentAgentNumber = 0; currentAgentNumber <50; ++currentAgentNumber){
+  for (int currentAgentNumber = 0; currentAgentNumber <1000; ++currentAgentNumber){
     TAgent *currentAgent = new TAgent;
     currentAgent->loadGenome(agentsFile);
     
@@ -247,9 +247,47 @@ bool TBehaviorAnalysis::plainSequencesComparison(double* firstSequence, double* 
   else
     return false;
 }
-TBehaviorAnalysis::SCycle transormActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
+
+double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
+{
+  //Получаем начальный вектор цикла
+  double *initialEnvironmentVector = getCycleInitialStateVector(actionsCycle, environment);
+  environment.setEnvironmentVector(initialEnvironmentVector);
+  
+  //Создаем удвоенный цикл путём дублирования
+  SCycle doubledActionsCycle;
+  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
+  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
+  //Вычисляем награду на момент старта второго цикла
+  double firstCycleReward = environment.calculateReward(&actionsCycle.cycleSequence[0], (int)actionsCycle.cycleSequence.size());
+  //Вычисляем награду за прохождение удвоенного цикла
+  environment.setEnvironmentVector(initialEnvironmentVector);
+  double doubledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0], (int)doubledActionsCycle.cycleSequence.size());
+  
+  return doubledCycleReward-firstCycleReward;
+}
+//Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
+//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
+TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
 {
   TBehaviorAnalysis::SCycle statesCycle;
+  //Получаем начальный вектор цикла
+  double *initialEnvironmentVector = getCycleInitialStateVector(actionsCycle, environment);
+  environment.setEnvironmentVector(initialEnvironmentVector);
+  //Добавляем его в послдовательность состояний
+  statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+  //Заполняем
+  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
+    environment.forceEnvironment(*action);
+    statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+  }
+  delete []initialEnvironmentVector;
+  return statesCycle;
+}
+
+//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
+double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
+{
   double *initialEnvironmentVector = new double[environment.getEnvironmentResolution()];
   
   //Заполняем начальный вектор минус единицами
@@ -266,16 +304,7 @@ TBehaviorAnalysis::SCycle transormActionsCycleToStatesCycle(TBehaviorAnalysis::S
   for (int bitNumber = 0; bitNumber < environment.getEnvironmentResolution(); ++bitNumber)
     if (initialEnvironmentVector[bitNumber] == -1)
       initialEnvironmentVector[bitNumber] = 0;
-  
-  environment.setEnvironmentVector(initialEnvironmentVector);
-  statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
-  //Заполняем
-  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
-    environment.forceEnvironment(*action);
-    statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
-  }
-  delete []initialEnvironmentVector;
-  return statesCycle;
+  return initialEnvironmentVector;
 }
 //Определяет режим запуска и файлы с параметрами и данными
 void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
