@@ -45,9 +45,10 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       //Запускаем поиск циклов
 //      vector<SCycle>cycles = findCyclesInEvolution(*environment);
 //      uploadCycles(cycles, filenameSettings.cyclesFilename);
-     vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
-      drawAllCyclesToDot(cycles, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
-//      SCycle states = transformActionsCycleToStatesCycle(cycles[1000], *environment);
+      calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
+     //vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
+     // drawAllCyclesToDot(cycles, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
+//      SCycle states = transformActionsCycleToStatesCycle(cycles[1189], *environment);
 //      drawStatesCycleToDot(states , *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
 //      for (int index = 0; index < cycles.size(); ++index) {
 //        cout<<"agent:"<<index<<" reward: "<<calculateCycleReward(cycles[index], *environment)<<" memory: "<<measureCycleLongestMemory(cycles[index], *environment)<<endl;
@@ -465,6 +466,7 @@ void TBehaviorAnalysis::drawAllCyclesToDot(vector<TBehaviorAnalysis::SCycle> &cy
 
 void TBehaviorAnalysis::drawStatesCycleToDot(TBehaviorAnalysis::SCycle &statesCycle, TEnvironment &environment, string outputDotFilename, bool edgesColored)
 {
+  environment.setStochasticityCoefficient(0.0);
   ofstream dotFile;
   dotFile.open(outputDotFilename.c_str());
   //Надо как-то динамически инициализировать
@@ -495,4 +497,87 @@ void TBehaviorAnalysis::drawStatesCycleToDot(TBehaviorAnalysis::SCycle &statesCy
   }
   dotFile<<"}"<<endl;
   dotFile.close();
+}
+void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExistanceFilename, string cyclesFilename, TEnvironment &environment)
+{
+  ifstream cyclesExistance;
+  ofstream metrics;
+  metrics.open("/Users/nikitapestrov/Desktop/Neurointellect/Settings/metrics.txt");
+  cyclesExistance.open(cyclesExistanceFilename.c_str());
+  
+  vector<SCycle> cycles = loadCycles(cyclesFilename);
+  vector<SCycle> statesCycles;
+  
+  vector<double> averageRewards;
+  vector<double> maxRewards;
+  
+  vector<int> maxCycleLengths;
+  vector<int> averageCycleLengths;
+  
+  vector<int> maxMemoryLengths;
+  vector<double> averageEfficiency;
+  
+  
+  for (int index = 0; index < cycles.size(); ++index) {
+    SCycle states = transformActionsCycleToStatesCycle(cycles[index], environment);
+    statesCycles.push_back(states);
+  }
+  bool weHaveThisAgentCycle = false;
+  string stepIndexInFile, cycleIndex;
+  vector<int>currentStepCyles;
+  for (int evolutionaryStep = 0; evolutionaryStep < 4999; ++evolutionaryStep) {
+    cout<<evolutionaryStep<<endl;
+    //Начинаем исследовать новый такт
+    if (weHaveThisAgentCycle) {
+      currentStepCyles.clear();
+      currentStepCyles.push_back(atoi(cycleIndex.c_str()));
+      weHaveThisAgentCycle = false;
+    }
+    
+    do {
+      cyclesExistance>>stepIndexInFile;
+      cyclesExistance>>cycleIndex;
+      
+      if (atoi(stepIndexInFile.c_str()) == evolutionaryStep) {
+        currentStepCyles.push_back(atoi(cycleIndex.c_str()));
+      } else {
+        weHaveThisAgentCycle = true;
+      }
+    } while (!weHaveThisAgentCycle);
+    
+    double averageReward = 0;
+    double maximumReward = 0;
+    int maximumLength = 0;
+    int averageLength = 0;
+    int maximumMemory = 0;
+    double currentAverageEfficiency = 0;
+    
+    for (int currentCycleIndex = 0; currentCycleIndex<currentStepCyles.size();++currentCycleIndex) {
+      
+      int reward = calculateCycleReward(cycles.at(currentStepCyles.at(currentCycleIndex)), environment);
+      averageReward+=reward;
+      if (reward>maximumReward)
+        maximumReward = reward;
+      
+      if (cycles.at(currentStepCyles.at(currentCycleIndex)).cycleSequence.size()>maximumLength)
+          maximumLength = (int)(cycles.at(currentStepCyles.at(currentCycleIndex))).cycleSequence.size();
+      averageLength+=(int)(cycles.at(currentStepCyles.at(currentCycleIndex))).cycleSequence.size();
+      
+      int memory = measureCycleLongestMemory(statesCycles.at(currentStepCyles.at(currentCycleIndex)), environment);
+      if (memory > maximumMemory)
+        maximumMemory+=memory;
+      currentAverageEfficiency+=(reward/(int)(cycles.at(currentStepCyles.at(currentCycleIndex))).cycleSequence.size());
+    }
+    averageReward/=currentStepCyles.size();
+    currentAverageEfficiency/=currentStepCyles.size();
+    
+    averageRewards.push_back(averageReward);
+    maxRewards.push_back(maximumReward);
+    maxCycleLengths.push_back(maximumLength);
+    averageCycleLengths.push_back(averageLength);
+    maxMemoryLengths.push_back(maximumMemory);
+    averageEfficiency.push_back(currentAverageEfficiency);
+    metrics<<evolutionaryStep<<"\t"<<averageReward<<"\t"<<maximumReward<<"\t"<<currentAverageEfficiency<<"\t"<<averageLength<<"\t"<<maximumLength<<"\t"<<maximumMemory<<endl;
+  }
+  metrics.close();
 }

@@ -109,7 +109,7 @@ public:
   static void drawStatesCycleToDot(SCycle &statesCycle, TEnvironment &environment, std::string outputDotFilename, bool edgesColored);
   static void drawAllCyclesToDot(std::vector<SCycle> &cycles,TEnvironment &environment,std::string outputDotFilename, bool edgesColored);
   static void addSingleCycleToDot(SCycle &statesCycle, TEnvironment &environment, std::ofstream &dotFile, bool edgesColored, int cycleNumber);
-  
+  static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, TEnvironment &environment);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */
