@@ -575,6 +575,7 @@ void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExis
     }
     averageReward/=currentStepCyles.size();
     currentAverageEfficiency/=currentStepCyles.size();
+    averageLength/=currentStepCyles.size();
     
     averageRewards.push_back(averageReward);
     maxRewards.push_back(maximumReward);
