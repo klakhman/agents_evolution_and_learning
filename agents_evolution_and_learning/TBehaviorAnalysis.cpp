@@ -270,14 +270,17 @@ int TBehaviorAnalysis::measureCycleLongestMemory(TBehaviorAnalysis::SCycle &cycl
     if (statePostitions.size()) {
       for (int currentPositionIndex = 0; currentPositionIndex < statePostitions.size()-1; ++currentPositionIndex)
         for (int comparedPositionIndex = currentPositionIndex + 1; comparedPositionIndex <= statePostitions.size()-1; ++comparedPositionIndex) {
-          int currentDepth = 1;
+          int currentDepth = 0;
           // Находим глубину памяти
-          while (cycle.cycleSequence[(statePostitions[currentPositionIndex]-currentDepth)%cycle.cycleSequence.size()] ==
-                 cycle.cycleSequence[(statePostitions[comparedPositionIndex]-currentDepth)%cycle.cycleSequence.size()]) {
-            ++currentDepth;
-          }
-          if (currentDepth > memoryDepth) {
-            memoryDepth = currentDepth;
+          if (cycle.cycleSequence[(statePostitions[currentPositionIndex]+1)%cycle.cycleSequence.size()] !=
+              cycle.cycleSequence[(statePostitions[comparedPositionIndex]+1)%cycle.cycleSequence.size()]) {
+            while (cycle.cycleSequence[(statePostitions[currentPositionIndex]-currentDepth-1)%cycle.cycleSequence.size()] ==
+                   cycle.cycleSequence[(statePostitions[comparedPositionIndex]-currentDepth-1)%cycle.cycleSequence.size()]) {
+              ++currentDepth;
+            }
+            if (currentDepth > memoryDepth) {
+              memoryDepth = currentDepth;
+            }
           }
         }
     }
@@ -295,12 +298,13 @@ double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &action
   doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
   doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
   //Вычисляем награду на момент старта второго цикла
-  double firstCycleReward = environment.calculateReward(&actionsCycle.cycleSequence[0], (int)actionsCycle.cycleSequence.size());
+  double doubledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0], (int)doubledActionsCycle.cycleSequence.size());
   //Вычисляем награду за прохождение удвоенного цикла
   environment.setEnvironmentVector(initialEnvironmentVector);
-  double doubledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0], (int)doubledActionsCycle.cycleSequence.size());
+  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
+  double trippledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0], (int)doubledActionsCycle.cycleSequence.size());
   
-  return doubledCycleReward-firstCycleReward;
+  return trippledCycleReward-doubledCycleReward;
 }
 //Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
 //Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
@@ -332,8 +336,9 @@ double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle 
   //Восстанавливаем начальный вектор
   for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
     //Если мы нам встречается действие, которое менят бит, который мы еще не восстановили, устанавливаем бит на противоположный
-    if (initialEnvironmentVector[(int)(fabs(*action))-1] < 0)
-      initialEnvironmentVector[(int)(fabs(*action))-1] = *action>0?0:1;
+    if (*action)
+      if (initialEnvironmentVector[(int)(fabs(*action))-1] < 0)
+        initialEnvironmentVector[(int)(fabs(*action))-1] = *action>0?0:1;
   }
   //Оставшееся заполняем нулями
   for (int bitNumber = 0; bitNumber < environment.getEnvironmentResolution(); ++bitNumber)
