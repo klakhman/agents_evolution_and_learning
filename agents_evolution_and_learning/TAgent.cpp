@@ -355,6 +355,7 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 				selectionSynapses[j+1] = selectionSynapses[j];
 				selectionSynapses[j] = tmp;
 			}
+
 	// Находим порог среднего потенциала по синапсу (через персентиль общего дискретного распределения среднего потенциала через синапсы)
 	double percentileValue = selectionSynapses[static_cast<int>((100 - primarySystemogenesisSettings.synapsesActivityTreshold)/100.0*neuralController->getSynapsesQuantity())].synapseSummaryPotential;
 	// Проходимся через все синапсы и удаляем те, у которых суммарный потенциал меньше порога (с определенными условиями - смотри далее)
@@ -448,6 +449,10 @@ void TAgent::primarySystemogenesis(){
 // Детекция рассогласования на нейроне
 // 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"
 int TAgent::mismatchDetection(int neuronNumber){
+	// Если нейрон не активен или он не внутренний, то он не может быть рассогласован
+	if ((! neuralController->getNeuronActive(neuronNumber)) || (neuralController->getNeuronType(neuronNumber) != 1))
+		return 0;
+
 	int activePrediction = 0; // Кол-во связей, предсказавшее активацию
 	int silentPrediction = 0; // Кол-во связей, предсказавшее молчание
 	for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(neuronNumber); ++currentPredConnection){
@@ -476,6 +481,77 @@ int TAgent::mismatchDetection(int neuronNumber){
 	return mismatchCheck;
 }
 
-// Основной метод обучения 
+// Процедура нахождения наиболее активного "спящего" нейрона в пуле (возвращает ноль, если нет подходящего нейрона - нет активных на данном такте времени или не осталось молчащих)
+int TAgent::findMostActiveSilentNeuron(int poolNumber){
+	int mostActiveNeuronNumber = 0;
+	double mostActiveNeuronOut = 0;
+	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
+			// Если нейрон не спящий и из нужного на пула и он активен на текущем такте времени
+			if (neuralController->getNeuronActive(currentNeuron) && (neuralController->getNeuronParentPoolID(currentNeuron) == poolNumber) &&
+				(neuralController->getNeuronPotential(currentNeuron) > 0) && (neuralController->getNeuronCurrentOut(currentNeuron) > mostActiveNeuronOut)){
+			mostActiveNeuronOut = neuralController->getNeuronPotential(currentNeuron);
+			mostActiveNeuronNumber = currentNeuron;
+		}
+	return mostActiveNeuronNumber;
+}
+
+// Процедура модификации синаптических связей при обучении рассогласованного нейрона (для активирующегося нейрона оставляем только связи от активных на текущем такте нейронов и добавляем связь на рассогласованный нейрон)
+void TAgent::modifySynapsesStructure(int mismatchedNeuron, int activatedNeuron, int mismatchType){
+	for (int currentSynapse = 1; currentSynapse <= neuralController->getNeuronInputSynapsesQuantity(activatedNeuron); ++currentSynapse)
+		if ((neuralController->getSynapsePreNeuron(activatedNeuron, currentSynapse)->getActive()) && (neuralController->getSynapsePreNeuron(activatedNeuron, currentSynapse)->getCurrentOut() <= TNeuron::ACTIVITY_TRESHOLD)){
+			neuralController->deleteSynapse(activatedNeuron, currentSynapse);
+			--currentSynapse; // Остаемся на том же синапсе
+		}
+	// Добавляем связь между активирующимся нейроном и рассогласованным
+	double interSynapseWeight;
+	if (mismatchType == 1)
+		interSynapseWeight = service::uniformDistribution(0.5, 1);
+	else
+		interSynapseWeight = service::uniformDistribution(-1, -0.5);
+	// Если связь уже существует, то просто меняем вес
+	int addSynapseNumber;
+	if (addSynapseNumber = neuralController->findSynapseNumber(activatedNeuron, mismatchedNeuron))
+		neuralController->setSynapseWeight(mismatchedNeuron, addSynapseNumber, interSynapseWeight);
+	else
+		neuralController->addSynapse(activatedNeuron, mismatchedNeuron, neuralController->getSynapsesQuantity() + 1, interSynapseWeight);
+}
+
+// Процедура модификации структуры предикторных связей (переносим связи, которые предсказали активацию с рассогласованного нейрона на включающийся)
+void TAgent::modifyPredConnectionsStructure(int mismatchedNeuron, int activatedNeuron){
+	for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(mismatchedNeuron); ++currentPredConnection)
+		// Если связь предсказала активацию (отсекаем таким образом сразу связи от молчащих нейронов)
+		if (neuralController->getPredConnectionPreNeuron(mismatchedNeuron, currentPredConnection)->getPreviousOut() >TNeuron::ACTIVITY_TRESHOLD)
+			// Если такой связи еще нет у активирующегося нейрона, то добавляем ее
+			if (! neuralController->findPredConnectionNumber(neuralController->getPredConnectionPreNeuron(mismatchedNeuron, currentPredConnection)->getID(), activatedNeuron))
+				neuralController->addPredConnection(neuralController->getPredConnectionPreNeuron(mismatchedNeuron, currentPredConnection)->getID(), activatedNeuron, neuralController->getPredConnectionsQuantity() + 1);
+}
+
+// Процедура самообучения рассогласованного нейрона
+void TAgent::selfLearnNeuron(int mismatchedNeuron, int mismatchType){
+	// Сначала находим наиболее активный нейрон в пуле рассогласованного (он распознает текущую ситуацию)
+	int mostActiveNeuronNumber = findMostActiveSilentNeuron(neuralController->getNeuronParentPoolID(mismatchedNeuron));
+	// Если мы не нашли подходящего нейрона, то выходим без обучения
+	if (!mostActiveNeuronNumber) return;
+
+	modifySynapsesStructure(mismatchedNeuron, mostActiveNeuronNumber, mismatchType);
+
+
+	neuralController->setNeuronActive(mostActiveNeuronNumber, true);
+}
+
+// Основной метод обучения нейроконтроллера на одном такте времени
 void TAgent::learning(){
+	// Массив признаков рассогласованности нейронов сети
+	int* mismatchCheck = new int[neuralController->getNeuronsQuantity()];
+
+	// Сначала определяем рассогласованность всех нейронов (чтобы избежать проверки рассогласованности вновь включающихся нейронов)
+	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
+			mismatchCheck[currentNeuron - 1] = mismatchDetection(currentNeuron);
+
+	// Проводим процедуру обучения каждого нейрона
+	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
+		if (mismatchCheck[currentNeuron - 1]) // Если нейрон рассогласован
+			selfLearnNeuron(currentNeuron, mismatchCheck[currentNeuron - 1]);	
+
+	delete []mismatchCheck;
 }

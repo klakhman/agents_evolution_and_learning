@@ -40,6 +40,14 @@ class TAgent{
 	// Детекция рассогласования на нейроне
 	// 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"
 	int mismatchDetection(int neuronNumber);
+	// Процедура нахождения наиболее активного "спящего" нейрона в пуле
+	int findMostActiveSilentNeuron(int poolNumber);
+	// Процедура модификации синаптических связей при обучении рассогласованного нейрона
+	void modifySynapsesStructure(int mismatchedNeuron, int activatedNeuron, int mismatchType);
+	// Процедура модификации структуры предикторных связей (переносим связи, которые предсказали активацию с рассогласованного нейрона на включающийся)
+	void modifyPredConnectionsStructure(int mismatchedNeuron, int activatedNeuron);
+	// Процедура самообучения рассогласованного нейрона
+	void selfLearnNeuron(int neuronNumber, int mismatchType);
 
 public:
 	// Структура настройки первичного системогенеза
@@ -100,8 +108,6 @@ public:
 	void uploadGenome(std::ostream& os, bool extra = false) const;
 	// Генерация случайного минимального возможного генома агента
 	void generateMinimalAgent(int inputResolution);
-	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
-	void linearSystemogenesis();
 	// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
 	void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
 	// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
@@ -110,10 +116,12 @@ public:
 	// Временная процедура печати жизни агента
 	void printLife(TEnvironment& environment, int agentLifeTime);
 
+	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
+	void linearSystemogenesis();
 	// Основной метод перчиного системогенеза 
 	void primarySystemogenesis();
 	
-	// Основной метод обучения 
+	// Основной метод обучения нейроконтроллера на одном такте времени
 	void learning();
 
 };

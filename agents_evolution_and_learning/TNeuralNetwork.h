@@ -62,6 +62,8 @@ public:
 	void setNeuronLayer(int neuronNumber, int newLayer) { neuronsStructure[neuronNumber-1]->setLayer(newLayer); }
 	bool getNeuronActive(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getActive(); }
 	void setNeuronActive(int neuronNumber, bool newActive) { neuronsStructure[neuronNumber - 1]->setActive(newActive); }
+	int getNeuronParentPoolID(int neuronNumber) const { return neuronsStructure[neuronNumber-1]->getParentPoolID(); }
+	void setNeuronParentPoolID(int neuronNumber, int newParentPoolID) { neuronsStructure[neuronNumber-1]->setParentPoolID(newParentPoolID); }
 
 	double getNeuronPotential(int neuronNumber) const { return neuronsStructure[neuronNumber - 1]->getCurrentPotential(); }
 	double getNeuronCurrentOut(int neuronNumber) const { return neuronsStructure[neuronNumber - 1]->getCurrentOut(); }
@@ -102,13 +104,13 @@ public:
 	void addNeuron(int newID, int newType, double newBias, int newLayer, bool newActive = true, int newParentNeuronID = 0);
 
 	//Добавление синапса в сеть
-	void addSynapse(int preNeuronNumber, int postNeuronNumber, int newID, double newWeight, bool newEnabled){
+	void addSynapse(int preNeuronNumber, int postNeuronNumber, int newID, double newWeight, bool newEnabled = true){
 		neuronsStructure[postNeuronNumber-1]->addSynapse(newID, newWeight, newEnabled, neuronsStructure[preNeuronNumber-1]); 
 		++synapsesQuantity;
 	}
 
 	// Добавление предикторной связи в сеть
-	void addPredConnection(int preNeuronNumber, int postNeuronNumber, int newID, bool newEnabled){
+	void addPredConnection(int preNeuronNumber, int postNeuronNumber, int newID, bool newEnabled = true){
 		neuronsStructure[postNeuronNumber-1]->addPredConnection(newID, newEnabled, neuronsStructure[preNeuronNumber-1]); 
 		++predConnectionsQuantity;
 	}
