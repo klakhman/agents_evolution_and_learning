@@ -106,10 +106,10 @@ public:
   //Подсчитываем длину максимально памяти в цикле
   static int measureCycleLongestMemory(SCycle &cycle, TEnvironment &environment);
   
-  static void drawStatesCycleToDot(SCycle &statesCycle, TEnvironment &environment, std::string outputDotFilename, bool edgesColored);
-  static void drawAllCyclesToDot(std::vector<SCycle> &cycles,TEnvironment &environment,std::string outputDotFilename, bool edgesColored);
-  static void addSingleCycleToDot(SCycle &statesCycle, TEnvironment &environment, std::ofstream &dotFile, bool edgesColored, int cycleNumber);
+  static void drawCycleToDot(SCycle &cycle, TEnvironment &environment, std::string outputDotFilename,int cycleNumber = 0);
+  static void drawAllCyclesToDot(std::vector<SCycle> &cycles,TEnvironment &environment,std::string outputDotFilename);
   static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, TEnvironment &environment);
+  static void addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */
