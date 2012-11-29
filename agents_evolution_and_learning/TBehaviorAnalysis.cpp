@@ -47,7 +47,10 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
 //      uploadCycles(cycles, filenameSettings.cyclesFilename);
      // calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
      vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
-      //drawCycleToDot(cycles[100], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
+      int memory = measureCycleLongestMemory(cycles[1328], *environment);
+      cout<<memory;
+    //  calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
+      drawCycleToDot(cycles[1328], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
      // drawAllCyclesToDot(cycles, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
 //      SCycle states = transformActionsCycleToStatesCycle(cycles[1189], *environment);
 //      drawStatesCycleToDot(states , *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
@@ -269,7 +272,7 @@ int TBehaviorAnalysis::measureCycleLongestMemory(TBehaviorAnalysis::SCycle &cycl
     vector<int> statePostitions;
     // Нахождение всех вхождений текущего состояния в поведенческий цикл
     for (int currentActionIndex = 0; currentActionIndex < cycle.cycleSequence.size(); ++currentActionIndex)
-      if (cycle.cycleSequence[currentActionIndex] == currentState)
+      if (states.cycleSequence[currentActionIndex] == currentState)
         statePostitions.push_back(currentActionIndex);
     //Если есть вхождения данного состояния в цикле - проверяем предыдущие состояния на наличие памяти
     //попарно сравнивая их у двух вхождений данного состояния
@@ -278,10 +281,10 @@ int TBehaviorAnalysis::measureCycleLongestMemory(TBehaviorAnalysis::SCycle &cycl
         for (int comparedPositionIndex = currentPositionIndex + 1; comparedPositionIndex <= statePostitions.size()-1; ++comparedPositionIndex) {
           int currentDepth = 0;
           // Если агент из одного и того же состояния перешел в разные - сравниваем, насколько далеко было различие
-          if (cycle.cycleSequence[(statePostitions[currentPositionIndex]+1)%cycle.cycleSequence.size()] !=
-              cycle.cycleSequence[(statePostitions[comparedPositionIndex]+1)%cycle.cycleSequence.size()]) {
-            while (cycle.cycleSequence[(statePostitions[currentPositionIndex]-currentDepth-1<0)*cycle.cycleSequence.size()+statePostitions[currentPositionIndex]-currentDepth-1] ==
-                   cycle.cycleSequence[(statePostitions[comparedPositionIndex]-currentDepth-1<0)*cycle.cycleSequence.size()+statePostitions[comparedPositionIndex]-currentDepth-1]) {
+          if (states.cycleSequence[(statePostitions[currentPositionIndex]+1)%cycle.cycleSequence.size()] !=
+              states.cycleSequence[(statePostitions[comparedPositionIndex]+1)%cycle.cycleSequence.size()]) {
+            while (states.cycleSequence[(statePostitions[currentPositionIndex]-currentDepth-1<0)*cycle.cycleSequence.size()+statePostitions[currentPositionIndex]-currentDepth-1] ==
+                   states.cycleSequence[(statePostitions[comparedPositionIndex]-currentDepth-1<0)*cycle.cycleSequence.size()+statePostitions[comparedPositionIndex]-currentDepth-1]) {
               ++currentDepth;
             }
             if (currentDepth > memoryDepth) {
