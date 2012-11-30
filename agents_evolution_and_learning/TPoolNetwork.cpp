@@ -246,13 +246,13 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 			if (poolsStructure[currentPool - 1]->getType() == actualCurrentType){
 				// На входном или выходном слое мы меняем только X-координату
 				if(actualCurrentType == 0){
-					nodeXPosition.push_back(distance += 1.5*scale);
+					nodeXPosition.push_back(distance += (int)1.5*scale);
 					nodeYPosition.push_back(0);
 //					nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
 //					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
 				}
 				if(actualCurrentType == 2){
-					nodeXPosition.push_back(distance += 1.5*scale);
+					nodeXPosition.push_back(distance += (int)1.5*scale);
 					nodeYPosition.push_back(scale * (poolsQuantity - inputResolution - outputResolution + 1) + 1000);
 //					nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
 //					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
@@ -285,7 +285,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		vector<int> nodesSequence;
 
 		// координата X внутреннего слоя
-		double XPos = 8 * scale + scale * (inputResolution > outputResolution ? inputResolution + 1 : outputResolution + 1);
+		int XPos = (int) 8 * scale + scale * (inputResolution > outputResolution ? inputResolution + 1 : outputResolution + 1);
 
 		// сортировка внутреннего слоя
 		nodesSequence.push_back(inputResolution + outputResolution + 1);
