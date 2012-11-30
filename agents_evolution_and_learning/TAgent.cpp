@@ -169,6 +169,8 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 		// Действуем на среду и проверяем успешно ли действие
 		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
 		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
+		// Проводим процедуру обучения (если такой режим)
+		if (learningSettings.learningMode) learning();
 	}
 	if (rewardCalculate) 
 		reward = environment.calculateReward(agentLife, agentLifeTime);
@@ -185,6 +187,7 @@ TAgent& TAgent::operator=(const TAgent& sourceAgent){
 	parents[0] = sourceAgent.parents[0];
 	parents[1] = sourceAgent.parents[1];
 	// Копируем настройки первичного системогенеза
+	primarySystemogenesisSettings.primarySystemogensisMode = sourceAgent.primarySystemogenesisSettings.primarySystemogensisMode;
 	primarySystemogenesisSettings.initialPoolCapacity = sourceAgent.primarySystemogenesisSettings.initialPoolCapacity;
 	primarySystemogenesisSettings.initialDevelopSynapseProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability;
 	primarySystemogenesisSettings.initialDevelopPredConnectionProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability;
@@ -193,6 +196,9 @@ TAgent& TAgent::operator=(const TAgent& sourceAgent){
 	primarySystemogenesisSettings.activeNeuronsPercent = sourceAgent.primarySystemogenesisSettings.activeNeuronsPercent;
 	primarySystemogenesisSettings.synapsesActivityTreshold = sourceAgent.primarySystemogenesisSettings.synapsesActivityTreshold; 
 	primarySystemogenesisSettings.significanceTreshold = sourceAgent.primarySystemogenesisSettings.significanceTreshold; 
+	// Копируем настройки обучения
+	learningSettings = sourceAgent.learningSettings;
+
 	return *this;
 }
 

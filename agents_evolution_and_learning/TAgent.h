@@ -53,6 +53,7 @@ public:
 	// Структура настройки первичного системогенеза
 	struct SPrimarySystemogenesisSettings
 	{
+		bool primarySystemogensisMode; // Режим первичного системогенеза (false - нет системогенеза (линейный системогенез), true - есть полнеценный первичный системогенез)
 		int initialPoolCapacity; // Изначальная размерность каждого пула
 		double initialDevelopSynapseProbability; // Вероятность образования синапса связи в процессе построения первичной сети
 		double initialDevelopPredConnectionProbability; // Вероятность образования предикторной связи в процессе построения первичной сети
@@ -62,6 +63,12 @@ public:
 		double synapsesActivityTreshold; //! Порог общего сигнала, прошедшего по синапсу в ПС, по которому происходит отбор связей между активными нейронами (или процент синапсов которые надо отобрать)
 		double significanceTreshold; // Порог значимости предсказания, осуществляемого по пред. связи в ПС, по которому происходит отбор связей между активными нейронами
 	} primarySystemogenesisSettings;
+	
+	// Структура настроек процесса обучения
+	struct SLearningSettings{
+		bool learningMode; // Режим обучения (false - нет обучения, true - есть обучение)
+		double mismatchSignificanceTreshold; // Порог значимости предсказания (доли предсказания), при котором нейрон считается рассогласованным
+	} learningSettings;
 
 	// Конструктор по умолчанию
 	TAgent(){
@@ -71,6 +78,7 @@ public:
 		reward = 0;
 		neuralController = new TNeuralNetwork;
 		genome = new TPoolNetwork;
+		primarySystemogenesisSettings.primarySystemogensisMode = false;
 		primarySystemogenesisSettings.initialPoolCapacity = 1;
 		primarySystemogenesisSettings.initialDevelopSynapseProbability = 1;
 		primarySystemogenesisSettings.initialDevelopPredConnectionProbability = 1;
@@ -79,6 +87,9 @@ public:
 		primarySystemogenesisSettings.activeNeuronsPercent = 0;
 		primarySystemogenesisSettings.synapsesActivityTreshold = 0;
 		primarySystemogenesisSettings.significanceTreshold = 0;
+
+		learningSettings.learningMode = false;
+		learningSettings.mismatchSignificanceTreshold = 0.5;
 	}
 
 	// Деструктор
@@ -95,6 +106,12 @@ public:
 	void setLessFitParent(int lessFitParent) { parents[1] = lessFitParent; }
 	TPoolNetwork* getPointerToAgentGenome() const { return genome; }
 	TNeuralNetwork* getPointerToAgentController() const { return neuralController; }
+	// Так как настройки режимов системогенеза и обучения очень важны, то делаем для них отдельные геттеры и сеттеры для удобства
+	bool getSystemogenesisMode() const { return primarySystemogenesisSettings.primarySystemogensisMode; }
+	void setSystemogenesisMode(bool mode) { primarySystemogenesisSettings.primarySystemogensisMode = mode; }
+	bool getLearningMode() const { return learningSettings.learningMode; }
+	void setLearningMode(bool mode) { learningSettings.learningMode = mode; }
+
 	// Получение указателя на запись жизни агента
 	double* getPointerToAgentLife() const { return agentLife; }
 
