@@ -39,23 +39,21 @@ public:
 		std::string environmentFilename;
 		std::string resultsFilename;
 		std::string populationFilename;
-    std::string agentsFilename;
+		std::string agentsFilename;
 		std::string settingsFilename;
-    std::string cyclesFilename;
+		std::string cyclesFilename;
 	} filenameSettings;
     
 	//Структура цикла
 	struct SCycle{
 		//Последовательность действий в цикле
 		std::vector<double> cycleSequence;
-		//Награда, получаемая за прохождение цикла
-		double cycleReward;
 	};
 
 	//Максимально возможная длина цикла(чуть меньше половины длины жизни агента)
-	static const int maxCycleLength = 70;
+	static const int maxCycleLength = 100;
 	//Число повторов, необоходимое для верификации нахождения цикла
-	static const int sufficientRepeatNumber = 4;
+	static const int sufficientRepeatNumber = 3;
 	//Длина жизни агента для прогона
 	static const int agentLifeTime = 350;
 
@@ -86,30 +84,33 @@ public:
   
   //Поиск максимальных циклов для луших агентов в эволюционном процессе, с записью в два файла
   std::vector<SCycle> findCyclesInEvolution(TEnvironment &environment);
-     
 
 	// Выгрузка списка циклов в файл
 	static void uploadCycles(std::vector<SCycle> cyclesList, std::string cyclesFilename);
 
 	// Загрузка циклов из файла
 	static std::vector<SCycle> loadCycles(std::string cyclesFilename);
+
+	//Получаем вектор среды, из которого стартовал цикл
+	static double * getCycleInitialStateVector(SCycle &actionsCycle, const TEnvironment &environment);
   
-  //Превращаем цикл переходов в цикл состояний
-  static SCycle transformActionsCycleToStatesCycle(SCycle &actionsCycle, TEnvironment &environment);
+	//Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
+	//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
+	static SCycle transformActionsCycleToStatesCycle(SCycle &actionsCycle, TEnvironment &environment);
   
-  //Получаем вектор среды, из которого стартовал цикл
-  static double * getCycleInitialStateVector(SCycle &actionsCycle, TEnvironment &environment);
+  //Подсчитываем длину максимальной памяти в цикле
+  static int calculateCycleLongestMemory(SCycle &cycle, TEnvironment &environment);
+
+  	//Вычисление награды осуществляется путем вычитания награды полученой за три цикла из награды полученной за два цикла
+	//Делается это с целью приближения к ситуации, когда поведение сошлось к этому циклу и награды уже были достигнуты
+	//Поэтому награды восстанавливаются и агенту не дается полная награда
+	static double calculateCycleReward(SCycle &actionsCycle, const TEnvironment &environment);
   
-  //Подсчитываем награду, получаемую за цикл
-  static double calculateCycleReward(SCycle &actionsCycle, TEnvironment &environment);
-  
-  //Подсчитываем длину максимально памяти в цикле
-  static int measureCycleLongestMemory(SCycle &cycle, TEnvironment &environment);
-  
-  static void drawCycleToDot(SCycle &cycle, TEnvironment &environment, std::string outputDotFilename,int cycleNumber = 0);
-  static void drawAllCyclesToDot(std::vector<SCycle> &cycles,TEnvironment &environment,std::string outputDotFilename);
-  static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, TEnvironment &environment);
+  static void drawCycleToDot(SCycle &cycle, TEnvironment &environment, std::string outputDotFilename);
+  static void drawCyclesListToDot(std::vector<SCycle> &cycles,TEnvironment &environment,std::string outputDotFilename);
   static void addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
+  static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, TEnvironment &environment);
+
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

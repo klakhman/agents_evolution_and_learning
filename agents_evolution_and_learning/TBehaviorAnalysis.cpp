@@ -16,6 +16,35 @@
 
 using namespace std;
 
+//Определяет режим запуска и файлы с параметрами и данными
+void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
+  int currentArgNumber = 1; // // Текущий номер параметра
+  while (currentArgNumber < argc){
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+      //Определяем режим
+			if (!strcmp("-analysisMode", argv[currentArgNumber])) {
+			  if (!strcmp("population", argv[currentArgNumber+1]))
+				  mode = TBAModePoulation;
+			  else if (!strcmp("singleagent", argv[currentArgNumber+1]))
+				  mode = TBAModeSingleAgent;
+			  else if (!strcmp("evolution", argv[currentArgNumber+1]))
+				  mode = TBAModeEvolution;
+        ++currentArgNumber;
+			}
+			else if (!strcmp("-settings", argv[currentArgNumber])) 
+				filenameSettings.settingsFilename = argv[++currentArgNumber];
+			else if (!strcmp("-env", argv[currentArgNumber])) 
+				filenameSettings.environmentFilename = argv[++currentArgNumber];
+			else if (!strcmp("-population", argv[currentArgNumber])) 
+				filenameSettings.populationFilename = argv[++currentArgNumber];
+			else if (!strcmp("-cycles", argv[currentArgNumber]))
+				filenameSettings.cyclesFilename = argv[++currentArgNumber];
+		}
+		++currentArgNumber;
+	}
+}
+
+
 void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
 {
 	//Извлекаем данные из файлов и определяем режим анализа  
@@ -47,7 +76,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
 //      uploadCycles(cycles, filenameSettings.cyclesFilename);
      // calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
      vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
-      int memory = measureCycleLongestMemory(cycles[1328], *environment);
+      int memory = calculateCycleLongestMemory(cycles[1328], *environment);
       cout<<memory;
     //  calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
       drawCycleToDot(cycles[1328], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
@@ -231,11 +260,11 @@ vector<double> TBehaviorAnalysis::findBaseCycleInCompoundCycle(double *cycle, in
 int TBehaviorAnalysis::findCycleInExistingCycles(SCycle &cycleToAdd, vector<SCycle> &existingCycles)
 {
   //Проходим по списку существующих циклов
-  for (int cycleNumber = 0; cycleNumber < existingCycles.size(); ++cycleNumber) {
+  for (unsigned int cycleNumber = 0; cycleNumber < existingCycles.size(); ++cycleNumber) {
     //Сперва сравниваем длины циклов
     if (existingCycles.at(cycleNumber).cycleSequence.size() == cycleToAdd.cycleSequence.size()) {
       //Если они равны, то, последовательно сдвигая начало, сравниваем два кусочка цикла
-      for (int shift = 0; shift < cycleToAdd.cycleSequence.size(); ++shift) {
+      for (unsigned int shift = 0; shift < cycleToAdd.cycleSequence.size(); ++shift) {
         double *cycleTail = &cycleToAdd.cycleSequence[0];
         double *shiftedCycleHead = &cycleToAdd.cycleSequence[shift];
         //Если сдвинутое начало цикла совпадает с началом цикла в массиве, и если совпадают хвосты - циклы одинаковы
@@ -260,83 +289,8 @@ bool TBehaviorAnalysis::plainSequencesComparison(double* firstSequence, double* 
   else
     return false;
 }
-int TBehaviorAnalysis::measureCycleLongestMemory(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment)
-{
-  //Преобразуем цикл действий в цикл состояний
-  SCycle states = transformActionsCycleToStatesCycle(cycle, environment);
-   //По умолчанию у агента нулевая память
-  int memoryDepth = 0;
-  //Проверяем глубину памяти для каждого из состояний
-  for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState) {
-    //Вектор, содержащий вхождения данного состояния в цикле
-    vector<int> statePostitions;
-    // Нахождение всех вхождений текущего состояния в поведенческий цикл
-    for (int currentActionIndex = 0; currentActionIndex < cycle.cycleSequence.size(); ++currentActionIndex)
-      if (states.cycleSequence[currentActionIndex] == currentState)
-        statePostitions.push_back(currentActionIndex);
-    //Если есть вхождения данного состояния в цикле - проверяем предыдущие состояния на наличие памяти
-    //попарно сравнивая их у двух вхождений данного состояния
-    if (statePostitions.size() > 1) {
-      for (int currentPositionIndex = 0; currentPositionIndex < statePostitions.size()-1; ++currentPositionIndex)
-        for (int comparedPositionIndex = currentPositionIndex + 1; comparedPositionIndex <= statePostitions.size()-1; ++comparedPositionIndex) {
-          int currentDepth = 0;
-          // Если агент из одного и того же состояния перешел в разные - сравниваем, насколько далеко было различие
-          if (states.cycleSequence[(statePostitions[currentPositionIndex]+1)%cycle.cycleSequence.size()] !=
-              states.cycleSequence[(statePostitions[comparedPositionIndex]+1)%cycle.cycleSequence.size()]) {
-            while (states.cycleSequence[(statePostitions[currentPositionIndex]-currentDepth-1<0)*cycle.cycleSequence.size()+statePostitions[currentPositionIndex]-currentDepth-1] ==
-                   states.cycleSequence[(statePostitions[comparedPositionIndex]-currentDepth-1<0)*cycle.cycleSequence.size()+statePostitions[comparedPositionIndex]-currentDepth-1]) {
-              ++currentDepth;
-            }
-            if (currentDepth > memoryDepth) {
-              memoryDepth = currentDepth;
-            }
-          }
-        }
-    }
-  }
-  return memoryDepth;
-}
-
-//Вычисление награды осуществляется путем вычитания награды полученой за два цикла из награды полученной за два цикла
-//Делается это с целью приближения к ситуации, когда поведение сошлось к этому циклу и награды уже были достигнуты
-//Поэтому награды восстанавливаются и агенту не дается полная награда
-double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
-{
-
-  //Создаем удвоенный цикл путём дублирования
-  SCycle doubledActionsCycle;
-  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
-  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
-  
-  //Вычисляем награду за прохождение удвоенного цикла
-  double doubledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0], static_cast<int>(doubledActionsCycle.cycleSequence.size()));
-  //Вычисляем награду за прохождение утроенного цикла
-  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
-  double trippledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0],  static_cast<int>(doubledActionsCycle.cycleSequence.size()));
-  
-  return trippledCycleReward-doubledCycleReward;
-}
-
-//Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
 //Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
-TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
-{
-  TBehaviorAnalysis::SCycle statesCycle;
-  //Получаем начальный вектор цикла
-  double *initialEnvironmentVector = getCycleInitialStateVector(actionsCycle, environment);
-  environment.setEnvironmentVector(initialEnvironmentVector);
-  //Добавляем его в послдовательность состояний
-  statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
-  //Заполняем
-  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
-    environment.forceEnvironment(*action);
-    statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
-  }
-  return statesCycle;
-}
-
-//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
-double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
+double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle &actionsCycle, const TEnvironment &environment)
 {
   double *initialEnvironmentVector = new double[environment.getEnvironmentResolution()];
   
@@ -357,34 +311,82 @@ double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle 
       initialEnvironmentVector[bitNumber] = 0;
   return initialEnvironmentVector;
 }
-//Определяет режим запуска и файлы с параметрами и данными
-void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
-  int currentArgNumber = 1; // // Текущий номер параметра
-  while (currentArgNumber < argc){
-		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
-      //Определяем режим
-			if (!strcmp("-analysisMode", argv[currentArgNumber])) {
-			  if (!strcmp("population", argv[currentArgNumber+1]))
-				  mode = TBAModePoulation;
-			  else if (!strcmp("singleagent", argv[currentArgNumber+1]))
-				  mode = TBAModeSingleAgent;
-			  else if (!strcmp("evolution", argv[currentArgNumber+1]))
-				  mode = TBAModeEvolution;
-        ++currentArgNumber;
-			}
-			else if (!strcmp("-settings", argv[currentArgNumber])) 
-				filenameSettings.settingsFilename = argv[++currentArgNumber];
-			else if (!strcmp("-env", argv[currentArgNumber])) 
-				filenameSettings.environmentFilename = argv[++currentArgNumber];
-			else if (!strcmp("-population", argv[currentArgNumber])) 
-				filenameSettings.populationFilename = argv[++currentArgNumber];
-			else if (!strcmp("-cycles", argv[currentArgNumber]))
-				filenameSettings.cyclesFilename = argv[++currentArgNumber];
-		}
-		++currentArgNumber;
-	}
+
+//Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
+//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
+TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
+{
+  TBehaviorAnalysis::SCycle statesCycle;
+  //Получаем начальный вектор цикла
+  double *initialEnvironmentVector = getCycleInitialStateVector(actionsCycle, environment);
+  environment.setEnvironmentVector(initialEnvironmentVector);
+  //Добавляем его в послдовательность состояний
+  statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+  //Заполняем
+  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
+    environment.forceEnvironment(*action);
+    statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+  }
+  delete []initialEnvironmentVector;
+  return statesCycle;
 }
 
+ //Подсчитываем длину максимальной памяти в цикле
+int TBehaviorAnalysis::calculateCycleLongestMemory(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment)
+{
+  //Преобразуем цикл действий в цикл состояний
+  SCycle states = transformActionsCycleToStatesCycle(cycle, environment);
+   //По умолчанию у агента нулевая память
+  int memoryDepth = 0;
+  //Проверяем глубину памяти для каждого из состояний
+  for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState) {
+    //Вектор, содержащий вхождения данного состояния в цикле
+    vector<int> statePostitions;
+    // Нахождение всех вхождений текущего состояния в поведенческий цикл
+    for (unsigned int currentActionIndex = 0; currentActionIndex < cycle.cycleSequence.size(); ++currentActionIndex)
+      if (states.cycleSequence[currentActionIndex] == currentState)
+        statePostitions.push_back(currentActionIndex);
+    //Если есть вхождения данного состояния в цикле - проверяем предыдущие состояния на наличие памяти
+    //попарно сравнивая их у двух вхождений данного состояния
+    if (statePostitions.size() > 1) {
+      for (unsigned int currentPositionIndex = 0; currentPositionIndex < statePostitions.size()-1; ++currentPositionIndex)
+        for (unsigned int comparedPositionIndex = currentPositionIndex + 1; comparedPositionIndex <= statePostitions.size()-1; ++comparedPositionIndex) {
+          int currentDepth = 0;
+          // Если агент из одного и того же состояния перешел в разные - сравниваем, насколько далеко было различие
+          if (states.cycleSequence[(statePostitions[currentPositionIndex]+1)%cycle.cycleSequence.size()] !=
+              states.cycleSequence[(statePostitions[comparedPositionIndex]+1)%cycle.cycleSequence.size()]) {
+            while (states.cycleSequence[(statePostitions[currentPositionIndex]-currentDepth-1 < 0)*cycle.cycleSequence.size() + statePostitions[currentPositionIndex]-currentDepth-1] ==
+                   states.cycleSequence[(statePostitions[comparedPositionIndex]-currentDepth-1 < 0)*cycle.cycleSequence.size() + statePostitions[comparedPositionIndex]-currentDepth-1]) {
+              ++currentDepth;
+            }
+            if (currentDepth > memoryDepth) memoryDepth = currentDepth;
+          }
+        }
+    }
+  }
+
+  return memoryDepth;
+}
+
+//Вычисление награды осуществляется путем вычитания награды полученой за два цикла из награды полученной за два цикла
+//Делается это с целью приближения к ситуации, когда поведение сошлось к этому циклу и награды уже были достигнуты
+//Поэтому награды восстанавливаются и агенту не дается полная награда
+double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &actionsCycle, const TEnvironment &environment)
+{
+
+  //Создаем удвоенный цикл путём дублирования
+  SCycle doubledActionsCycle;
+  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
+  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
+  
+  //Вычисляем награду за прохождение удвоенного цикла
+  double doubledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0], static_cast<int>(doubledActionsCycle.cycleSequence.size()));
+  //Вычисляем награду за прохождение утроенного цикла
+  doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
+  double trippledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0],  static_cast<int>(doubledActionsCycle.cycleSequence.size()));
+  
+  return trippledCycleReward-doubledCycleReward;
+}
 
 // Выгрузка списка циклов в файл
 void TBehaviorAnalysis::uploadCycles(vector<TBehaviorAnalysis::SCycle> cyclesList, string cyclesFilename){
@@ -392,14 +394,13 @@ void TBehaviorAnalysis::uploadCycles(vector<TBehaviorAnalysis::SCycle> cyclesLis
 	cyclesFile.open(cyclesFilename.c_str());
 	cyclesFile << cyclesList.size()<<endl; // Записываем кол-во циклов
   
-	for (int currentCycle = 0; currentCycle < cyclesList.size(); ++currentCycle){
+	for (unsigned int currentCycle = 0; currentCycle < cyclesList.size(); ++currentCycle){
 		// Записываем технический номер цикла, чтобы из можно было искать непосредственно в файле
 		cyclesFile << "#" << currentCycle + 1 << "\t";
     cyclesFile << cyclesList[currentCycle].cycleSequence.size() << endl; // Запиываем длину цикла
     
-    for (vector<double>::const_iterator i = cyclesList[currentCycle].cycleSequence.begin(); i != cyclesList[currentCycle].cycleSequence.end(); ++i) {
+    for (vector<double>::const_iterator i = cyclesList[currentCycle].cycleSequence.begin(); i != cyclesList[currentCycle].cycleSequence.end(); ++i)
       cyclesFile << *i << "\t";
-    }
     cyclesFile << endl;
 	}
   
@@ -418,7 +419,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	//Считываем все циклы
 	for (int currentCycle = 1; currentCycle <= cyclesQuantity; ++currentCycle){
     
-    cyclesFile >> tmp_str;//Считываем номер цикла в никуда
+		cyclesFile >> tmp_str;//Считываем номер цикла в никуда
 		cyclesFile >> tmp_str; // Считываем длину цикла
 		int cycleLength = atoi(tmp_str.c_str());
 		SCycle newCycle;
@@ -433,35 +434,37 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	cyclesFile.close();
 	return detectedCycles;
 }
-void TBehaviorAnalysis::addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, ofstream &dotFile, int cycleNumber)
+
+void TBehaviorAnalysis::addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/)
 {
-  SCycle statesCycle = transformActionsCycleToStatesCycle(cycle, environment);
+	environment.setStochasticityCoefficient(0.0);
+	SCycle statesCycle = transformActionsCycleToStatesCycle(cycle, environment);
   //Надо как-то динамически инициализировать
-  bool currentStateVector[8];
+  bool* currentStateVector = new bool[environment.getEnvironmentResolution()];
   
   dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[0]<<" [label=\"";
-  service::decToBin(statesCycle.cycleSequence[0], currentStateVector, environment.getEnvironmentResolution());
+  service::decToBin(static_cast<int>(statesCycle.cycleSequence[0]), currentStateVector, environment.getEnvironmentResolution());
   
   for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
     dotFile<<currentStateVector[currentBit];
   dotFile<<"\"]"<<endl;
   
-  for (int currentStep=1; currentStep<statesCycle.cycleSequence.size(); ++currentStep) {
+  for (unsigned int currentStep=1; currentStep<statesCycle.cycleSequence.size(); ++currentStep) {
     // Записываем очередную вершину
     dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep]<<" [label=\"";
-    service::decToBin(statesCycle.cycleSequence[currentStep], currentStateVector, environment.getEnvironmentResolution());
+    service::decToBin(static_cast<int>(statesCycle.cycleSequence[currentStep]), currentStateVector, environment.getEnvironmentResolution());
     
     for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
       dotFile<<currentStateVector[currentBit];
     dotFile<<"\"]"<<endl;
     // Записываем переход
     dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep]<<" [label=\""<<currentStep<<"("<<cycle.cycleSequence[currentStep-1]<<")"<<"\"]"<<endl;
-
   }
+  delete []currentStateVector;
 }
-void TBehaviorAnalysis::drawAllCyclesToDot(vector<TBehaviorAnalysis::SCycle> &cycles,TEnvironment &environment, string outputDotFilename)
+
+void TBehaviorAnalysis::drawCyclesListToDot(vector<TBehaviorAnalysis::SCycle> &cycles,TEnvironment &environment, string outputDotFilename)
 {
-  environment.setStochasticityCoefficient(0.0);
   ofstream dotFile;
   dotFile.open(outputDotFilename.c_str());
   dotFile<<"digraph G {"<<endl;
@@ -475,9 +478,8 @@ void TBehaviorAnalysis::drawAllCyclesToDot(vector<TBehaviorAnalysis::SCycle> &cy
   dotFile.close();
 }
 
-void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, string outputDotFilename, int cycleNumber)
+void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, string outputDotFilename)
 {
-  environment.setStochasticityCoefficient(0.0);
   ofstream dotFile;
   dotFile.open(outputDotFilename.c_str());
   dotFile<<"digraph G {"<<endl;
@@ -485,6 +487,7 @@ void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, TEnviro
   dotFile<<"}"<<endl;
   dotFile.close();
 }
+
 void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExistanceFilename, string cyclesFilename, TEnvironment &environment)
 {
   ifstream cyclesExistance;
@@ -499,7 +502,7 @@ void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExis
   vector<double> maxRewards;
   
   vector<int> maxCycleLengths;
-  vector<int> averageCycleLengths;
+  vector<double> averageCycleLengths;
   
   vector<int> maxMemoryLengths;
   vector<double> averageEfficiency;
@@ -529,23 +532,23 @@ void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExis
     
     double averageReward = 0;
     double maximumReward = 0;
-    int maximumLength = 0;
-    int averageLength = 0;
+    unsigned int maximumLength = 0;
+    double averageLength = 0;
     int maximumMemory = 0;
     double currentAverageEfficiency = 0;
     
-    for (int currentCycleIndex = 0; currentCycleIndex<currentStepCyles.size();++currentCycleIndex) {
+    for (unsigned int currentCycleIndex = 0; currentCycleIndex<currentStepCyles.size();++currentCycleIndex) {
       
-      int reward = calculateCycleReward(cycles.at(currentStepCyles.at(currentCycleIndex)), environment);
+      double reward = calculateCycleReward(cycles.at(currentStepCyles.at(currentCycleIndex)), environment);
       averageReward+=reward;
       if (reward>maximumReward)
         maximumReward = reward;
       
-      if (cycles.at(currentStepCyles.at(currentCycleIndex)).cycleSequence.size()>maximumLength)
-          maximumLength = static_cast<int>(cycles.at(currentStepCyles.at(currentCycleIndex)).cycleSequence.size());
+      if (cycles.at(currentStepCyles.at(currentCycleIndex)).cycleSequence.size() > maximumLength)
+          maximumLength = static_cast<unsigned int>(cycles.at(currentStepCyles.at(currentCycleIndex)).cycleSequence.size());
       averageLength+=static_cast<int>((cycles.at(currentStepCyles.at(currentCycleIndex))).cycleSequence.size());
       
-      int memory = measureCycleLongestMemory(cycles.at(currentStepCyles.at(currentCycleIndex)), environment);
+      int memory = calculateCycleLongestMemory(cycles.at(currentStepCyles.at(currentCycleIndex)), environment);
       if (memory > maximumMemory)
         maximumMemory=memory;
       currentAverageEfficiency+=(reward/static_cast<int>((cycles.at(currentStepCyles.at(currentCycleIndex))).cycleSequence.size()));
