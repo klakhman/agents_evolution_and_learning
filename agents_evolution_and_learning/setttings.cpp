@@ -1,5 +1,5 @@
 ﻿#include "settings.h"
-#include "TEnvironment.h"
+#include "THypercubeEnvironment.h"
 #include "TPopulation.h"
 #include "TAgent.h"
 #include <string>
@@ -34,7 +34,7 @@ void settings::fillDirectoriesSettings(string& workDirectory, string& environmen
 }
 
 // Загрузка параметров среды из файла
-void settings::fillEnvironmentSettingsFromFile(TEnvironment& environment, string settingsFilename){
+void settings::fillEnvironmentSettingsFromFile(THypercubeEnvironment& environment, string settingsFilename){
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());

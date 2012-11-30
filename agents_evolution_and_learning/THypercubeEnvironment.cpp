@@ -1,4 +1,4 @@
-﻿#include "TEnvironment.h"
+﻿#include "THypercubeEnvironment.h"
 #include "service.h"
 
 #include <iostream>
@@ -11,12 +11,12 @@
 using namespace std;
 
 // Загрузка структуры целей среды из файла
-void TEnvironment::loadAims(string aimsFilename){
+void THypercubeEnvironment::loadEnvironment(std::string environmentFilename){
 	// Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
 	if (environmentResolution) delete []currentEnvironmentVector;
 
 	ifstream environmentFile;
-	environmentFile.open(aimsFilename.c_str());
+	environmentFile.open(environmentFilename.c_str());
 	string tmp_str;
 	environmentFile >> tmp_str; // Считываем размерность среды
 	environmentResolution = atoi(tmp_str.c_str());
@@ -44,9 +44,9 @@ void TEnvironment::loadAims(string aimsFilename){
 }
 
 // Выгрузка структуры целей в файл
-void TEnvironment::uploadAims(string aimsFilename) const{
+void THypercubeEnvironment::uploadEnvironment(std::string environmentFilename) const{
 	ofstream environmentFile;
-	environmentFile.open(aimsFilename.c_str());
+	environmentFile.open(environmentFilename.c_str());
 	// Записываем размерность среды и кол-во целей
 	environmentFile << environmentResolution << "\t" << aimsQuantity << endl;
 	// Записываем все цели
@@ -62,7 +62,7 @@ void TEnvironment::uploadAims(string aimsFilename) const{
 }
 
 // Подсчет коэффициента заполненности всей среды
-double TEnvironment::calculateOccupancyCoefficient() const{
+double THypercubeEnvironment::calculateOccupancyCoefficient() const{
 	if (!environmentResolution) return 0;
 	// Массив вхождения какого-либо бита в цель
 	bool* bitsOccurrence = new bool[environmentResolution];
@@ -92,7 +92,7 @@ double TEnvironment::calculateOccupancyCoefficient() const{
 }
 
 // Процедура случайных изменений среды согласно степени нестационарности
-void TEnvironment::randomizeEnvironment(){
+void THypercubeEnvironment::randomizeEnvironment(){
 	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit){
 		// Не включаем начало интервала, чтобы при нулевой вероятности условие никогда не срабатывало, а при вероятности равной единице, условие всегда срабатывало
 		if (service::uniformDistribution(0, 1, true, false) < stochasticityCoefficient)
@@ -104,7 +104,7 @@ void TEnvironment::randomizeEnvironment(){
 Изменение среды под действием агента (возвращает совершено ли действие (true) или его невозможно совершить(false))
 В рамках данной архитектуры actionID кодируется как +-(bitNumber), при этом знак определяет в какую сторону изменяется бит (+ это с нуля на единицу)
 */
-bool TEnvironment::forceEnvironment(double actionID){
+bool THypercubeEnvironment::forceEnvironment(double actionID){
 	// Признак успешности совершаемого действия
 	bool actionSuccess = false;
 	//Направление изменения
@@ -123,7 +123,7 @@ bool TEnvironment::forceEnvironment(double actionID){
 }
 
 // Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
-double TEnvironment::calculateReward(double actionsIDs[], int actionsQuantity) const{
+double THypercubeEnvironment::calculateReward(double actionsIDs[], int actionsQuantity) const{
 	double accumulatedReward = 0.0; // Награда агента
 	// Времена последнего достижения цели агентом
 	int* achievingTime = new int[aimsQuantity];
@@ -163,7 +163,7 @@ double TEnvironment::calculateReward(double actionsIDs[], int actionsQuantity) c
 }
 
 // Сравнение двух полных целей для процедуры генерации среды (возвращает true - если есть хотя бы одна совпадающая подцель)
-bool TEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSubAimComplexity, TAim& secondAim, int minSecondSubAimComplexity){
+bool THypercubeEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSubAimComplexity, TAim& secondAim, int minSecondSubAimComplexity){
 	// Основная цель данной процедуры понять равны ли минимальные подцели равной длины у двух целей
 	// Если длина минимальной подцели у первой цели больше
 	if (minFirstSubAimComplexity > minSecondSubAimComplexity)
@@ -193,7 +193,7 @@ bool TEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int minFirstSu
 }
 
 // Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
-double TEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps /*=0.001*/, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/){
+double THypercubeEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps /*=0.001*/, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/){
 	if (environmentResolution) delete []currentEnvironmentVector;
 	environmentResolution = _environmentResolution;
 	currentEnvironmentVector = new bool[environmentResolution];
@@ -205,7 +205,7 @@ double TEnvironment::generateEnvironment(int _environmentResolution, double requ
 		const int MAX_FULL_AIMS = 1000; //1000
 		int fullAimsQuantity = service::uniformDiscreteDistribution(1, MAX_FULL_AIMS);
 		// Создаем среду, в которую будут записываться полные цели
-		TEnvironment environmentWithFullAims;
+		THypercubeEnvironment environmentWithFullAims;
 		environmentWithFullAims.environmentResolution = environmentResolution;
 		// Создаем фиктивный вектор среды (чтобы при удалении типа не происходило ошибки)
 		environmentWithFullAims.currentEnvironmentVector = new bool[environmentResolution];

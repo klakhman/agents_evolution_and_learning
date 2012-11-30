@@ -2,7 +2,7 @@
 #define TEVOLUTIONARYPROCESS_H
 
 #include "TPopulation.h"
-#include "TEnvironment.h"
+#include "THypercubeEnvironment.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -11,7 +11,7 @@ class TEvolutionaryProcess{
 	// Популяция агентов
 	TPopulation* agentsPopulation;
 	// Среда для агентов
-	TEnvironment* environment;
+	THypercubeEnvironment* environment;
 	// Лучшая средняя награда по популяции в текущем запуске
 	double bestAverageReward;
 	// Признак того, что надо печатать расширенную информацию про пулы, когда мы записываем агентов

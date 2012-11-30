@@ -1,15 +1,15 @@
 ﻿#ifndef TESTS_H
 #define TESTS_H
 
-#include "TEnvironment.h"
+#include "THypercubeEnvironment.h"
 #include "TPoolNetwork.h"
 #include <string>
 
 class tests{
 	// Проверка непротиворечивости цели (true - цель противоречива, false - цель непротиворечива)
-	bool checkAimInconsistency(TEnvironment::TAim& aim, int environmentResolution);
+	bool checkAimInconsistency(THypercubeEnvironment::TAim& aim, int environmentResolution);
 	// Сравнение двух целей среды (true - цели равны, false - цели неравны)
-	bool compareTwoAims(TEnvironment::TAim& firstAim, TEnvironment::TAim& secondAim);
+	bool compareTwoAims(THypercubeEnvironment::TAim& firstAim, THypercubeEnvironment::TAim& secondAim);
 
 public:
 	int testPoolNetwork(std::string outputFilename);

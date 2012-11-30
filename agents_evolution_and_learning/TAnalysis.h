@@ -2,7 +2,7 @@
 #define TANALYSIS_H
 
 #include <string>
-#include "TEnvironment.h"
+#include "THypercubeEnvironment.h"
 #include "TPopulation.h"
 
 // Класс основного анализа
@@ -32,7 +32,7 @@ public:
 	void makeBestPopulationAnalysisSummary(std::string analysisFilename, std::string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity);
 	
 	// Процедура прогона случайного агента (на каждом такте времени действие агента определяется случайно)
-	double randomAgentLife(TEnvironment& environment, int agentLifeTime);
+	double randomAgentLife(THypercubeEnvironment& environment, int agentLifeTime);
 
 	// Процедура анализа базового уровня награды для среды (путем прогона случайного агента)
 	void randomAgentAnalysis(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string settingsFilename, std::string resultsFilename);

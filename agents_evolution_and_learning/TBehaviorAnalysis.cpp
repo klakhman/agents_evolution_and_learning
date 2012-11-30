@@ -52,7 +52,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
   
 	switch (mode) {
      case TBAModePoulation: {
-       TEnvironment* environment = new TEnvironment(filenameSettings.environmentFilename);
+       THypercubeEnvironment* environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
        settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
        //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
        environment->setStochasticityCoefficient(0.0);
@@ -67,7 +67,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
     case TBAModeSingleAgent:
       ;
     case TBAModeEvolution: {
-      TEnvironment* environment = new TEnvironment(filenameSettings.environmentFilename);
+      THypercubeEnvironment* environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
       settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
       //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
       environment->setStochasticityCoefficient(0.0);
@@ -93,7 +93,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
   }
 }
 
-vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvironment &environment)
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(THypercubeEnvironment &environment)
 {
   ifstream agentsFile;
   vector<SCycle> detectedCycles;
@@ -134,7 +134,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(TEnvi
 }
 
 //Найти все циклы в популяции путем прогона агентов через из всех начальных состояний среды
-vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, TEnvironment &environment) {
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, THypercubeEnvironment &environment) {
   time_t start_time = time(0);
 	//Вычисляем размер популяции единожды
 	int populationSize = population.getPopulationSize();
@@ -157,7 +157,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPop
 }
 
 //Прогон агента из всех возможных состояний среды для обнаружения всех возможных циклов
-vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, TEnvironment &environment)
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, THypercubeEnvironment &environment)
 {
   vector<SCycle> currentAgentCycles;
   //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
@@ -180,7 +180,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent
 
 //Находит цикл в жизни данного агента - возвращает пустой цикл, если содержательный цикл не найден (агент что-то делает) 
 //(!!! состояние среды, из которого должен запускаться агент должно быть уже становлено, коэффициент стохастичности среды должен быть уже установлен!!!)
-TBehaviorAnalysis::SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent, TEnvironment &environment){
+TBehaviorAnalysis::SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent, THypercubeEnvironment &environment){
   SCycle agentCycle;
   //Прогоняем жизнь агента (без подсчета награды, так как она нам не нужна)
   agent.life(environment, agentLifeTime, false);
@@ -290,7 +290,7 @@ bool TBehaviorAnalysis::plainSequencesComparison(double* firstSequence, double* 
     return false;
 }
 //Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
-double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle &actionsCycle, const TEnvironment &environment)
+double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle &actionsCycle, const THypercubeEnvironment &environment)
 {
   double *initialEnvironmentVector = new double[environment.getEnvironmentResolution()];
   
@@ -314,7 +314,7 @@ double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle 
 
 //Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
 //Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
-TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, TEnvironment &environment)
+TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, THypercubeEnvironment &environment)
 {
   TBehaviorAnalysis::SCycle statesCycle;
   //Получаем начальный вектор цикла
@@ -332,7 +332,7 @@ TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(
 }
 
  //Подсчитываем длину максимальной памяти в цикле
-int TBehaviorAnalysis::calculateCycleLongestMemory(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment)
+int TBehaviorAnalysis::calculateCycleLongestMemory(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment)
 {
   //Преобразуем цикл действий в цикл состояний
   SCycle states = transformActionsCycleToStatesCycle(cycle, environment);
@@ -371,7 +371,7 @@ int TBehaviorAnalysis::calculateCycleLongestMemory(TBehaviorAnalysis::SCycle &cy
 //Вычисление награды осуществляется путем вычитания награды полученой за два цикла из награды полученной за два цикла
 //Делается это с целью приближения к ситуации, когда поведение сошлось к этому циклу и награды уже были достигнуты
 //Поэтому награды восстанавливаются и агенту не дается полная награда
-double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &actionsCycle, const TEnvironment &environment)
+double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &actionsCycle, const THypercubeEnvironment &environment)
 {
 
   //Создаем удвоенный цикл путём дублирования
@@ -435,7 +435,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	return detectedCycles;
 }
 
-void TBehaviorAnalysis::addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/)
+void TBehaviorAnalysis::addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/)
 {
 	environment.setStochasticityCoefficient(0.0);
 	SCycle statesCycle = transformActionsCycleToStatesCycle(cycle, environment);
@@ -463,7 +463,7 @@ void TBehaviorAnalysis::addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cyc
   delete []currentStateVector;
 }
 
-void TBehaviorAnalysis::drawCyclesListToDot(vector<TBehaviorAnalysis::SCycle> &cycles,TEnvironment &environment, string outputDotFilename)
+void TBehaviorAnalysis::drawCyclesListToDot(vector<TBehaviorAnalysis::SCycle> &cycles,THypercubeEnvironment &environment, string outputDotFilename)
 {
   ofstream dotFile;
   dotFile.open(outputDotFilename.c_str());
@@ -478,7 +478,7 @@ void TBehaviorAnalysis::drawCyclesListToDot(vector<TBehaviorAnalysis::SCycle> &c
   dotFile.close();
 }
 
-void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, string outputDotFilename)
+void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, string outputDotFilename)
 {
   ofstream dotFile;
   dotFile.open(outputDotFilename.c_str());
@@ -488,7 +488,7 @@ void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, TEnviro
   dotFile.close();
 }
 
-void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExistanceFilename, string cyclesFilename, TEnvironment &environment)
+void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExistanceFilename, string cyclesFilename, THypercubeEnvironment &environment)
 {
   ifstream cyclesExistance;
   ofstream metrics;

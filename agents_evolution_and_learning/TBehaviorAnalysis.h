@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <string>
-#include "TEnvironment.h"
+#include "THypercubeEnvironment.h"
 #include "TPopulation.h"
 
 /* Класс анализа поведенческих циклов агента */
@@ -61,17 +61,17 @@ public:
   void beginAnalysis(int argc, char **argv);
 
   //Найти все циклы в популяции путем прогона агентов через из всех начальных состояний среды
-  std::vector<SCycle> findCyclesInPopulation(TPopulation &population, TEnvironment &environment);
+  std::vector<SCycle> findCyclesInPopulation(TPopulation &population, THypercubeEnvironment &environment);
 
   //Прогон агента из всех возможных состояний среды для обнаружения всех возможных циклов
-  static std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, TEnvironment &environment);
+  static std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, THypercubeEnvironment &environment);
 
 	// Нахождение цикла в массиве существующих циклов (0 - цикла в массиве нет, иначе возвращает номер цикла, начиная с 1)
   static int findCycleInExistingCycles(SCycle &cycleToAdd,std::vector<SCycle> &existingCycles);
 
   //Находит цикл в жизни данного агента - возвращает пустой цикл, если цикл не найден 
   //(!!! состояние среды, из которого должен запускаться агент должно быть уже становлено, коэффициент стохастичности среды должен быть уже установлен!!!)
-  static SCycle findCycleInAgentLife(TAgent &agent, TEnvironment &environment);
+  static SCycle findCycleInAgentLife(TAgent &agent, THypercubeEnvironment &environment);
 
 	// Поиск цикла в последовательности (возвращает пустой вектор, если цикл не найден, но !!! может вернуть цикл из нуля длиной 1 !!!)
   static std::vector<double> findCycleInSequence(double *sequence,int sequenceLength);
@@ -83,7 +83,7 @@ public:
   static bool plainSequencesComparison(double* firstSequence, double* secondSequence, int sequenceLength);
   
   //Поиск максимальных циклов для луших агентов в эволюционном процессе, с записью в два файла
-  std::vector<SCycle> findCyclesInEvolution(TEnvironment &environment);
+  std::vector<SCycle> findCyclesInEvolution(THypercubeEnvironment &environment);
 
 	// Выгрузка списка циклов в файл
 	static void uploadCycles(std::vector<SCycle> cyclesList, std::string cyclesFilename);
@@ -92,24 +92,24 @@ public:
 	static std::vector<SCycle> loadCycles(std::string cyclesFilename);
 
 	//Получаем вектор среды, из которого стартовал цикл
-	static double * getCycleInitialStateVector(SCycle &actionsCycle, const TEnvironment &environment);
+	static double * getCycleInitialStateVector(SCycle &actionsCycle, const THypercubeEnvironment &environment);
   
 	//Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
 	//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
-	static SCycle transformActionsCycleToStatesCycle(SCycle &actionsCycle, TEnvironment &environment);
+	static SCycle transformActionsCycleToStatesCycle(SCycle &actionsCycle, THypercubeEnvironment &environment);
   
   //Подсчитываем длину максимальной памяти в цикле
-  static int calculateCycleLongestMemory(SCycle &cycle, TEnvironment &environment);
+  static int calculateCycleLongestMemory(SCycle &cycle, THypercubeEnvironment &environment);
 
   	//Вычисление награды осуществляется путем вычитания награды полученой за три цикла из награды полученной за два цикла
 	//Делается это с целью приближения к ситуации, когда поведение сошлось к этому циклу и награды уже были достигнуты
 	//Поэтому награды восстанавливаются и агенту не дается полная награда
-	static double calculateCycleReward(SCycle &actionsCycle, const TEnvironment &environment);
+	static double calculateCycleReward(SCycle &actionsCycle, const THypercubeEnvironment &environment);
   
-  static void drawCycleToDot(SCycle &cycle, TEnvironment &environment, std::string outputDotFilename);
-  static void drawCyclesListToDot(std::vector<SCycle> &cycles,TEnvironment &environment,std::string outputDotFilename);
-  static void addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, TEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
-  static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, TEnvironment &environment);
+  static void drawCycleToDot(SCycle &cycle, THypercubeEnvironment &environment, std::string outputDotFilename);
+  static void drawCyclesListToDot(std::vector<SCycle> &cycles,THypercubeEnvironment &environment,std::string outputDotFilename);
+  static void addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
+  static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, THypercubeEnvironment &environment);
 
 };
 

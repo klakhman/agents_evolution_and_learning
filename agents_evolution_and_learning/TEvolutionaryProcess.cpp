@@ -1,6 +1,6 @@
 ﻿#include "TEvolutionaryProcess.h"
 #include "TPopulation.h"
-#include "TEnvironment.h"
+#include "THypercubeEnvironment.h"
 #include "settings.h"
 #include <ctime>
 #include <cstdlib>
@@ -97,7 +97,7 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Загружаем среду
 	if (environment)
 		delete environment;
-	environment = new TEnvironment(filenameSettings.environmentFilename);
+	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
 	settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
 	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
 	if (agentsPopulation)

@@ -2,7 +2,7 @@
 
 #include "TAnalysis.h"
 
-#include "TEnvironment.h"
+#include "THypercubeEnvironment.h"
 #include "TPopulation.h"
 #include "TBehaviorAnalysis.h"
 #include "settings.h"
@@ -27,7 +27,7 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	rand();
 	rand();
 	rand();
-	TEnvironment* environment = new TEnvironment(environmentFilename);
+	THypercubeEnvironment* environment = new THypercubeEnvironment(environmentFilename);
 	settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
 	//!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
 	environment->setStochasticityCoefficient(0.0);
@@ -324,7 +324,7 @@ void TAnalysis::makeBestPopulationAnalysisSummary(string analysisFilename, strin
 }
 
 // Процедура прогона случайного агента (на каждом такте времени действие агента определяется случайно)
-double TAnalysis::randomAgentLife(TEnvironment& environment, int agentLifeTime){
+double TAnalysis::randomAgentLife(THypercubeEnvironment& environment, int agentLifeTime){
 	double* agentLife = new double[agentLifeTime];
 
 	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
@@ -353,7 +353,7 @@ void TAnalysis::randomAgentAnalysis(string environmentDirectory, int firstEnvNum
 	for (int currentEnvironment = firstEnvNumber; currentEnvironment <= lastEnvNumber; ++currentEnvironment){
 		stringstream environmentFilename;
 		environmentFilename << environmentDirectory << "/Environment" << currentEnvironment << ".txt";
-		TEnvironment environment(environmentFilename.str());
+		THypercubeEnvironment environment(environmentFilename.str());
 		settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
 		environment.setStochasticityCoefficient(0.0);
 		long double averageReward = 0;

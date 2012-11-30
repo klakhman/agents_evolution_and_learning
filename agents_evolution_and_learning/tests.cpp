@@ -107,8 +107,8 @@ void tests::testEnvironment(string firstOutputEnvironmentFilename, string second
 	ofs << 2 << "\t" << 20 << endl << 8 << "\t" << 1 << "\t" << 2 << "\t" << 0 << endl;
 	ofs.close();
 	
-	TEnvironment environment(firstOutputEnvironmentFilename, 30);
-	environment.uploadAims(secondOutputEnvironmentFilename);
+	THypercubeEnvironment environment(firstOutputEnvironmentFilename, 30);
+	environment.uploadEnvironment(secondOutputEnvironmentFilename);
 	double life[6];
 	life[0] = 1;
 	life[1] = -5;
@@ -167,7 +167,7 @@ int tests::testCalculateOccupancyCoeffcient(string environmentFilename){
 	int checkStatus = 0;
 	cout << endl << "--------------------+ TEST FOR ENVIRONMENT'S OCCUPANCY +--------------------" << endl;
 	double environmentOccupancy = 0.1204;
-	TEnvironment*  environment = new TEnvironment(environmentFilename);
+	THypercubeEnvironment*  environment = new THypercubeEnvironment(environmentFilename);
 
 	if (environment->calculateOccupancyCoefficient() != environmentOccupancy)
 		checkStatus = 1;
@@ -179,7 +179,7 @@ int tests::testCalculateOccupancyCoeffcient(string environmentFilename){
 }
 
 // Проверка непротиворечивости цели (true - цель противоречива, false - цель непротиворечива)
-bool tests::checkAimInconsistency(TEnvironment::TAim& aim, int environmentResolution){
+bool tests::checkAimInconsistency(THypercubeEnvironment::TAim& aim, int environmentResolution){
 	// Массив последних действий в отношении битов среды (-1 - действия еще не было, 0 - перевод в ноль, 1 - перевод в единицу)
 	int* lastAction = new int[environmentResolution];
 	for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
@@ -200,7 +200,7 @@ bool tests::checkAimInconsistency(TEnvironment::TAim& aim, int environmentResolu
 }
 
 // Сравнение двух целей среды (true - цели равны, false - цели неравны)
-bool tests::compareTwoAims(TEnvironment::TAim& firstAim, TEnvironment::TAim& secondAim){
+bool tests::compareTwoAims(THypercubeEnvironment::TAim& firstAim, THypercubeEnvironment::TAim& secondAim){
 	if (firstAim.aimComplexity != secondAim.aimComplexity)
 		return false;
 	else 
@@ -217,7 +217,7 @@ int tests::testGenerateEnvironment(){
 
 	int environmentResolution = 8;
 	double occupancySet[] = {0.04, 0.14, 0.4, 0.7};
-	TEnvironment* environment = new TEnvironment;
+	THypercubeEnvironment* environment = new THypercubeEnvironment;
 	cout << endl << "--------------------+ TEST FOR ENVIRONMENT'S GENERATING +--------------------" << endl;
 	for (int currentOccupancy = 1; currentOccupancy <= sizeof(occupancySet)/sizeof(*occupancySet); ++currentOccupancy){
 		environment->generateEnvironment(environmentResolution, occupancySet[currentOccupancy - 1]);
