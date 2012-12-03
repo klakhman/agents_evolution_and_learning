@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <fstream>
+#include "TPoolConnection.h"
+#include "TPoolPredConnection.h"
 
 class TPoolNetwork;
-class TPoolConnection;
-class TPoolPredConnection;
 
 /* 
 Класс нейронального пула
@@ -60,8 +60,8 @@ public:
 		appearenceEvolutionTime = 0;
 	}
 	// Полный конструктор
-	TNeuralPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer){
-		setAll(newID, newType, newCapacity, newBiasMean, newBiasVariance, newLayer);
+	TNeuralPool(int newID, int newType, int newLayer, double newBiasMean, double newBiasVariance = 0, int newCapacity = 1){
+		setAll(newID, newType, newLayer, newBiasMean, newBiasVariance, newCapacity);
 		connectednessSet = 0;
 		connectednessSetSize = 0;
 		inputConnectionsQuantity = 0;
@@ -93,7 +93,7 @@ public:
 	// Получение количества входных предикторных связей пула
 	int getInputPredConnectionsQuantity() const { return inputPredConnectionsQuantity; }
 	// Заполнение всех характеристик пула
-	void setAll(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer){
+	void setAll(int newID, int newType, int newLayer, double newBiasMean, double newBiasVariance = 0, int newCapacity = 1){
 		ID = newID;
 		type = newType;
 		capacity = newCapacity;
@@ -108,48 +108,48 @@ public:
 	int getAppearenceEvolutionTime() const { return appearenceEvolutionTime; }
 
 	// Геттеры и сеттеры для связей данного пула (во всех случаях передается номер связи в массиве связей)
-	int getConnectionID(int connectionNumber) const;
-	void setConnectionID(int connectionNumber, int newID);
-	double getConnectionWeightMean(int connectionNumber) const;
-	void setConnectionWeightMean(int connectionNumber, double newWeightMean);
-	double getConnectionWeightVariance(int connectionNumber) const;
-	void setConnectionWeightVariance(int connectionNumber, double newWeightVariance);
-	bool getConnectionEnabled(int connectionNumber) const;
-	void setConnectionEnabled(int connectionNumber, bool newEnabled);
-	int getConnectionDisabledStep(int connectionNumber) const;
-	void setConnectionDisabledStep(int connectionNumber, int newDisabledStep);
-	double getConnectionDevelopSynapseProb(int connectionNumber) const;
-	void setConnectionDevelopSynapseProb(int connectionNumber, double newDevelopSynapseProb);
-	long int getConnectionInnovationNumber(int connectionNumber) const;
-	void setConnectionInnovationNumber(int connectionNumber, long int newInnovationNumber);
-	TNeuralPool* getConnectionPrePool(int connectionNumber) const;
-	void setConnectionPrePool(int connectionNumber, TNeuralPool* newPrePool);
-	TNeuralPool* getConnectionPostPool(int connectionNumber) const;
-	void setConnectionPostPool(int connectionNumber, TNeuralPool* newPostPool);
+	int getConnectionID(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getID(); }
+	void setConnectionID(int connectionNumber, int newID) { connectednessSet[connectionNumber-1]->setID(newID); }
+	double getConnectionWeightMean(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getWeightMean(); }
+	void setConnectionWeightMean(int connectionNumber, double newWeightMean) { connectednessSet[connectionNumber-1]->setWeightMean(newWeightMean); }
+	double getConnectionWeightVariance(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getWeightVariance(); }
+	void setConnectionWeightVariance(int connectionNumber, double newWeightVariance) { connectednessSet[connectionNumber-1]->setWeightVariance(newWeightVariance); } 
+	bool getConnectionEnabled(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getEnabled(); }
+	void setConnectionEnabled(int connectionNumber, bool newEnabled) { connectednessSet[connectionNumber-1]->setEnabled(newEnabled); }
+	int getConnectionDisabledStep(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getDisabledStep(); }
+	void setConnectionDisabledStep(int connectionNumber, int newDisabledStep) { connectednessSet[connectionNumber-1]->setDisabledStep(newDisabledStep); }
+	double getConnectionDevelopSynapseProb(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getDevelopSynapseProb(); }
+	void setConnectionDevelopSynapseProb(int connectionNumber, double newDevelopSynapseProb) { connectednessSet[connectionNumber-1]->setDevelopSynapseProb(newDevelopSynapseProb); }
+	long getConnectionInnovationNumber(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getInnovationNumber(); }
+	void setConnectionInnovationNumber(int connectionNumber, long newInnovationNumber) { connectednessSet[connectionNumber-1]->setInnovationNumber(newInnovationNumber); }
+	int getConnectionPrePoolID(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getPrePoolID(); }
+	void setConnectionPrePoolID(int connectionNumber, int newPrePoolID) { connectednessSet[connectionNumber-1]->setPrePoolID(newPrePoolID); }
+	int getConnectionPostPoolID(int connectionNumber) const { return connectednessSet[connectionNumber-1]->getPostPoolID(); }
+	void setConnectionPostPoolID(int connectionNumber, int newPostPoolID) { connectednessSet[connectionNumber-1]->setPostPoolID(newPostPoolID); }
 
 	// Геттеры и сеттеры для предикторных связей данного пула (во всех случаях передается номер связи в массиве связей)
-	int getPredConnectionID(int predConnectionNumber) const;
-	void setPredConnectionID(int predConnectionNumber, int newID);
-	bool getPredConnectionEnabled(int predConnectionNumber) const;
-	void setPredConnectionEnabled(int predConnectionNumber, bool newEnabled);
-	int getPredConnectionDisabledStep(int predConnectionNumber) const;
-	void setPredConnectionDisabledStep(int predConnectionNumber, int newDisabledStep);
-	double getDevelopPredConnectionProb(int predConnectionNumber) const;
-	void setDevelopPredConnectionProb(int predConnectionNumber, double newDevelopPredConnectionProb);
-	long getPredConnectionInnovationNumber(int predConnectionNumber) const;
-	void setPredConnectionInnovationNumber(int predConnectionNumber, long newInnovationNumber);
-	TNeuralPool* getPredConnectionPrePool(int predConnectionNumber) const;
-	void setPredConnectionPrePool(int predConnectionNumber, TNeuralPool* newPrePool);
-	TNeuralPool* getPredConnectionPostPool(int predConnectionNumber) const;
-	void setPredConnectionPostPool(int predConnectionNumber, TNeuralPool* newPostPool);
+	int getPredConnectionID(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getID(); }
+	void setPredConnectionID(int predConnectionNumber, int newID) { predConnectednessSet[predConnectionNumber-1]->setID(newID); }
+	bool getPredConnectionEnabled(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getEnabled(); }
+	void setPredConnectionEnabled(int predConnectionNumber, bool newEnabled) { predConnectednessSet[predConnectionNumber-1]->setEnabled(newEnabled); }
+	int getPredConnectionDisabledStep(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getDisabledStep(); }
+	void setPredConnectionDisabledStep(int predConnectionNumber, int newDisabledStep) { predConnectednessSet[predConnectionNumber-1]->setDisabledStep(newDisabledStep); }
+	double getDevelopPredConnectionProb(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getDevelopPredConnectionProb(); }
+	void setDevelopPredConnectionProb(int predConnectionNumber, double newDevelopPredConnectionProb) { predConnectednessSet[predConnectionNumber-1]->setDevelopPredConnectionProb(newDevelopPredConnectionProb); }
+	long getPredConnectionInnovationNumber(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getInnovationNumber(); }
+	void setPredConnectionInnovationNumber(int predConnectionNumber, long newInnovationNumber) { predConnectednessSet[predConnectionNumber-1]->setInnovationNumber(newInnovationNumber); }
+	int getPredConnectionPrePoolID(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getPrePoolID(); }
+	void setPredConnectionPrePoolID(int predConnectionNumber, int newPrePoolID) { predConnectednessSet[predConnectionNumber-1]->setPrePoolID(newPrePoolID); }
+	int getPredConnectionPostPoolID(int predConnectionNumber) const { return predConnectednessSet[predConnectionNumber-1]->getPostPoolID(); }
+	void setPredConnectionPostPoolID(int predConnectionNumber, int newPostPoolID) { predConnectednessSet[predConnectionNumber-1]->setPostPoolID(newPostPoolID); }
 
 	// Добавление входной связи в пул
-	void addConnection(int newID, double newWeightMean, double newWeightVariance, bool newEnabled = true, int newDisabledStep = 0, double newDevelopSynapseProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0);
+	void addConnection(int newID, int newPrePoolID, double newWeightMean, double newWeightVariance = 0, double newDevelopSynapseProb = 1, bool newEnabled = true, int newDisabledStep = 0, long int newInnovationNumber = 0);
 	// Удаление связи из пула
 	void deleteConnection(int connectionNumber);
 
 	// Добавление входной предикторной связи в пул
-	void addPredConnection(int newID, bool newEnabled = true, int newDisabledStep = 0, double newDevelopPredConnectionProb = 1, long int newInnovationNumber = 0, TNeuralPool* newPrePool = 0);
+	void addPredConnection(int newID, int newPrePoolID, double newDevelopPredConnectionProb = 1, bool newEnabled = true, int newDisabledStep = 0, long int newInnovationNumber = 0);
 	// Удаление предикторной связи из пула
 	void deletePredConnection(int predConnectionNumber);
 
@@ -162,7 +162,6 @@ public:
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& ofs, const TPoolNetwork& PoolNetwork); // Функция вывода сети объявлена дружественной, чтобы она имела прямой доступ к списку связей пула
 
-	//Печать сети со всеми сведений о пулах в файл или на экран (вместе с номером пула родителя и временем появления в эволюции)
 	friend class TPoolNetwork; // Функция вывода сети объявлена дружественной, чтобы она имела прямой доступ к списку связей пула
 };
 

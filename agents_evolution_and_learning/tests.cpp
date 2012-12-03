@@ -13,7 +13,7 @@
 
 using namespace std;
 
-int tests::testPoolNetwork(string outputFilename){
+/*int tests::testPoolNetwork(string outputFilename){
 	TPoolNetwork PoolNetwork;
 	PoolNetwork.addPool(1, 0, 1, 0.2, 0.003, 1);
 	PoolNetwork.addPool(2, 2, 1, 0.4, 0.004, 3);
@@ -253,7 +253,7 @@ int tests::testGenerateEnvironment(){
 	delete environment;
 	cout << "---------------------------------------------------------------------------" << endl;
 	return checkStatus;
-}
+}*/
 
 // Процедура тестирования степени равномерности распределения, получаемого с помощью слабой функции
 /*int tests::testWeakUniformDistribution(){
@@ -308,7 +308,7 @@ int tests::testGenerateEnvironment(){
 
 //------------------ Тестирование различных процедур мутации ---------------------------
 
-// Создание тестовой сети из пулов
+/*// Создание тестовой сети из пулов
 void tests::createTestPoolNetwork(TPoolNetwork& poolNetwork){
 	poolNetwork.erasePoolNetwork();
 	// Входные пулы
@@ -441,7 +441,7 @@ void tests::testDuplicatePool(string testDirectory){
 
 	delete testPopulation;
 	delete testNetwork;
-}
+}*/
 
 
 

@@ -6,7 +6,7 @@
 #include <string>
 
 class tests{
-	// Проверка непротиворечивости цели (true - цель противоречива, false - цель непротиворечива)
+	/*// Проверка непротиворечивости цели (true - цель противоречива, false - цель непротиворечива)
 	bool checkAimInconsistency(THypercubeEnvironment::TAim& aim, int environmentResolution);
 	// Сравнение двух целей среды (true - цели равны, false - цели неравны)
 	bool compareTwoAims(THypercubeEnvironment::TAim& firstAim, THypercubeEnvironment::TAim& secondAim);
@@ -40,7 +40,7 @@ public:
 	void testDeleteConnection(std::string testDirectory);
 
 	// Тестирование процедуры дупликации пула
-	void testDuplicatePool(std::string testDirectory);
+	void testDuplicatePool(std::string testDirectory);*/
 };
 
 #endif // TESTS_H

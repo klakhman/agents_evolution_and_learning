@@ -85,10 +85,10 @@ public:
 	void setConnectionDevelopSynapseProb(int poolNumber, int connectionNumber, double newDevelopSynapseProb) { poolsStructure[poolNumber-1]->setConnectionDevelopSynapseProb(connectionNumber, newDevelopSynapseProb); }
 	long getConnectionInnovationNumber(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionInnovationNumber(connectionNumber); }
 	void setConnectionInnovationNumber(int poolNumber, int connectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1]->setConnectionInnovationNumber(connectionNumber, newInnovationNumber); }
-	TNeuralPool* getConnectionPrePool(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPrePool(connectionNumber); }
-	void setConnectionPrePool(int poolNumber, int connectionNumber, TNeuralPool* newPrePool) { poolsStructure[poolNumber-1]->setConnectionPrePool(connectionNumber, newPrePool); }
-	TNeuralPool* getConnectionPostPool(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPostPool(connectionNumber); }
-	void setConnectionPostPool(int poolNumber, int connectionNumber, TNeuralPool* newPostPool) { poolsStructure[poolNumber-1]->setConnectionPostPool(connectionNumber, newPostPool); }
+	int getConnectionPrePoolID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPrePoolID(connectionNumber); }
+	void setConnectionPrePoolID(int poolNumber, int connectionNumber, int newPrePoolID) { poolsStructure[poolNumber-1]->setConnectionPrePoolID(connectionNumber, newPrePoolID); }
+	int getConnectionPostPoolID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPostPoolID(connectionNumber); }
+	void setConnectionPostPoolID(int poolNumber, int connectionNumber, int newPostPoolID) { poolsStructure[poolNumber-1]->setConnectionPostPoolID(connectionNumber, newPostPoolID); }
 
 	// Геттеры и сеттеры для предикторных связей данной сети (во всех случаях передается номер пула в массиве пула и номер связи в массиве связей)
 	int getPredConnectionID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionID(predConnectionNumber); }
@@ -101,10 +101,10 @@ public:
 	void setDevelopPredConnectionProb(int poolNumber, int predConnectionNumber, double newDevelopPredConnectionProb) { poolsStructure[poolNumber-1]->setDevelopPredConnectionProb(predConnectionNumber, newDevelopPredConnectionProb); }
 	long getPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionInnovationNumber(predConnectionNumber); }
 	void setPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1]->setPredConnectionInnovationNumber(predConnectionNumber, newInnovationNumber); }
-	TNeuralPool* getPredConnectionPrePool(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPrePool(predConnectionNumber); }
-	void setPredConnectionPrePool(int poolNumber, int predConnectionNumber, TNeuralPool* newPrePool) { poolsStructure[poolNumber-1]->setPredConnectionPrePool(predConnectionNumber, newPrePool); }
-	TNeuralPool* getPredConnectionPostPool(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPostPool(predConnectionNumber); }
-	void setPredConnectionPostPool(int poolNumber, int predConnectionNumber, TNeuralPool* newPostPool) { poolsStructure[poolNumber-1]->setPredConnectionPostPool(predConnectionNumber, newPostPool); }
+	int getPredConnectionPrePoolID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPrePoolID(predConnectionNumber); }
+	void setPredConnectionPrePoolID(int poolNumber, int predConnectionNumber, int newPrePoolID) { poolsStructure[poolNumber-1]->setPredConnectionPrePoolID(predConnectionNumber, newPrePoolID); }
+	int getPredConnectionPostPoolID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPostPoolID(predConnectionNumber); }
+	void setPredConnectionPostPoolID(int poolNumber, int predConnectionNumber, int newPostPoolID) { poolsStructure[poolNumber-1]->setPredConnectionPostPoolID(predConnectionNumber, newPostPoolID); }
 
 	// Нахождение номера связи в структуре постсинаптического пула - возвращает ноль, если связи нет
 	int findConnectionNumber(int prePoolNumber, int postPoolNumber);
@@ -120,33 +120,26 @@ public:
 	void fixPredConnectionsIDs();
 
 	//Добавление нейронального пула в сеть
-	void addPool(int newID, int newType, int newCapacity, double newBiasMean, double newBiasVariance, int newLayer);
+	void addPool(int newType, int newLayer, double newBiasMean, double newBiasVariance = 0, int newCapacity = 1);
 
 	//Добавление связи в сеть
-	void addConnection(int prePoolNumber, int postPoolNumber, int newID, double newWeightMean, double newWeightVariance, bool newEnabled, int newDisabledStep, double newDevelopSynapseProb, long newInnovationNumber){
-		poolsStructure[postPoolNumber-1]->addConnection(newID, newWeightMean, newWeightVariance, newEnabled, newDisabledStep, newDevelopSynapseProb, newInnovationNumber, poolsStructure[prePoolNumber-1]); 
-		++connectionsQuantity;
+	void addConnection(int prePoolNumber, int postPoolNumber, double newWeightMean, double newWeightVariance = 0, double newDevelopSynapseProb = 1, bool newEnabled = true, int newDisabledStep = 0, long newInnovationNumber = 0){
+		poolsStructure[postPoolNumber-1]->addConnection(++connectionsQuantity, prePoolNumber, newWeightMean, newWeightVariance, newDevelopSynapseProb, newEnabled, newDisabledStep, newInnovationNumber); 
 	}
 
 	// Добавление предикторной связи в сеть
-	void addPredConnection(int prePoolNumber, int postPoolNumber, int newID, bool newEnabled, int newDisabledStep, double newDevelopPredConnectionProb, long newInnovationNumber){
-		poolsStructure[postPoolNumber-1]->addPredConnection(newID, newEnabled, newDisabledStep, newDevelopPredConnectionProb, newInnovationNumber, poolsStructure[prePoolNumber-1]); 
-		++predConnectionsQuantity;
+	void addPredConnection(int prePoolNumber, int postPoolNumber, double newDevelopPredConnectionProb = 1, bool newEnabled = true, int newDisabledStep = 0, long newInnovationNumber = 0){
+		poolsStructure[postPoolNumber-1]->addPredConnection(++predConnectionsQuantity, prePoolNumber, newDevelopPredConnectionProb, newEnabled, newDisabledStep, newInnovationNumber); 
 	}
+
 	// Удаление пула из сети (с удалением также всех входных и выходных связей из этого пула)
 	void deletePool(int poolNumber);
 
-	//Удаление связи из сети
-	void deleteConnection(int poolNumber, int connectionNumber){
-		poolsStructure[poolNumber-1]->deleteConnection(connectionNumber);
-		--connectionsQuantity;
-	}
+	//Удаление связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
+	void deleteConnection(int poolNumber, int connectionNumber, bool fixIDs = true); 
 
 	// Удаление предикторной связи из сети
-	void deletePredConnection(int poolNumber, int predConnectionNumber){
-		poolsStructure[poolNumber-1]->deletePredConnection(predConnectionNumber);
-		--predConnectionsQuantity;
-	}
+	void deletePredConnection(int poolNumber, int predConnectionNumber, bool fixIDs = true);
 
 	// Стирание сети
 	void erasePoolNetwork();

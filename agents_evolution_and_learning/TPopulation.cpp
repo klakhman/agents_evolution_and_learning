@@ -161,7 +161,7 @@ void TPopulation::mutationDeleteConnectionPopulation(TAgent& kidAgent, int curre
 			// Если эта связь была выключена и ее уже надо удалить из генома
 			if (( !kidGenome->getConnectionEnabled(currentPool, currentPoolConnection)) &&
 								(currentEvolutionStep - kidGenome->getConnectionDisabledStep(currentPool, currentPoolConnection) >= mutationSettings.disLimit)){
-				kidGenome->deleteConnection(currentPool, currentPoolConnection);
+				kidGenome->deleteConnection(currentPool, currentPoolConnection, false);
 				--currentPoolConnection; // Чтобы указатель остался на том же номере связи
 			}
 	kidGenome->fixConnectionsIDs();
@@ -175,7 +175,7 @@ void TPopulation::mutationDeletePredConnectionPopulation(TAgent& kidAgent, int c
 			// Если эта предикторная связь была выключена и ее уже надо удалить из генома
 			if (( !kidGenome->getPredConnectionEnabled(currentPool, currentPoolPredConnection)) &&
 								(currentEvolutionStep - kidGenome->getPredConnectionDisabledStep(currentPool, currentPoolPredConnection) >= mutationSettings.disLimit)){
-				kidGenome->deletePredConnection(currentPool, currentPoolPredConnection);
+				kidGenome->deletePredConnection(currentPool, currentPoolPredConnection, false);
 				--currentPoolPredConnection; // Чтобы указатель остался на том же номере предикторной связи
 			}
 	kidGenome->fixPredConnectionsIDs();
@@ -187,6 +187,7 @@ void TPopulation::mutationAddPoolConnection(TAgent& kidAgent){
 	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addConnectionProb){ // Если имеет место мутация
 		int prePoolID, postPoolID; // Пресинаптический и постсинаптический пул потенциальной связи
 		int tryCount = 0; //Количество ложных генераций связи - введено, чтобы не было зацикливания
+		int findedConnection = 0;
 		do{ // Цикл нахождения отсутствующей связи
 			do{ // Цикл нахождения корректной связи
 				prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getPoolsQuantity());
@@ -197,11 +198,11 @@ void TPopulation::mutationAddPoolConnection(TAgent& kidAgent){
 																(prePoolID <= kidGenome->getInputResolution()) || (prePoolID > kidGenome->getInputResolution() + kidGenome->getOutputResolution())));
 			++tryCount;
 		// Пока не найдем отсутствующую связь или превысим допустимое кол-во попыток
-		}while ((kidGenome->findConnectionNumber(prePoolID, postPoolID)) && (tryCount <= 1000));
+		}while ((findedConnection = kidGenome->findConnectionNumber(prePoolID, postPoolID)) && (tryCount <= 1000));
 		// Если отсутствующая связь найдена
-		if (! kidGenome->findConnectionNumber(prePoolID, postPoolID)){
-			kidGenome->addConnection(prePoolID, postPoolID, kidGenome->getConnectionsQuantity() + 1, service::uniformDistribution(-0.5, 0.5), 0, true, 0, 
-												kidAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability, ++connectionInnovationNumber);
+		if (! findedConnection){
+			kidGenome->addConnection(prePoolID, postPoolID, service::uniformDistribution(-0.5, 0.5), 0, kidAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability, 
+												true, 0, ++connectionInnovationNumber);
 			// Детекция необходимости сдвига постсинаптического пула в следующий слой, если появилась связь между пулами одного слоя
 			if ((kidGenome->getPoolLayer(prePoolID) == kidGenome->getPoolLayer(postPoolID)) && (prePoolID != postPoolID))
 				for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
@@ -219,17 +220,18 @@ void TPopulation::mutationAddPoolPredConnection(TAgent& kidAgent){
 	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addPredConnectionProb){ // Если имеет место мутация
 		int prePoolID, postPoolID; // Пресинаптический и постсинаптический пул потенциальной предикторной связи
 		int tryCount = 0; //Количество ложных генераций предикторной связи - введено, чтобы не было зацикливания
+		int findedConnection = 0;
 		do{ // Цикл нахождения отсутствующей предикторной связи
 			prePoolID = service::uniformDiscreteDistribution(1, kidGenome->getPoolsQuantity());
 			// Постсинаптический пул точно не может быть входным или выходным
 			postPoolID = service::uniformDiscreteDistribution(kidGenome->getInputResolution() + kidGenome->getOutputResolution() + 1, kidGenome->getPoolsQuantity());
 			++tryCount;
 		// Пока не найдем отсутствующую предикторную связь или превысим допустимое кол-во попыток
-		}while ((kidGenome->findPredConnectionNumber(prePoolID, postPoolID)) && (tryCount <= 1000));
+		}while ((findedConnection = kidGenome->findPredConnectionNumber(prePoolID, postPoolID)) && (tryCount <= 1000));
 		// Если отсутствующая предикторная связь найдена
-		if (! kidGenome->findPredConnectionNumber(prePoolID, postPoolID)){
-			kidGenome->addPredConnection(prePoolID, postPoolID, kidGenome->getPredConnectionsQuantity() + 1, true, 0, 
-													kidAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability, ++predConnectionInnovationNumber); 
+		if (! findedConnection){
+			kidGenome->addPredConnection(prePoolID, postPoolID, kidAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability,  
+													true, 0, ++predConnectionInnovationNumber); 
 			kidGenome->fixPredConnectionsIDs();
 		}
 	}
@@ -247,7 +249,6 @@ void TPopulation::mutationDeletePoolConnection(TAgent& kidAgent){
 					kidGenome->deleteConnection(currentPool, currentPoolConnection);
 					break;
 				}
-		kidGenome->fixConnectionsIDs();
 	}
 }
 
@@ -263,7 +264,6 @@ void TPopulation::mutationDeletePoolPredConnection(TAgent& kidAgent){
 					kidGenome->deletePredConnection(currentPool, currentPoolPredConnection);
 					break;
 				}
-		kidGenome->fixPredConnectionsIDs();
 	}
 }
 
@@ -288,8 +288,8 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent, int evolutionaryTime
 			if (duplicate){ // Если пул дуплицирует
 				if (kidGenome->getPoolCapacity(currentPool) != 1 ) // Если в пуле не остался только один нейрон (иначе оставляем размерность = 1)
 					kidGenome->setPoolCapacity(currentPool, static_cast<int>(kidGenome->getPoolCapacity(currentPool) * mutationSettings.poolDivisionCoef + 0.5));
-				kidGenome->addPool(kidGenome->getPoolsQuantity() + 1, kidGenome->getPoolType(currentPool), kidGenome->getPoolCapacity(currentPool),
-											kidGenome->getPoolBiasMean(currentPool), kidGenome->getPoolBiasVariance(currentPool), kidGenome->getPoolLayer(currentPool));
+				kidGenome->addPool(kidGenome->getPoolType(currentPool), kidGenome->getPoolLayer(currentPool),
+											kidGenome->getPoolBiasMean(currentPool), kidGenome->getPoolBiasVariance(currentPool), kidGenome->getPoolCapacity(currentPool));
 				kidGenome->setPoolRootPoolID(kidGenome->getPoolsQuantity(), currentPool);
 				kidGenome->setPoolAppearenceEvolutionTime(kidGenome->getPoolsQuantity(), evolutionaryTime);
 
@@ -299,13 +299,13 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent, int evolutionaryTime
 					if (kidGenome->getConnectionID(currentPool, currentPoolConnection) <= initConnectionsQuantity){
 						int prePoolNumber;
 						// Если это не связь на самого себя
-						if (kidGenome->getConnectionPrePool(currentPool, currentPoolConnection)->getID() != kidGenome->getConnectionPostPool(currentPool, currentPoolConnection)->getID())
-							prePoolNumber = kidGenome->getConnectionPrePool(currentPool, currentPoolConnection)->getID();
+						if (kidGenome->getConnectionPrePoolID(currentPool, currentPoolConnection) != kidGenome->getConnectionPostPoolID(currentPool, currentPoolConnection))
+							prePoolNumber = kidGenome->getConnectionPrePoolID(currentPool, currentPoolConnection);
 						else 
 							prePoolNumber = kidGenome->getPoolsQuantity();
-						kidGenome->addConnection(prePoolNumber, kidGenome->getPoolsQuantity(), kidGenome->getConnectionsQuantity() + 1, kidGenome->getConnectionWeightMean(currentPool, currentPoolConnection),
-														kidGenome->getConnectionWeightVariance(currentPool, currentPoolConnection), kidGenome->getConnectionEnabled(currentPool, currentPoolConnection),
-														kidGenome->getConnectionDisabledStep(currentPool, currentPoolConnection), kidGenome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection),
+						kidGenome->addConnection(prePoolNumber, kidGenome->getPoolsQuantity(), kidGenome->getConnectionWeightMean(currentPool, currentPoolConnection),
+														kidGenome->getConnectionWeightVariance(currentPool, currentPoolConnection), kidGenome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection),
+														kidGenome->getConnectionEnabled(currentPool, currentPoolConnection), kidGenome->getConnectionDisabledStep(currentPool, currentPoolConnection), 
 														++connectionInnovationNumber);
 					}
             // Копируем все выходящие связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
@@ -314,10 +314,10 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent, int evolutionaryTime
 						for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPostPool); ++currentPoolConnection)
 							if (kidGenome->getConnectionID(currentPostPool, currentPoolConnection) <= initConnectionsQuantity) // Если это старая связь
 								// Если у текущего потенциального пула есть связь с текущим дублицирующим пулом
-								if (kidGenome->getConnectionPrePool(currentPostPool, currentPoolConnection)->getID() == currentPool){
-									kidGenome->addConnection(kidGenome->getPoolsQuantity(), currentPostPool, kidGenome->getConnectionsQuantity() + 1, kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0,
-														kidGenome->getConnectionWeightVariance(currentPostPool, currentPoolConnection), kidGenome->getConnectionEnabled(currentPostPool, currentPoolConnection),
-														kidGenome->getConnectionDisabledStep(currentPostPool, currentPoolConnection), kidGenome->getConnectionDevelopSynapseProb(currentPostPool, currentPoolConnection),
+								if (kidGenome->getConnectionPrePoolID(currentPostPool, currentPoolConnection) == currentPool){
+									kidGenome->addConnection(kidGenome->getPoolsQuantity(), currentPostPool, kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0,
+														kidGenome->getConnectionWeightVariance(currentPostPool, currentPoolConnection), kidGenome->getConnectionDevelopSynapseProb(currentPostPool, currentPoolConnection), 
+														kidGenome->getConnectionEnabled(currentPostPool, currentPoolConnection), kidGenome->getConnectionDisabledStep(currentPostPool, currentPoolConnection),
 														++connectionInnovationNumber);
 									// Выходные связи дуплицирующего нейрона мы делим пополам между новым и дуплицирующим
 									kidGenome->setConnectionWeightMean(currentPostPool, currentPoolConnection, kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0); 
@@ -329,12 +329,12 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent, int evolutionaryTime
 					if (kidGenome->getPredConnectionID(currentPool, currentPoolPredConnection) <= initPredConnectionsQuantity){
 						int prePoolNumber;
 						// Если это не предикторная связь на самого себя
-						if (kidGenome->getPredConnectionPrePool(currentPool, currentPoolPredConnection)->getID() != kidGenome->getPredConnectionPostPool(currentPool, currentPoolPredConnection)->getID())
-							prePoolNumber = kidGenome->getPredConnectionPrePool(currentPool, currentPoolPredConnection)->getID();
+						if (kidGenome->getPredConnectionPrePoolID(currentPool, currentPoolPredConnection) != kidGenome->getPredConnectionPostPoolID(currentPool, currentPoolPredConnection))
+							prePoolNumber = kidGenome->getPredConnectionPrePoolID(currentPool, currentPoolPredConnection);
 						else 
 							prePoolNumber = kidGenome->getPoolsQuantity();
-						kidGenome->addPredConnection(prePoolNumber, kidGenome->getPoolsQuantity(), kidGenome->getPredConnectionsQuantity() + 1, kidGenome->getPredConnectionEnabled(currentPool, currentPoolPredConnection),
-														kidGenome->getPredConnectionDisabledStep(currentPool, currentPoolPredConnection), kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection),
+						kidGenome->addPredConnection(prePoolNumber, kidGenome->getPoolsQuantity(), kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection), 
+														kidGenome->getPredConnectionEnabled(currentPool, currentPoolPredConnection), kidGenome->getPredConnectionDisabledStep(currentPool, currentPoolPredConnection),
 														++predConnectionInnovationNumber);
 					}
             // Копируем все выходящие предикторные связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
@@ -343,9 +343,9 @@ void TPopulation::mutationPoolDuplication(TAgent& kidAgent, int evolutionaryTime
 						for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPostPool); ++currentPoolPredConnection)
 							if (kidGenome->getPredConnectionID(currentPostPool, currentPoolPredConnection) <= initPredConnectionsQuantity) // Если это старая связь
 								// Если у текущего потенциального пула есть предикторная связь с текущим дублицирующим пулом
-								if (kidGenome->getPredConnectionPrePool(currentPostPool, currentPoolPredConnection)->getID() == currentPool)
-									kidGenome->addPredConnection(kidGenome->getPoolsQuantity(), currentPostPool, kidGenome->getPredConnectionsQuantity() + 1, kidGenome->getPredConnectionEnabled(currentPostPool, currentPoolPredConnection),
-														kidGenome->getPredConnectionDisabledStep(currentPostPool, currentPoolPredConnection), kidGenome->getDevelopPredConnectionProb(currentPostPool, currentPoolPredConnection),
+								if (kidGenome->getPredConnectionPrePoolID(currentPostPool, currentPoolPredConnection) == currentPool)
+									kidGenome->addPredConnection(kidGenome->getPoolsQuantity(), currentPostPool, kidGenome->getDevelopPredConnectionProb(currentPostPool, currentPoolPredConnection),
+														kidGenome->getPredConnectionEnabled(currentPostPool, currentPoolPredConnection), kidGenome->getPredConnectionDisabledStep(currentPostPool, currentPoolPredConnection),
 														++predConnectionInnovationNumber);
 			} // duplicate
 		}
