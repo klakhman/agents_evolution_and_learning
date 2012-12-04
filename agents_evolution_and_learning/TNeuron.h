@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <fstream>
+#include "TSynapse.h"
+#include "TPredConnection.h"
 
 class TNeuralNetwork;
-class TSynapse;
-class TPredConnection;
 
 /* 
 Класс нейрона нейронной сети 
@@ -18,7 +18,6 @@ class TNeuron{
 	int layer; // Номер слоя, в котором находится нейрон
 	bool active; // Признак активности нейрона (0 - молчащий нейрон, 1 - активный нейрон)
 
-	//TNeuralPool* ParentPool; // Ссылка на пул из которого образовался нейрон (не всегда есть)
 	int parentPoolID; // Номер родительского пула
 
 	TSynapse** inputSynapsesSet; // Массив входных синапсов нейрона
@@ -68,8 +67,8 @@ public:
 		previousOut = 0;
 	}
 	// Полный конструктор
-	TNeuron(int newID, int newType, double newBias, int newLayer, bool newActive = true, int newParentPoolID = 0){
-		setAll(newID, newType, newBias, newLayer, newActive, newParentPoolID);
+	TNeuron(int newID, int newType, int newLayer, double newBias, bool newActive = true, int newParentPoolID = 0){
+		setAll(newID, newType, newLayer, newBias, newActive, newParentPoolID);
 		inputSynapsesSet = 0;
 		inputSynapsesSetSize = 0;
 		inputSynapsesQuantity = 0;
@@ -102,7 +101,7 @@ public:
 	// Получение количества входных предикторных связей нейрона
 	int getInputPredConnectionsQuantity() const { return inputPredConnectionsQuantity; }
 	// Заполнение всех характеристик нейрона
-	void setAll(int newID, int newType, double newBias, int newLayer, bool newActive, int newParentPoolID){
+	void setAll(int newID, int newType, int newLayer, double newBias, bool newActive = true, int newParentPoolID = 0){
 		ID = newID;
 		type = newType;
 		bias = newBias;
@@ -110,40 +109,41 @@ public:
 		active = newActive;
 		parentPoolID = newParentPoolID;
 	}
+
 	// Получение динамических характеристик нейрона
 	double getCurrentOut() { return currentOut; }
 	double getCurrentPotential() { return potential; }
 	double getPreviousOut() { return previousOut; }
 
 	// Геттеры и сеттеры для синапсов данного пула (во всех случаях передается номер синапса в массиве синапсов)
-	int getSynapseID(int synapseNumber) const;
-	void setSynapseID(int synapseNumber, int newID);
-	double getSynapseWeight(int synapseNumber) const;
-	void setSynapseWeight(int synapseNumber, double newWeight);
-	bool getSynapseEnabled(int synapseNumber) const;
-	void setSynapseEnabled(int synapseNumber, bool newEnabled);
-	TNeuron* getSynapsePreNeuron(int synapseNumber) const;
-	void setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron);
-	TNeuron* getSynapsePostNeuron(int synapseNumber) const;
-	void setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron);
+	int TNeuron::getSynapseID(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getID(); }
+	void TNeuron::setSynapseID(int synapseNumber, int newID) { inputSynapsesSet[synapseNumber-1]->setID(newID); }
+	double TNeuron::getSynapseWeight(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getWeight(); }
+	void TNeuron::setSynapseWeight(int synapseNumber, double newWeight) { inputSynapsesSet[synapseNumber-1]->setWeight(newWeight); }
+	bool TNeuron::getSynapseEnabled(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getEnabled(); }
+	void TNeuron::setSynapseEnabled(int synapseNumber, bool newEnabled) { inputSynapsesSet[synapseNumber-1]->setEnabled(newEnabled); }
+	TNeuron* TNeuron::getSynapsePreNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getPreNeuron(); }
+	void TNeuron::setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron) { inputSynapsesSet[synapseNumber-1]->setPreNeuron(newPreNeuron); }
+	TNeuron* TNeuron::getSynapsePostNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getPostNeuron(); }
+	void TNeuron::setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron) { inputSynapsesSet[synapseNumber-1]->setPostNeuron(newPostNeuron); }
 
 	// Геттеры и сеттеры для предикторных связей данного нейрона (во всех случаях передается номер связи в массиве связей)
-	int getPredConnectionID(int predConnectionNumber) const;
-	void setPredConnectionID(int predConnectionNumber, int newID);
-	bool getPredConnectionEnabled(int predConnectionNumber) const;
-	void setPredConnectionEnabled(int predConnectionNumber, bool newEnabled);
-	TNeuron* getPredConnectionPreNeuron(int predConnectionNumber) const;
-	void setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newPreNeuron);
-	TNeuron* getPredConnectionPostNeuron(int predConnectionNumber) const;
-	void setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron);
+	int TNeuron::getPredConnectionID(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getID(); }
+	void TNeuron::setPredConnectionID(int predConnectionNumber, int newID) { inputPredConnectionsSet[predConnectionNumber-1]->setID(newID); }
+	bool TNeuron::getPredConnectionEnabled(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getEnabled(); }
+	void TNeuron::setPredConnectionEnabled(int predConnectionNumber, bool newEnabled) { inputPredConnectionsSet[predConnectionNumber-1]->setEnabled(newEnabled); }
+	TNeuron* TNeuron::getPredConnectionPreNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getPreNeuron(); }
+	void TNeuron::setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newPreNeuron) { inputPredConnectionsSet[predConnectionNumber-1]->setPreNeuron(newPreNeuron); }
+	TNeuron* TNeuron::getPredConnectionPostNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getPostNeuron(); }
+	void TNeuron::setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron) { inputPredConnectionsSet[predConnectionNumber-1]->setPostNeuron(newPostNeuron); }
 
 	// Добавление входного синапса в нейрон
-	void addSynapse(int newID, double newWeight, bool newEnabled = true, TNeuron* newPreNeuron = 0);
+	void addSynapse(int newID, TNeuron* newPreNeuron, double newWeight, bool newEnabled = true);
 	// Удаление синапса из нейрона
 	void deleteSynapse(int synapseNumber);
 
 	// Добавление входной предикторной связи в нейрон
-	void addPredConnection(int newID, bool newEnabled = true, TNeuron* newPreNeuron = 0);
+	void addPredConnection(int newID, TNeuron* newPreNeuron, bool newEnabled = true);
 	// Удаление предикторной связи из нейрона
 	void deletePredConnection(int predConnectionNumber);
 

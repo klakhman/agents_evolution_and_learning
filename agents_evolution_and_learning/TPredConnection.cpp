@@ -1,8 +1,8 @@
 ﻿#include "TPredConnection.h"
-#include "TNeuron.h"
 
 #include <iostream>
 #include <fstream>
+#include "TNeuron.h"
 
 using namespace std;
 

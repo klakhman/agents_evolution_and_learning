@@ -175,9 +175,12 @@ void TPoolNetwork::erasePoolNetwork(){
 TPoolNetwork& TPoolNetwork::operator=(const TPoolNetwork& sourcePoolNetwork){
 	erasePoolNetwork(); // На всякий случай опустошаем сеть
 	// Копируем пулы
-	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool)
+	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool){
 		addPool(sourcePoolNetwork.getPoolType(currentPool), sourcePoolNetwork.getPoolLayer(currentPool),
 					sourcePoolNetwork.getPoolBiasMean(currentPool), sourcePoolNetwork.getPoolBiasVariance(currentPool), sourcePoolNetwork.getPoolCapacity(currentPool));
+		setPoolRootPoolID(currentPool, sourcePoolNetwork.getPoolRootPoolID(currentPool));
+		setPoolAppearenceEvolutionTime(currentPool, sourcePoolNetwork.getPoolAppearenceEvolutionTime(currentPool));
+	}
 	// Копируем все связи сети
 	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool){
 		for (int currentPoolConnection = 1; currentPoolConnection <= sourcePoolNetwork.getPoolInputConnectionsQuantity(currentPool); ++ currentPoolConnection)

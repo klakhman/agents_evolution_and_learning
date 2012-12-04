@@ -23,8 +23,8 @@ public:
 		postNeuron = 0;
 	}
 	// Полный конструктор
-	TPredConnection(int newID, bool newEnabled = true, TNeuron* newPreNeuron = 0, TNeuron* newPostNeuron = 0){
-		setAll(newID, newEnabled, newPreNeuron, newPostNeuron);
+	TPredConnection(int newID, TNeuron* newPreNeuron, TNeuron* newPostNeuron, bool newEnabled = true){
+		setAll(newID, newPreNeuron, newPostNeuron, newEnabled);
 	}
 	// Деструктор
 	~TPredConnection() {}
@@ -39,7 +39,7 @@ public:
 	TNeuron* getPostNeuron() const { return postNeuron; }
 	void setPostNeuron(TNeuron* newPostNeuron) { postNeuron = newPostNeuron; }
 	// Заполнение всех характеристик связи
-	void setAll(int newID, bool newEnabled = true, TNeuron* newPreNeuron = 0, TNeuron* newPostNeuron = 0){
+	void setAll(int newID, TNeuron* newPreNeuron, TNeuron* newPostNeuron, bool newEnabled = true){
 		ID = newID;
 		enabled = newEnabled;
 		preNeuron = newPreNeuron;
@@ -50,3 +50,4 @@ public:
 };
 
 #endif // TPREDCONNECTION_H
+

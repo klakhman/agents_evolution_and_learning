@@ -33,6 +33,21 @@ void TNeuralNetwork::fixNeuronsIDs(){
 		neuronsStructure[currentNeuron - 1]->setID(currentNeuron);
 }
 
+// Корректировка ID связей (например после удаления)
+void TNeuralNetwork::fixSynapsesIDs(){
+	int _synapesQuantity = 0;
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
+			neuronsStructure[currentNeuron - 1]->setSynapseID(currentSynapse, ++_synapesQuantity);
+}
+// Корректировка ID предикторных связей (например после удаления)
+void TNeuralNetwork::fixPredConnectionsIDs(){
+	int _predConnectionsQuantity = 0;
+	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+			neuronsStructure[currentNeuron - 1]->setPredConnectionID(currentPredConnection, ++_predConnectionsQuantity);
+}
+
 // Процедура увеличения размера массива нейронов
 void TNeuralNetwork::inflateNeuronsStructure(int inflateSize){
 	TNeuron** newNeuronsStructure = new TNeuron*[neuronsStructureSize + inflateSize];
@@ -53,10 +68,11 @@ TNeuralNetwork::~TNeuralNetwork(){
 }
 
 //Добавление нейрона в сеть
-void TNeuralNetwork::addNeuron(int newID, int newType, double newBias, int newLayer, bool newActive /*=true*/, int newParentneuralID /*=0*/){
+void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool newActive /*=true*/, int newParentNeuronID /*=0*/){
 	if (neuronsQuantity >= neuronsStructureSize) // Если не хватает места в массиве
 		inflateNeuronsStructure(INFLATE_NEURONS_SIZE);
-	neuronsStructure[neuronsQuantity++] = new TNeuron(newID, newType, newBias, newLayer, newActive, newParentneuralID);
+	neuronsStructure[neuronsQuantity] = new TNeuron(neuronsQuantity + 1, newType, newLayer, newBias, newActive, newParentNeuronID);
+	++neuronsQuantity;
 	// Если нейрон входной
 	if (0 == newType) ++inputResolution;
 	// Если нейрон выходной
@@ -93,6 +109,32 @@ void TNeuralNetwork::deleteNeuron(int neuronNumber){
 	neuronsStructure[neuronsQuantity - 1] = 0;
 	--neuronsQuantity;
 	fixNeuronsIDs();
+}
+
+//Удаление связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
+void TNeuralNetwork::deleteSynapse(int neuronNumber, int synapseNumber, bool fixIDs /*=true*/){
+	neuronsStructure[neuronNumber-1]->deleteSynapse(synapseNumber);
+	if (fixIDs){
+		for (int currentSynapse = synapseNumber; currentSynapse <= neuronsStructure[neuronNumber - 1]->getInputSynapsesQuantity(); ++currentSynapse)
+			neuronsStructure[neuronNumber - 1]->setSynapseID(currentSynapse, neuronsStructure[neuronNumber - 1]->getSynapseID(currentSynapse) - 1);
+		for (int currentNeuron = neuronNumber + 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+			for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
+				neuronsStructure[currentNeuron - 1]->setSynapseID(currentSynapse, neuronsStructure[currentSynapse - 1]->getSynapseID(currentSynapse) - 1);
+	}
+	--synapsesQuantity;
+}
+
+// Удаление предикторной связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
+void TNeuralNetwork::deletePredConnection(int neuronNumber, int predConnectionNumber, bool fixIDs /*=true*/){
+	neuronsStructure[neuronNumber-1]->deletePredConnection(predConnectionNumber);
+	if (fixIDs){
+		for (int currentPredConnection = predConnectionNumber; currentPredConnection <= neuronsStructure[neuronNumber - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+			neuronsStructure[neuronNumber - 1]->setPredConnectionID(currentPredConnection, neuronsStructure[neuronNumber - 1]->getPredConnectionID(currentPredConnection) - 1);
+		for (int currentNeuron = neuronNumber + 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+			for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
+				neuronsStructure[currentNeuron - 1]->setPredConnectionID(currentPredConnection, neuronsStructure[currentNeuron - 1]->getPredConnectionID(currentPredConnection) - 1);
+	}
+	--predConnectionsQuantity;
 }
 
 // Стирание сети
@@ -257,7 +299,7 @@ istream& operator>>(istream& is, TNeuralNetwork& neuralNetwork){
 		bool newActive = (atoi(tmp_string.c_str()) != 0);
 		is >> tmp_string; // Считываем номер родительского пула
 		int newParentPoolID = atoi(tmp_string.c_str());
-		neuralNetwork.addNeuron(neuralNetwork.getNeuronsQuantity() + 1, newType, newBias, newLayer, newActive, newParentPoolID);
+		neuralNetwork.addNeuron(newType, newLayer, newBias, newActive, newParentPoolID);
 		is >> tmp_string; // Считываем типа нейрона
 	}
 	// Создаем все синапсы между пулами
@@ -270,7 +312,7 @@ istream& operator>>(istream& is, TNeuralNetwork& neuralNetwork){
 		double newWeight = atof(tmp_string.c_str());
 		is >> tmp_string; // Считываем признак экспресии синапса
 		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
-		neuralNetwork.addSynapse(preNeuronNumber, postNeuronNumber, neuralNetwork.getSynapsesQuantity() + 1, newWeight, newEnabled);
+		neuralNetwork.addSynapse(preNeuronNumber, postNeuronNumber, newWeight, newEnabled);
 		is >> tmp_string; // Считываем номер пресинаптического нейрона
 	}
 	// Создаем все предикторные связи между нейронами
@@ -281,7 +323,7 @@ istream& operator>>(istream& is, TNeuralNetwork& neuralNetwork){
 		int postNeuronNumber = atoi(tmp_string.c_str());
 		is >> tmp_string; // Считываем признак экспресии связи
 		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
-		neuralNetwork.addPredConnection(preNeuronNumber, postNeuronNumber, neuralNetwork.getPredConnectionsQuantity() + 1, newEnabled);
+		neuralNetwork.addPredConnection(preNeuronNumber, postNeuronNumber, newEnabled);
 		is >> tmp_string; // Считываем номер пресинаптического нейрона
 	}
 

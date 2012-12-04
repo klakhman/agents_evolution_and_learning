@@ -43,33 +43,11 @@ TNeuron::~TNeuron(){
 	delete []inputPredConnectionsSet;
 }
 
-	// Геттеры и сеттеры для синапсов данного пула (во всех случаях передается номер синапса в массиве синапсов)
-int TNeuron::getSynapseID(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getID(); }
-void TNeuron::setSynapseID(int synapseNumber, int newID) { inputSynapsesSet[synapseNumber-1]->setID(newID); }
-double TNeuron::getSynapseWeight(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getWeight(); }
-void TNeuron::setSynapseWeight(int synapseNumber, double newWeight) { inputSynapsesSet[synapseNumber-1]->setWeight(newWeight); }
-bool TNeuron::getSynapseEnabled(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getEnabled(); }
-void TNeuron::setSynapseEnabled(int synapseNumber, bool newEnabled) { inputSynapsesSet[synapseNumber-1]->setEnabled(newEnabled); }
-TNeuron* TNeuron::getSynapsePreNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getPreNeuron(); }
-void TNeuron::setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron) { inputSynapsesSet[synapseNumber-1]->setPreNeuron(newPreNeuron); }
-TNeuron* TNeuron::getSynapsePostNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getPostNeuron(); }
-void TNeuron::setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron) { inputSynapsesSet[synapseNumber-1]->setPostNeuron(newPostNeuron); }
-
-// Геттеры и сеттеры для предикторных связей данного нейрона (во всех случаях передается номер связи в массиве связей)
-int TNeuron::getPredConnectionID(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getID(); }
-void TNeuron::setPredConnectionID(int predConnectionNumber, int newID) { inputPredConnectionsSet[predConnectionNumber-1]->setID(newID); }
-bool TNeuron::getPredConnectionEnabled(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getEnabled(); }
-void TNeuron::setPredConnectionEnabled(int predConnectionNumber, bool newEnabled) { inputPredConnectionsSet[predConnectionNumber-1]->setEnabled(newEnabled); }
-TNeuron* TNeuron::getPredConnectionPreNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getPreNeuron(); }
-void TNeuron::setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newPreNeuron) { inputPredConnectionsSet[predConnectionNumber-1]->setPreNeuron(newPreNeuron); }
-TNeuron* TNeuron::getPredConnectionPostNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getPostNeuron(); }
-void TNeuron::setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron) { inputPredConnectionsSet[predConnectionNumber-1]->setPostNeuron(newPostNeuron); }
-
 // Добавление входного синапса в нейрон
-void TNeuron::addSynapse(int newID, double newWeight, bool newEnabled /* = true*/, TNeuron* newPreNeuron /* = 0*/){
+void TNeuron::addSynapse(int newID, TNeuron* newPreNeuron, double newWeight, bool newEnabled /*=true*/){
 	if (inputSynapsesQuantity >= inputSynapsesSetSize) // Если у нас не хватает объема массива
 		inflateSynapsesSet(INFLATE_SYNAPSES_SIZE);
-	inputSynapsesSet[inputSynapsesQuantity++] = new TSynapse(newID, newWeight, newEnabled, newPreNeuron, this);
+	inputSynapsesSet[inputSynapsesQuantity++] = new TSynapse(newID, newPreNeuron, this, newWeight, newEnabled);
 }
 
 // Удаление синапса из нейрона
@@ -85,10 +63,10 @@ void TNeuron::deleteSynapse(int synapseNumber){
 }
 
 // Добавление входной предикторной связи в нейрон
-void TNeuron::addPredConnection(int newID, bool newEnabled /* = true*/, TNeuron* newPreNeuron /* = 0*/){
+void TNeuron::addPredConnection(int newID, TNeuron* newPreNeuron, bool newEnabled /* = true*/){
 	if (inputPredConnectionsQuantity >= inputPredConnectionsSetSize) // Если у нас не хватает объема массива
 		inflatePredConnectionsSet(INFLATE_PRED_CONNECTIONS_SIZE);
-	inputPredConnectionsSet[inputPredConnectionsQuantity++] = new TPredConnection(newID, newEnabled, newPreNeuron, this);
+	inputPredConnectionsSet[inputPredConnectionsQuantity++] = new TPredConnection(newID, newPreNeuron, this, newEnabled);
 }
 
 // Удаление предикторной связи из пула

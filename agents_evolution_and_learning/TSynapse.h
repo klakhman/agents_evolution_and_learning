@@ -22,12 +22,12 @@ public:
 		ID = 0;
 		weight = 0;
 		enabled = false;
-		preNeuron = NULL;
-		postNeuron = NULL;
+		preNeuron = 0;
+		postNeuron = 0;
 	}
 	// Полный конструктор
-	TSynapse(int newID, double newWeight, bool newEnabled = true, TNeuron* newPreNeuron = NULL, TNeuron* newPostNeuron = NULL){
-		setAll(newID, newWeight, newEnabled, newPreNeuron, newPostNeuron);
+	TSynapse(int newID, TNeuron* newPreNeuron, TNeuron* newPostNeuron, double newWeight, bool newEnabled = true){
+		setAll(newID, newPreNeuron, newPostNeuron, newWeight, newEnabled);
 	}
 	// Деструктор
 	~TSynapse() {}
@@ -44,7 +44,7 @@ public:
 	TNeuron* getPostNeuron() const { return postNeuron; }
 	void setPostNeuron(TNeuron* newPostNeuron) { postNeuron = newPostNeuron; }
 	// Заполнение всех характеристик синапса
-	void setAll(int newID, double newWeight, bool newEnabled = true, TNeuron* newPreNeuron = NULL, TNeuron* newPostNeuron = NULL){
+	void setAll(int newID, TNeuron* newPreNeuron, TNeuron* newPostNeuron, double newWeight, bool newEnabled = true){
 		ID = newID;
 		weight = newWeight;
 		enabled = newEnabled;

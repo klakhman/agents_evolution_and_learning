@@ -79,20 +79,20 @@ public:
 	void setSynapseWeight(int neuronNumber, int synapseNumber, double newWeight) { neuronsStructure[neuronNumber-1]->setSynapseWeight(synapseNumber, newWeight); }
 	bool getSynapseEnabled(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapseEnabled(synapseNumber); }
 	void setSynapseEnabled(int neuronNumber, int synapseNumber, bool newEnabled) { neuronsStructure[neuronNumber-1]->setSynapseEnabled(synapseNumber, newEnabled); }
-	TNeuron* getSynapsePreNeuron(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapsePreNeuron(synapseNumber); }
-	void setSynapsePreNeuron(int neuronNumber, int synapseNumber, TNeuron* newPreNeuron) { neuronsStructure[neuronNumber-1]->setSynapsePreNeuron(synapseNumber, newPreNeuron); }
-	TNeuron* getSynapsePostNeuron(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapsePostNeuron(synapseNumber); }
-	void setSynapsePostNeuron(int neuronNumber, int synapseNumber, TNeuron* newPostNeuron) { neuronsStructure[neuronNumber-1]->setSynapsePostNeuron(synapseNumber, newPostNeuron); }
+	int getSynapsePreNeuronID(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapsePreNeuron(synapseNumber)->getID(); }
+	void setSynapsePreNeuronID(int neuronNumber, int synapseNumber, int newPreNeuronID) { neuronsStructure[neuronNumber-1]->setSynapsePreNeuron(synapseNumber, neuronsStructure[newPreNeuronID-1]); }
+	int getSynapsePostNeuronID(int neuronNumber, int synapseNumber) const { return neuronsStructure[neuronNumber-1]->getSynapsePostNeuron(synapseNumber)->getID(); }
+	void setSynapsePostNeuronID(int neuronNumber, int synapseNumber, int newPostNeuronID) { neuronsStructure[neuronNumber-1]->setSynapsePostNeuron(synapseNumber, neuronsStructure[newPostNeuronID-1]); }
 
 	// Геттеры и сеттеры для предикторных связей данной сети (во всех случаях передается номер нейрона в массиве нейронов и номер связи в массиве связей)
 	int getPredConnectionID(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionID(predConnectionNumber); }
 	void setPredConnectionID(int neuronNumber, int predConnectionNumber, int newID) { neuronsStructure[neuronNumber-1]->setPredConnectionID(predConnectionNumber, newID); }
 	bool getPredConnectionEnabled(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionEnabled(predConnectionNumber); }
 	void setPredConnectionEnabled(int neuronNumber, int predConnectionNumber, bool newEnabled) { neuronsStructure[neuronNumber-1]->setPredConnectionEnabled(predConnectionNumber, newEnabled); }
-	TNeuron* getPredConnectionPreNeuron(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionPreNeuron(predConnectionNumber); }
-	void setPredConnectionPreNeuron(int neuronNumber, int predConnectionNumber, TNeuron* newPreNeuron) { neuronsStructure[neuronNumber-1]->setPredConnectionPreNeuron(predConnectionNumber, newPreNeuron); }
-	TNeuron* getPredConnectionPostNeuron(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionPostNeuron(predConnectionNumber); }
-	void setPredConnectionPostNeuron(int neuronNumber, int predConnectionNumber, TNeuron* newPostNeuron) { neuronsStructure[neuronNumber-1]->setPredConnectionPostNeuron(predConnectionNumber, newPostNeuron); }
+	int getPredConnectionPreNeuronID(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionPreNeuron(predConnectionNumber)->getID(); }
+	void setPredConnectionPreNeuronID(int neuronNumber, int predConnectionNumber, int newPreNeuronID) { neuronsStructure[neuronNumber-1]->setPredConnectionPreNeuron(predConnectionNumber, neuronsStructure[newPreNeuronID-1]); }
+	int getPredConnectionPostNeuronID(int neuronNumber, int predConnectionNumber) const { return neuronsStructure[neuronNumber-1]->getPredConnectionPostNeuron(predConnectionNumber)->getID(); }
+	void setPredConnectionPostNeuronID(int neuronNumber, int predConnectionNumber, int newPostNeuronID) { neuronsStructure[neuronNumber-1]->setPredConnectionPostNeuron(predConnectionNumber, neuronsStructure[newPostNeuronID-1]); }
 
 	// Нахождение номера связи в структуре постсинаптического нейрона - возвращает ноль, если связи нет
 	int findSynapseNumber(int preNeuronNumber, int postNeuronNumber);
@@ -100,35 +100,32 @@ public:
 	// Нахождение номера предикторной связи в структуре постсинаптического нейрона - возвращает ноль, если предикторной связи нет
 	int findPredConnectionNumber(int preNeuronNumber, int postNeuronNumber);
 
+	// Корректировка ID связей (например после удаления)
+	void fixSynapsesIDs();
+	// Корректировка ID предикторных связей (например после удаления)
+	void fixPredConnectionsIDs();
+
 	//Добавление нейрона в сеть
-	void addNeuron(int newID, int newType, double newBias, int newLayer, bool newActive = true, int newParentNeuronID = 0);
+	void addNeuron(int newType, int newLayer, double newBias, bool newActive = true, int newParentNeuronID = 0);
 
 	//Добавление синапса в сеть
-	void addSynapse(int preNeuronNumber, int postNeuronNumber, int newID, double newWeight, bool newEnabled = true){
-		neuronsStructure[postNeuronNumber-1]->addSynapse(newID, newWeight, newEnabled, neuronsStructure[preNeuronNumber-1]); 
-		++synapsesQuantity;
+	void addSynapse(int preNeuronNumber, int postNeuronNumber, double newWeight, bool newEnabled = true){
+		neuronsStructure[postNeuronNumber-1]->addSynapse(++synapsesQuantity, neuronsStructure[preNeuronNumber-1], newWeight, newEnabled); 
 	}
 
 	// Добавление предикторной связи в сеть
-	void addPredConnection(int preNeuronNumber, int postNeuronNumber, int newID, bool newEnabled = true){
-		neuronsStructure[postNeuronNumber-1]->addPredConnection(newID, newEnabled, neuronsStructure[preNeuronNumber-1]); 
-		++predConnectionsQuantity;
+	void addPredConnection(int preNeuronNumber, int postNeuronNumber, bool newEnabled = true){
+		neuronsStructure[postNeuronNumber-1]->addPredConnection(++predConnectionsQuantity, neuronsStructure[preNeuronNumber-1], newEnabled); 
 	}
 
 	// Удаление нейрона из сети (с удалением также всех входных и выходных связей из этого нейрона)
 	void deleteNeuron(int neuronNumber);
 
-	//Удаление связи из сети
-	void deleteSynapse(int neuronNumber, int synapseNumber){
-		neuronsStructure[neuronNumber-1]->deleteSynapse(synapseNumber);
-		--synapsesQuantity;
-	}
+	//Удаление связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
+	void deleteSynapse(int neuronNumber, int synapseNumber, bool fixIDs = true);
 
-	// Удаление предикторной связи из сети
-	void deletePredConnection(int neuronNumber, int predConnectionNumber){
-		neuronsStructure[neuronNumber-1]->deletePredConnection(predConnectionNumber);
-		--predConnectionsQuantity;
-	}
+	// Удаление предикторной связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
+	void deletePredConnection(int neuronNumber, int predConnectionNumber, bool fixIDs = true);
 
 	// Стирание сети
 	void eraseNeuralNetwork();
