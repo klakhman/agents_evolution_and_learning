@@ -4,6 +4,7 @@
 #include "settings.h"
 #include "TAnalysis.h"
 #include "TBehaviorAnalysis.h"
+#include "TTopologyAnalysis.h"
 
 #include <iostream>
 #include <fstream>
@@ -86,7 +87,7 @@ int main(int argc, char** argv){
   }
   else if (programMode == "PRNT"){ // Режим визуализации лучшего агента
 	TAgent testAgent;
-	std::fstream inputFile("test_file.txt");
+	std::fstream inputFile("pop.txt");
 	std::ofstream outputFile("out_file.txt");
 	testAgent.loadGenome(inputFile);
 	testAgent.uploadGenome(outputFile);
@@ -101,6 +102,18 @@ int main(int argc, char** argv){
 	testAgent.uploadGenome(outputFile, true);
 	(testAgent.getPointerToAgentGenome())->printGraphNetworkAlternative("1", 200, 1);
 	return 0;
+  }
+  else if (programMode == "TLA"){
+	TAgent testAgent;
+	std::fstream inputFile("pop.txt");
+	std::ofstream outputFile("out_file.txt");
+	cout << "we are here" << endl;
+	testAgent.loadGenome(inputFile, true);
+	testAgent.uploadGenome(outputFile, true);
+	
+	TTopologyAnalysis *topologyAnalysis = new TTopologyAnalysis;
+	topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
+	cout << topologyAnalysis->getPoolId(20)[0] << "   " << topologyAnalysis->getPoolId(20)[1] << endl;
   }
 
   /*TAnalysis* analysis = new TAnalysis;
