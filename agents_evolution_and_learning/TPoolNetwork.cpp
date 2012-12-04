@@ -341,9 +341,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 					int flag = 0;
 					for(vector<int>::iterator iterator = nodesSequence.begin(); iterator != nodesSequence.end(); iterator++){
 						if(*iterator == poolsStructure[currentPool - 1]->getRootPoolID()){
-							cout << *(iterator) << "   " << "currentPool " << currentPool << endl;
 							nodesSequence.insert(iterator + 1, 1, currentPool);
-							cout << *(iterator) << "   " << "currentPool " << currentPool << endl;
 							flag = 1;
 							break;
 						}

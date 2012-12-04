@@ -113,7 +113,6 @@ int main(int argc, char** argv){
 	
 	TTopologyAnalysis *topologyAnalysis = new TTopologyAnalysis;
 	topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
-	cout << topologyAnalysis->getPoolId(20)[0] << "   " << topologyAnalysis->getPoolId(20)[1] << endl;
   }
 
   /*TAnalysis* analysis = new TAnalysis;
