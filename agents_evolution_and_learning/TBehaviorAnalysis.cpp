@@ -56,7 +56,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
        settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
        //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
        environment->setStochasticityCoefficient(0.0);
-       TPopulation* agentsPopulation = new TPopulation;
+       TPopulation<TAgent>* agentsPopulation = new TPopulation<TAgent>;
        settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
        settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
        agentsPopulation->loadPopulation(filenameSettings.populationFilename);
@@ -134,7 +134,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(THype
 }
 
 //Найти все циклы в популяции путем прогона агентов через из всех начальных состояний среды
-vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation &population, THypercubeEnvironment &environment) {
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPopulation<TAgent> &population, THypercubeEnvironment &environment) {
   time_t start_time = time(0);
 	//Вычисляем размер популяции единожды
 	int populationSize = population.getPopulationSize();

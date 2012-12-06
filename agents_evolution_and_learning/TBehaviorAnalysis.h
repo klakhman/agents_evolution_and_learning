@@ -13,6 +13,7 @@
 #include <string>
 #include "THypercubeEnvironment.h"
 #include "TPopulation.h"
+#include "TAgent.h"
 
 /* Класс анализа поведенческих циклов агента */
 class TBehaviorAnalysis{
@@ -61,7 +62,7 @@ public:
   void beginAnalysis(int argc, char **argv);
 
   //Найти все циклы в популяции путем прогона агентов через из всех начальных состояний среды
-  std::vector<SCycle> findCyclesInPopulation(TPopulation &population, THypercubeEnvironment &environment);
+  std::vector<SCycle> findCyclesInPopulation(TPopulation<TAgent> &population, THypercubeEnvironment &environment);
 
   //Прогон агента из всех возможных состояний среды для обнаружения всех возможных циклов
   static std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, THypercubeEnvironment &environment);

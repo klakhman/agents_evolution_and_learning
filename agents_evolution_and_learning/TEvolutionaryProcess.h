@@ -2,6 +2,7 @@
 #define TEVOLUTIONARYPROCESS_H
 
 #include "TPopulation.h"
+#include "TAgent.h"
 #include "THypercubeEnvironment.h"
 #include <string>
 #include <iostream>
@@ -9,7 +10,7 @@
 
 class TEvolutionaryProcess{
 	// Популяция агентов
-	TPopulation* agentsPopulation;
+	TPopulation<TAgent>* agentsPopulation;
 	// Среда для агентов
 	THypercubeEnvironment* environment;
 	// Лучшая средняя награда по популяции в текущем запуске
@@ -42,7 +43,7 @@ public:
 	void setExtraPrint(bool _extraPrint) { extraPrint = _extraPrint; }
 	
 	// Вывод логовых сообщений (прогресса) на консоль или в файл
-	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation* bestPopulation, int currentEvolutionStep /*=0*/);
+	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation<TAgent>* bestPopulation, int currentEvolutionStep /*=0*/);
 	
 	// Создание и заполнение предварительного файла основных результатов
 	void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);

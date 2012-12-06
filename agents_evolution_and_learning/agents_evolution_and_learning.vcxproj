@@ -127,7 +127,6 @@
     <ClCompile Include="TPoolConnection.cpp" />
     <ClCompile Include="TPoolNetwork.cpp" />
     <ClCompile Include="TPoolPredConnection.cpp" />
-    <ClCompile Include="TPopulation.cpp" />
     <ClCompile Include="TPredConnection.cpp" />
     <ClCompile Include="TSynapse.cpp" />
     <ClCompile Include="TTopologyAnalysis.cpp" />

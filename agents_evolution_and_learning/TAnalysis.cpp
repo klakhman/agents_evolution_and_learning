@@ -4,6 +4,7 @@
 
 #include "THypercubeEnvironment.h"
 #include "TPopulation.h"
+#include "TAgent.h"
 #include "TBehaviorAnalysis.h"
 #include "settings.h"
 #include <vector>
@@ -31,7 +32,7 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
 	//!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
 	environment->setStochasticityCoefficient(0.0);
-	TPopulation* agentsPopulation = new TPopulation;
+	TPopulation<TAgent>* agentsPopulation = new TPopulation<TAgent>;
 	settings::fillPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);

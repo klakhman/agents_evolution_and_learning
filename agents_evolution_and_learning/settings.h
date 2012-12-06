@@ -14,9 +14,9 @@ namespace settings{
 	// Загрузка параметров среды из файла
 	void fillEnvironmentSettingsFromFile(THypercubeEnvironment& environment, std::string settingsFilename);
 	// Загрузка параметров популяции из файла
-	void fillPopulationSettingsFromFile(TPopulation& agentsPopulation, std::string settingsFilename);
+	void fillPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, std::string settingsFilename);
 	// Загрузка параметров всех агентов в популяции из файла
-	void fillAgentsPopulationSettingsFromFile(TPopulation& agentsPopulation, std::string settingsFilename);
+	void fillAgentsPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, std::string settingsFilename);
 	// Загрузка параметров агента из файла
 	void fillAgentSettingsFromFile(TAgent& agent, std::string settingsFilename);
 };

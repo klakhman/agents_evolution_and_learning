@@ -13,7 +13,7 @@
 using namespace std;
 
 // Вывод логовых сообщений (прогресса) на консоль или в файл
-void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgentsConsole, TPopulation* bestPopulation, int currentEvolutionStep /*=0*/){
+void TEvolutionaryProcess::makeLogNote(ostream& outputConsole, ostream& bestAgentsConsole, TPopulation<TAgent>* bestPopulation, int currentEvolutionStep /*=0*/){
 	// Подсчитываем средние характеристики
 	double averagePoolsQuantity = 0;
 	double averageConnectionsQuantity = 0;
@@ -102,7 +102,7 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
 	if (agentsPopulation)
 		delete agentsPopulation;
-	agentsPopulation = new TPopulation;
+	agentsPopulation = new TPopulation<TAgent>;
 	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
@@ -114,7 +114,7 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
 	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
 	// Создаем структуру лучшей популяции (если процессор достаточно быстрый, то копирование популяций будет быстрее чем каждый раз записывать популяцию в файл)
-	TPopulation* bestPopulation = new TPopulation;
+	TPopulation<TAgent>* bestPopulation = new TPopulation<TAgent>;
 	for (int currentEvolutionStep = 1; currentEvolutionStep <= agentsPopulation->evolutionSettings.evolutionTime; ++currentEvolutionStep){
 		agentsPopulation->evolutionaryStep(*environment, currentEvolutionStep); 
 		makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);

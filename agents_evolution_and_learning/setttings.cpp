@@ -47,7 +47,7 @@ void settings::fillEnvironmentSettingsFromFile(THypercubeEnvironment& environmen
 }
 
 // Загрузка параметров популяции из файла
-void settings::fillPopulationSettingsFromFile(TPopulation& agentsPopulation, string settingsFilename){
+void settings::fillPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, string settingsFilename){
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());
@@ -77,7 +77,7 @@ void settings::fillPopulationSettingsFromFile(TPopulation& agentsPopulation, str
 }
 
 // Загрузка параметров агента из файла
-void settings::fillAgentsPopulationSettingsFromFile(TPopulation& agentsPopulation, string settingsFilename){
+void settings::fillAgentsPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, string settingsFilename){
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());

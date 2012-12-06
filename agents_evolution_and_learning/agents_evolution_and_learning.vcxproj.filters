@@ -113,9 +113,6 @@
     <ClCompile Include="TAgent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TPopulation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TEvolutionaryProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
