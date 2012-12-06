@@ -33,7 +33,7 @@ void TTopologyAnalysis::initializeIdArray(TPoolNetwork *network){
 			if(network->getPoolRootPoolID(currentPool) == parentId){
 				++childNumber;
 				newId.clear();
-				currentGeneration = idArray.at(parentId)[0] + 1;
+				currentGeneration = idArray[parentId][0] + 1;
 				// указываем поколение потомка
 				newId.push_back(currentGeneration);
 				// указываем id родителя (все, кроме его поколения)

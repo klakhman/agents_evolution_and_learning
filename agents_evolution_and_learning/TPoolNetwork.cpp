@@ -223,9 +223,9 @@ void TPoolNetwork::printGraphNetwork(string graphFilename, bool printWeights /*=
 				service::decToHex(static_cast<int>(min(fabs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue), 255.0)), hex, 2);
 				string color;
 				if (poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) < 0)
-					color = "0000" + hex; // Оттенок синего
+					color = "0000FF" + hex; // Оттенок синего
 				else
-					color = hex + "0000"; // Оттенок красного
+					color = "FF0000" + hex; // Оттенок красного
 				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePoolID(currentConnection) << "\" -> \"" <<
 					poolsStructure[currentPool - 1]->getConnectionPostPoolID(currentConnection) << "\" [ ";
 				if (printWeights) //  Если надо напечатать веса
