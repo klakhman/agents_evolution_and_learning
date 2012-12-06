@@ -82,6 +82,7 @@ public:
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			environmentVector[currentBit - 1] = static_cast<double>(currentEnvironmentVector[currentBit - 1]);
 	}
+
 	// Получение кол-ва начальных состояний среды (для текущей бинарной среды - фактически общее кол-во состояний)
 	int getInitialStatesQuantity() const {
 		return static_cast<int>(pow(2, environmentResolution));
@@ -123,10 +124,10 @@ public:
 	Изменение среды под действием агента (возвращает совершено ли действие или его невозможно совершить)
 	В рамках данной архитектуры actionID кодируется как +-(bitNumber), при этом знак определяет в какую сторону изменяется бит (+ это с нуля на единицу)
 	*/
-	bool forceEnvironment(double actionID);
+	bool forceEnvironment(const std::vector<double>& action);
 
 	// Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
-	double calculateReward(double actionsIDs[], int actionsQuantity) const;
+	double calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
 
 	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
 	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps = 0.001, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3);

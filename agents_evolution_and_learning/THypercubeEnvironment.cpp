@@ -104,13 +104,13 @@ void THypercubeEnvironment::randomizeEnvironment(){
 Изменение среды под действием агента (возвращает совершено ли действие (true) или его невозможно совершить(false))
 В рамках данной архитектуры actionID кодируется как +-(bitNumber), при этом знак определяет в какую сторону изменяется бит (+ это с нуля на единицу)
 */
-bool THypercubeEnvironment::forceEnvironment(double actionID){
+bool THypercubeEnvironment::forceEnvironment(const std::vector<double>& action){
 	// Признак успешности совершаемого действия
 	bool actionSuccess = false;
 	//Направление изменения
-	bool changeDirection = (actionID > 0);
+	bool changeDirection = (action[0] > 0);
 	// Номер изменяемого бита
-	int changeBit = static_cast<int>(fabs(actionID));
+	int changeBit = static_cast<int>(fabs(action[0]));
 	// Если бит в противоположной позиции, то действие совершается
 	if (currentEnvironmentVector[changeBit -1] != changeDirection){
 		currentEnvironmentVector[changeBit - 1] = changeDirection;
@@ -123,7 +123,7 @@ bool THypercubeEnvironment::forceEnvironment(double actionID){
 }
 
 // Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
-double THypercubeEnvironment::calculateReward(double actionsIDs[], int actionsQuantity) const{
+double THypercubeEnvironment::calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const{
 	double accumulatedReward = 0.0; // Награда агента
 	// Времена последнего достижения цели агентом
 	int* achievingTime = new int[aimsQuantity];
@@ -140,8 +140,8 @@ double THypercubeEnvironment::calculateReward(double actionsIDs[], int actionsQu
 				// Пока не найдено нарушение последовательности цели или проверка цели закончена
 				while (achivedFlag && (currentAction <= aimsSet[currentAim - 1].aimComplexity)){
 					// Определение направления изменения и изменяемого бита (с откатыванием времени назад)
-					bool changedDirection = (actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction] > 0);
-					int changedBit = static_cast<int>(fabs(actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction]));
+					bool changedDirection = (actions[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0] > 0);
+					int changedBit = static_cast<int>(fabs(actions[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0]));
 					/* Проверяем совпадает ли реальное действие с действием в цели на нужном месте 
 						Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
 					if ((changedBit != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber) ||

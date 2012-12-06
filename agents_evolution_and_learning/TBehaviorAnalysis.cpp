@@ -184,8 +184,14 @@ TBehaviorAnalysis::SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent,
   SCycle agentCycle;
   //Прогоняем жизнь агента (без подсчета награды, так как она нам не нужна)
   agent.life(environment, agentLifeTime, false);
+  // Теперь составляем массив действий агента за всю жизнь (копируем из вектора)
+  vector< vector<double> > agentLife = agent.getPointerToAgentLife();
+  double* agentLifeArray = new double[agentLifeTime];
+  for (int currentAction = 1; currentAction <= agentLifeTime; ++currentAction)
+	  agentLifeArray[currentAction - 1] = agentLife[currentAction - 1][0];
   //Находим цикл
-  vector<double> cycle = findCycleInSequence(agent.getPointerToAgentLife(), agentLifeTime/*Продолжительность жизни, надо бы узнавать размер*/);
+  vector<double> cycle = findCycleInSequence(agentLifeArray, agentLifeTime/*Продолжительность жизни, надо бы узнавать размер*/);
+  delete []agentLifeArray;
   //Если агент бездействовал - возвращаем пустой веткор
   if (cycle.size() == 1)
     return agentCycle;
@@ -322,10 +328,12 @@ TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(
   environment.setEnvironmentVector(initialEnvironmentVector);
   //Добавляем его в послдовательность состояний
   statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+  vector<double> actionVector(environment.getActionResolution());
   //Заполняем
   for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
-    environment.forceEnvironment(*action);
-    statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+		actionVector[0] = *action;
+		environment.forceEnvironment(actionVector);
+		statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
   }
   delete []initialEnvironmentVector;
   return statesCycle;
@@ -378,12 +386,19 @@ double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &action
   SCycle doubledActionsCycle;
   doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
   doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
-  
+	vector< vector<double> > cycleVector(3 * actionsCycle.cycleSequence.size());
+  for (unsigned int currentAction = 1; currentAction <= doubledActionsCycle.cycleSequence.size(); ++currentAction)
+	  cycleVector[currentAction-1].push_back(doubledActionsCycle.cycleSequence[0]);
+
   //Вычисляем награду за прохождение удвоенного цикла
-  double doubledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0], static_cast<int>(doubledActionsCycle.cycleSequence.size()));
+  double doubledCycleReward = environment.calculateReward(cycleVector, static_cast<int>(doubledActionsCycle.cycleSequence.size()));
   //Вычисляем награду за прохождение утроенного цикла
   doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
-  double trippledCycleReward = environment.calculateReward(&doubledActionsCycle.cycleSequence[0],  static_cast<int>(doubledActionsCycle.cycleSequence.size()));
+  for (unsigned int currentAction = 1; currentAction <= doubledActionsCycle.cycleSequence.size(); ++currentAction){
+	  cycleVector[currentAction-1].clear();
+	  cycleVector[currentAction-1].push_back(doubledActionsCycle.cycleSequence[0]);
+  }
+  double trippledCycleReward = environment.calculateReward(cycleVector,  static_cast<int>(doubledActionsCycle.cycleSequence.size()));
   
   return trippledCycleReward-doubledCycleReward;
 }

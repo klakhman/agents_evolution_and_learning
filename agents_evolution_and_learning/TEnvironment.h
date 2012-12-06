@@ -2,6 +2,7 @@
 #define TENVIRONMENT_H 
 
 #include <string>
+#include <vector>
 
 /*
 Класс окружающей среды - виртуальный (интерфейсный) класс - все среды должны от него наследовать предоставляя правильный интерфейс!!! 
@@ -21,9 +22,9 @@ public:
 	// Задание случайного состояния среды
 	virtual void setRandomEnvironmentState() = 0;
 	// Возоздействие на среду - возвращает успешность воздействия (!!! если такого понятия нет для конкретной среды, то должна возвращать true)
-	virtual bool forceEnvironment(double action) = 0;
+	virtual bool forceEnvironment(const std::vector<double>& action) = 0;
 	// Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
-	virtual double calculateReward(double actions[], int actionsQuantity) const = 0;
+	virtual double calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const = 0;
 };
 
 #endif // TENVIRONMENT_H

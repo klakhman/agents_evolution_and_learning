@@ -325,7 +325,7 @@ void TAnalysis::makeBestPopulationAnalysisSummary(string analysisFilename, strin
 
 // Процедура прогона случайного агента (на каждом такте времени действие агента определяется случайно)
 double TAnalysis::randomAgentLife(THypercubeEnvironment& environment, int agentLifeTime){
-	double* agentLife = new double[agentLifeTime];
+	vector< vector<double> > agentLife(agentLifeTime);
 
 	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
 		// Определяем случайное действие агента (отличное от нуля)
@@ -333,14 +333,13 @@ double TAnalysis::randomAgentLife(THypercubeEnvironment& environment, int agentL
 		while (action == 0){
 			action = static_cast<double>(service::uniformDiscreteDistribution(-environment.getEnvironmentResolution(), environment.getEnvironmentResolution()));
 		}
-		agentLife[agentLifeStep - 1] = action;
+		agentLife[agentLifeStep - 1].push_back(action);
 		// Действуем на среду и проверяем успешно ли действие
 		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
-		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
+		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
 	}
 	
 	double reward = environment.calculateReward(agentLife, agentLifeTime);
-	delete []agentLife;
 
 	return reward;
 }

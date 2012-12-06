@@ -6,6 +6,7 @@
 #include "TEnvironment.h"
 
 #include <iostream>
+#include <vector>
 
 /*
 Класс нейросетевого агента
@@ -20,9 +21,9 @@ class TAgent{
 	// Родители агента (первый более приспособленный, второй - менее)
 	int parents[2];
 	// Записанная жизнь агента
-	double* agentLife;
+	std::vector< std::vector<double> > agentLife;
 	// Декодирование идентификатора совершаемого агентом действия (!!!! по идее декодирование действия, как и кодирование состояния среды во входной вектор, так и определение необходимой размерности выходного вектора должны совершаться некоторым сторонним от агента образом, так как это средоспецифические функции, но при этом не принадлежащие среде !!!!!)
-	double decodeAction(double outputVector[]);
+	std::vector<double> decodeAction(double outputVector[]);
 	// Подсчет размера выходного вектора нейроконтроллера и генома агента на основе размера входного вектора среды
 	int calculateOutputResolution(int inputResolution) const;
 	// Запрещаем копирующий конструктор (чтобы экземпляры нельзя было передавать по значению)
@@ -74,7 +75,6 @@ public:
 	TAgent(){
 		parents[0] = 0;
 		parents[1] = 0;
-		agentLife = 0;
 		reward = 0;
 		neuralController = new TNeuralNetwork;
 		genome = new TPoolNetwork;
@@ -94,7 +94,6 @@ public:
 
 	// Деструктор
 	~TAgent(){
-		if (agentLife) delete []agentLife;
 		if (neuralController) delete neuralController;
 		if (genome) delete genome;
 	}
@@ -112,8 +111,10 @@ public:
 	bool getLearningMode() const { return learningSettings.learningMode; }
 	void setLearningMode(bool mode) { learningSettings.learningMode = mode; }
 
+	// Размерность составного действия агента (кол-во идентификаторов действия в один такт времени)
+	int getActionResolution() const { return 1; }
 	// Получение указателя на запись жизни агента
-	double* getPointerToAgentLife() const { return agentLife; }
+	const std::vector< std::vector<double> >& getPointerToAgentLife() const { return agentLife; }
 
 	// Загрузка нейроконтроллера агента
 	void loadController(std::istream& is);
@@ -131,7 +132,7 @@ public:
 	TAgent& operator=(const TAgent& sourceAgent);
 
 	// Временная процедура печати жизни агента
-	void printLife(TEnvironment& environment, int agentLifeTime);
+	//void printLife(TEnvironment& environment, int agentLifeTime);
 
 	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
 	void linearSystemogenesis();
