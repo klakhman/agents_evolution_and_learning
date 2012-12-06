@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <cstdlib>
 #include <cmath>
 
 using namespace std;
@@ -514,8 +515,8 @@ void TAgent::modifySynapsesStructure(int mismatchedNeuron, int activatedNeuron, 
 	else
 		interSynapseWeight = service::uniformDistribution(-1, -0.5);
 	// Если связь уже существует, то просто меняем вес
-	int addSynapseNumber;
-	if (addSynapseNumber = neuralController->findSynapseNumber(activatedNeuron, mismatchedNeuron))
+	int addSynapseNumber = neuralController->findSynapseNumber(activatedNeuron, mismatchedNeuron);
+	if (addSynapseNumber)
 		neuralController->setSynapseWeight(mismatchedNeuron, addSynapseNumber, interSynapseWeight);
 	else
 		neuralController->addSynapse(activatedNeuron, mismatchedNeuron, interSynapseWeight, true);

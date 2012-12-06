@@ -123,7 +123,7 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	if (!extraPrint) bestPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
 	else	{
 				ofstream bestPopulationFile;
-				bestPopulationFile.open(filenameSettings.bestPopulationFilename);
+				bestPopulationFile.open(filenameSettings.bestPopulationFilename.c_str());
 				for (int currentAgent = 1; currentAgent <= bestPopulation->getPopulationSize(); ++ currentAgent)
 					bestPopulation->getPointertoAgent(currentAgent)->uploadGenome(bestPopulationFile, extraPrint);
 				bestPopulationFile.close();

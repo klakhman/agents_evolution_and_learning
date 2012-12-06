@@ -1,4 +1,4 @@
-#ifndef TTopologyAnalysis_H
+п»ї#ifndef TTopologyAnalysis_H
 #define TTopologyAnalysis_H
 
 #include "TPoolNetwork.h"
@@ -6,16 +6,16 @@
 #include <vector>
 #include <map>
 
-// класс анализа топологии агента
+// РєР»Р°СЃСЃ Р°РЅР°Р»РёР·Р° С‚РѕРїРѕР»РѕРіРёРё Р°РіРµРЅС‚Р°
 class TTopologyAnalysis{
-	std::map<int, std::vector<int>> idArray;
+	std::map< int, std::vector<int> > idArray;
 public:
 	TTopologyAnalysis(void);
 
-	// получить новый id для пула (необходимо предварительно инициализировать массив idArray)
+	// РїРѕР»СѓС‡РёС‚СЊ РЅРѕРІС‹Р№ id РґР»СЏ РїСѓР»Р° (РЅРµРѕР±С…РѕРґРёРјРѕ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅРѕ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РјР°СЃСЃРёРІ idArray)
 	std::vector<int> getPoolId(int id);
 
-	// инициализация массива новых id для сети
+	// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјР°СЃСЃРёРІР° РЅРѕРІС‹С… id РґР»СЏ СЃРµС‚Рё
 	void initializeIdArray(TPoolNetwork* network);
 
 	~TTopologyAnalysis(void);

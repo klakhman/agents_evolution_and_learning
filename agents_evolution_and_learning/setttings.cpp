@@ -3,6 +3,7 @@
 #include "TPopulation.h"
 #include "TAgent.h"
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <cmath>
 
