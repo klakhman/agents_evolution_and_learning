@@ -9,7 +9,16 @@
 #include <vector>
 
 /*
-Класс нейросетевого агента
+Класс нейросетевого агента.
+ВСЕ АГЕНТЫ ДОЛЖНЫ НАСЛЕДОВАТЬ ОТ ДАННОГО КЛАССА. В СЛУЧАЕ НЕОБХОДИМОСТИ НУЖНО ПЕРЕОПРЕДЕЛЯТЬ СЛЕДУЮЩИЕ ВИРТУАЛЬНЫЕ ФУНКЦИИ:
+
+virtual int getActionResolution() const;
+virtual int calculateOutputResolution(int inputResolution) const;
+virtual void generateMinimalAgent(int inputResolution);
+virtual std::vector<double> decodeAction(double outputVector[]);
+virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
+И КОНЕЧНО ДЕСТРУКТОР
+
 */
 class TAgent{
 	// Геном агента из которого транслируется контроллер
@@ -23,9 +32,9 @@ class TAgent{
 	// Записанная жизнь агента
 	std::vector< std::vector<double> > agentLife;
 	// Декодирование идентификатора совершаемого агентом действия (!!!! по идее декодирование действия, как и кодирование состояния среды во входной вектор, так и определение необходимой размерности выходного вектора должны совершаться некоторым сторонним от агента образом, так как это средоспецифические функции, но при этом не принадлежащие среде !!!!!)
-	std::vector<double> decodeAction(double outputVector[]);
+	virtual std::vector<double> decodeAction(double outputVector[]);
 	// Подсчет размера выходного вектора нейроконтроллера и генома агента на основе размера входного вектора среды
-	int calculateOutputResolution(int inputResolution) const;
+	virtual int calculateOutputResolution(int inputResolution) const;
 	// Запрещаем копирующий конструктор (чтобы экземпляры нельзя было передавать по значению)
 	TAgent(const TAgent&);
 
@@ -93,7 +102,7 @@ public:
 	}
 
 	// Деструктор
-	~TAgent(){
+	virtual ~TAgent(){
 		if (neuralController) delete neuralController;
 		if (genome) delete genome;
 	}
@@ -112,7 +121,7 @@ public:
 	void setLearningMode(bool mode) { learningSettings.learningMode = mode; }
 
 	// Размерность составного действия агента (кол-во идентификаторов действия в один такт времени)
-	int getActionResolution() const { return 1; }
+	virtual int getActionResolution() const { return 1; }
 	// Получение указателя на запись жизни агента
 	const std::vector< std::vector<double> >& getPointerToAgentLife() const { return agentLife; }
 
@@ -125,9 +134,9 @@ public:
 	// Выгрузка генома агента в файл или на экран (extra = true - печать полных сведений о пуле (вместе с номерами родительских пулов и временами появления в эволюции))
 	void uploadGenome(std::ostream& os, bool extra = false) const;
 	// Генерация случайного минимального возможного генома агента
-	void generateMinimalAgent(int inputResolution);
+	virtual void generateMinimalAgent(int inputResolution);
 	// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
-	void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
+	virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
 	// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
 	TAgent& operator=(const TAgent& sourceAgent);
 
