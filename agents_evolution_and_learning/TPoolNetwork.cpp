@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <sstream>
 
 
 using namespace std;
@@ -251,6 +252,8 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 	// Инициализируем
 	hDotGraphFile << "digraph G { \n\t\n";
 
+	stringstream convert;
+
 	// строка вида: x,y
 	std::vector<string> nodePosition;
 
@@ -286,6 +289,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		
 		// Обнуляем текущее расстояние по изменяемой координате
 		int distance = 0;
+
 
 		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
 			// помни про костыль - обход упорядочен по id
@@ -360,7 +364,10 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 
 		// запись пулов в файл
 		for(int currentPool = 1; currentPool <= poolsQuantity; currentPool++){
-			nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
+			convert.str( std::string() );
+			convert.clear();
+			convert << nodeXPosition[currentPool - 1] << "," << nodeYPosition[currentPool - 1];
+			nodePosition.push_back(convert.str());
 			hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
 		}
 
@@ -388,12 +395,22 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		evolutionStep = 0;
 		genealogyNodesXPosition.push_back(XPos);
 		genealogyNodesYPosition.push_back(nodeYPosition[inputResolution + outputResolution]);
-		genealogyNodePosition.push_back(std::to_string(genealogyNodesXPosition.back()) + "," + std::to_string(genealogyNodesYPosition.back()));
+
+		convert.str( std::string() );
+		convert.clear();
+		convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
+
+		genealogyNodePosition.push_back(convert.str());
 		hDotGraphFile << "\t\t\""<< poolsStructure[inputResolution + outputResolution]->getID() << "1gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"none\", height=.1, width=.1];\n" ;
 
 		genealogyNodesXPosition.push_back(XPos + 5000 - evolutionStep);
 		genealogyNodesYPosition.push_back(nodeYPosition[inputResolution + outputResolution]);
-		genealogyNodePosition.push_back(std::to_string(genealogyNodesXPosition.back()) + "," + std::to_string(genealogyNodesYPosition.back()));
+
+		convert.str( std::string() );
+		convert.clear();
+		convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
+
+		genealogyNodePosition.push_back(convert.str());
 		hDotGraphFile << "\t\t\""<< poolsStructure[inputResolution + outputResolution]->getID() << "2gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
 		
 		for(evolutionStep = 1; evolutionStep <= 5000; evolutionStep++){
@@ -401,17 +418,32 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 				if(poolsStructure[currentPool - 1]->getAppearenceEvolutionTime() == evolutionStep){
 					genealogyNodesXPosition.push_back(XPos);
 					genealogyNodesYPosition.push_back(nodeYPosition[currentPool - 1]);
-					genealogyNodePosition.push_back(std::to_string(genealogyNodesXPosition.back()) + "," + std::to_string(genealogyNodesYPosition.back()));
+
+					convert.str( std::string() );
+					convert.clear();
+					convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
+
+					genealogyNodePosition.push_back(convert.str());
 					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "1gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"none\", height=.1, width=.1];\n" ;
 
 					genealogyNodesXPosition.push_back(XPos + 5000 - evolutionStep);
 					genealogyNodesYPosition.push_back(nodeYPosition[currentPool - 1]);
-					genealogyNodePosition.push_back(std::to_string(genealogyNodesXPosition.back()) + "," + std::to_string(genealogyNodesYPosition.back()));
+
+					convert.str( std::string() );
+					convert.clear();
+					convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
+
+					genealogyNodePosition.push_back(convert.str());
 					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "2gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
 
 					genealogyNodesXPosition.push_back(XPos + 5000 - evolutionStep);
 					genealogyNodesYPosition.push_back(nodeYPosition[poolsStructure[currentPool - 1]->getRootPoolID() - 1]);
-					genealogyNodePosition.push_back(std::to_string(genealogyNodesXPosition.back()) + "," + std::to_string(genealogyNodesYPosition.back()));
+
+					convert.str( std::string() );
+					convert.clear();
+					convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
+
+					genealogyNodePosition.push_back(convert.str());
 					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "3gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
 				}
 			}
@@ -445,7 +477,12 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 	} else {
 		// запись пулов в файл
 		for(int currentPool = 1; currentPool <= poolsQuantity; currentPool++){
-			nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
+
+			convert.str( std::string() );
+			convert.clear();
+			convert << nodeXPosition[currentPool - 1] << "," << nodeYPosition[currentPool - 1];
+
+			nodePosition.push_back(convert.str());
 			hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
 		}
 	}
@@ -490,23 +527,49 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 				if((poolsStructure[prePoolId - 1]->getType() == 0 || poolsStructure[prePoolId - 1]->getType() == 2 || poolsStructure[postPoolId - 1]->getType() == 0 || poolsStructure[postPoolId - 1]->getType() == 2)
 					&& !(poolsStructure[prePoolId - 1]->getType() == 0 && poolsStructure[postPoolId - 1]->getType() == 2)){
 						// если связь идет к/от входного слоя
-						if(poolsStructure[prePoolId - 1]->getType() == 0 || poolsStructure[postPoolId - 1]->getType() == 0)
-							splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(geometricCenterX - 300) + "," + std::to_string(geometricCenterY - 100) + " " + std::to_string(geometricCenterX - 330) + "," + std::to_string(geometricCenterY - 200) + " " + nodePosition[postPoolId - 1] + "\", ";
-						else
-							splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(geometricCenterX - 200) + "," + std::to_string(geometricCenterY + 100) + " " + std::to_string(geometricCenterX - 220) + "," + std::to_string(geometricCenterY + 200) + " " + nodePosition[postPoolId - 1] + "\", ";
+						if(poolsStructure[prePoolId - 1]->getType() == 0 || poolsStructure[postPoolId - 1]->getType() == 0){
+
+							convert.str( std::string() );
+							convert.clear();
+							convert << geometricCenterX - 300 << "," << geometricCenterY - 100 << " " << geometricCenterX - 330 << "," << geometricCenterY - 200;
+
+							splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + convert.str() + " " + nodePosition[postPoolId - 1] + "\", ";
+						} else {
+
+							convert.str( std::string() );
+							convert.clear();
+							convert << geometricCenterX - 200 << "," << geometricCenterY + 100 << " " << geometricCenterX - 220 << "," << geometricCenterY + 200;
+
+							splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + convert.str() + " " + nodePosition[postPoolId - 1] + "\", ";
+						}
 
 				} else {
 					// для связи между внешними пулами
 					if(poolsStructure[prePoolId - 1]->getType() == 0 && poolsStructure[postPoolId - 1]->getType() == 2){
-						splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(geometricCenterX - 1400) + "," + std::to_string(geometricCenterY - 700) + " " + std::to_string(geometricCenterX - 1400) + "," + std::to_string(geometricCenterY + 700) + " " + nodePosition[postPoolId - 1] + "\", ";
+
+						convert.str( std::string() );
+						convert.clear();
+						convert << geometricCenterX - 1400 << "," << geometricCenterY - 700 << " " << geometricCenterX - 1400 << "," << geometricCenterY + 700;
+
+						splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + convert.str() + " " + nodePosition[postPoolId - 1] + "\", ";
 					} else {
 						// для связи между внутренними пулами
 						if(!genealogy){
 							if((poolsStructure[prePoolId - 1]->getType() == 1 && poolsStructure[postPoolId - 1]->getType() == 1) && (prePoolId != postPoolId)){
 								if(nodeYPosition[prePoolId - 1] < nodeYPosition[postPoolId - 1]){
-									splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]))/2 - 100) + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId -1]))/2 + 100) + " " + nodePosition[postPoolId - 1] + "\", ";
+
+									convert.str( std::string() );
+									convert.clear();
+									convert << 3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]) << "," << min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]))/2 - 100 << " " << 3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]) << "," << min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId -1]))/2 + 100;
+
+									splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + convert.str() + " " + nodePosition[postPoolId - 1] + "\", ";
 								} else {
-									splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]))/2 + 100) + " " + std::to_string(3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1])) + "," + std::to_string(min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId -1]))/2 - 100) + " " + nodePosition[postPoolId - 1] + "\", ";
+
+									convert.str( std::string() );
+									convert.clear();
+									convert << 3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]) << "," << min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]))/2 + 100 << " " << 3*geometricCenterX + 0.7*abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId - 1]) << "," << min(nodeYPosition[prePoolId - 1], nodeYPosition[postPoolId - 1]) + (abs(nodeYPosition[prePoolId - 1] - nodeYPosition[postPoolId -1]))/2 - 100;
+
+									splineControlPoints = "pos = \"" + nodePosition[prePoolId - 1] + " " + convert.str() + " " + nodePosition[postPoolId - 1] + "\", ";
 								}
 							} else {
 								splineControlPoints = "";
