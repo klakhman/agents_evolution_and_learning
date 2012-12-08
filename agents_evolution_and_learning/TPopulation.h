@@ -431,7 +431,7 @@ void TPopulation<TemplateNeuralAgent>::mutationDeletePoolPredConnection(Template
 // Коэффициент уменьшения вероятности дупликации пула с ростом генома
 template<class TemplateNeuralAgent>
 double TPopulation<TemplateNeuralAgent>::duplicateDivision(int poolsQuantity, int connectionsQuantity){
-	return max(1.0, 0.5 * connectionsQuantity/static_cast<double>(mutationSettings.connectionStandartAmount) 
+	return std::max(1.0, 0.5 * connectionsQuantity/static_cast<double>(mutationSettings.connectionStandartAmount)
 																							+ 0.5 * (poolsQuantity - mutationSettings.poolStandartAmount));
 }
 
