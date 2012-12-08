@@ -41,6 +41,10 @@ public:
 
 	// Тестирование процедуры дупликации пула
 	void testDuplicatePool(std::string testDirectory);*/
+public:
+	static void createTestPoolNetwork(TPoolNetwork& poolNetwork);
+	static void testPrimarySystemogenesis(std::string testDirectory);
+
 };
 
 #endif // TESTS_H

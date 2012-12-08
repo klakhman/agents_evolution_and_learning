@@ -5,6 +5,7 @@
 #include "TAnalysis.h"
 #include "TBehaviorAnalysis.h"
 #include "TTopologyAnalysis.h"
+#include "tests.h"
 
 #include <iostream>
 #include <fstream>
@@ -65,25 +66,29 @@ int main(int argc, char** argv){
 		delete parallelProcess;	
 	}
 	else if (programMode == "BPA"){ // Режим анализа методом прогона лучшей популяции
-			TAnalysis* bestPopulationAnalysis = new TAnalysis;
-			bestPopulationAnalysis->startParallelBestPopulationAnalysis(argc, argv);
-			delete bestPopulationAnalysis;
-		}
+		TAnalysis* bestPopulationAnalysis = new TAnalysis;
+		bestPopulationAnalysis->startParallelBestPopulationAnalysis(argc, argv);
+		delete bestPopulationAnalysis;
+	}
 	else if (programMode == "SE"){ // Режим эволюционного запуска на одном процессоре
-				TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
-				evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
-				long randomSeed = 0;
-				bool extraPrint = false;
-				decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, randomSeed, extraPrint, argc, argv);
-				evolutionaryProcess->setExtraPrint(extraPrint);
-				evolutionaryProcess->start(randomSeed);
-				delete evolutionaryProcess;
+		TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
+		evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
+		long randomSeed = 0;
+		bool extraPrint = false;
+		decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, randomSeed, extraPrint, argc, argv);
+		evolutionaryProcess->setExtraPrint(extraPrint);
+		evolutionaryProcess->start(randomSeed);
+			delete evolutionaryProcess;
+  }
+  else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
+    srand(static_cast<unsigned int>(time(0)));
+    tests::testPrimarySystemogenesis("C:/Current_Test_Folder/");
+    return 0;
   }
   else if (programMode == "BCA"){//Режим анализа поведенчиских циклов
     TBehaviorAnalysis* behaviorAnalysis = new TBehaviorAnalysis;
     behaviorAnalysis->beginAnalysis(argc, argv);
     delete behaviorAnalysis;
-    
   }
   else if (programMode == "PRNT"){ // Режим визуализации лучшего агента
 	TAgent testAgent;

@@ -5,6 +5,8 @@
 #include "TEnvironment.h"
 #include "service.h"
 #include "TPopulation.h"
+#include "TAgent.h"
+#include "settings.h"
 
 #include <iostream>
 #include <fstream>
@@ -442,6 +444,39 @@ void tests::testDuplicatePool(string testDirectory){
 	delete testPopulation;
 	delete testNetwork;
 }*/
+
+void tests::createTestPoolNetwork(TPoolNetwork& poolNetwork){
+	poolNetwork.erasePoolNetwork();
+	poolNetwork.addPool(0, 1, 0.5);
+	poolNetwork.addPool(0, 1, -0.1);
+	poolNetwork.addPool(2, 3, 0.1);
+	poolNetwork.addPool(2, 3, -0.3);
+	poolNetwork.addPool(1, 2, 0.3, 0.02, 3);
+
+  poolNetwork.addConnection(1, 3, -0.9, 0.04);
+  poolNetwork.addConnection(5, 4, 1.04, 0.08);
+	poolNetwork.addConnection(1, 5, 0.31, 0.02);
+  poolNetwork.addConnection(4, 5, 0.21, 0.01);
+	poolNetwork.addConnection(2, 5, 0.8, 0.01);
+
+  poolNetwork.addPredConnection(4, 5);
+}
+
+void tests::testPrimarySystemogenesis(string testDirectory){
+	TAgent testAgent;
+	settings::fillAgentSettingsFromFile(testAgent, testDirectory + "/settings.ini"); 
+	createTestPoolNetwork(*(testAgent.getPointerToAgentGenome()));
+  ofstream hTestFile;
+	hTestFile.open((testDirectory + "/testPoolNet.txt").c_str());
+	hTestFile << *(testAgent.getPointerToAgentGenome());
+	testAgent.primarySystemogenesis();
+	hTestFile << *(testAgent.getPointerToAgentController());
+	hTestFile.close();
+	testAgent.getPointerToAgentGenome()->printGraphNetwork(testDirectory + "/testPoolNet.jpg", true);
+	testAgent.getPointerToAgentController()->printGraphNetwork(testDirectory + "/testNeuralNet.jpg", true);
+}
+
+
 
 
 

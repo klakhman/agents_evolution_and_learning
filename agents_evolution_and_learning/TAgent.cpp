@@ -151,7 +151,7 @@ vector<double> TAgent::decodeAction(double outputVector[]){
 	double actionCode = (actionNumber % 2 ? -1 : 1) * (actionNumber / 2 + 1);
 
 	vector<double> actions(getActionResolution());
-	actions.push_back(actionCode);
+	actions[0] = actionCode;
 
 	return actions;
 }
@@ -268,7 +268,7 @@ void TAgent::buildPrimaryNeuralController(){
 		}
 	// Проходимся по все пулам и нейронам и создаем синапсы
 	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
-		for (int currentNeuron = 1; currentNeuron <= genome->getPoolCapacity(currentPool); ++currentPool)
+    for (int currentNeuron = 1; currentNeuron <= genome->getPoolCapacity(currentPool); ++currentNeuron)
 			// Проходимся по всем входным связям пула
 			for (int currentPoolConnection = 1; currentPoolConnection <= genome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
 				if (genome->getConnectionEnabled(currentPool, currentPoolConnection)){
@@ -277,12 +277,11 @@ void TAgent::buildPrimaryNeuralController(){
 					for (int currentPreNeuron = 1; currentPreNeuron <= genome->getPoolCapacity(currentPrePool); ++currentPreNeuron)
 						if (service::uniformDistribution(0, 1, true, false) < genome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection))
 							neuralController->addSynapse(poolsAndNeurons[currentPrePool-1][currentPreNeuron-1], poolsAndNeurons[currentPool-1][currentNeuron-1], 
-																service::normalDistribution(genome->getConnectionWeightMean(currentPrePool, currentPoolConnection), genome->getConnectionWeightVariance(currentPrePool, currentPoolConnection)), true);
-
-				}
+																service::normalDistribution(genome->getConnectionWeightMean(currentPool, currentPoolConnection), genome->getConnectionWeightVariance(currentPool, currentPoolConnection)), true);
+        }
 	// Создаем все предикторные связи
 	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
-		for (int currentNeuron = 1; currentNeuron <= genome->getPoolCapacity(currentPool); ++currentPool)
+    for (int currentNeuron = 1; currentNeuron <= genome->getPoolCapacity(currentPool); ++currentNeuron)
 			// Проходимся по всем входным предикторным связям пула
 			for (int currentPoolPredConnection = 1; currentPoolPredConnection <= genome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
 				if (genome->getPredConnectionEnabled(currentPool, currentPoolPredConnection)){
@@ -324,7 +323,7 @@ void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
 		double randomPotential = service::uniformDistribution(0, totalPotential, false, false);
 		double currentPotential = 0;
 		int currentNeuron = neuralController->getInputResolution() + neuralController->getOutputResolution();
-		while (randomPotential < currentPotential)
+		while (randomPotential > currentPotential)
 			currentPotential += max(neuronsSummaryPotential[++currentNeuron - 1], 0.0);
 		totalPotential -= neuronsSummaryPotential[currentNeuron - 1];
 		neuronsSummaryPotential[currentNeuron - 1] = checkChoice;
@@ -440,7 +439,7 @@ void TAgent::primarySystemogenesis(){
 	}
 	// Нормировка показателей статистической значимости предикторных связей
 	for (int currentPredConnection = 1; currentPredConnection <= neuralController->getPredConnectionsQuantity(); ++currentPredConnection)
-		predictorSignificance[currentPredConnection - 1] /= primarySystemogenesisSettings.primarySystemogenesisTime;
+		predictorSignificance[currentPredConnection - 1] /= (primarySystemogenesisSettings.primarySystemogenesisTime - 1);
 	// Производим отбор
 	neuronsSelection(neuronsSummaryPotential);
 	synapsesSelection(synapsesSummaryPotential);

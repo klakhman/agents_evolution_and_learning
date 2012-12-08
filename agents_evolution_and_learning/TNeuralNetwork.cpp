@@ -190,7 +190,8 @@ void TNeuralNetwork::calculateSpontaneousNetwork(double spontaneousActivityProb)
 	// Проходимся по нейронам по слоям (начинаем со второго)
 	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
 		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-			if (neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer){
+			if (neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer)
+      {
 				neuronsStructure[currentNeuron - 1]->calculateOut();
 				// Если нейрон спонтанно активируется, то просто заменяем выход на спонтанный (при этом оставляем потенциал, таким какой был в результате подсчета)
 				if (service::uniformDistribution(0, 1, true, false) < spontaneousActivityProb)
@@ -240,7 +241,7 @@ void TNeuralNetwork::printGraphNetwork(string graphFilename, bool printWeights /
 			//Отображаем связи только между активными нейронами
 			if ((neuronsStructure[currentNeuron - 1]->getSynapseEnabled(currentSynapse)) &&
 					(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive()) && 
-						(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive())){
+						(neuronsStructure[currentNeuron - 1]->getSynapsePostNeuron(currentSynapse)->getActive())){
 				string hex;
 				service::decToHex(static_cast<int>(min(fabs(255 * neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) / maxWeightValue), 255.0)), hex, 2);
 				string color;

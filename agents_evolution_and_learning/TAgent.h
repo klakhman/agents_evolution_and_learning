@@ -20,6 +20,8 @@ virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 И КОНЕЧНО ДЕСТРУКТОР
 
 */
+class tests;
+
 class TAgent{
 	// Геном агента из которого транслируется контроллер
 	TPoolNetwork* genome;
@@ -61,8 +63,7 @@ class TAgent{
 
 public:
 	// Структура настройки первичного системогенеза
-	struct SPrimarySystemogenesisSettings
-	{
+	struct SPrimarySystemogenesisSettings{
 		bool primarySystemogensisMode; // Режим первичного системогенеза (false - нет системогенеза (линейный системогенез), true - есть полнеценный первичный системогенез)
 		int initialPoolCapacity; // Изначальная размерность каждого пула
 		double initialDevelopSynapseProbability; // Вероятность образования синапса связи в процессе построения первичной сети
@@ -151,6 +152,7 @@ public:
 	// Основной метод обучения нейроконтроллера на одном такте времени
 	void learning();
 
+  friend class tests;
 };
 
 #endif // TAGENT_H
