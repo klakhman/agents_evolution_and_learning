@@ -305,13 +305,13 @@ void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
 	int neededActiveNeurons = static_cast<int>(primarySystemogenesisSettings.activeNeuronsPercent / 100.0 * (neuralController->getNeuronsQuantity() - neuralController->getInputResolution() - neuralController->getOutputResolution()) + 0.5);
 	// Для отбора нейронов используем рулеточный алгоритм (работаем только с той частью списка в которой записаны интернейроны)
 	// Сначала нормируем все значения - так, чтобы у нейронов с отрицательным потенциалом была возможность отобраться
-	double minSummaryPotential = 0;
+	double minSummaryPotential = 10000.0;
 	for (int currentNeuron = neuralController->getInputResolution() + neuralController->getOutputResolution() + 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
 		if (minSummaryPotential > neuronsSummaryPotential[currentNeuron - 1])
 			minSummaryPotential = neuronsSummaryPotential[currentNeuron - 1];
 	// Нормируем все потенциалы
 	for (int currentNeuron = neuralController->getInputResolution() + neuralController->getOutputResolution() + 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
-		neuronsSummaryPotential[currentNeuron - 1] -= minSummaryPotential - 1; // Делаем так, чтобы ни у одного нейрона не было нулевого суммарного потенциала
+		neuronsSummaryPotential[currentNeuron - 1] -= minSummaryPotential - 1; // Делаем так, чтобы ни у одного нейрона не было нулевого суммарного потенциала (или отрицательного, если это вообще возможно)
 	
 	double totalPotential = 0;
 	for (int currentNeuron = neuralController->getInputResolution() + neuralController->getOutputResolution() + 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
@@ -324,7 +324,7 @@ void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
 		double currentPotential = 0;
 		int currentNeuron = neuralController->getInputResolution() + neuralController->getOutputResolution();
 		while (randomPotential > currentPotential)
-			currentPotential += max(neuronsSummaryPotential[++currentNeuron - 1], 0.0);
+			currentPotential += max(neuronsSummaryPotential[++currentNeuron - 1], 0.0); // Для того, чтобы не сумировать уже отобранные нейроны
 		totalPotential -= neuronsSummaryPotential[currentNeuron - 1];
 		neuronsSummaryPotential[currentNeuron - 1] = checkChoice;
 		++currentActiveNeuronsQuantity;
@@ -491,14 +491,14 @@ int TAgent::mismatchDetection(int neuronNumber){
 // Процедура нахождения наиболее активного "спящего" нейрона в пуле (возвращает ноль, если нет подходящего нейрона - нет активных на данном такте времени или не осталось молчащих)
 int TAgent::findMostActiveSilentNeuron(int poolNumber){
 	int mostActiveNeuronNumber = 0;
-	double mostActiveNeuronOut = 0;
+	double mostActiveNeuronPotential = 0;
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
-			// Если нейрон не спящий и из нужного на пула и он активен на текущем такте времени
-			if (neuralController->getNeuronActive(currentNeuron) && (neuralController->getNeuronParentPoolID(currentNeuron) == poolNumber) &&
-				(neuralController->getNeuronPotential(currentNeuron) > 0) && (neuralController->getNeuronCurrentOut(currentNeuron) > mostActiveNeuronOut)){
-			mostActiveNeuronOut = neuralController->getNeuronPotential(currentNeuron);
+    // Если нейрон спящий и из нужного на пула и он активен на текущем такте времени
+		if (! neuralController->getNeuronActive(currentNeuron) && (neuralController->getNeuronParentPoolID(currentNeuron) == poolNumber) &&
+        (neuralController->getNeuronPotential(currentNeuron) > mostActiveNeuronPotential)){
+			mostActiveNeuronPotential = neuralController->getNeuronPotential(currentNeuron);
 			mostActiveNeuronNumber = currentNeuron;
-		}
+    }
 	return mostActiveNeuronNumber;
 }
 
