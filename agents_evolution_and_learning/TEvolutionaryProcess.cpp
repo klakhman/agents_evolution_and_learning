@@ -70,11 +70,13 @@ void TEvolutionaryProcess::createMainResultsFile(ofstream& resultsFile, unsigned
 		<< "\tmut-develop-con-prob-disp=" << agentsPopulation->mutationSettings.mutDevelopConProbDisp << endl << endl;
 	TAgent* pointerToAgent = agentsPopulation->getPointertoAgent(1);
 	// Записываем параметры первичного системогенеза
-	resultsFile << "Primary_systemogenesis_parameters:" << "\tinitial-pool-capacity=" << pointerToAgent->primarySystemogenesisSettings.initialPoolCapacity
+  resultsFile << "Primary_systemogenesis_parameters:" << "\tprimary-systemogenesis-mode=" << pointerToAgent->primarySystemogenesisSettings.primarySystemogenesisMode << "\tinitial-pool-capacity=" << pointerToAgent->primarySystemogenesisSettings.initialPoolCapacity
 		<< "\tinitial-develop-synapse-probability=" << pointerToAgent->primarySystemogenesisSettings.initialDevelopSynapseProbability << "\tinitial-develop-predconnection-prob=" << pointerToAgent->primarySystemogenesisSettings.initialDevelopPredConnectionProbability
 		<< "\tprimary-systemogenesis-time=" << pointerToAgent->primarySystemogenesisSettings.primarySystemogenesisTime << "\tspontaneous-acivity-prob=" << pointerToAgent->primarySystemogenesisSettings.spontaneousActivityProb
 		<< "\tactive-neurons-percent=" << pointerToAgent->primarySystemogenesisSettings.activeNeuronsPercent << "\tsynapses-activity-treshold=" << pointerToAgent->primarySystemogenesisSettings.synapsesActivityTreshold
 		<< "\tsignificance-treshold=" << pointerToAgent->primarySystemogenesisSettings.significanceTreshold << endl << endl;
+  // Записываем параметры обучения
+  resultsFile << "Learning_parameters:" << "\tlearning-mode=" << pointerToAgent->learningSettings.learningMode << "\tmismatch-significance-treshold=" << pointerToAgent->learningSettings.mismatchSignificanceTreshold << endl << endl;
 	// Записываем параметры среды
 	resultsFile << "Environment_parameters:" << "\tnstochasticity-coefficient=" << environment->getStochasticityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
 	//Записываем уникальное ядро рандомизации

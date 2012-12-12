@@ -191,7 +191,7 @@ TAgent& TAgent::operator=(const TAgent& sourceAgent){
 	parents[0] = sourceAgent.parents[0];
 	parents[1] = sourceAgent.parents[1];
 	// Копируем настройки первичного системогенеза
-	primarySystemogenesisSettings.primarySystemogensisMode = sourceAgent.primarySystemogenesisSettings.primarySystemogensisMode;
+	primarySystemogenesisSettings.primarySystemogenesisMode = sourceAgent.primarySystemogenesisSettings.primarySystemogenesisMode;
 	primarySystemogenesisSettings.initialPoolCapacity = sourceAgent.primarySystemogenesisSettings.initialPoolCapacity;
 	primarySystemogenesisSettings.initialDevelopSynapseProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopSynapseProbability;
 	primarySystemogenesisSettings.initialDevelopPredConnectionProbability = sourceAgent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability;

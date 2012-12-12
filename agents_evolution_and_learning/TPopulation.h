@@ -192,7 +192,7 @@ void TPopulation<TemplateNeuralAgent>::evolutionaryStep(TEnvironment& environmen
 	// Прогоняем всех агентов
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
 		// Проводим первичный системогенез (если нужно)
-		if (agents[currentAgent - 1]->primarySystemogenesisSettings.primarySystemogensisMode)
+		if (agents[currentAgent - 1]->primarySystemogenesisSettings.primarySystemogenesisMode)
 			agents[currentAgent - 1]->primarySystemogenesis();
 		else
 			agents[currentAgent - 1]->linearSystemogenesis();

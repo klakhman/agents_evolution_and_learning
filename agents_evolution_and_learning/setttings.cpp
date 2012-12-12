@@ -85,7 +85,7 @@ void settings::fillAgentsPopulationSettingsFromFile(TPopulation<TAgent>& agentsP
 	TAgent::SLearningSettings* learningSettings = new TAgent::SLearningSettings;
 	while (settingsFile >> optionString){
 		// Параметры первичного системогенеза
-		if (optionString == "primary-systemogenesis-mode") { settingsFile >> optionString; primarySystemogenesisSettings->primarySystemogensisMode = (atoi(optionString.c_str()) != 0); }
+		if (optionString == "primary-systemogenesis-mode") { settingsFile >> optionString; primarySystemogenesisSettings->primarySystemogenesisMode = (atoi(optionString.c_str()) != 0); }
 		else if (optionString == "initial-pool-capacity") { settingsFile >> optionString; primarySystemogenesisSettings->initialPoolCapacity = atoi(optionString.c_str()); }
 		else if (optionString == "initial-develop-synapse-probability") { settingsFile >> optionString; primarySystemogenesisSettings->initialDevelopSynapseProbability = atof(optionString.c_str()); }
 		else if (optionString == "initial-develop-predconnection-probability") { settingsFile >> optionString; primarySystemogenesisSettings->initialDevelopPredConnectionProbability = atof(optionString.c_str()); }
@@ -100,7 +100,8 @@ void settings::fillAgentsPopulationSettingsFromFile(TPopulation<TAgent>& agentsP
 	}
 	for (int currentAgent = 1; currentAgent <= agentsPopulation.getPopulationSize(); ++currentAgent)
 	{
-		agentsPopulation.getPointertoAgent(currentAgent)->primarySystemogenesisSettings.initialPoolCapacity = primarySystemogenesisSettings->initialPoolCapacity;
+    agentsPopulation.getPointertoAgent(currentAgent)->primarySystemogenesisSettings.primarySystemogenesisMode = primarySystemogenesisSettings->primarySystemogenesisMode;
+    agentsPopulation.getPointertoAgent(currentAgent)->primarySystemogenesisSettings.initialPoolCapacity = primarySystemogenesisSettings->initialPoolCapacity;
 		agentsPopulation.getPointertoAgent(currentAgent)->primarySystemogenesisSettings.initialDevelopSynapseProbability = primarySystemogenesisSettings->initialDevelopSynapseProbability;
 		agentsPopulation.getPointertoAgent(currentAgent)->primarySystemogenesisSettings.initialDevelopPredConnectionProbability = primarySystemogenesisSettings->initialDevelopPredConnectionProbability;
 		agentsPopulation.getPointertoAgent(currentAgent)->primarySystemogenesisSettings.primarySystemogenesisTime = primarySystemogenesisSettings->primarySystemogenesisTime;
@@ -123,7 +124,7 @@ void settings::fillAgentSettingsFromFile(TAgent& agent, string settingsFilename)
 	settingsFile.open(settingsFilename.c_str());
 	while (settingsFile >> optionString){
 		// Параметры первичного системогенеза
-		if (optionString == "primary-systemogenesis-mode") { settingsFile >> optionString; agent.primarySystemogenesisSettings.primarySystemogensisMode = (atoi(optionString.c_str()) != 0); }
+		if (optionString == "primary-systemogenesis-mode") { settingsFile >> optionString; agent.primarySystemogenesisSettings.primarySystemogenesisMode = (atoi(optionString.c_str()) != 0); }
 		else if (optionString == "initial-pool-capacity") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialPoolCapacity = atoi(optionString.c_str()); }
 		else if (optionString == "initial-develop-synapse-probability") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialDevelopSynapseProbability = atof(optionString.c_str()); }
 		else if (optionString == "initial-develop-predconnection-probability") { settingsFile >> optionString; agent.primarySystemogenesisSettings.initialDevelopPredConnectionProbability = atof(optionString.c_str()); }
