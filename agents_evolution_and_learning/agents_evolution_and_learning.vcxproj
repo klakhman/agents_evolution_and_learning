@@ -89,6 +89,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
     <ClInclude Include="service.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="TAgent.h" />

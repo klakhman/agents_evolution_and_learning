@@ -1,0 +1,1 @@
+#define NOT_USE_ROBOT_LIB
