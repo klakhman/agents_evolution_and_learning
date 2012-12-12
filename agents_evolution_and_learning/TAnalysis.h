@@ -29,7 +29,7 @@ public:
 	// Запуск параллельного процесса анализа по методу лучшей популяции в каждом запуске (!!!в папке с результатами должна быть папка "/Analysis"!!!)
 	void startParallelBestPopulationAnalysis(int argc, char **argv);
 	// Процедура усреднение параметров анализа по лучшей популяции по глобальным сложностям сред (membersQuantity - кол-во сред в рамках одного коэффициента заполненности)
-	void makeBestPopulationAnalysisSummary(std::string analysisFilename, std::string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity);
+	static void makeBestPopulationAnalysisSummary(std::string analysisFilename, std::string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity);
 	
 	// Процедура прогона случайного агента (на каждом такте времени действие агента определяется случайно)
 	double randomAgentLife(THypercubeEnvironment& environment, int agentLifeTime);

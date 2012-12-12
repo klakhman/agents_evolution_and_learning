@@ -82,7 +82,8 @@ int main(int argc, char** argv){
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
     srand(static_cast<unsigned int>(time(0)));
-    tests::testPrimarySystemogenesis("C:/Current_Test_Folder/");
+    //TAnalysis::makeBestPopulationAnalysisSummary("C:/Coding/Current_Test_Folder/BestPopulation_analysis_En1001-1360_test.txt", "C:/Coding/Current_Test_Folder/analysis_summary.txt", 18, 20, 10);
+    tests::testPrimarySystemogenesis("C:/Coding/Current_Test_Folder/");
     return 0;
   }
   else if (programMode == "BCA"){//Режим анализа поведенчиских циклов

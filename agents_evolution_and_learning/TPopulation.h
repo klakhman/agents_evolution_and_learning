@@ -556,9 +556,9 @@ void TPopulation<TemplateNeuralAgent>::generateOffspring(TemplateNeuralAgent& ki
 	composeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
 
 	mutationAddPoolConnection(kidAgent);
-	//mutationAddPoolPredConnection(kidAgent);
+  if (firstParentAgent.getLearningMode()) mutationAddPoolPredConnection(kidAgent);
 	mutationDeletePoolConnection(kidAgent);
-	//mutationDeletePoolPredConnection(kidAgent);
+	if (firstParentAgent.getLearningMode()) mutationDeletePoolPredConnection(kidAgent);
 
 	mutationPoolDuplication(kidAgent, currentEvolutionStep);
 
@@ -568,8 +568,8 @@ void TPopulation<TemplateNeuralAgent>::generateOffspring(TemplateNeuralAgent& ki
 	//mutationEnableDisablePredConnections(kidAgent, currentEvolutionStep);
 
 	mutationConnectionsWeight(kidAgent);
-	//mutationDevelopSynapseProb(kidAgent);
-	//mutationDevelopPredConProb(kidAgent);
+	if (firstParentAgent.getSystemogenesisMode()) mutationDevelopSynapseProb(kidAgent);
+	if (firstParentAgent.getSystemogenesisMode()) mutationDevelopPredConProb(kidAgent);
 }
 
 //Процедура получения номера агента, используемая в рулеточном алгоритме
