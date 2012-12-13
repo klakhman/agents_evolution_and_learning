@@ -73,10 +73,10 @@ void TAgent::generateMinimalAgent(int inputResolution){
 	int currentNeuron = 1;
 	int outputResolution = calculateOutputResolution(inputResolution);
 	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
-		genome->addPool(0, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
+    genome->addPool(TPoolNetwork::INPUT_POOL, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
 	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
-		genome->addPool(2, 3, service::uniformDistribution(-0.5, 0.5), 0, 1);
-	genome->addPool(1, 2, service::uniformDistribution(-0.5, 0.5), 0, primarySystemogenesisSettings.initialPoolCapacity);
+    genome->addPool(TPoolNetwork::OUTPUT_POOL, 3, service::uniformDistribution(-0.5, 0.5), 0, 1);
+  genome->addPool(TPoolNetwork::HIDDEN_POOL, 2, service::uniformDistribution(-0.5, 0.5), 0, primarySystemogenesisSettings.initialPoolCapacity);
 	int currentConnection = 1;
 	for (currentNeuron = inputResolution + 1; currentNeuron <= inputResolution + outputResolution; ++currentNeuron){
 		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, service::uniformDistribution(-0.5, 0.5), 0, primarySystemogenesisSettings.initialDevelopSynapseProbability, true, 0, currentConnection); 
@@ -331,7 +331,7 @@ void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
 	}
 	// Изменяем информацию о нейронах (разделяем их на активные и молчащие)
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
-		if (neuralController->getNeuronType(currentNeuron) == 1) // Если нейрон внутренний
+    if (neuralController->getNeuronType(currentNeuron) == TNeuralNetwork::HIDDEN_NEURON) // Если нейрон внутренний
 			if (neuronsSummaryPotential[currentNeuron - 1] == checkChoice)
 				neuralController->setNeuronActive(currentNeuron, true);
 			else 
@@ -368,11 +368,11 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 	// Проходимся через все синапсы и удаляем те, у которых суммарный потенциал меньше порога (с определенными условиями - смотри далее)
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
 		// Связь не подлежит проверке на отбор если один из неронов не является активным !!! или если пресинаптический нейрон входной или постсинаптический нейрон выходной !!!
-		if ((neuralController->getNeuronActive(currentNeuron)) && (neuralController->getNeuronType(currentNeuron) != 2))
+    if ((neuralController->getNeuronActive(currentNeuron)) && (neuralController->getNeuronType(currentNeuron) != TNeuralNetwork::OUTPUT_NEURON))
 			for (int currentSynapse = 1; currentSynapse <= neuralController->getNeuronInputSynapsesQuantity(currentNeuron); ++currentSynapse){
 				int currentPreNeuron = neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse);
 				// Если пресинаптический нейрон не входной и он активен
-				if ((neuralController->getNeuronActive(currentPreNeuron)) && (neuralController->getNeuronType(currentPreNeuron) != 0))
+        if ((neuralController->getNeuronActive(currentPreNeuron)) && (neuralController->getNeuronType(currentPreNeuron) != TNeuralNetwork::INPUT_NEURON))
 					// Если синапс подлежит отбору и сумарный потенциал ниже порога, то надо его удалить
 					if (synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] < percentileValue){
 						neuralController->deleteSynapse(currentNeuron, currentSynapse, false);
@@ -457,7 +457,7 @@ void TAgent::primarySystemogenesis(){
 // 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"
 int TAgent::mismatchDetection(int neuronNumber){
 	// Если нейрон не активен или он не внутренний, то он не может быть рассогласован
-	if ((! neuralController->getNeuronActive(neuronNumber)) || (neuralController->getNeuronType(neuronNumber) != 1))
+  if ((! neuralController->getNeuronActive(neuronNumber)) || (neuralController->getNeuronType(neuronNumber) != TNeuralNetwork::HIDDEN_NEURON))
 		return 0;
 
 	int activePrediction = 0; // Кол-во связей, предсказавшее активацию

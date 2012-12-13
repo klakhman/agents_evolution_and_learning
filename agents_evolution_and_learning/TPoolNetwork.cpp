@@ -77,9 +77,9 @@ void TPoolNetwork::addPool(int newType, int newLayer, double newBiasMean, double
 	poolsStructure[poolsQuantity] = new TNeuralPool(poolsQuantity + 1, newType, newLayer, newBiasMean, newBiasVariance, newCapacity);
 	++poolsQuantity;
 	// Если пул входной
-	if (0 == newType) ++inputResolution;
+  if (INPUT_POOL == newType) ++inputResolution;
 	// Если пул выходной
-	if (2 == newType) ++outputResolution;
+  if (OUTPUT_POOL == newType) ++outputResolution;
 	// Смотрим на слой пула
 	if (newLayer > layersQuantity) layersQuantity = newLayer;
 }
@@ -100,9 +100,9 @@ void TPoolNetwork::deletePool(int poolNumber){
 				}
 		}
 	// Если пул входной
-	if (0 == poolsStructure[poolNumber - 1]->getType()) --inputResolution;
+  if (INPUT_POOL == poolsStructure[poolNumber - 1]->getType()) --inputResolution;
 	// Если пул выходной
-	if (2 == poolsStructure[poolNumber - 1]->getType()) --outputResolution;
+  if (OUTPUT_POOL == poolsStructure[poolNumber - 1]->getType()) --outputResolution;
 	// Стираем пул и сдвигаем массив
 	connectionsQuantity -= poolsStructure[poolNumber - 1]->getInputConnectionsQuantity();
 	predConnectionsQuantity -= poolsStructure[poolNumber - 1]->getInputPredConnectionsQuantity();

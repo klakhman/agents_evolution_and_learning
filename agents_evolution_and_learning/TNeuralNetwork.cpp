@@ -74,9 +74,9 @@ void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool n
 	neuronsStructure[neuronsQuantity] = new TNeuron(neuronsQuantity + 1, newType, newLayer, newBias, newActive, newParentNeuronID);
 	++neuronsQuantity;
 	// Если нейрон входной
-	if (0 == newType) ++inputResolution;
+  if (INPUT_NEURON == newType) ++inputResolution;
 	// Если нейрон выходной
-	if (2 == newType) ++outputResolution;
+  if (OUTPUT_NEURON == newType) ++outputResolution;
 	// Смотрим на слой нейрона
 	if (newLayer > layersQuantity) layersQuantity = newLayer;
 }
@@ -97,9 +97,9 @@ void TNeuralNetwork::deleteNeuron(int neuronNumber){
 				}
 		}
 	// Если нейрон входной
-	if (0 == neuronsStructure[neuronNumber - 1]->getType()) --inputResolution;
+  if (INPUT_NEURON == neuronsStructure[neuronNumber - 1]->getType()) --inputResolution;
 	// Если нейрон выходной
-	if (2 == neuronsStructure[neuronNumber - 1]->getType()) --outputResolution;
+  if (OUTPUT_NEURON == neuronsStructure[neuronNumber - 1]->getType()) --outputResolution;
 	// Стираем нейрон и сдвигаем массив
 	synapsesQuantity -= neuronsStructure[neuronNumber - 1]->getInputSynapsesQuantity();
 	predConnectionsQuantity -= neuronsStructure[neuronNumber - 1]->getInputPredConnectionsQuantity();

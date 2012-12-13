@@ -120,7 +120,7 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 		--processTillQuit;
 	}
-
+  logFile << endl << "Done." << endl;
 	logFile.close();
 }
 

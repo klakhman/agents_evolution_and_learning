@@ -38,25 +38,39 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
 	agentsPopulation->loadPopulation(bestPopulationFilename);
 	// Создаем массив наград всех агентов при запуске из всех начальных состояний (чтобы если что, то можно было проводить более сложный анализ)
-	int intitalStatesQuantity = environment->getInitialStatesQuantity();
+	int initialStatesQuantity = environment->getInitialStatesQuantity();
 	double** agentsRewards = new double*[agentsPopulation->getPopulationSize()];
-	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
-		agentsRewards[currentAgent - 1] = new double[intitalStatesQuantity];
+	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
+		agentsRewards[currentAgent - 1] = new double[initialStatesQuantity];
+    memset(agentsRewards[currentAgent - 1], 0, sizeof(*(agentsRewards[currentAgent - 1])) * initialStatesQuantity);
+  }
 	double maxReward = 0.0;
 	long double averageReward = 0.0;
+  // Для корректного анализа агентов, которые проходят процедуру первичного системогенеза (и возможно обучения) нужно проводить их построение несколько раз
+  int runsQuantity;
+  if (agentsPopulation->getPointertoAgent(1)->getSystemogenesisMode())
+    runsQuantity = 10;
+  else 
+    runsQuantity = 1;
 	// Прогоняем всех агентов и записываем награды в массив
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
-		agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
-		for (int currentInitialState = 0; currentInitialState < intitalStatesQuantity; ++currentInitialState){
-			environment->setEnvironmentState(currentInitialState);
-			agentsPopulation->getPointertoAgent(currentAgent)->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
-			agentsRewards[currentAgent - 1][currentInitialState] = agentsPopulation->getPointertoAgent(currentAgent)->getReward();
-			
-			averageReward += agentsRewards[currentAgent - 1][currentInitialState] / (agentsPopulation->getPopulationSize() *  intitalStatesQuantity);
-			if (agentsRewards[currentAgent - 1][currentInitialState] > maxReward)
-				maxReward = agentsRewards[currentAgent - 1][currentInitialState];
-		}
+    for (int currentRun = 1; currentRun <= runsQuantity; ++currentRun){
+      if (agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
+        agentsPopulation->getPointertoAgent(currentAgent)->primarySystemogenesis();
+      else
+		    agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
+		  for (int currentInitialState = 0; currentInitialState < initialStatesQuantity; ++currentInitialState){
+			  environment->setEnvironmentState(currentInitialState);
+			  agentsPopulation->getPointertoAgent(currentAgent)->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
+			  double reward = agentsPopulation->getPointertoAgent(currentAgent)->getReward();
+        agentsRewards[currentAgent - 1][currentInitialState] += reward/runsQuantity;			
+			  averageReward += reward / (agentsPopulation->getPopulationSize() *  initialStatesQuantity);
+			  if (reward > maxReward)
+				  maxReward = reward;
+		  }
+    }
 	}
+  averageReward /= runsQuantity;
 	// Удаляем все переменные
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
 		delete []agentsRewards[currentAgent - 1];
@@ -197,6 +211,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 		--processTillQuit;
 	}
+  logFile << endl << "Done." << endl;
 	logFile.close();
 	// Записываем файл с полными данными по всем попыткам и усредненные по средам
 	stringstream analysisResultFilename;

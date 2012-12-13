@@ -41,10 +41,14 @@ class TNeuralPool{
 	void inflatePredConnectednessSet(int inflateSize);
 
 public:
+  static const int INPUT_POOL = 0;
+  static const int HIDDEN_POOL = 1;
+  static const int OUTPUT_POOL = 2;
+
 	// Конструктор по умолчанию
 	TNeuralPool(){
 		ID = 0;
-		type = 0;
+		type = INPUT_POOL;
 		capacity = 0;
 		biasMean = 0;
 		biasVariance = 0;

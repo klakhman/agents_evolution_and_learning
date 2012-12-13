@@ -30,6 +30,10 @@ class TPoolNetwork{
 	void fixPoolsIDs();
 
 public:
+  static const int INPUT_POOL = 0;
+  static const int HIDDEN_POOL = 1;
+  static const int OUTPUT_POOL = 2;
+
 	// Конструктор по умолчанию
 	TPoolNetwork(){
 		poolsStructure = 0;

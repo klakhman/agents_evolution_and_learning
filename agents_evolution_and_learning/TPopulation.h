@@ -445,7 +445,7 @@ void TPopulation<TemplateNeuralAgent>::mutationPoolDuplication(TemplateNeuralAge
 	int initPredConnectionsQuantity = kidGenome->getPredConnectionsQuantity();
 	// Проходимся по всем старым пулам
 	for (int currentPool = 1; currentPool <= initPoolsQuantity; ++currentPool)
-		if (kidGenome->getPoolType(currentPool) == 1){ // Если пул внутренний
+    if (kidGenome->getPoolType(currentPool) == TPoolNetwork::HIDDEN_POOL){ // Если пул внутренний
 			// Проверяем дуплицирует ли пул (с учетом введеной поправки, уменьшающей вероятность дупликации с ростом структуры генома в эволюции)
 			bool duplicate = (service::uniformDistribution(0, 1, true, false) < mutationSettings.duplicatePoolProb/duplicateDivision(initPoolsQuantity, initConnectionsQuantity));
 			if (duplicate){ // Если пул дуплицирует
@@ -569,7 +569,7 @@ void TPopulation<TemplateNeuralAgent>::generateOffspring(TemplateNeuralAgent& ki
 
 	mutationConnectionsWeight(kidAgent);
 	if (firstParentAgent.getSystemogenesisMode()) mutationDevelopSynapseProb(kidAgent);
-	if (firstParentAgent.getSystemogenesisMode()) mutationDevelopPredConProb(kidAgent);
+	if (firstParentAgent.getSystemogenesisMode() && firstParentAgent.getLearningMode()) mutationDevelopPredConProb(kidAgent);
 }
 
 //Процедура получения номера агента, используемая в рулеточном алгоритме

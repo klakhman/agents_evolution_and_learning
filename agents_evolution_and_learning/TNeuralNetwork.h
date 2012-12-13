@@ -30,6 +30,10 @@ class TNeuralNetwork{
 	void inflateNeuronsStructure(int inflateSize);
 
 public:
+  static const int INPUT_NEURON = 0;
+  static const int HIDDEN_NEURON = 1;
+  static const int OUTPUT_NEURON = 2;
+
 	// Конструктор по умолчанию
 	TNeuralNetwork(){
 		neuronsStructure = 0;

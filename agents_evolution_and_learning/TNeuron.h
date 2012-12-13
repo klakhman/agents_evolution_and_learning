@@ -46,11 +46,14 @@ class TNeuron{
 
 public:
 	static const double ACTIVITY_TRESHOLD; // Порог активности, при котором сигнал передается по выходным связям
+  static const int INPUT_NEURON = 0;
+  static const int HIDDEN_NEURON = 1;
+  static const int OUTPUT_NEURON = 2;
 
 	// Конструктор по умолчанию
 	TNeuron(){
 		ID = 0;
-		type = 0;
+		type = INPUT_NEURON;
 		bias = 0;
 		layer = 0;
 		active = false;
