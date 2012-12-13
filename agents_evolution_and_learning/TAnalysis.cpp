@@ -242,7 +242,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 void TAnalysis::decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, string& runSign){
 	string tmpString;
 	for (unsigned int i=0; i < strlen(inputMessage); ++i)
-		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || ((inputMessage[i] >= 'a') && (inputMessage[i] <= 'z')) ) // Если символ число или маленькая буква
+		if ( ((inputMessage[i] >= '0') && (inputMessage[i] <= '9')) || ((inputMessage[i] >= 'a') && (inputMessage[i] <= 'z')) || (inputMessage[i] == '_')) // Если символ число или маленькая буква или знак подчеркивания 
 			tmpString += inputMessage[i];
 		else {
 			switch (inputMessage[i]){
