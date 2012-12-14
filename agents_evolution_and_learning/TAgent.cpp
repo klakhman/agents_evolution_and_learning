@@ -174,7 +174,9 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
 		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
 		// Проводим процедуру обучения (если такой режим)
-		if (learningSettings.learningMode) learning();
+		if (1 == learningSettings.learningMode) learning();
+    // !!!! Случайное обучение - только для контроля качества обучения !!!!!
+    else if (2 == learningSettings.learningMode) randomLearning();
 	}
 	if (rewardCalculate) 
 		reward = environment.calculateReward(agentLife, agentLifeTime);
@@ -563,4 +565,28 @@ void TAgent::learning(){
 			selfLearnNeuron(currentNeuron, mismatchCheck[currentNeuron - 1]);	
 
 	delete []mismatchCheck;
+}
+
+// Процедура случайного обучения агента - случайное включение нейронов с некоторой вероятностью (для контроля качества разработанного алгоритма обучения)
+void TAgent::randomLearning(){
+  const double activeProb = 0.05; // Вероятность случайного включения молчащего нейрона (на всю сеть)
+  // Считаем кол-во молчащих нейронв
+  if (service::uniformDistribution(0, 1, true, false) < activeProb){ // Если должен включиться нейрон
+    int silentNeuronsQuantity = 0;
+    for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
+      if (!neuralController->getNeuronActive(currentNeuron))
+        ++silentNeuronsQuantity;
+    if (silentNeuronsQuantity){// Если вообще остались молчащие нейроны
+      int activateNeuron = service::uniformDiscreteDistribution(1, silentNeuronsQuantity);
+      silentNeuronsQuantity = 0;
+      for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron){
+        if (!neuralController->getNeuronActive(currentNeuron))
+          ++silentNeuronsQuantity;
+        if (silentNeuronsQuantity == activateNeuron){
+          neuralController->setNeuronActive(activateNeuron, true);
+          break;
+        }
+      }
+    }
+  }
 }

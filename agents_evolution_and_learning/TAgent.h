@@ -64,7 +64,7 @@ class TAgent{
 public:
 	// Структура настройки первичного системогенеза
 	struct SPrimarySystemogenesisSettings{
-		bool primarySystemogenesisMode; // Режим первичного системогенеза (false - нет системогенеза (линейный системогенез), true - есть полнеценный первичный системогенез)
+		int primarySystemogenesisMode; // Режим первичного системогенеза (false - нет системогенеза (линейный системогенез), true - есть полнеценный первичный системогенез)
 		int initialPoolCapacity; // Изначальная размерность каждого пула
 		double initialDevelopSynapseProbability; // Вероятность образования синапса связи в процессе построения первичной сети
 		double initialDevelopPredConnectionProbability; // Вероятность образования предикторной связи в процессе построения первичной сети
@@ -77,7 +77,7 @@ public:
 	
 	// Структура настроек процесса обучения
 	struct SLearningSettings{
-		bool learningMode; // Режим обучения (false - нет обучения, true - есть обучение)
+		int learningMode; // Режим обучения (false - нет обучения, true - есть обучение)
 		double mismatchSignificanceTreshold; // Порог значимости предсказания (доли предсказания), при котором нейрон считается рассогласованным
 	} learningSettings;
 
@@ -88,7 +88,7 @@ public:
 		reward = 0;
 		neuralController = new TNeuralNetwork;
 		genome = new TPoolNetwork;
-		primarySystemogenesisSettings.primarySystemogenesisMode = false;
+		primarySystemogenesisSettings.primarySystemogenesisMode = 0;
 		primarySystemogenesisSettings.initialPoolCapacity = 1;
 		primarySystemogenesisSettings.initialDevelopSynapseProbability = 1;
 		primarySystemogenesisSettings.initialDevelopPredConnectionProbability = 1;
@@ -98,7 +98,7 @@ public:
 		primarySystemogenesisSettings.synapsesActivityTreshold = 0;
 		primarySystemogenesisSettings.significanceTreshold = 0;
 
-		learningSettings.learningMode = false;
+		learningSettings.learningMode = 0;
 		learningSettings.mismatchSignificanceTreshold = 0.5;
 	}
 
@@ -116,10 +116,10 @@ public:
 	TPoolNetwork* getPointerToAgentGenome() const { return genome; }
 	TNeuralNetwork* getPointerToAgentController() const { return neuralController; }
 	// Так как настройки режимов системогенеза и обучения очень важны, то делаем для них отдельные геттеры и сеттеры для удобства
-	bool getSystemogenesisMode() const { return primarySystemogenesisSettings.primarySystemogenesisMode; }
-	void setSystemogenesisMode(bool mode) { primarySystemogenesisSettings.primarySystemogenesisMode = mode; }
-	bool getLearningMode() const { return learningSettings.learningMode; }
-	void setLearningMode(bool mode) { learningSettings.learningMode = mode; }
+	int getSystemogenesisMode() const { return primarySystemogenesisSettings.primarySystemogenesisMode; }
+	void setSystemogenesisMode(int mode) { primarySystemogenesisSettings.primarySystemogenesisMode = mode; }
+	int getLearningMode() const { return learningSettings.learningMode; }
+	void setLearningMode(int mode) { learningSettings.learningMode = mode; }
 
 	// Размерность составного действия агента (кол-во идентификаторов действия в один такт времени)
 	virtual int getActionResolution() const { return 1; }
@@ -151,6 +151,9 @@ public:
 	
 	// Основной метод обучения нейроконтроллера на одном такте времени
 	void learning();
+
+  // Процедура случайного обучения агента - случайное включение нейронов с некоторой вероятностью (для контроля качества разработанного алгоритма обучения)
+  void randomLearning();
 
   friend class tests;
 };

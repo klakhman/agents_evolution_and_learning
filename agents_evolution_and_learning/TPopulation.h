@@ -192,9 +192,9 @@ void TPopulation<TemplateNeuralAgent>::evolutionaryStep(TEnvironment& environmen
 	// Прогоняем всех агентов
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
 		// Проводим первичный системогенез (если нужно)
-		if (agents[currentAgent - 1]->primarySystemogenesisSettings.primarySystemogenesisMode)
+		if (1 == agents[currentAgent - 1]->getSystemogenesisMode())
 			agents[currentAgent - 1]->primarySystemogenesis();
-		else
+		else if (0 == agents[currentAgent - 1]->getSystemogenesisMode())
 			agents[currentAgent - 1]->linearSystemogenesis();
 
 		environment.setRandomEnvironmentState();
@@ -556,9 +556,9 @@ void TPopulation<TemplateNeuralAgent>::generateOffspring(TemplateNeuralAgent& ki
 	composeOffspringFromParents(kidAgent, firstParentAgent, secondParentAgent);
 
 	mutationAddPoolConnection(kidAgent);
-  if (firstParentAgent.getLearningMode()) mutationAddPoolPredConnection(kidAgent);
+  if (1 == firstParentAgent.getLearningMode()) mutationAddPoolPredConnection(kidAgent);
 	mutationDeletePoolConnection(kidAgent);
-	if (firstParentAgent.getLearningMode()) mutationDeletePoolPredConnection(kidAgent);
+	if (1 == firstParentAgent.getLearningMode()) mutationDeletePoolPredConnection(kidAgent);
 
 	mutationPoolDuplication(kidAgent, currentEvolutionStep);
 
@@ -568,8 +568,8 @@ void TPopulation<TemplateNeuralAgent>::generateOffspring(TemplateNeuralAgent& ki
 	//mutationEnableDisablePredConnections(kidAgent, currentEvolutionStep);
 
 	mutationConnectionsWeight(kidAgent);
-	if (firstParentAgent.getSystemogenesisMode()) mutationDevelopSynapseProb(kidAgent);
-	if (firstParentAgent.getSystemogenesisMode() && firstParentAgent.getLearningMode()) mutationDevelopPredConProb(kidAgent);
+	if (1 == firstParentAgent.getSystemogenesisMode()) mutationDevelopSynapseProb(kidAgent);
+	if ((1 == firstParentAgent.getSystemogenesisMode()) && (1 == firstParentAgent.getLearningMode())) mutationDevelopPredConProb(kidAgent);
 }
 
 //Процедура получения номера агента, используемая в рулеточном алгоритме

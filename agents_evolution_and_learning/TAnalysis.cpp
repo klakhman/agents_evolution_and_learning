@@ -48,17 +48,18 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	long double averageReward = 0.0;
   // Для корректного анализа агентов, которые проходят процедуру первичного системогенеза (и возможно обучения) нужно проводить их построение несколько раз
   int runsQuantity;
-  if (agentsPopulation->getPointertoAgent(1)->getSystemogenesisMode())
+  if (1 == agentsPopulation->getPointertoAgent(1)->getSystemogenesisMode())
     runsQuantity = 10;
   else 
     runsQuantity = 1;
 	// Прогоняем всех агентов и записываем награды в массив
 	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
     for (int currentRun = 1; currentRun <= runsQuantity; ++currentRun){
-      if (agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
+      if (1 == agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
         agentsPopulation->getPointertoAgent(currentAgent)->primarySystemogenesis();
-      else
+      else if (0 == agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
 		    agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
+
 		  for (int currentInitialState = 0; currentInitialState < initialStatesQuantity; ++currentInitialState){
 			  environment->setEnvironmentState(currentInitialState);
 			  agentsPopulation->getPointertoAgent(currentAgent)->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
