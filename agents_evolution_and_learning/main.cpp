@@ -6,6 +6,7 @@
 #include "TBehaviorAnalysis.h"
 #include "TTopologyAnalysis.h"
 #include "tests.h"
+#include "techanalysis.h"
 
 #include <iostream>
 #include <fstream>

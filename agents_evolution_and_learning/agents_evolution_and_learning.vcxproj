@@ -95,6 +95,7 @@
     <ClInclude Include="TAgent.h" />
     <ClInclude Include="TAnalysis.h" />
     <ClInclude Include="TBehaviorAnalysis.h" />
+    <ClInclude Include="techanalysis.h" />
     <ClInclude Include="TEnvironment.h" />
     <ClInclude Include="tests.h" />
     <ClInclude Include="TEvolutionaryProcess.h" />
@@ -118,6 +119,7 @@
     <ClCompile Include="TAgent.cpp" />
     <ClCompile Include="TAnalysis.cpp" />
     <ClCompile Include="TBehaviorAnalysis.cpp" />
+    <ClCompile Include="techanalysis.cpp" />
     <ClCompile Include="tests.cpp" />
     <ClCompile Include="TEvolutionaryProcess.cpp" />
     <ClCompile Include="THypercubeEnvironment.cpp" />
