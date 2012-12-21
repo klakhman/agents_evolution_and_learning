@@ -5,6 +5,8 @@
 #include "THypercubeEnvironment.h"
 #include "TPopulation.h"
 
+class TAgent;
+
 // Класс основного анализа
 class TAnalysis{
 	
@@ -43,6 +45,11 @@ public:
 	// Парсинг файлов углубленного анализа поведения (zeroConvergenceMean - среднее кол-во состояний, из которых агенты никуда не сходятся)
 	static void advancedBehaviorFilesParsing(int* cyclesConvergenceHist, int statesQuantity, double& zeroConvergenceMean, int* cyclesLengthHist, int maxCyclesLength, std::string analysisFilename);
 
+  // Подсчет среднего количества нейронов (после развертывания пулов) в популяции
+  static double calculatePopAverageNeurons(const TPopulation<TAgent>& population);
+
+  // Подсчет среднего кол-ва нейронов для запуска на одной среде
+  static void calculateOneEnvironmentAverageNeurons(int argc, char**argv);
 };
 
 #endif // TANALYSIS_H

@@ -5,6 +5,7 @@
 #include <fstream>
 
 class TNeuron;
+class TNeuralNetwork;
 
 /* 
 Класс синапса нейронной сети 
@@ -53,6 +54,9 @@ public:
 	}
 	// Запись синапса в файл или на экран
 	friend std::ostream& operator<<(std::ostream& ofs, const TSynapse& synapse);
+
+  friend class TNeuralNetwork;
+  friend class TNeuron;
 };
 
 #endif // TSYNAPSE_H

@@ -348,7 +348,15 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 	struct SSelectionSynapse{
 		int synapseID;
 		double synapseSummaryPotential;
+    // Функция сравнения структур (для функции qsort())
+    static int compare(const void* first, const void* second){
+      double compare = reinterpret_cast<const SSelectionSynapse*>(first)->synapseSummaryPotential - reinterpret_cast<const SSelectionSynapse*>(second)->synapseSummaryPotential;
+      if (!compare) return 0;
+      else if (compare > 0) return 1;
+      else return -1;
+    }
 	};
+
 	SSelectionSynapse* selectionSynapses = new SSelectionSynapse[neuralController->getSynapsesQuantity()];
 	// Проходимся по всем синапсам
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
@@ -357,13 +365,14 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 			selectionSynapses[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1].synapseSummaryPotential = synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1];
 		}
 	// Сортируем связи по значению суммарного потенциала
-	for (int i = 0; i < neuralController->getSynapsesQuantity(); ++i)
+	/*for (int i = 0; i < neuralController->getSynapsesQuantity(); ++i)
 		for (int j = 0; j < neuralController->getSynapsesQuantity() - i - 1; ++j)
 			if (selectionSynapses[j].synapseSummaryPotential > selectionSynapses[j+1].synapseSummaryPotential){
 				SSelectionSynapse tmp = selectionSynapses[j+1];
 				selectionSynapses[j+1] = selectionSynapses[j];
 				selectionSynapses[j] = tmp;
-			}
+			}*/
+  qsort(selectionSynapses, neuralController->getSynapsesQuantity(), sizeof(*selectionSynapses), SSelectionSynapse::compare);
 
 	// Находим порог среднего потенциала по синапсу (через персентиль общего дискретного распределения среднего потенциала через синапсы)
 	double percentileValue = selectionSynapses[static_cast<int>((100 - primarySystemogenesisSettings.synapsesActivityTreshold)/100.0*neuralController->getSynapsesQuantity())].synapseSummaryPotential;

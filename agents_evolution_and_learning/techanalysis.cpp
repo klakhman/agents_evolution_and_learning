@@ -3,6 +3,11 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <fstream>
+
+#include "TAgent.h"
+#include "THypercubeEnvironment.h"
+#include "settings.h"
 
 using namespace std;
 
@@ -50,4 +55,52 @@ bool techanalysis::checkMeanDifSignificance(const vector<double>& firstSequence,
     return true;
   else 
     return false;
+}
+
+// Методика анализа стабильности группы нейронов, развивабщихся из пула - передается файл с сетью (геномом), которая эволюционировала с линейным системогенезом
+// Подсчитывается средняя награда контроллера, полученного линейным системогенезом, и контроллера, полученного первичным системогенезом, если бы все пулы имели не единичный размер, а некоторый стандартный 
+vector<double> techanalysis::poolsStabilityAnalysis(string agentFilename, string environmentFilename, string settingsFilename, int poolsStandartCapacity /*=20*/, double developSynapseStandartProb /*=0.1*/){
+  int agentLifetime = 250;
+  // Итоговый вектор - первое значение это награда с линейным системогенезом, второе значение - с первичным системогенезом
+  vector<double> output;
+  // Загружаем агента и среду
+  TAgent agent;
+  ifstream agentFile;
+  agentFile.open(agentFilename.c_str());
+  agent.loadGenome(agentFile);
+  agentFile.close();
+  settings::fillAgentSettingsFromFile(agent, settingsFilename);
+  THypercubeEnvironment environment(environmentFilename);
+  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  // Прогоняем сначала агента полученного в результате линейного системогенеза
+  agent.setSystemogenesisMode(0);
+  agent.setLearningMode(0);
+  environment.setStochasticityCoefficient(0.0);
+  int statesQuantity = environment.getInitialStatesQuantity();
+  agent.linearSystemogenesis();
+  double reward = 0;
+  for (int currentState = 0; currentState < statesQuantity; ++currentState){
+    environment.setEnvironmentState(currentState);
+    agent.life(environment, agentLifetime);
+    reward += agent.getReward();
+  }
+  output.push_back(reward/statesQuantity);
+  // Проверяем агента, полученного в результате первичного системогенеза
+  // Для этого надо сначала установить стандартные значения емкости пулов и вероятности развития связей
+  for (int currenPool = 1; currenPool <= agent.getPointerToAgentGenome()->getPoolsQuantity(); ++ currenPool){
+    if (TPoolNetwork::HIDDEN_POOL == agent.getPointerToAgentGenome()->getPoolType(currenPool))
+      agent.getPointerToAgentGenome()->setPoolCapacity(currenPool, poolsStandartCapacity);
+    for (int currentConnection = 1; currentConnection <= agent.getPointerToAgentGenome()->getPoolInputConnectionsQuantity(currenPool); ++currentConnection)
+      agent.getPointerToAgentGenome()->setConnectionDevelopSynapseProb(currenPool, currentConnection, developSynapseStandartProb);
+  }
+  agent.primarySystemogenesis();
+  reward = 0;
+  for (int currentState = 0; currentState < statesQuantity; ++currentState){
+    environment.setEnvironmentState(currentState);
+    agent.life(environment, agentLifetime);
+    reward += agent.getReward();
+  }
+  output.push_back(reward/statesQuantity);
+
+  return output;
 }

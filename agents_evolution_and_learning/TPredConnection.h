@@ -5,6 +5,7 @@
 #include <fstream>
 
 class TNeuron;
+class TNeuralNetwork;
 
 /* 
 Класс предикторной связи нейронной сети
@@ -47,6 +48,8 @@ public:
 	}
 	// Запись предикторной связи в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TPredConnection& poolPredConnection);
+
+  friend class TNeuralNetwork;
 };
 
 #endif // TPREDCONNECTION_H

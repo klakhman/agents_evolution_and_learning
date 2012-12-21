@@ -42,11 +42,11 @@ string decodeProgramMode(int argc, char** argv){
 	return "";
 }
 
-void decodeCommandPromt(string& environemtnFilename, string& resultsFilename, string& bestPopulationFilename, string& bestAgentsFilename, long& randomSeed, bool& extraPrint, int argc, char** argv){
+void decodeCommandPromt(string& environmentFilename, string& resultsFilename, string& bestPopulationFilename, string& bestAgentsFilename, long& randomSeed, bool& extraPrint, int argc, char** argv){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
-			if (!strcmp("-envfile", argv[currentArgNumber])) environemtnFilename = argv[++currentArgNumber];
+			if (!strcmp("-envfile", argv[currentArgNumber])) environmentFilename = argv[++currentArgNumber];
 			else if (!strcmp("-resultfile", argv[currentArgNumber])) resultsFilename = argv[++currentArgNumber];
 			else if (!strcmp("-bestpopfile", argv[currentArgNumber])) bestPopulationFilename = argv[++currentArgNumber];
 			else if (!strcmp("-bestagentfile", argv[currentArgNumber])) bestAgentsFilename = argv[++currentArgNumber];
@@ -82,9 +82,15 @@ int main(int argc, char** argv){
 			delete evolutionaryProcess;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
-    srand(static_cast<unsigned int>(time(0)));
     //TAnalysis::makeBestPopulationAnalysisSummary("C:/Coding/Current_Test_Folder/BestPopulation_analysis_En1001-1360_test.txt", "C:/Coding/Current_Test_Folder/analysis_summary.txt", 18, 20, 10);
-    tests::testPrimarySystemogenesis("C:/Coding/Current_Test_Folder/");
+    //tests::testPrimarySystemogenesis("C:/Coding/Current_Test_Folder/");
+    //vector<double> reward = techanalysis::poolsStabilityAnalysis("C:/EXPERIMENTS/agent.txt", "C:/EXPERIMENTS/Environment1113.txt" , "C:/EXPERIMENTS/settings.ini", 50, 0.1);
+    //cout << reward[0] << endl << reward[1] << endl;
+    //cout << static_cast<int>(-1.1);
+    return 0;
+  }
+  else if(programMode == "NQ"){ // Режим подсчета количества нейронов
+    TAnalysis::calculateOneEnvironmentAverageNeurons(argc, argv);
     return 0;
   }
   else if (programMode == "BCA"){//Режим анализа поведенчиских циклов

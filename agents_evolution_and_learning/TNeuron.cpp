@@ -88,13 +88,13 @@ void TNeuron::calculateOut(){
 	for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
 	{
 		// Определяем какая связь - рекуррентная или прямая
-		double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getLayer()) ? 
-													inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getCurrentOut():
-													inputSynapsesSet[currentSynapse - 1]->getPreNeuron()->getPreviousOut();
+		double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1]->preNeuron->layer) ? 
+													inputSynapsesSet[currentSynapse - 1]->preNeuron->currentOut:
+													inputSynapsesSet[currentSynapse - 1]->preNeuron->previousOut;
 		// Если выход не означен, то что-то пошло не так (эта строчка больше для отладки)
 		if (preNeuronOut == EMPTY_OUT) exit(2);
 		if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
-			potential += inputSynapsesSet[currentSynapse - 1]->getWeight() * preNeuronOut;
+			potential += inputSynapsesSet[currentSynapse - 1]->weight * preNeuronOut;
 	}
 	// Если нейрон активен, то вычисляем выход
 	if (active)

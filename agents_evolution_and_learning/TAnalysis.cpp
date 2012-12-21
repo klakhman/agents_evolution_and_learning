@@ -423,4 +423,59 @@ void TAnalysis::advancedBehaviorFilesParsing(int* cyclesConvergenceHist, int sta
 	analysisFile.close();
 }
 
+// Подсчет среднего количества нейронов (после развертывания пулов) в популяции
+double TAnalysis::calculatePopAverageNeurons(const TPopulation<TAgent>& population){
+  double averageNeuronsQuantity = 0;
+  for (int currentAgent = 1; currentAgent < population.getPopulationSize(); ++currentAgent){
+    TPoolNetwork* genome = population.getPointertoAgent(currentAgent)->getPointerToAgentGenome();
+    for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+      averageNeuronsQuantity += genome->getPoolCapacity(currentPool);
+  }
+  return averageNeuronsQuantity/static_cast<double>(population.getPopulationSize());
+}
+
+// Подсчет среднего кол-ва нейронов для запуска на одной среде
+void TAnalysis::calculateOneEnvironmentAverageNeurons(int argc, char**argv){
+  MPI_Init(&argc, &argv);
+  string settingsFilename = settings::getSettingsFilename(argc, argv);
+  string resultsDirectory;
+  string environmentDirectory;
+  string workDirectory;
+  settings::fillDirectoriesSettings(workDirectory, environmentDirectory, resultsDirectory, settingsFilename);
+
+  string runSign;
+  int envNumber;
+  int tryQuantity;
+  int currentArgNumber = 1; // Текущий номер параметра
+	while (currentArgNumber < argc){
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if (!strcmp("-envnumber", argv[currentArgNumber])) envNumber = atoi(argv[++currentArgNumber]);
+			else if (!strcmp("-sign", argv[currentArgNumber])) runSign = argv[++currentArgNumber];
+      else if (!strcmp("-tryquantity", argv[currentArgNumber])) tryQuantity = atoi(argv[++currentArgNumber]);
+		}
+		++currentArgNumber;
+	}
+  stringstream tmpStream;
+  tmpStream << workDirectory << "/NeuronsQuantityAnalysis_env" << envNumber << "_try1-" << tryQuantity << "_" << runSign << ".txt";
+  ofstream outputFile;
+  outputFile.open(tmpStream.str().c_str());
+
+  TPopulation<TAgent> population;
+  settings::fillPopulationSettingsFromFile(population, settingsFilename);
+  double averageNeuronsQuantity = 0;
+  for (int currentPopulation = 0; currentPopulation < tryQuantity; ++currentPopulation){
+    double currentAverage = 0;
+    tmpStream.str("");
+    tmpStream << resultsDirectory << "/En" << envNumber << "/En" << envNumber << "_" << runSign << "(" << currentPopulation + 1 << ")_bestpopulation.txt";
+    population.loadPopulation(tmpStream.str());
+    currentAverage = calculatePopAverageNeurons(population);
+    averageNeuronsQuantity += currentAverage;
+    outputFile << "Try: " << currentPopulation + 1 << "\tAverage neurons quantity: " << currentAverage << endl; 
+  }
+  averageNeuronsQuantity /= tryQuantity;
+  outputFile << endl << endl << "Total average: " << averageNeuronsQuantity << endl;
+  outputFile.close();
+  MPI_Finalize();
+}
+
 
