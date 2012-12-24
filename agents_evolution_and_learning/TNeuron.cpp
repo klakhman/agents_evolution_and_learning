@@ -19,14 +19,16 @@ void TNeuron::calculateOut(){
 	potential += bias; // Добавляем смещение
 	for (unsigned int currentSynapse = 1; currentSynapse <= inputSynapsesSet.size(); ++currentSynapse)
 	{
-		// Определяем какая связь - рекуррентная или прямая
-		double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1].preNeuron->layer) ? 
-													inputSynapsesSet[currentSynapse - 1].preNeuron->currentOut:
-													inputSynapsesSet[currentSynapse - 1].preNeuron->previousOut;
-		// Если выход не означен, то что-то пошло не так (эта строчка больше для отладки)
-		//if (preNeuronOut == EMPTY_OUT) exit(2);
-		if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
-			potential += inputSynapsesSet[currentSynapse - 1].weight * preNeuronOut;
+    if (inputSynapsesSet[currentSynapse - 1].preNeuron->active){ // Если нейрон активен, то проводим суммирование, иначе просто пропускаем для улучшения производительности
+      // Определяем какая связь - рекуррентная или прямая
+		  double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1].preNeuron->layer) ? 
+													  inputSynapsesSet[currentSynapse - 1].preNeuron->currentOut:
+													  inputSynapsesSet[currentSynapse - 1].preNeuron->previousOut;
+		  // Если выход не означен, то что-то пошло не так (эта строчка больше для отладки)
+		  //if (preNeuronOut == EMPTY_OUT) exit(2);
+		  if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
+			  potential += inputSynapsesSet[currentSynapse - 1].weight * preNeuronOut;
+    }
 	}
 	// Если нейрон активен, то вычисляем выход
 	if (active)
