@@ -2,6 +2,7 @@
 #define TNEURON_H
 
 #include <iostream>
+#include <vector>
 #include <fstream>
 #include "TSynapse.h"
 #include "TPredConnection.h"
@@ -20,13 +21,9 @@ class TNeuron{
 
 	int parentPoolID; // Номер родительского пула
 
-	TSynapse** inputSynapsesSet; // Массив входных синапсов нейрона
-	int inputSynapsesSetSize; // Текущий размер массива входных синапсов
-	int inputSynapsesQuantity; // Количество входных синапсов нейрона
+	std::vector<TSynapse> inputSynapsesSet; // Массив входных синапсов нейрона
 
-	TPredConnection** inputPredConnectionsSet; // Массив входных предикторных связей нейрона
-	int inputPredConnectionsSetSize; // Текущий размер массива входных предикторных связей
-	int inputPredConnectionsQuantity; // Количество входных предикторных связей нейрона
+	std::vector<TPredConnection> inputPredConnectionsSet; // Массив входных предикторных связей нейрона
 
 	double currentOut; // Текущий выход нейрона
 	double potential; // Текущий потенциал нейрона
@@ -35,14 +32,7 @@ class TNeuron{
 	// Установка значения выхода нейрона (только для дружественного TNeuralNetwork для заполнения нейронов среды)
 	void setCurrentOut(double newCurrentOut) { currentOut = newCurrentOut; }
 
-	// Процедура увеличения размера массива входных синапсов
-	void inflateSynapsesSet(int inflateSize);
-	// Процедура увеличения размера массива входных предикторных связей
-	void inflatePredConnectionsSet(int inflateSize);
-
 	static const double EMPTY_OUT; // Признак неозначенного выхода нейрона
-	static const int INFLATE_SYNAPSES_SIZE = 10; // Размер увеличения массива с входным синапсами в случае переполнения
-	static const int INFLATE_PRED_CONNECTIONS_SIZE = 10; // Размер увеличения массива с входным предикторными связями в случае переполнения
 
 public:
 	static const double ACTIVITY_TRESHOLD; // Порог активности, при котором сигнал передается по выходным связям
@@ -58,12 +48,6 @@ public:
 		layer = 0;
 		active = false;
 		parentPoolID = 0;
-		inputSynapsesSet = 0;
-		inputSynapsesSetSize = 0;
-		inputSynapsesQuantity = 0;
-		inputPredConnectionsSet = 0;
-		inputPredConnectionsSetSize = 0;
-		inputPredConnectionsQuantity = 0;
 
 		currentOut = 0;
 		potential = 0;
@@ -72,19 +56,13 @@ public:
 	// Полный конструктор
 	TNeuron(int newID, int newType, int newLayer, double newBias, bool newActive = true, int newParentPoolID = 0){
 		setAll(newID, newType, newLayer, newBias, newActive, newParentPoolID);
-		inputSynapsesSet = 0;
-		inputSynapsesSetSize = 0;
-		inputSynapsesQuantity = 0;
-		inputPredConnectionsSet = 0;
-		inputPredConnectionsSetSize = 0;
-		inputPredConnectionsQuantity = 0;
 
 		currentOut = 0;
 		potential = 0;
 		previousOut = 0;
 	}
 	// Деструктор
-	~TNeuron();
+  ~TNeuron() {}
 
 	// Геттеры и сеттеры для всех внутренних переменных
 	int getID() const { return ID; }
@@ -100,9 +78,9 @@ public:
 	int getParentPoolID() const { return parentPoolID; }
 	void setParentPoolID(int newParentPoolID) { parentPoolID = newParentPoolID; }
 	// Получение количества входных синапсов нейрона
-	int getInputSynapsesQuantity() const { return inputSynapsesQuantity; }
+	int getInputSynapsesQuantity() const { return inputSynapsesSet.size(); }
 	// Получение количества входных предикторных связей нейрона
-	int getInputPredConnectionsQuantity() const { return inputPredConnectionsQuantity; }
+	int getInputPredConnectionsQuantity() const { return inputPredConnectionsSet.size(); }
 	// Заполнение всех характеристик нейрона
 	void setAll(int newID, int newType, int newLayer, double newBias, bool newActive = true, int newParentPoolID = 0){
 		ID = newID;
@@ -119,36 +97,47 @@ public:
 	double getPreviousOut() { return previousOut; }
 
 	// Геттеры и сеттеры для синапсов данного пула (во всех случаях передается номер синапса в массиве синапсов)
-	int getSynapseID(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getID(); }
-	void setSynapseID(int synapseNumber, int newID) { inputSynapsesSet[synapseNumber-1]->setID(newID); }
-	double getSynapseWeight(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getWeight(); }
-	void setSynapseWeight(int synapseNumber, double newWeight) { inputSynapsesSet[synapseNumber-1]->setWeight(newWeight); }
-	bool getSynapseEnabled(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getEnabled(); }
-	void setSynapseEnabled(int synapseNumber, bool newEnabled) { inputSynapsesSet[synapseNumber-1]->setEnabled(newEnabled); }
-	TNeuron* getSynapsePreNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getPreNeuron(); }
-	void setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron) { inputSynapsesSet[synapseNumber-1]->setPreNeuron(newPreNeuron); }
-	TNeuron* getSynapsePostNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1]->getPostNeuron(); }
-	void setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron) { inputSynapsesSet[synapseNumber-1]->setPostNeuron(newPostNeuron); }
+	int getSynapseID(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1].getID(); }
+	void setSynapseID(int synapseNumber, int newID) { inputSynapsesSet[synapseNumber-1].setID(newID); }
+	double getSynapseWeight(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1].getWeight(); }
+	void setSynapseWeight(int synapseNumber, double newWeight) { inputSynapsesSet[synapseNumber-1].setWeight(newWeight); }
+	bool getSynapseEnabled(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1].getEnabled(); }
+	void setSynapseEnabled(int synapseNumber, bool newEnabled) { inputSynapsesSet[synapseNumber-1].setEnabled(newEnabled); }
+	TNeuron* getSynapsePreNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1].getPreNeuron(); }
+	void setSynapsePreNeuron(int synapseNumber, TNeuron* newPreNeuron) { inputSynapsesSet[synapseNumber-1].setPreNeuron(newPreNeuron); }
+	TNeuron* getSynapsePostNeuron(int synapseNumber) const { return inputSynapsesSet[synapseNumber-1].getPostNeuron(); }
+	void setSynapsePostNeuron(int synapseNumber, TNeuron* newPostNeuron) { inputSynapsesSet[synapseNumber-1].setPostNeuron(newPostNeuron); }
 
 	// Геттеры и сеттеры для предикторных связей данного нейрона (во всех случаях передается номер связи в массиве связей)
-	int getPredConnectionID(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getID(); }
-	void setPredConnectionID(int predConnectionNumber, int newID) { inputPredConnectionsSet[predConnectionNumber-1]->setID(newID); }
-	bool getPredConnectionEnabled(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getEnabled(); }
-	void setPredConnectionEnabled(int predConnectionNumber, bool newEnabled) { inputPredConnectionsSet[predConnectionNumber-1]->setEnabled(newEnabled); }
-	TNeuron* getPredConnectionPreNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getPreNeuron(); }
-	void setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newPreNeuron) { inputPredConnectionsSet[predConnectionNumber-1]->setPreNeuron(newPreNeuron); }
-	TNeuron* getPredConnectionPostNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1]->getPostNeuron(); }
-	void setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron) { inputPredConnectionsSet[predConnectionNumber-1]->setPostNeuron(newPostNeuron); }
+	int getPredConnectionID(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1].getID(); }
+	void setPredConnectionID(int predConnectionNumber, int newID) { inputPredConnectionsSet[predConnectionNumber-1].setID(newID); }
+	bool getPredConnectionEnabled(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1].getEnabled(); }
+	void setPredConnectionEnabled(int predConnectionNumber, bool newEnabled) { inputPredConnectionsSet[predConnectionNumber-1].setEnabled(newEnabled); }
+	TNeuron* getPredConnectionPreNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1].getPreNeuron(); }
+	void setPredConnectionPreNeuron(int predConnectionNumber, TNeuron* newPreNeuron) { inputPredConnectionsSet[predConnectionNumber-1].setPreNeuron(newPreNeuron); }
+	TNeuron* getPredConnectionPostNeuron(int predConnectionNumber) const { return inputPredConnectionsSet[predConnectionNumber-1].getPostNeuron(); }
+	void setPredConnectionPostNeuron(int predConnectionNumber, TNeuron* newPostNeuron) { inputPredConnectionsSet[predConnectionNumber-1].setPostNeuron(newPostNeuron); }
 
-	// Добавление входного синапса в нейрон
-	void addSynapse(int newID, TNeuron* newPreNeuron, double newWeight, bool newEnabled = true);
-	// Удаление синапса из нейрона
-	void deleteSynapse(int synapseNumber);
+  // Добавление входного синапса в нейрон
+  void addSynapse(int newID, TNeuron* newPreNeuron, double newWeight, bool newEnabled = true){
+    TSynapse newSynapse(newID, newPreNeuron, this, newWeight, newEnabled);
+    inputSynapsesSet.push_back(newSynapse);
+  }
+
+  // Удаление синапса из нейрона
+  void deleteSynapse(int synapseNumber){
+    inputSynapsesSet.erase(inputSynapsesSet.begin() + synapseNumber - 1);
+  }
 
 	// Добавление входной предикторной связи в нейрон
-	void addPredConnection(int newID, TNeuron* newPreNeuron, bool newEnabled = true);
+	void addPredConnection(int newID, TNeuron* newPreNeuron, bool newEnabled = true){
+    TPredConnection newPredConnection(newID, newPreNeuron, this, newEnabled);
+    inputPredConnectionsSet.push_back(newPredConnection);
+  }
 	// Удаление предикторной связи из нейрона
-	void deletePredConnection(int predConnectionNumber);
+	void deletePredConnection(int predConnectionNumber){
+    inputPredConnectionsSet.erase(inputPredConnectionsSet.begin() + predConnectionNumber - 1);
+  }
 
 	// "Перезагрузка нейрона"
 	void reset(){

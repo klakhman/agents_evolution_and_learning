@@ -124,9 +124,9 @@ bool THypercubeEnvironment::forceEnvironment(const std::vector<double>& action){
 
 // Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
 double THypercubeEnvironment::calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const{
-  double* actionsIDs = new double[actionsQuantity];
+  /*double* actionsIDs = new double[actionsQuantity];
   for (int currentAction = 0; currentAction < actionsQuantity; ++currentAction)
-    actionsIDs[currentAction] = actions[currentAction][0];
+    actionsIDs[currentAction] = actions[currentAction][0];*/
 	double accumulatedReward = 0.0; // Награда агента
 	// Времена последнего достижения цели агентом
 	int* achievingTime = new int[aimsQuantity];
@@ -143,8 +143,8 @@ double THypercubeEnvironment::calculateReward(const std::vector< std::vector<dou
 				// Пока не найдено нарушение последовательности цели или проверка цели закончена
 				while (achivedFlag && (currentAction <= aimsSet[currentAim - 1].aimComplexity)){
 					// Определение направления изменения и изменяемого бита (с откатыванием времени назад)
-					bool changedDirection = (actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction] > 0);
-					int changedBit = static_cast<int>(fabs(actionsIDs[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction]));
+					bool changedDirection = (actions[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0] > 0);
+					int changedBit = static_cast<int>(fabs(actions[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0]));
 					/* Проверяем совпадает ли реальное действие с действием в цели на нужном месте 
 						Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
 					if ((changedBit != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber) ||
@@ -161,7 +161,7 @@ double THypercubeEnvironment::calculateReward(const std::vector< std::vector<dou
 			} // Конец проверки одной цели
 		} // Конец проверки всех целей относительно одного фронта времени
 	} // Конец проверки всей "жизни"
-  delete []actionsIDs;
+  //delete []actionsIDs;
 	delete []achievingTime;
 	return accumulatedReward;
 }

@@ -13,66 +13,45 @@ using namespace std;
 
 // Нахождение номера связи в структуре постсинаптического нейрона - возвращает ноль, если связи нет
 int TNeuralNetwork::findSynapseNumber(int preNeuronNumber, int postNeuronNumber){
-  for (int currentSynapse = 1; currentSynapse <= neuronsStructure[postNeuronNumber - 1]->inputSynapsesQuantity; ++currentSynapse)
-    if (neuronsStructure[postNeuronNumber - 1]->inputSynapsesSet[currentSynapse - 1]->preNeuron->ID == preNeuronNumber)
+  for (unsigned int currentSynapse = 1; currentSynapse <= neuronsStructure[postNeuronNumber - 1].inputSynapsesSet.size(); ++currentSynapse)
+    if (neuronsStructure[postNeuronNumber - 1].inputSynapsesSet[currentSynapse - 1].preNeuron->ID == preNeuronNumber)
 			return currentSynapse;
 	return 0;
 }
 
 // Нахождение номера предикторной связи в структуре постсинаптического нейрона - возвращает ноль, если предикторной связи нет
 int TNeuralNetwork::findPredConnectionNumber(int preNeuronNumber, int postNeuronNumber){
-  for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[postNeuronNumber - 1]->inputPredConnectionsQuantity; ++currentPredConnection)
-    if (neuronsStructure[postNeuronNumber - 1]->inputPredConnectionsSet[currentPredConnection - 1]->preNeuron->ID == preNeuronNumber)
+  for (unsigned int currentPredConnection = 1; currentPredConnection <= neuronsStructure[postNeuronNumber - 1].inputPredConnectionsSet.size(); ++currentPredConnection)
+    if (neuronsStructure[postNeuronNumber - 1].inputPredConnectionsSet[currentPredConnection - 1].preNeuron->ID == preNeuronNumber)
 			return currentPredConnection;
 	return 0;
 }
 
 // Корректировка ID нейронов (например после удаления)
 void TNeuralNetwork::fixNeuronsIDs(){
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		neuronsStructure[currentNeuron - 1]->ID = currentNeuron;
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+		neuronsStructure[currentNeuron - 1].ID = currentNeuron;
 }
 
 // Корректировка ID связей (например после удаления)
 void TNeuralNetwork::fixSynapsesIDs(){
 	int _synapesQuantity = 0;
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-    for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->inputSynapsesQuantity; ++currentSynapse)
-      neuronsStructure[currentNeuron - 1]->inputSynapsesSet[currentSynapse - 1]->ID = ++_synapesQuantity;
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+    for (unsigned int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1].inputSynapsesSet.size(); ++currentSynapse)
+      neuronsStructure[currentNeuron - 1].inputSynapsesSet[currentSynapse - 1].ID = ++_synapesQuantity;
 }
 // Корректировка ID предикторных связей (например после удаления)
 void TNeuralNetwork::fixPredConnectionsIDs(){
 	int _predConnectionsQuantity = 0;
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-    for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->inputPredConnectionsQuantity; ++currentPredConnection)
-      neuronsStructure[currentNeuron - 1]->inputPredConnectionsSet[currentPredConnection - 1]->ID = ++_predConnectionsQuantity;
-}
-
-// Процедура увеличения размера массива нейронов
-void TNeuralNetwork::inflateNeuronsStructure(int inflateSize){
-	TNeuron** newNeuronsStructure = new TNeuron*[neuronsStructureSize + inflateSize];
-	memset(newNeuronsStructure, 0, (neuronsStructureSize + inflateSize) * sizeof(TNeuron*));
-	memcpy(newNeuronsStructure, neuronsStructure, neuronsStructureSize * sizeof(TNeuron*));
-	delete []neuronsStructure;
-	neuronsStructure = newNeuronsStructure;
-	neuronsStructureSize += inflateSize;
-}
-
-// Декструктор
-TNeuralNetwork::~TNeuralNetwork(){
-	if (neuronsStructure){
-		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-			delete neuronsStructure[currentNeuron - 1];
-		delete []neuronsStructure;
-	}
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+    for (unsigned int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1].inputPredConnectionsSet.size(); ++currentPredConnection)
+      neuronsStructure[currentNeuron - 1].inputPredConnectionsSet[currentPredConnection - 1].ID = ++_predConnectionsQuantity;
 }
 
 //Добавление нейрона в сеть
 void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool newActive /*=true*/, int newParentNeuronID /*=0*/){
-	if (neuronsQuantity >= neuronsStructureSize) // Если не хватает места в массиве
-		inflateNeuronsStructure(INFLATE_NEURONS_SIZE);
-	neuronsStructure[neuronsQuantity] = new TNeuron(neuronsQuantity + 1, newType, newLayer, newBias, newActive, newParentNeuronID);
-	++neuronsQuantity;
+  TNeuron newNeuron(neuronsStructure.size() + 1, newType, newLayer, newBias, newActive, newParentNeuronID);
+  neuronsStructure.push_back(newNeuron);
 	// Если нейрон входной
   if (INPUT_NEURON == newType) ++inputResolution;
 	// Если нейрон выходной
@@ -82,71 +61,98 @@ void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool n
 }
 
 // Удаление нейрона из сети (с удалением также всех входных и выходных связей из этого нейрона)
-void TNeuralNetwork::deleteNeuron(int neuronNumber){
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		if (currentNeuron != neuronNumber){ // Если это не стираемый нейрон (пропускаем просто для экономии времени)
-      for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->inputSynapsesQuantity; ++currentSynapse)
-        if (neuronsStructure[currentNeuron - 1]->inputSynapsesSet[currentSynapse - 1]->preNeuron->ID == neuronNumber){ // Если это синапс от стираемого нейрона
+void TNeuralNetwork::deleteNeuron(unsigned int neuronNumber){
+  // ПРОБЛЕМА - после стирания нейрона у всех нейронов могут измениться адреса в векторе => надо править все ссылки в синапсах и предикторных связях
+  /*struct SConnectionNeuronsIDs{
+    int preNeuronID;
+    int postNeuronID;
+    SConnectionNeuronsIDs(int _preNeuronID, int _postNeuronID) : preNeuronID(_preNeuronID), postNeuronID(_postNeuronID) {};
+  };*/
+  vector<int> synapsesPreNeuron; // Позиция связи в векторе - это номер в _ОБЩЕЙ_ последовательности синапсов
+  vector<int> predConnectionsPreNeuron;
+  // Проходим по всей сети и стираем синапсы и пред.связи у которых удаляемый нейрон пресинаптический 
+  // Также записываем информацию об ID пре- и пост-синаптических нейронов для всех остальных связей (кроме связей удаляемого нейрона)
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+		if (currentNeuron != neuronNumber){ // Если это не стираемый нейрон
+      for (unsigned int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1].inputSynapsesSet.size(); ++currentSynapse)
+        if (neuronsStructure[currentNeuron - 1].inputSynapsesSet[currentSynapse - 1].preNeuron->ID == neuronNumber){ // Если это синапс от стираемого нейрона
 					deleteSynapse(currentNeuron, currentSynapse);
-					break; // Выходим из цикла, так как у одного нейрона не может быть более одной связи от другого нейрона
-				}
-      for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->inputPredConnectionsQuantity; ++currentPredConnection)
-        if (neuronsStructure[currentNeuron - 1]->inputPredConnectionsSet[currentPredConnection - 1]->preNeuron->ID == neuronNumber){ // Если это пред. связь от стираемого нейрона
+          --currentSynapse;
+        }
+        else{
+          unsigned int preNeuronID = neuronsStructure[currentNeuron - 1].inputSynapsesSet[currentSynapse - 1].preNeuron->ID;
+          // Сразу сдвигаем номер ID нейрона, если он идет после удаляемого
+          synapsesPreNeuron.push_back((preNeuronID < neuronNumber) ? preNeuronID : preNeuronID - 1);
+        }
+
+      for (unsigned int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1].inputPredConnectionsSet.size(); ++currentPredConnection)
+        if (neuronsStructure[currentNeuron - 1].inputPredConnectionsSet[currentPredConnection - 1].preNeuron->ID == neuronNumber){ // Если это пред. связь от стираемого нейрона
 					deletePredConnection(currentNeuron, currentPredConnection);
-					break;
+          --currentPredConnection;
 				}
+        else{
+          unsigned int preNeuronID = neuronsStructure[currentNeuron - 1].inputPredConnectionsSet[currentPredConnection - 1].preNeuron->ID;
+          predConnectionsPreNeuron.push_back((preNeuronID < neuronNumber) ? preNeuronID : preNeuronID - 1);
+        }
 		}
 	// Если нейрон входной
-  if (INPUT_NEURON == neuronsStructure[neuronNumber - 1]->type) --inputResolution;
+  if (INPUT_NEURON == neuronsStructure[neuronNumber - 1].type) --inputResolution;
 	// Если нейрон выходной
-  if (OUTPUT_NEURON == neuronsStructure[neuronNumber - 1]->type) --outputResolution;
-	// Стираем нейрон и сдвигаем массив
-  synapsesQuantity -= neuronsStructure[neuronNumber - 1]->inputSynapsesQuantity;
-  predConnectionsQuantity -= neuronsStructure[neuronNumber - 1]->inputPredConnectionsQuantity;
-	delete neuronsStructure[neuronNumber - 1];
-	for (int currentNeuron = neuronNumber - 1; currentNeuron < neuronsQuantity - 1; ++currentNeuron)
-		neuronsStructure[currentNeuron] = neuronsStructure[currentNeuron + 1];
-	neuronsStructure[neuronsQuantity - 1] = 0;
-	--neuronsQuantity;
+  if (OUTPUT_NEURON == neuronsStructure[neuronNumber - 1].type) --outputResolution;
+	// Стираем нейрон
+  synapsesQuantity -= neuronsStructure[neuronNumber - 1].inputSynapsesSet.size();
+  predConnectionsQuantity -= neuronsStructure[neuronNumber - 1].inputPredConnectionsSet.size();
+  neuronsStructure.erase(neuronsStructure.begin() + neuronNumber - 1);
 	fixNeuronsIDs();
+  int overallSynapseNumber = 0;
+  int overallPredConnectionNumber = 0;
+  // Теперь правим все ссылки в связях
+  for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron){
+    for (unsigned int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1].inputSynapsesSet.size(); ++currentSynapse){
+      setSynapsePreNeuronID(currentNeuron, currentSynapse, synapsesPreNeuron[overallSynapseNumber]);
+      setSynapsePostNeuronID(currentNeuron, currentSynapse, currentNeuron);
+      ++overallSynapseNumber;
+    }
+    for (unsigned int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron].inputPredConnectionsSet.size(); ++currentPredConnection){
+      setPredConnectionPreNeuronID(currentNeuron, currentPredConnection, predConnectionsPreNeuron[overallPredConnectionNumber]);
+      setPredConnectionPostNeuronID(currentNeuron, currentPredConnection, currentNeuron);
+      ++overallPredConnectionNumber;
+    }
+  }
+  fixSynapsesIDs();
+  fixPredConnectionsIDs();
 }
 
 //Удаление связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
-void TNeuralNetwork::deleteSynapse(int neuronNumber, int synapseNumber, bool fixIDs /*=true*/){
-	neuronsStructure[neuronNumber-1]->deleteSynapse(synapseNumber);
+void TNeuralNetwork::deleteSynapse(unsigned int neuronNumber,unsigned int synapseNumber, bool fixIDs /*=true*/){
+	neuronsStructure[neuronNumber-1].deleteSynapse(synapseNumber);
 	if (fixIDs){
-    for (int currentSynapse = synapseNumber; currentSynapse <= neuronsStructure[neuronNumber - 1]->inputSynapsesQuantity; ++currentSynapse)
-      neuronsStructure[neuronNumber - 1]->inputSynapsesSet[currentSynapse - 1]->ID -= 1;
-		for (int currentNeuron = neuronNumber + 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-      for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->inputSynapsesQuantity; ++currentSynapse)
-				neuronsStructure[currentNeuron - 1]->inputSynapsesSet[currentSynapse - 1]->ID -= 1;
+    for (unsigned int currentSynapse = synapseNumber; currentSynapse <= neuronsStructure[neuronNumber - 1].inputSynapsesSet.size(); ++currentSynapse)
+      neuronsStructure[neuronNumber - 1].inputSynapsesSet[currentSynapse - 1].ID -= 1;
+    for (unsigned int currentNeuron = neuronNumber + 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+      for (unsigned int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1].inputSynapsesSet.size(); ++currentSynapse)
+				neuronsStructure[currentNeuron - 1].inputSynapsesSet[currentSynapse - 1].ID -= 1;
 	}
 	--synapsesQuantity;
 }
 
 // Удаление предикторной связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
-void TNeuralNetwork::deletePredConnection(int neuronNumber, int predConnectionNumber, bool fixIDs /*=true*/){
-	neuronsStructure[neuronNumber-1]->deletePredConnection(predConnectionNumber);
+void TNeuralNetwork::deletePredConnection(unsigned int neuronNumber,unsigned int predConnectionNumber, bool fixIDs /*=true*/){
+	neuronsStructure[neuronNumber-1].deletePredConnection(predConnectionNumber);
 	if (fixIDs){
-    for (int currentPredConnection = predConnectionNumber; currentPredConnection <= neuronsStructure[neuronNumber - 1]->inputPredConnectionsQuantity; ++currentPredConnection)
-      neuronsStructure[neuronNumber - 1]->inputPredConnectionsSet[currentPredConnection - 1]->ID -= 1;
-		for (int currentNeuron = neuronNumber + 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-      for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->inputPredConnectionsQuantity; ++currentPredConnection)
-				neuronsStructure[currentNeuron - 1]->inputPredConnectionsSet[currentPredConnection - 1]->ID -= 1;
+    for (unsigned int currentPredConnection = predConnectionNumber; currentPredConnection <= neuronsStructure[neuronNumber - 1].inputPredConnectionsSet.size(); ++currentPredConnection)
+      neuronsStructure[neuronNumber - 1].inputPredConnectionsSet[currentPredConnection - 1].ID -= 1;
+		for (unsigned int currentNeuron = neuronNumber + 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+      for (unsigned int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1].inputPredConnectionsSet.size(); ++currentPredConnection)
+				neuronsStructure[currentNeuron - 1].inputPredConnectionsSet[currentPredConnection - 1].ID -= 1;
 	}
 	--predConnectionsQuantity;
 }
 
 // Стирание сети
 void TNeuralNetwork::eraseNeuralNetwork(){
-	if (neuronsStructure) {
-		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-			delete neuronsStructure[currentNeuron - 1];
-		delete []neuronsStructure;
-		neuronsStructure = 0;
-	}
-	neuronsStructureSize = 0;
-	neuronsQuantity = 0;
+	if (neuronsStructure.size() != 0) 
+    neuronsStructure.resize(0);
 	synapsesQuantity = 0;
 	predConnectionsQuantity = 0;
 	layersQuantity = 0;
@@ -157,46 +163,46 @@ void TNeuralNetwork::eraseNeuralNetwork(){
 // Обсчет одного такта работы сети
 void TNeuralNetwork::calculateNetwork(double inputVector[]){
 	// Сначала подготавливаем все нейроны
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		neuronsStructure[currentNeuron - 1]->prepare();
+  for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+		neuronsStructure[currentNeuron - 1].prepare();
 	// Заполняем входные нейроны
 	for (int currentBit = 1; currentBit <= inputResolution; ++currentBit)
-		neuronsStructure[currentBit - 1]->currentOut = inputVector[currentBit - 1];
+		neuronsStructure[currentBit - 1].currentOut = inputVector[currentBit - 1];
 	// Проходимся по нейронам по слоям (начинаем со второго)
 	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
-		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-			if (neuronsStructure[currentNeuron - 1]->layer == currentLayer)
-				neuronsStructure[currentNeuron - 1]->calculateOut();
+    for (unsigned int currentNeuron = inputResolution + 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+			if (neuronsStructure[currentNeuron - 1].layer == currentLayer)
+				neuronsStructure[currentNeuron - 1].calculateOut();
 }
 
 // Обсчет одного такта работы сети, в условиях спонтанной активации нейронов
 void TNeuralNetwork::calculateSpontaneousNetwork(double spontaneousActivityProb){
 	// Сначала подготавливаем все нейроны
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		neuronsStructure[currentNeuron - 1]->prepare();
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+		neuronsStructure[currentNeuron - 1].prepare();
 	// Отдельно обсчитываем входные нейроны
 	for (int currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron)
 		// Если нейрон спотанно активируется
 		if (service::uniformDistribution(0, 1, true, false) < spontaneousActivityProb)
-      neuronsStructure[currentNeuron - 1]->currentOut = service::uniformDistribution(0.5, 1, false, false);
+      neuronsStructure[currentNeuron - 1].currentOut = service::uniformDistribution(0.5, 1, false, false);
 		else
-			neuronsStructure[currentNeuron - 1]->currentOut = 0.0;
+			neuronsStructure[currentNeuron - 1].currentOut = 0.0;
 	// Проходимся по нейронам по слоям (начинаем со второго)
 	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
-		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-			if (neuronsStructure[currentNeuron - 1]->layer == currentLayer)
+		for (unsigned int currentNeuron = inputResolution + 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+			if (neuronsStructure[currentNeuron - 1].layer == currentLayer)
       {
-				neuronsStructure[currentNeuron - 1]->calculateOut();
+				neuronsStructure[currentNeuron - 1].calculateOut();
 				// Если нейрон спонтанно активируется, то просто заменяем выход на спонтанный (при этом оставляем потенциал, таким какой был в результате подсчета)
 				if (service::uniformDistribution(0, 1, true, false) < spontaneousActivityProb)
-					neuronsStructure[currentNeuron - 1]->currentOut = service::uniformDistribution(0.5, 1, false, false);
+					neuronsStructure[currentNeuron - 1].currentOut = service::uniformDistribution(0.5, 1, false, false);
 			}
 }
 
 // Получение текущего выходного вектора сети
 void TNeuralNetwork::getOutputVector(double outputVector[]){
 	for (int currentBit = 1; currentBit <= outputResolution; ++currentBit)
-		outputVector[currentBit - 1] = neuronsStructure[currentBit - 1 + inputResolution]->currentOut; 
+		outputVector[currentBit - 1] = neuronsStructure[currentBit - 1 + inputResolution].currentOut; 
 }
 
 // Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
@@ -208,55 +214,55 @@ void TNeuralNetwork::printGraphNetwork(string graphFilename, bool printWeights /
 	hDotGraphFile << "digraph G { \n\trankdir=LR;\n";
 	// Подсчитываем кол-во пулов сети
 	int poolsQuantity = 0;
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		if (neuronsStructure[currentNeuron - 1]->getParentPoolID() > poolsQuantity)
-			poolsQuantity = neuronsStructure[currentNeuron - 1]->getParentPoolID();
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+		if (neuronsStructure[currentNeuron - 1].getParentPoolID() > poolsQuantity)
+			poolsQuantity = neuronsStructure[currentNeuron - 1].getParentPoolID();
 	// Записываем нейроны послойно
 	for (int currentLayer = 1; currentLayer <= layersQuantity; ++ currentLayer){
 		// Указываем, что это один слой и нейроны должны идти в столбец
 		hDotGraphFile << "\t{ rank = same; \n";
-		for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
+		for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
 			// !! Не отображаем неактивные нейроны
-			if ((neuronsStructure[currentNeuron - 1]->getLayer() == currentLayer) && (neuronsStructure[currentNeuron - 1]->getActive())){
+			if ((neuronsStructure[currentNeuron - 1].getLayer() == currentLayer) && (neuronsStructure[currentNeuron - 1].getActive())){
 				// Определяем насыщенность цвета нейрона (отражает принадлежность к пулу)
 				string hex;
-				service::decToHex((poolsQuantity - neuronsStructure[currentNeuron-1]->getParentPoolID() + 1) * (255 - 30) / poolsQuantity + 30, hex, 2);
+				service::decToHex((poolsQuantity - neuronsStructure[currentNeuron-1].getParentPoolID() + 1) * (255 - 30) / poolsQuantity + 30, hex, 2);
 				string color = hex + hex + hex;
-				hDotGraphFile << "\t\tsubgraph cluster" << neuronsStructure[currentNeuron - 1]->getParentPoolID() << "{\n" << "\t\t\tstyle=dashed;\n\t\t\tcolor=lightgrey;\n" <<
-					"\t\t\t\"" << neuronsStructure[currentNeuron - 1]->getID() << "\"[label=\"" << neuronsStructure[currentNeuron - 1]->getID() << "; " << neuronsStructure[currentNeuron - 1]->getParentPoolID() <<
+				hDotGraphFile << "\t\tsubgraph cluster" << neuronsStructure[currentNeuron - 1].getParentPoolID() << "{\n" << "\t\t\tstyle=dashed;\n\t\t\tcolor=lightgrey;\n" <<
+					"\t\t\t\"" << neuronsStructure[currentNeuron - 1].getID() << "\"[label=\"" << neuronsStructure[currentNeuron - 1].getID() << "; " << neuronsStructure[currentNeuron - 1].getParentPoolID() <<
 					"\", shape=\"circle\", style=filled, fillcolor=\"#" << color << "\"];\n\t\t}\n";
 			}
 		hDotGraphFile << "\t}\n"; // Заканчиваем запись слоя
 	}
 	// Записываем синапсы
 	double maxWeightValue = 1.0;
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+		for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron - 1].getInputSynapsesQuantity(); ++currentSynapse)
 			//Отображаем связи только между активными нейронами
-			if ((neuronsStructure[currentNeuron - 1]->getSynapseEnabled(currentSynapse)) &&
-					(neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getActive()) && 
-						(neuronsStructure[currentNeuron - 1]->getSynapsePostNeuron(currentSynapse)->getActive())){
+			if ((neuronsStructure[currentNeuron - 1].getSynapseEnabled(currentSynapse)) &&
+					(neuronsStructure[currentNeuron - 1].getSynapsePreNeuron(currentSynapse)->getActive()) && 
+						(neuronsStructure[currentNeuron - 1].getSynapsePostNeuron(currentSynapse)->getActive())){
 				string hex;
-				service::decToHex(static_cast<int>(min(fabs(255 * neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) / maxWeightValue), 255.0)), hex, 2);
+				service::decToHex(static_cast<int>(min(fabs(255 * neuronsStructure[currentNeuron - 1].getSynapseWeight(currentSynapse) / maxWeightValue), 255.0)), hex, 2);
 				string color;
-				if (neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) < 0)
+				if (neuronsStructure[currentNeuron - 1].getSynapseWeight(currentSynapse) < 0)
 					color = "0000FF" + hex; // Оттенок синего
 				else
 					color = "FF0000" + hex; // Оттенок красного
-				hDotGraphFile << "\t\"" << neuronsStructure[currentNeuron - 1]->getSynapsePreNeuron(currentSynapse)->getID() << "\" -> \"" <<
-					neuronsStructure[currentNeuron - 1]->getSynapsePostNeuron(currentSynapse)->getID() << "\" [ ";
+				hDotGraphFile << "\t\"" << neuronsStructure[currentNeuron - 1].getSynapsePreNeuron(currentSynapse)->getID() << "\" -> \"" <<
+					neuronsStructure[currentNeuron - 1].getSynapsePostNeuron(currentSynapse)->getID() << "\" [ ";
 				if (printWeights) // Если надо напечатать веса
-					hDotGraphFile << "label=\"" << neuronsStructure[currentNeuron - 1]->getSynapseWeight(currentSynapse) << "\", ";
+					hDotGraphFile << "label=\"" << neuronsStructure[currentNeuron - 1].getSynapseWeight(currentSynapse) << "\", ";
 				hDotGraphFile << "arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
 			}
 	// Записываем предикторные связи
-	for (int currentNeuron = 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
-		for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-			if ((neuronsStructure[currentNeuron - 1]->getPredConnectionEnabled(currentPredConnection)) &&
-					(neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getActive()) &&
-						(neuronsStructure[currentNeuron - 1]->getPredConnectionPostNeuron(currentPredConnection)->getActive()))
-				hDotGraphFile << "\t\"" << neuronsStructure[currentNeuron - 1]->getPredConnectionPreNeuron(currentPredConnection)->getID() << "\" -> \"" <<
-					neuronsStructure[currentNeuron - 1]->getPredConnectionPostNeuron(currentPredConnection)->getID() << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+		for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+			if ((neuronsStructure[currentNeuron - 1].getPredConnectionEnabled(currentPredConnection)) &&
+					(neuronsStructure[currentNeuron - 1].getPredConnectionPreNeuron(currentPredConnection)->getActive()) &&
+						(neuronsStructure[currentNeuron - 1].getPredConnectionPostNeuron(currentPredConnection)->getActive()))
+				hDotGraphFile << "\t\"" << neuronsStructure[currentNeuron - 1].getPredConnectionPreNeuron(currentPredConnection)->getID() << "\" -> \"" <<
+					neuronsStructure[currentNeuron - 1].getPredConnectionPostNeuron(currentPredConnection)->getID() << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
 	hDotGraphFile << "}";
 	hDotGraphFile.close();
 	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
@@ -264,16 +270,16 @@ void TNeuralNetwork::printGraphNetwork(string graphFilename, bool printWeights /
 
 //Печать сети в файл или на экран
 ostream& operator<<(ostream& os, const TNeuralNetwork& neuralNetwork){
-	for (int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsQuantity; ++currentNeuron)
-		os << *(neuralNetwork.neuronsStructure[currentNeuron - 1]);
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsStructure.size(); ++currentNeuron)
+		os << neuralNetwork.neuronsStructure[currentNeuron - 1];
 	os << "|\n"; // Записываем разделитель между нейронами и синапсами
-	for (int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsQuantity; ++currentNeuron)
-		for (int currentSynapse = 1; currentSynapse <= neuralNetwork.neuronsStructure[currentNeuron - 1]->getInputSynapsesQuantity(); ++currentSynapse)
-			os << *(neuralNetwork.neuronsStructure[currentNeuron-1]->inputSynapsesSet[currentSynapse-1]); 
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsStructure.size(); ++currentNeuron)
+		for (int currentSynapse = 1; currentSynapse <= neuralNetwork.neuronsStructure[currentNeuron - 1].getInputSynapsesQuantity(); ++currentSynapse)
+			os << neuralNetwork.neuronsStructure[currentNeuron-1].inputSynapsesSet[currentSynapse-1]; 
 	os << "||\n"; // Записываем разделитель между синапсами и предикторными связями
-	for (int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsQuantity; ++currentNeuron)
-		for (int currentPredConnection = 1; currentPredConnection <= neuralNetwork.neuronsStructure[currentNeuron - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-			os << *(neuralNetwork.neuronsStructure[currentNeuron-1]->inputPredConnectionsSet[currentPredConnection-1]); 
+	for (unsigned int currentNeuron = 1; currentNeuron <= neuralNetwork.neuronsStructure.size(); ++currentNeuron)
+		for (int currentPredConnection = 1; currentPredConnection <= neuralNetwork.neuronsStructure[currentNeuron - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+			os << neuralNetwork.neuronsStructure[currentNeuron-1].inputPredConnectionsSet[currentPredConnection-1]; 
 	os << "|||\n"; // Записываем разделитель между сетями
 	return os;
 }

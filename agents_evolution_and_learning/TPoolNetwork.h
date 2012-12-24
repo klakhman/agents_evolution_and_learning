@@ -5,14 +5,13 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 /*
 Класс cети из нейрональных пулов
 */
 class TPoolNetwork{
-	TNeuralPool** poolsStructure; // Список из пулов 
-	int poolsStructureSize; // Текущий размер массива пулов
-	int poolsQuantity; // Количество пулов в сети
+  std::vector<TNeuralPool> poolsStructure; // Список из пулов 
 
 	int connectionsQuantity; // Количество связей в сети
 	int predConnectionsQuantity; // Количество предикторных связей в сети
@@ -20,11 +19,6 @@ class TPoolNetwork{
 	int layersQuantity; // Количество слоев в сети (!!!! не уменьшается при удалении пулов !!!)
 	int inputResolution; // Размер входного пр-ва сети
 	int outputResolution; // Размер выходного пр-ва сети
-
-	static const int INFLATE_POOLS_SIZE = 10; // Размер увеличения массива с пулами в случае переполнения
-
-	// Процедура увеличения размера массива пулов
-	void inflatePoolsStructure(int inflateSize);
 	
 	// Корректировка ID пулов (например после удаления)
 	void fixPoolsIDs();
@@ -36,9 +30,6 @@ public:
 
 	// Конструктор по умолчанию
 	TPoolNetwork(){
-		poolsStructure = 0;
-		poolsStructureSize = 0;
-		poolsQuantity = 0;
 		connectionsQuantity = 0;
 		predConnectionsQuantity = 0;
 		layersQuantity = 0;
@@ -46,72 +37,72 @@ public:
 		outputResolution = 0;
 	}
 	// Деструктор
-	~TPoolNetwork();
+  ~TPoolNetwork(){};
 
 	//Геттеры для параметров сети
-	int getPoolsQuantity() const{ return poolsQuantity; }
+  int getPoolsQuantity() const{ return poolsStructure.size(); }
 	int getConnectionsQuantity() const { return connectionsQuantity; }
 	int getPredConnectionsQuantity() const { return predConnectionsQuantity; }
 	int getInputResolution() const { return inputResolution; }
 	int getOutputResolution() const { return outputResolution; }
 
 	// Геттеры и сеттеры для всех пулов сети (во всех случаях передается номер пула в массиве пула)
-	int getPoolID(int poolNumber) const { return poolsStructure[poolNumber-1]->getID(); }
-	void setPoolID(int poolNumber, int newID){ poolsStructure[poolNumber-1]->setID(newID); }
-	int getPoolType(int poolNumber) const { return poolsStructure[poolNumber-1]->getType(); }
-	void setPoolType(int poolNumber, int newType) { poolsStructure[poolNumber-1]->setType(newType); }
-	int getPoolCapacity(int poolNumber) const { return poolsStructure[poolNumber-1]->getCapacity(); }
-	void setPoolCapacity(int poolNumber, int newCapacity) { poolsStructure[poolNumber-1]->setCapacity(newCapacity); }
-	double getPoolBiasMean(int poolNumber) const { return poolsStructure[poolNumber-1]->getBiasMean(); }
-	void setPoolBiasMean(int poolNumber, double newBiasMean) { poolsStructure[poolNumber-1]->setBiasMean(newBiasMean); }
-	double getPoolBiasVariance(int poolNumber) const { return poolsStructure[poolNumber-1]->getBiasVariance(); }
-	void setPoolBiasVariance(int poolNumber, double newBiasVariance) { poolsStructure[poolNumber-1]->setBiasVariance(newBiasVariance); }
-	int getPoolLayer(int poolNumber) const { return poolsStructure[poolNumber-1]->getLayer(); }
-	void setPoolLayer(int poolNumber, int newLayer) { poolsStructure[poolNumber-1]->setLayer(newLayer); }
+	int getPoolID(int poolNumber) const { return poolsStructure[poolNumber-1].getID(); }
+	void setPoolID(int poolNumber, int newID){ poolsStructure[poolNumber-1].setID(newID); }
+	int getPoolType(int poolNumber) const { return poolsStructure[poolNumber-1].getType(); }
+	void setPoolType(int poolNumber, int newType) { poolsStructure[poolNumber-1].setType(newType); }
+	int getPoolCapacity(int poolNumber) const { return poolsStructure[poolNumber-1].getCapacity(); }
+	void setPoolCapacity(int poolNumber, int newCapacity) { poolsStructure[poolNumber-1].setCapacity(newCapacity); }
+	double getPoolBiasMean(int poolNumber) const { return poolsStructure[poolNumber-1].getBiasMean(); }
+	void setPoolBiasMean(int poolNumber, double newBiasMean) { poolsStructure[poolNumber-1].setBiasMean(newBiasMean); }
+	double getPoolBiasVariance(int poolNumber) const { return poolsStructure[poolNumber-1].getBiasVariance(); }
+	void setPoolBiasVariance(int poolNumber, double newBiasVariance) { poolsStructure[poolNumber-1].setBiasVariance(newBiasVariance); }
+	int getPoolLayer(int poolNumber) const { return poolsStructure[poolNumber-1].getLayer(); }
+	void setPoolLayer(int poolNumber, int newLayer) { poolsStructure[poolNumber-1].setLayer(newLayer); }
 
-	void setPoolRootPoolID(int poolNumber, int _rootPoolID) { poolsStructure[poolNumber-1]->setRootPoolID(_rootPoolID); }
-	int getPoolRootPoolID(int poolNumber) const { return poolsStructure[poolNumber-1]->getRootPoolID(); }
-	void setPoolAppearenceEvolutionTime(int poolNumber, int _appearenceEvolutionTime) { poolsStructure[poolNumber-1]->setAppearenceEvolutionTime(_appearenceEvolutionTime); }
-	int getPoolAppearenceEvolutionTime(int poolNumber) const { return poolsStructure[poolNumber-1]->getAppearenceEvolutionTime(); }
+	void setPoolRootPoolID(int poolNumber, int _rootPoolID) { poolsStructure[poolNumber-1].setRootPoolID(_rootPoolID); }
+	int getPoolRootPoolID(int poolNumber) const { return poolsStructure[poolNumber-1].getRootPoolID(); }
+	void setPoolAppearenceEvolutionTime(int poolNumber, int _appearenceEvolutionTime) { poolsStructure[poolNumber-1].setAppearenceEvolutionTime(_appearenceEvolutionTime); }
+	int getPoolAppearenceEvolutionTime(int poolNumber) const { return poolsStructure[poolNumber-1].getAppearenceEvolutionTime(); }
 
-	int getPoolInputConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputConnectionsQuantity(); }
-	int getPoolInputPredConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1]->getInputPredConnectionsQuantity(); }
+	int getPoolInputConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1].getInputConnectionsQuantity(); }
+	int getPoolInputPredConnectionsQuantity(int poolNumber) const { return poolsStructure[poolNumber-1].getInputPredConnectionsQuantity(); }
 
 	// Геттеры и сеттеры для связей данной сети (во всех случаях передается номер пула в массиве пулов и номер связи в массиве связей)
-	int getConnectionID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionID(connectionNumber); }
-	void setConnectionID(int poolNumber, int connectionNumber, int newID) { poolsStructure[poolNumber-1]->setConnectionID(connectionNumber, newID); }
-	double getConnectionWeightMean(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionWeightMean(connectionNumber); }
-	void setConnectionWeightMean(int poolNumber, int connectionNumber, double newWeightMean) { poolsStructure[poolNumber-1]->setConnectionWeightMean(connectionNumber, newWeightMean); }
-	double getConnectionWeightVariance(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionWeightVariance(connectionNumber); }
-	void setConnectionWeightVariance(int poolNumber, int connectionNumber, double newWeightVariance) { poolsStructure[poolNumber-1]->setConnectionWeightVariance(connectionNumber, newWeightVariance); } 
-	bool getConnectionEnabled(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionEnabled(connectionNumber); }
-	void setConnectionEnabled(int poolNumber, int connectionNumber, bool newEnabled) { poolsStructure[poolNumber-1]->setConnectionEnabled(connectionNumber, newEnabled); }
-	int getConnectionDisabledStep(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionDisabledStep(connectionNumber); }
-	void setConnectionDisabledStep(int poolNumber, int connectionNumber, int newDisabledStep) { poolsStructure[poolNumber-1]->setConnectionDisabledStep(connectionNumber, newDisabledStep); }
-	double getConnectionDevelopSynapseProb(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionDevelopSynapseProb(connectionNumber); }
-	void setConnectionDevelopSynapseProb(int poolNumber, int connectionNumber, double newDevelopSynapseProb) { poolsStructure[poolNumber-1]->setConnectionDevelopSynapseProb(connectionNumber, newDevelopSynapseProb); }
-	long getConnectionInnovationNumber(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionInnovationNumber(connectionNumber); }
-	void setConnectionInnovationNumber(int poolNumber, int connectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1]->setConnectionInnovationNumber(connectionNumber, newInnovationNumber); }
-	int getConnectionPrePoolID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPrePoolID(connectionNumber); }
-	void setConnectionPrePoolID(int poolNumber, int connectionNumber, int newPrePoolID) { poolsStructure[poolNumber-1]->setConnectionPrePoolID(connectionNumber, newPrePoolID); }
-	int getConnectionPostPoolID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1]->getConnectionPostPoolID(connectionNumber); }
-	void setConnectionPostPoolID(int poolNumber, int connectionNumber, int newPostPoolID) { poolsStructure[poolNumber-1]->setConnectionPostPoolID(connectionNumber, newPostPoolID); }
+	int getConnectionID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionID(connectionNumber); }
+	void setConnectionID(int poolNumber, int connectionNumber, int newID) { poolsStructure[poolNumber-1].setConnectionID(connectionNumber, newID); }
+	double getConnectionWeightMean(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionWeightMean(connectionNumber); }
+	void setConnectionWeightMean(int poolNumber, int connectionNumber, double newWeightMean) { poolsStructure[poolNumber-1].setConnectionWeightMean(connectionNumber, newWeightMean); }
+	double getConnectionWeightVariance(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionWeightVariance(connectionNumber); }
+	void setConnectionWeightVariance(int poolNumber, int connectionNumber, double newWeightVariance) { poolsStructure[poolNumber-1].setConnectionWeightVariance(connectionNumber, newWeightVariance); } 
+	bool getConnectionEnabled(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionEnabled(connectionNumber); }
+	void setConnectionEnabled(int poolNumber, int connectionNumber, bool newEnabled) { poolsStructure[poolNumber-1].setConnectionEnabled(connectionNumber, newEnabled); }
+	int getConnectionDisabledStep(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionDisabledStep(connectionNumber); }
+	void setConnectionDisabledStep(int poolNumber, int connectionNumber, int newDisabledStep) { poolsStructure[poolNumber-1].setConnectionDisabledStep(connectionNumber, newDisabledStep); }
+	double getConnectionDevelopSynapseProb(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionDevelopSynapseProb(connectionNumber); }
+	void setConnectionDevelopSynapseProb(int poolNumber, int connectionNumber, double newDevelopSynapseProb) { poolsStructure[poolNumber-1].setConnectionDevelopSynapseProb(connectionNumber, newDevelopSynapseProb); }
+	long getConnectionInnovationNumber(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionInnovationNumber(connectionNumber); }
+	void setConnectionInnovationNumber(int poolNumber, int connectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1].setConnectionInnovationNumber(connectionNumber, newInnovationNumber); }
+	int getConnectionPrePoolID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionPrePoolID(connectionNumber); }
+	void setConnectionPrePoolID(int poolNumber, int connectionNumber, int newPrePoolID) { poolsStructure[poolNumber-1].setConnectionPrePoolID(connectionNumber, newPrePoolID); }
+	int getConnectionPostPoolID(int poolNumber, int connectionNumber) const { return poolsStructure[poolNumber-1].getConnectionPostPoolID(connectionNumber); }
+	void setConnectionPostPoolID(int poolNumber, int connectionNumber, int newPostPoolID) { poolsStructure[poolNumber-1].setConnectionPostPoolID(connectionNumber, newPostPoolID); }
 
 	// Геттеры и сеттеры для предикторных связей данной сети (во всех случаях передается номер пула в массиве пула и номер связи в массиве связей)
-	int getPredConnectionID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionID(predConnectionNumber); }
-	void setPredConnectionID(int poolNumber, int predConnectionNumber, int newID) { poolsStructure[poolNumber-1]->setPredConnectionID(predConnectionNumber, newID); }
-	bool getPredConnectionEnabled(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionEnabled(predConnectionNumber); }
-	void setPredConnectionEnabled(int poolNumber, int predConnectionNumber, bool newEnabled) { poolsStructure[poolNumber-1]->setPredConnectionEnabled(predConnectionNumber, newEnabled); }
-	int getPredConnectionDisabledStep(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionDisabledStep(predConnectionNumber); }
-	void setPredConnectionDisabledStep(int poolNumber, int predConnectionNumber, int newDisabledStep) { poolsStructure[poolNumber-1]->setPredConnectionDisabledStep(predConnectionNumber, newDisabledStep); }
-	double getDevelopPredConnectionProb(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getDevelopPredConnectionProb(predConnectionNumber); }
-	void setDevelopPredConnectionProb(int poolNumber, int predConnectionNumber, double newDevelopPredConnectionProb) { poolsStructure[poolNumber-1]->setDevelopPredConnectionProb(predConnectionNumber, newDevelopPredConnectionProb); }
-	long getPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionInnovationNumber(predConnectionNumber); }
-	void setPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1]->setPredConnectionInnovationNumber(predConnectionNumber, newInnovationNumber); }
-	int getPredConnectionPrePoolID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPrePoolID(predConnectionNumber); }
-	void setPredConnectionPrePoolID(int poolNumber, int predConnectionNumber, int newPrePoolID) { poolsStructure[poolNumber-1]->setPredConnectionPrePoolID(predConnectionNumber, newPrePoolID); }
-	int getPredConnectionPostPoolID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1]->getPredConnectionPostPoolID(predConnectionNumber); }
-	void setPredConnectionPostPoolID(int poolNumber, int predConnectionNumber, int newPostPoolID) { poolsStructure[poolNumber-1]->setPredConnectionPostPoolID(predConnectionNumber, newPostPoolID); }
+	int getPredConnectionID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1].getPredConnectionID(predConnectionNumber); }
+	void setPredConnectionID(int poolNumber, int predConnectionNumber, int newID) { poolsStructure[poolNumber-1].setPredConnectionID(predConnectionNumber, newID); }
+	bool getPredConnectionEnabled(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1].getPredConnectionEnabled(predConnectionNumber); }
+	void setPredConnectionEnabled(int poolNumber, int predConnectionNumber, bool newEnabled) { poolsStructure[poolNumber-1].setPredConnectionEnabled(predConnectionNumber, newEnabled); }
+	int getPredConnectionDisabledStep(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1].getPredConnectionDisabledStep(predConnectionNumber); }
+	void setPredConnectionDisabledStep(int poolNumber, int predConnectionNumber, int newDisabledStep) { poolsStructure[poolNumber-1].setPredConnectionDisabledStep(predConnectionNumber, newDisabledStep); }
+	double getDevelopPredConnectionProb(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1].getDevelopPredConnectionProb(predConnectionNumber); }
+	void setDevelopPredConnectionProb(int poolNumber, int predConnectionNumber, double newDevelopPredConnectionProb) { poolsStructure[poolNumber-1].setDevelopPredConnectionProb(predConnectionNumber, newDevelopPredConnectionProb); }
+	long getPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1].getPredConnectionInnovationNumber(predConnectionNumber); }
+	void setPredConnectionInnovationNumber(int poolNumber, int predConnectionNumber, long newInnovationNumber) { poolsStructure[poolNumber-1].setPredConnectionInnovationNumber(predConnectionNumber, newInnovationNumber); }
+	int getPredConnectionPrePoolID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1].getPredConnectionPrePoolID(predConnectionNumber); }
+	void setPredConnectionPrePoolID(int poolNumber, int predConnectionNumber, int newPrePoolID) { poolsStructure[poolNumber-1].setPredConnectionPrePoolID(predConnectionNumber, newPrePoolID); }
+	int getPredConnectionPostPoolID(int poolNumber, int predConnectionNumber) const { return poolsStructure[poolNumber-1].getPredConnectionPostPoolID(predConnectionNumber); }
+	void setPredConnectionPostPoolID(int poolNumber, int predConnectionNumber, int newPostPoolID) { poolsStructure[poolNumber-1].setPredConnectionPostPoolID(predConnectionNumber, newPostPoolID); }
 
 	// Нахождение номера связи в структуре постсинаптического пула - возвращает ноль, если связи нет
 	int findConnectionNumber(int prePoolNumber, int postPoolNumber);
@@ -129,12 +120,12 @@ public:
 
 	//Добавление связи в сеть
 	void addConnection(int prePoolNumber, int postPoolNumber, double newWeightMean, double newWeightVariance = 0, double newDevelopSynapseProb = 1, bool newEnabled = true, int newDisabledStep = 0, long newInnovationNumber = 0){
-		poolsStructure[postPoolNumber-1]->addConnection(++connectionsQuantity, prePoolNumber, newWeightMean, newWeightVariance, newDevelopSynapseProb, newEnabled, newDisabledStep, newInnovationNumber); 
+		poolsStructure[postPoolNumber-1].addConnection(++connectionsQuantity, prePoolNumber, newWeightMean, newWeightVariance, newDevelopSynapseProb, newEnabled, newDisabledStep, newInnovationNumber); 
 	}
 
 	// Добавление предикторной связи в сеть
 	void addPredConnection(int prePoolNumber, int postPoolNumber, double newDevelopPredConnectionProb = 1, bool newEnabled = true, int newDisabledStep = 0, long newInnovationNumber = 0){
-		poolsStructure[postPoolNumber-1]->addPredConnection(++predConnectionsQuantity, prePoolNumber, newDevelopPredConnectionProb, newEnabled, newDisabledStep, newInnovationNumber); 
+		poolsStructure[postPoolNumber-1].addPredConnection(++predConnectionsQuantity, prePoolNumber, newDevelopPredConnectionProb, newEnabled, newDisabledStep, newInnovationNumber); 
 	}
 
 	// Удаление пула из сети (с удалением также всех входных и выходных связей из этого пула)

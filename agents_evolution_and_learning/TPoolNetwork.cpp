@@ -16,66 +16,46 @@ using namespace std;
 
 // Нахождение номера связи в структуре постсинаптического пула - возвращает ноль, если связи нет
 int TPoolNetwork::findConnectionNumber(int prePoolNumber, int postPoolNumber){
-	for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[postPoolNumber - 1]->getInputConnectionsQuantity(); ++currentPoolConnection)
-		if (poolsStructure[postPoolNumber - 1]->getConnectionPrePoolID(currentPoolConnection) == prePoolNumber)
+	for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[postPoolNumber - 1].getInputConnectionsQuantity(); ++currentPoolConnection)
+		if (poolsStructure[postPoolNumber - 1].getConnectionPrePoolID(currentPoolConnection) == prePoolNumber)
 			return currentPoolConnection;
 	return 0;
 }
 
 // Нахождение номера предикторной связи в структуре постсинаптического пула - возвращает ноль, если предикторной связи нет
 int TPoolNetwork::findPredConnectionNumber(int prePoolNumber, int postPoolNumber){
-	for (int currentPoolPredConnection = 1; currentPoolPredConnection <= poolsStructure[postPoolNumber - 1]->getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
-		if (poolsStructure[postPoolNumber - 1]->getPredConnectionPrePoolID(currentPoolPredConnection) == prePoolNumber)
+	for (int currentPoolPredConnection = 1; currentPoolPredConnection <= poolsStructure[postPoolNumber - 1].getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
+		if (poolsStructure[postPoolNumber - 1].getPredConnectionPrePoolID(currentPoolPredConnection) == prePoolNumber)
 			return currentPoolPredConnection;
 	return 0;
 }
 
 // Корректировка ID пулов (например после удаления)
 void TPoolNetwork::fixPoolsIDs(){
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		poolsStructure[currentPool - 1]->setID(currentPool);
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		poolsStructure[currentPool - 1].setID(currentPool);
 }
 
 // Корректировка ID связей (например после удаления)
 void TPoolNetwork::fixConnectionsIDs(){
 	int _connectionsQuantity = 0;
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
-			poolsStructure[currentPool - 1]->setConnectionID(currentConnection, ++_connectionsQuantity);
+  for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection)
+			poolsStructure[currentPool - 1].setConnectionID(currentConnection, ++_connectionsQuantity);
 }
 
 // Корректировка ID предикторных связей (например после удаления)
 void TPoolNetwork::fixPredConnectionsIDs(){
 	int _predConnectionsQuantity = 0;
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-			poolsStructure[currentPool - 1]->setPredConnectionID(currentPredConnection, ++_predConnectionsQuantity);
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+			poolsStructure[currentPool - 1].setPredConnectionID(currentPredConnection, ++_predConnectionsQuantity);
 }
-
-// Процедура увеличения размера массива пулов
-void TPoolNetwork::inflatePoolsStructure(int inflateSize){
-	TNeuralPool** newPoolsStructure = new TNeuralPool*[poolsStructureSize + inflateSize];
-	memset(newPoolsStructure, 0, (poolsStructureSize + inflateSize) * sizeof(TNeuralPool*));
-	memcpy(newPoolsStructure, poolsStructure, poolsStructureSize * sizeof(TNeuralPool*));
-	delete []poolsStructure;
-	poolsStructure = newPoolsStructure;
-	poolsStructureSize += inflateSize;
-}
-
-// Декструктор
-TPoolNetwork::~TPoolNetwork(){
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		delete poolsStructure[currentPool - 1];
-	delete []poolsStructure;
-}
-
 
 //Добавление нейронального пула в сеть
 void TPoolNetwork::addPool(int newType, int newLayer, double newBiasMean, double newBiasVariance /*=0*/, int newCapacity /*=1*/){
-	if (poolsQuantity >= poolsStructureSize) // Если не хватает места в массиве
-		inflatePoolsStructure(INFLATE_POOLS_SIZE);
-	poolsStructure[poolsQuantity] = new TNeuralPool(poolsQuantity + 1, newType, newLayer, newBiasMean, newBiasVariance, newCapacity);
-	++poolsQuantity;
+  TNeuralPool pool(poolsStructure.size() + 1, newType, newLayer, newBiasMean, newBiasVariance, newCapacity);
+  poolsStructure.push_back(pool);
 	// Если пул входной
   if (INPUT_POOL == newType) ++inputResolution;
 	// Если пул выходной
@@ -86,85 +66,78 @@ void TPoolNetwork::addPool(int newType, int newLayer, double newBiasMean, double
 
 // Удаление пула из сети (с удалением также всех входных и выходных связей из этого пула + корректировка ссылок на все пулы которые идут после него - так как теперь в связях не ссылки а номера - долгая операция !!!)
 void TPoolNetwork::deletePool(int poolNumber){
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+  for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
 		if (currentPool != poolNumber){ // Если это не стираемый пул (пропускаем просто для экономии времени)
-			for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
-				if (poolsStructure[currentPool - 1]->getConnectionPrePoolID(currentConnection) == poolNumber){ // Если это связь от стираемого пула
+			for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection)
+				if (poolsStructure[currentPool - 1].getConnectionPrePoolID(currentConnection) == poolNumber){ // Если это связь от стираемого пула
 					deleteConnection(currentPool, currentConnection);
 					break; // Выходим из цикла, так как у одного пула не может быть более одной связи от другого пула
 				}
-			for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-				if (poolsStructure[currentPool - 1]->getPredConnectionPrePoolID(currentPredConnection) == poolNumber){ // Если это пред. связь от стираемого пула
+			for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+				if (poolsStructure[currentPool - 1].getPredConnectionPrePoolID(currentPredConnection) == poolNumber){ // Если это пред. связь от стираемого пула
 					deletePredConnection(currentPool, currentPredConnection);
 					break;
 				}
 		}
 	// Если пул входной
-  if (INPUT_POOL == poolsStructure[poolNumber - 1]->getType()) --inputResolution;
+  if (INPUT_POOL == poolsStructure[poolNumber - 1].getType()) --inputResolution;
 	// Если пул выходной
-  if (OUTPUT_POOL == poolsStructure[poolNumber - 1]->getType()) --outputResolution;
+  if (OUTPUT_POOL == poolsStructure[poolNumber - 1].getType()) --outputResolution;
 	// Стираем пул и сдвигаем массив
-	connectionsQuantity -= poolsStructure[poolNumber - 1]->getInputConnectionsQuantity();
-	predConnectionsQuantity -= poolsStructure[poolNumber - 1]->getInputPredConnectionsQuantity();
-	delete poolsStructure[poolNumber - 1];
-	for (int currentPool = poolNumber - 1; currentPool < poolsQuantity - 1; ++currentPool)
-		poolsStructure[currentPool] = poolsStructure[currentPool + 1];
-	poolsStructure[poolsQuantity - 1] = 0;
-	--poolsQuantity;
+	connectionsQuantity -= poolsStructure[poolNumber - 1].getInputConnectionsQuantity();
+	predConnectionsQuantity -= poolsStructure[poolNumber - 1].getInputPredConnectionsQuantity();
+	poolsStructure.erase(poolsStructure.begin() + poolNumber - 1);
 	fixPoolsIDs();
 	// Теперь нужно поправить ссылки на все пулы после удаленного в записях связей
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
-		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection){
-			if (poolsStructure[currentPool - 1]->getConnectionPrePoolID(currentConnection) > poolNumber)
-				poolsStructure[currentPool - 1]->setConnectionPrePoolID(currentConnection, poolsStructure[currentPool - 1]->getConnectionPrePoolID(currentConnection) - 1);
-			if (poolsStructure[currentPool - 1]->getConnectionPostPoolID(currentConnection) > poolNumber)
-				poolsStructure[currentPool - 1]->setConnectionPostPoolID(currentConnection, poolsStructure[currentPool - 1]->getConnectionPostPoolID(currentConnection) - 1);
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool){
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection){
+			if (poolsStructure[currentPool - 1].getConnectionPrePoolID(currentConnection) > poolNumber)
+				poolsStructure[currentPool - 1].setConnectionPrePoolID(currentConnection, poolsStructure[currentPool - 1].getConnectionPrePoolID(currentConnection) - 1);
+			if (poolsStructure[currentPool - 1].getConnectionPostPoolID(currentConnection) > poolNumber)
+				poolsStructure[currentPool - 1].setConnectionPostPoolID(currentConnection, poolsStructure[currentPool - 1].getConnectionPostPoolID(currentConnection) - 1);
 		}
-		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection){
-			if (poolsStructure[currentPool - 1]->getPredConnectionPrePoolID(currentPredConnection) > poolNumber)
-				poolsStructure[currentPool - 1]->setPredConnectionPrePoolID(currentPredConnection, poolsStructure[currentPool - 1]->getPredConnectionPrePoolID(currentPredConnection) - 1);
-			if (poolsStructure[currentPool - 1]->getPredConnectionPostPoolID(currentPredConnection) > poolNumber)
-				poolsStructure[currentPool - 1]->setPredConnectionPostPoolID(currentPredConnection, poolsStructure[currentPool - 1]->getPredConnectionPostPoolID(currentPredConnection) - 1);
+		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection){
+			if (poolsStructure[currentPool - 1].getPredConnectionPrePoolID(currentPredConnection) > poolNumber)
+				poolsStructure[currentPool - 1].setPredConnectionPrePoolID(currentPredConnection, poolsStructure[currentPool - 1].getPredConnectionPrePoolID(currentPredConnection) - 1);
+			if (poolsStructure[currentPool - 1].getPredConnectionPostPoolID(currentPredConnection) > poolNumber)
+				poolsStructure[currentPool - 1].setPredConnectionPostPoolID(currentPredConnection, poolsStructure[currentPool - 1].getPredConnectionPostPoolID(currentPredConnection) - 1);
 		}
 	}
+  fixConnectionsIDs();
+  fixPredConnectionsIDs();
 }
 
 //Удаление связи из сети (fixIDs - признак того, чтобы мы корректировали все ID после удаления связи - если подряд идет несколько операций удаления, то дешевле отключать эту операцию и потом в конце проводить корректировку с помощью отдельного метода)
 void TPoolNetwork::deleteConnection(int poolNumber, int connectionNumber, bool fixIDs /*= true*/){
-	poolsStructure[poolNumber-1]->deleteConnection(connectionNumber);
+	poolsStructure[poolNumber-1].deleteConnection(connectionNumber);
 	if (fixIDs){
-		for (int currentPoolConnection = connectionNumber; currentPoolConnection <= poolsStructure[poolNumber - 1]->getInputConnectionsQuantity(); ++currentPoolConnection)
-			poolsStructure[poolNumber - 1]->setConnectionID(currentPoolConnection, poolsStructure[poolNumber - 1]->getConnectionID(currentPoolConnection) - 1);
-		for (int currentPool = poolNumber + 1; currentPool <= poolsQuantity; ++currentPool)
-			for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentPoolConnection)
-				poolsStructure[currentPool - 1]->setConnectionID(currentPoolConnection, poolsStructure[currentPool - 1]->getConnectionID(currentPoolConnection) - 1);
+		for (int currentPoolConnection = connectionNumber; currentPoolConnection <= poolsStructure[poolNumber - 1].getInputConnectionsQuantity(); ++currentPoolConnection)
+			poolsStructure[poolNumber - 1].setConnectionID(currentPoolConnection, poolsStructure[poolNumber - 1].getConnectionID(currentPoolConnection) - 1);
+		for (unsigned int currentPool = poolNumber + 1; currentPool <= poolsStructure.size(); ++currentPool)
+			for (int currentPoolConnection = 1; currentPoolConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentPoolConnection)
+				poolsStructure[currentPool - 1].setConnectionID(currentPoolConnection, poolsStructure[currentPool - 1].getConnectionID(currentPoolConnection) - 1);
 	}
 	--connectionsQuantity;
 }
 
 // Удаление предикторной связи из сети
 void TPoolNetwork::deletePredConnection(int poolNumber, int predConnectionNumber, bool fixIDs /*= true*/){
-	poolsStructure[poolNumber-1]->deletePredConnection(predConnectionNumber);
+	poolsStructure[poolNumber-1].deletePredConnection(predConnectionNumber);
 	if (fixIDs){
-		for (int currentPoolPredConnection = predConnectionNumber; currentPoolPredConnection <= poolsStructure[poolNumber - 1]->getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
-			poolsStructure[poolNumber - 1]->setPredConnectionID(currentPoolPredConnection, poolsStructure[poolNumber - 1]->getPredConnectionID(currentPoolPredConnection) - 1);
-		for (int currentPool = poolNumber + 1; currentPool <= poolsQuantity; ++currentPool)
-			for (int currentPoolPredConnection = 1; currentPoolPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
-				poolsStructure[currentPool - 1]->setPredConnectionID(currentPoolPredConnection, poolsStructure[currentPool - 1]->getPredConnectionID(currentPoolPredConnection) - 1);
+		for (int currentPoolPredConnection = predConnectionNumber; currentPoolPredConnection <= poolsStructure[poolNumber - 1].getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
+			poolsStructure[poolNumber - 1].setPredConnectionID(currentPoolPredConnection, poolsStructure[poolNumber - 1].getPredConnectionID(currentPoolPredConnection) - 1);
+		for (unsigned int currentPool = poolNumber + 1; currentPool <= poolsStructure.size(); ++currentPool)
+			for (int currentPoolPredConnection = 1; currentPoolPredConnection <= poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPoolPredConnection)
+				poolsStructure[currentPool - 1].setPredConnectionID(currentPoolPredConnection, poolsStructure[currentPool - 1].getPredConnectionID(currentPoolPredConnection) - 1);
 	}
 	--predConnectionsQuantity;
 }
 
 // Стирание сети
 void TPoolNetwork::erasePoolNetwork(){
-	if (poolsStructure){
-		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-			delete poolsStructure[currentPool - 1];
-		delete []poolsStructure;
-		poolsStructure = 0;
-		poolsStructureSize = 0;
+	if (poolsStructure.size() != 0){
+    poolsStructure.resize(0);
 	}
-	poolsQuantity = 0;
 	connectionsQuantity = 0;
 	predConnectionsQuantity = 0;
 	layersQuantity = 0;
@@ -210,35 +183,35 @@ void TPoolNetwork::printGraphNetwork(string graphFilename, bool printWeights /*=
 	for (int currentLayer = 1; currentLayer <= layersQuantity; ++ currentLayer){
 		// Указываем, что это один слой и пулы должны идти в столбец
 		hDotGraphFile << "\t{ rank = same; \n";
-		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-			if (poolsStructure[currentPool - 1]->getLayer() == currentLayer)
-				hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"circle\"];\n" ;
+		for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+			if (poolsStructure[currentPool - 1].getLayer() == currentLayer)
+				hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1].getID() << "\" [label=\"" << poolsStructure[currentPool - 1].getID() << "\", shape = \"circle\"];\n" ;
 		hDotGraphFile << "\t}\n"; // Заканчиваем запись слоя
 	}
 	// Записываем связи
 	double maxWeightValue = 1.0;
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
-			if (poolsStructure[currentPool - 1]->getConnectionEnabled(currentConnection)){
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection)
+			if (poolsStructure[currentPool - 1].getConnectionEnabled(currentConnection)){
 				string hex;
-				service::decToHex(static_cast<int>(min(fabs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue), 255.0)), hex, 2);
+				service::decToHex(static_cast<int>(min(fabs(255 * poolsStructure[currentPool - 1].getConnectionWeightMean(currentConnection) / maxWeightValue), 255.0)), hex, 2);
 				string color;
-				if (poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) < 0)
+				if (poolsStructure[currentPool - 1].getConnectionWeightMean(currentConnection) < 0)
 					color = "0000FF" + hex; // Оттенок синего
 				else
 					color = "FF0000" + hex; // Оттенок красного
-				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getConnectionPrePoolID(currentConnection) << "\" -> \"" <<
-					poolsStructure[currentPool - 1]->getConnectionPostPoolID(currentConnection) << "\" [ ";
+				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1].getConnectionPrePoolID(currentConnection) << "\" -> \"" <<
+					poolsStructure[currentPool - 1].getConnectionPostPoolID(currentConnection) << "\" [ ";
 				if (printWeights) //  Если надо напечатать веса
-					hDotGraphFile << "label=\"" << poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) << "\", ";
+					hDotGraphFile << "label=\"" << poolsStructure[currentPool - 1].getConnectionWeightMean(currentConnection) << "\", ";
 				hDotGraphFile <<"arrowsize=0.7, color=\"#" << color << "\", penwidth=2.0];\n";
 			}
 	// Записываем предикторные связи
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-			if (poolsStructure[currentPool - 1]->getPredConnectionEnabled(currentPredConnection))
-				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getPredConnectionPrePoolID(currentPredConnection) << "\" -> \"" <<
-					poolsStructure[currentPool - 1]->getPredConnectionPostPoolID(currentPredConnection) << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+			if (poolsStructure[currentPool - 1].getPredConnectionEnabled(currentPredConnection))
+				hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1].getPredConnectionPrePoolID(currentPredConnection) << "\" -> \"" <<
+					poolsStructure[currentPool - 1].getPredConnectionPostPoolID(currentPredConnection) << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
 	hDotGraphFile << "}";
 	hDotGraphFile.close();
 	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
@@ -291,9 +264,9 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		int distance = 0;
 
 
-		for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+		for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
 			// помни про костыль - обход упорядочен по id
-			if (poolsStructure[currentPool - 1]->getType() == actualCurrentType){
+			if (poolsStructure[currentPool - 1].getType() == actualCurrentType){
 				// На входном или выходном слое мы меняем только X-координату
 				if(actualCurrentType == 0){
 					nodeXPosition.push_back(distance += (int)1.5*scale);
@@ -303,7 +276,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 				}
 				if(actualCurrentType == 2){
 					nodeXPosition.push_back(distance += (int)1.5*scale);
-					nodeYPosition.push_back(scale * (poolsQuantity - inputResolution - outputResolution + 1) + 1000);
+					nodeYPosition.push_back(scale * (poolsStructure.size() - inputResolution - outputResolution + 1) + 1000);
 //					nodePosition.push_back(std::to_string(nodeXPosition[currentPool - 1]) + "," + std::to_string(nodeYPosition[currentPool - 1]));
 //					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
 				}
@@ -340,11 +313,11 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		// сортировка внутреннего слоя
 		nodesSequence.push_back(inputResolution + outputResolution + 1);
 		for(evolutionStep = 1; evolutionStep <= 5000; evolutionStep++){
-			for (int currentPool = inputResolution + outputResolution + 1; currentPool <= poolsQuantity; ++currentPool){
-				if(poolsStructure[currentPool - 1]->getAppearenceEvolutionTime() == evolutionStep){
+			for (unsigned int currentPool = inputResolution + outputResolution + 1; currentPool <= poolsStructure.size(); ++currentPool){
+				if(poolsStructure[currentPool - 1].getAppearenceEvolutionTime() == evolutionStep){
 					int flag = 0;
 					for(vector<int>::iterator iterator = nodesSequence.begin(); iterator != nodesSequence.end(); iterator++){
-						if(*iterator == poolsStructure[currentPool - 1]->getRootPoolID()){
+						if(*iterator == poolsStructure[currentPool - 1].getRootPoolID()){
 							nodesSequence.insert(iterator + 1, 1, currentPool);
 							flag = 1;
 							break;
@@ -363,12 +336,12 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		}
 
 		// запись пулов в файл
-		for(int currentPool = 1; currentPool <= poolsQuantity; currentPool++){
+		for(unsigned int currentPool = 1; currentPool <= poolsStructure.size(); currentPool++){
 			convert.str( std::string() );
 			convert.clear();
 			convert << nodeXPosition[currentPool - 1] << "," << nodeYPosition[currentPool - 1];
 			nodePosition.push_back(convert.str());
-			hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
+			hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1].getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1].getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
 		}
 
 
@@ -401,7 +374,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
 
 		genealogyNodePosition.push_back(convert.str());
-		hDotGraphFile << "\t\t\""<< poolsStructure[inputResolution + outputResolution]->getID() << "1gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"none\", height=.1, width=.1];\n" ;
+		hDotGraphFile << "\t\t\""<< poolsStructure[inputResolution + outputResolution].getID() << "1gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"none\", height=.1, width=.1];\n" ;
 
 		genealogyNodesXPosition.push_back(XPos + 5000 - evolutionStep);
 		genealogyNodesYPosition.push_back(nodeYPosition[inputResolution + outputResolution]);
@@ -411,11 +384,11 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
 
 		genealogyNodePosition.push_back(convert.str());
-		hDotGraphFile << "\t\t\""<< poolsStructure[inputResolution + outputResolution]->getID() << "2gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
+		hDotGraphFile << "\t\t\""<< poolsStructure[inputResolution + outputResolution].getID() << "2gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
 		
 		for(evolutionStep = 1; evolutionStep <= 5000; evolutionStep++){
-			for (int currentPool = inputResolution + outputResolution + 1; currentPool <= poolsQuantity; ++currentPool){
-				if(poolsStructure[currentPool - 1]->getAppearenceEvolutionTime() == evolutionStep){
+			for (unsigned int currentPool = inputResolution + outputResolution + 1; currentPool <= poolsStructure.size(); ++currentPool){
+				if(poolsStructure[currentPool - 1].getAppearenceEvolutionTime() == evolutionStep){
 					genealogyNodesXPosition.push_back(XPos);
 					genealogyNodesYPosition.push_back(nodeYPosition[currentPool - 1]);
 
@@ -424,7 +397,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 					convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
 
 					genealogyNodePosition.push_back(convert.str());
-					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "1gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"none\", height=.1, width=.1];\n" ;
+					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1].getID() << "1gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"none\", height=.1, width=.1];\n" ;
 
 					genealogyNodesXPosition.push_back(XPos + 5000 - evolutionStep);
 					genealogyNodesYPosition.push_back(nodeYPosition[currentPool - 1]);
@@ -434,17 +407,17 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 					convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
 
 					genealogyNodePosition.push_back(convert.str());
-					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "2gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
+					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1].getID() << "2gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
 
 					genealogyNodesXPosition.push_back(XPos + 5000 - evolutionStep);
-					genealogyNodesYPosition.push_back(nodeYPosition[poolsStructure[currentPool - 1]->getRootPoolID() - 1]);
+					genealogyNodesYPosition.push_back(nodeYPosition[poolsStructure[currentPool - 1].getRootPoolID() - 1]);
 
 					convert.str( std::string() );
 					convert.clear();
 					convert << genealogyNodesXPosition.back() << "," << genealogyNodesYPosition.back();
 
 					genealogyNodePosition.push_back(convert.str());
-					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "3gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
+					hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1].getID() << "3gen" << "\" [pos = \"" + genealogyNodePosition.back() + "!\", label=\"" << "\", shape = \"" + nodeShape + "\", height=.1, width=.1];\n" ;
 				}
 			}
 		}
@@ -458,10 +431,10 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		hDotGraphFile << "dir=none, penwidth=2.0];\n";
 
 		for(evolutionStep = 1; evolutionStep <= 5000; evolutionStep++){
-			for (int currentPool = inputResolution + outputResolution + 1; currentPool <= poolsQuantity; ++currentPool){
-				if(poolsStructure[currentPool - 1]->getAppearenceEvolutionTime() == evolutionStep && poolsStructure[currentPool - 1]->getRootPoolID()){
+			for (unsigned int currentPool = inputResolution + outputResolution + 1; currentPool <= poolsStructure.size(); ++currentPool){
+				if(poolsStructure[currentPool - 1].getAppearenceEvolutionTime() == evolutionStep && poolsStructure[currentPool - 1].getRootPoolID()){
 					int prePoolId = currentPool;
-					int postPoolId = poolsStructure[currentPool - 1]->getRootPoolID();
+					int postPoolId = poolsStructure[currentPool - 1].getRootPoolID();
 					hDotGraphFile << "\t\"" << prePoolId << "1gen" << "\" -> \"" <<
 					prePoolId << "2gen" << "\" [ ";
 					hDotGraphFile << "dir=none, penwidth=2.0];\n";
@@ -476,23 +449,23 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 		}
 	} else {
 		// запись пулов в файл
-		for(int currentPool = 1; currentPool <= poolsQuantity; currentPool++){
+		for(unsigned int currentPool = 1; currentPool <= poolsStructure.size(); currentPool++){
 
 			convert.str( std::string() );
 			convert.clear();
 			convert << nodeXPosition[currentPool - 1] << "," << nodeYPosition[currentPool - 1];
 
 			nodePosition.push_back(convert.str());
-			hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1]->getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1]->getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
+			hDotGraphFile << "\t\t\""<< poolsStructure[currentPool - 1].getID() << "\" [pos = \"" + nodePosition[currentPool - 1] + "!\", label=\"" << poolsStructure[currentPool - 1].getID() << "\", shape = \"" + nodeShape + "\"];\n" ;
 		}
 	}
 	
 	// ищем максимальный вес связи для нормализации
 	double maxWeightValue = 0;
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
-		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection){
-			if(poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) > maxWeightValue){
-				maxWeightValue = poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection);
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool){
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection){
+			if(poolsStructure[currentPool - 1].getConnectionWeightMean(currentConnection) > maxWeightValue){
+				maxWeightValue = poolsStructure[currentPool - 1].getConnectionWeightMean(currentConnection);
 			}
 		}
 	}
@@ -500,34 +473,34 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 	// геометрический центр области ограниченной внутренним слоем справа и внешними слоями сверху и снизу
 	int geometricCenterX = 1500;
 	// геометрический центр области ограниченной внутренним слоем справа и внешними слоями сверху и снизу
-	int geometricCenterY = (scale * (poolsQuantity - inputResolution - outputResolution + 1) + 500)/2;
+	int geometricCenterY = (scale * (poolsStructure.size() - inputResolution - outputResolution + 1) + 500)/2;
 
 	string splineControlPoints;
 	int prePoolId;
 	int postPoolId;
 
 	// Записываем связи
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
-			if (poolsStructure[currentPool - 1]->getConnectionEnabled(currentConnection)){
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection)
+			if (poolsStructure[currentPool - 1].getConnectionEnabled(currentConnection)){
 				string hex;
-				service::decToHex(static_cast<int>(fabs(255 * poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) / maxWeightValue)), hex, 2);
+				service::decToHex(static_cast<int>(fabs(255 * poolsStructure[currentPool - 1].getConnectionWeightMean(currentConnection) / maxWeightValue)), hex, 2);
 				string color;
-				if (poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) < 0)
+				if (poolsStructure[currentPool - 1].getConnectionWeightMean(currentConnection) < 0)
 					color = "0000FF" + hex; // Оттенок синего
 				else
 					color = "FF0000" + hex; // Оттенок красного
-				prePoolId = poolsStructure[currentPool - 1]->getConnectionPrePoolID(currentConnection);
-				postPoolId = poolsStructure[currentPool - 1]->getConnectionPostPoolID(currentConnection);
+				prePoolId = poolsStructure[currentPool - 1].getConnectionPrePoolID(currentConnection);
+				postPoolId = poolsStructure[currentPool - 1].getConnectionPostPoolID(currentConnection);
 				hDotGraphFile << "\t\"" << prePoolId << "\" -> \"" <<
 					postPoolId << "\" [ ";
 //				if (printWeights) //  Если надо напечатать веса
 //					hDotGraphFile << "label=\"" << poolsStructure[currentPool - 1]->getConnectionWeightMean(currentConnection) << "\", ";
 				// для связи между внутренними и внешними пулами
-				if((poolsStructure[prePoolId - 1]->getType() == 0 || poolsStructure[prePoolId - 1]->getType() == 2 || poolsStructure[postPoolId - 1]->getType() == 0 || poolsStructure[postPoolId - 1]->getType() == 2)
-					&& !(poolsStructure[prePoolId - 1]->getType() == 0 && poolsStructure[postPoolId - 1]->getType() == 2)){
+				if((poolsStructure[prePoolId - 1].getType() == 0 || poolsStructure[prePoolId - 1].getType() == 2 || poolsStructure[postPoolId - 1].getType() == 0 || poolsStructure[postPoolId - 1].getType() == 2)
+					&& !(poolsStructure[prePoolId - 1].getType() == 0 && poolsStructure[postPoolId - 1].getType() == 2)){
 						// если связь идет к/от входного слоя
-						if(poolsStructure[prePoolId - 1]->getType() == 0 || poolsStructure[postPoolId - 1]->getType() == 0){
+						if(poolsStructure[prePoolId - 1].getType() == 0 || poolsStructure[postPoolId - 1].getType() == 0){
 
 							convert.str( std::string() );
 							convert.clear();
@@ -545,7 +518,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 
 				} else {
 					// для связи между внешними пулами
-					if(poolsStructure[prePoolId - 1]->getType() == 0 && poolsStructure[postPoolId - 1]->getType() == 2){
+					if(poolsStructure[prePoolId - 1].getType() == 0 && poolsStructure[postPoolId - 1].getType() == 2){
 
 						convert.str( std::string() );
 						convert.clear();
@@ -555,7 +528,7 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 					} else {
 						// для связи между внутренними пулами
 						if(!genealogy){
-							if((poolsStructure[prePoolId - 1]->getType() == 1 && poolsStructure[postPoolId - 1]->getType() == 1) && (prePoolId != postPoolId)){
+							if((poolsStructure[prePoolId - 1].getType() == 1 && poolsStructure[postPoolId - 1].getType() == 1) && (prePoolId != postPoolId)){
 								if(nodeYPosition[prePoolId - 1] < nodeYPosition[postPoolId - 1]){
 
 									convert.str( std::string() );
@@ -587,13 +560,13 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 	
 
 	// Записываем предикторные связи
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-			for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-				if (poolsStructure[currentPool - 1]->getPredConnectionEnabled(currentPredConnection)){
-					prePoolId = poolsStructure[currentPool - 1]->getPredConnectionPrePoolID(currentPredConnection);
-					postPoolId = poolsStructure[currentPool - 1]->getPredConnectionPostPoolID(currentPredConnection);
-					hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1]->getPredConnectionPrePoolID(currentPredConnection) << "\" -> \"" <<
-						poolsStructure[currentPool - 1]->getPredConnectionPostPoolID(currentPredConnection) << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+			for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+				if (poolsStructure[currentPool - 1].getPredConnectionEnabled(currentPredConnection)){
+					prePoolId = poolsStructure[currentPool - 1].getPredConnectionPrePoolID(currentPredConnection);
+					postPoolId = poolsStructure[currentPool - 1].getPredConnectionPostPoolID(currentPredConnection);
+					hDotGraphFile << "\t\"" << poolsStructure[currentPool - 1].getPredConnectionPrePoolID(currentPredConnection) << "\" -> \"" <<
+						poolsStructure[currentPool - 1].getPredConnectionPostPoolID(currentPredConnection) << "\" [style=dashed, arrowsize=0.7, color=\"#000000\", penwidth=2.0];\n";
 				}
 	hDotGraphFile << "}";
 	hDotGraphFile.close();
@@ -618,32 +591,32 @@ void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale,
 
 //Печать сети в файл или на экран
 ostream& operator<<(ostream& os, const TPoolNetwork& poolNetwork){
-	for (int currentPool = 1; currentPool <= poolNetwork.poolsQuantity; ++currentPool)
-		os << *(poolNetwork.poolsStructure[currentPool - 1]);
+	for (unsigned int currentPool = 1; currentPool <= poolNetwork.poolsStructure.size(); ++currentPool)
+		os << poolNetwork.poolsStructure[currentPool - 1];
 	os << "|\n"; // Записываем разделитель между пулами и связями
-	for (int currentPool = 1; currentPool <= poolNetwork.poolsQuantity; ++currentPool)
-		for (int currentConnection = 1; currentConnection <= poolNetwork.poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
-			os << *(poolNetwork.poolsStructure[currentPool-1]->connectednessSet[currentConnection-1]); 
+	for (unsigned int currentPool = 1; currentPool <= poolNetwork.poolsStructure.size(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolNetwork.poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection)
+			os << poolNetwork.poolsStructure[currentPool-1].connectednessSet[currentConnection-1]; 
 	os << "||\n"; // Записываем разделитель между связями и предикторными связями
-	for (int currentPool = 1; currentPool <= poolNetwork.poolsQuantity; ++currentPool)
-		for (int currentPredConnection = 1; currentPredConnection <= poolNetwork.poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-			os << *(poolNetwork.poolsStructure[currentPool-1]->predConnectednessSet[currentPredConnection-1]); 
+	for (unsigned int currentPool = 1; currentPool <= poolNetwork.poolsStructure.size(); ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <= poolNetwork.poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+			os << poolNetwork.poolsStructure[currentPool-1].predConnectednessSet[currentPredConnection-1]; 
 	os << "|||\n"; // Записываем разделитель между сетями
 	return os;
 }
 
 //Печать сети со всеми сведений о пулах в файл или на экран (вместе с номером пула родителя и временем появления в эволюции)
 ostream& TPoolNetwork::printNetworkExtra(ostream& os){
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		poolsStructure[currentPool - 1]->printPoolExtra(os);
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		poolsStructure[currentPool - 1].printPoolExtra(os);
 	os << "|\n"; // Записываем разделитель между пулами и связями
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1]->getInputConnectionsQuantity(); ++currentConnection)
-			os << *(poolsStructure[currentPool-1]->connectednessSet[currentConnection-1]); 
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection)
+			os << poolsStructure[currentPool-1].connectednessSet[currentConnection-1]; 
 	os << "||\n"; // Записываем разделитель между связями и предикторными связями
-	for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
-		for (int currentPredConnection = 1; currentPredConnection <=poolsStructure[currentPool - 1]->getInputPredConnectionsQuantity(); ++currentPredConnection)
-			os << *(poolsStructure[currentPool-1]->predConnectednessSet[currentPredConnection-1]); 
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <=poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+			os << poolsStructure[currentPool-1].predConnectednessSet[currentPredConnection-1]; 
 	os << "|||\n"; // Записываем разделитель между сетями
 	return os;
 }
@@ -730,8 +703,8 @@ istream& TPoolNetwork::readNetworkExtra(istream& is){
 		is >> tmp_string; // Считываем время появления в эволюции
 		int appearenceEvolutionTime = atoi(tmp_string.c_str());
 		addPool(newType, newLayer, newBiasMean, newBiasVariance, newCapacity);
-		poolsStructure[getPoolsQuantity() - 1]->setRootPoolID(rootPoolID);
-		poolsStructure[getPoolsQuantity() - 1]->setAppearenceEvolutionTime(appearenceEvolutionTime);
+		poolsStructure[getPoolsQuantity() - 1].setRootPoolID(rootPoolID);
+		poolsStructure[getPoolsQuantity() - 1].setAppearenceEvolutionTime(appearenceEvolutionTime);
 		is >> tmp_string; // Считываем типа пула
 	}
 	// Создаем все связи между пулами

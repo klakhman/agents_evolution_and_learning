@@ -81,6 +81,34 @@ int main(int argc, char** argv){
 		evolutionaryProcess->start(randomSeed);
 			delete evolutionaryProcess;
   }
+  else if (programMode == "PROFILING"){ // Режим для различных тестов производительности
+    string settingsFilename = settings::getSettingsFilename(argc, argv);
+    string environmentFilename, testPopulationFilename;
+    int currentArgNumber = 1; // Текущий номер параметра
+	  while (currentArgNumber < argc){
+		  if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			  if (!strcmp("-envfile", argv[currentArgNumber])) environmentFilename = argv[++currentArgNumber];
+        else if (!strcmp("-testpopfile", argv[currentArgNumber])) testPopulationFilename = argv[++currentArgNumber];
+		  }
+		  ++currentArgNumber;
+	  }
+    TPopulation<TAgent> population;
+    settings::fillPopulationSettingsFromFile(population, settingsFilename);
+    population.loadPopulation(testPopulationFilename);
+    settings::fillAgentsPopulationSettingsFromFile(population, settingsFilename);
+    THypercubeEnvironment environment;
+    settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+    environment.loadEnvironment(environmentFilename);
+    // Проводим прогон для определения производительности
+    int runsQuantity = 10;
+    for (int run = 0; run < runsQuantity; ++run)
+      for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
+        population.getPointertoAgent(currentAgent)->primarySystemogenesis();
+        environment.setRandomEnvironmentState();
+        population.getPointertoAgent(currentAgent)->life(environment, population.evolutionSettings.agentLifetime); 
+      }
+    return 0;
+  }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
     //TAnalysis::makeBestPopulationAnalysisSummary("C:/Coding/Current_Test_Folder/BestPopulation_analysis_En1001-1360_test.txt", "C:/Coding/Current_Test_Folder/analysis_summary.txt", 18, 20, 10);
     //tests::testPrimarySystemogenesis("C:/Coding/Current_Test_Folder/");

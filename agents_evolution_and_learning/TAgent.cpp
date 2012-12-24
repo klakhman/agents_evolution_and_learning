@@ -8,6 +8,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
 
@@ -342,21 +343,26 @@ void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
 			neuralController->setNeuronActive(currentNeuron, true);
 }
 
-// Функция отбора наиболее активных синапсов
-void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
-	// Массив связей вместе с их суммарными потенциалами
-	struct SSelectionSynapse{
-		int synapseID;
-		double synapseSummaryPotential;
-    // Функция сравнения структур (для функции qsort())
-    static int compare(const void* first, const void* second){
+//Техническая структура, используемая в методе отбора синапсов (не может быть локальной, так как стандарт 2003 не позволяет)
+struct SSelectionSynapse{
+	int synapseID;
+	double synapseSummaryPotential;
+  // Функция сравнения структур (для функции qsort())
+  /*static int compare(const void* first, const void* second){
       double compare = reinterpret_cast<const SSelectionSynapse*>(first)->synapseSummaryPotential - reinterpret_cast<const SSelectionSynapse*>(second)->synapseSummaryPotential;
       if (!compare) return 0;
       else if (compare > 0) return 1;
       else return -1;
-    }
-	};
+    }*/
+  // Функция сравнения структур (для функции std::sort())
+  bool operator<(const SSelectionSynapse& right) const {
+    return (synapseSummaryPotential < right.synapseSummaryPotential);
+  }
+};
 
+// Функция отбора наиболее активных синапсов
+void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
+  // Массив связей вместе с их суммарными потенциалами
 	SSelectionSynapse* selectionSynapses = new SSelectionSynapse[neuralController->getSynapsesQuantity()];
 	// Проходимся по всем синапсам
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
@@ -372,8 +378,8 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 				selectionSynapses[j+1] = selectionSynapses[j];
 				selectionSynapses[j] = tmp;
 			}*/
-  qsort(selectionSynapses, neuralController->getSynapsesQuantity(), sizeof(*selectionSynapses), SSelectionSynapse::compare);
-
+  //qsort(selectionSynapses, neuralController->getSynapsesQuantity(), sizeof(*selectionSynapses), SSelectionSynapse::compare);
+  sort(selectionSynapses, selectionSynapses + neuralController->getSynapsesQuantity());
 	// Находим порог среднего потенциала по синапсу (через персентиль общего дискретного распределения среднего потенциала через синапсы)
 	double percentileValue = selectionSynapses[static_cast<int>((100 - primarySystemogenesisSettings.synapsesActivityTreshold)/100.0*neuralController->getSynapsesQuantity())].synapseSummaryPotential;
 	// Проходимся через все синапсы и удаляем те, у которых суммарный потенциал меньше порога (с определенными условиями - смотри далее)
@@ -441,11 +447,13 @@ void TAgent::primarySystemogenesis(){
 					synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] += 
 							fabs(neuralController->getSynapseWeight(currentNeuron, currentSynapse) * neuralController->getNeuronPreviousOut(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)));
 			
-			for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron); ++currentPredConnection)
-				// Если пресинаптический нейрон правильно предсказал активацию / молчание постсинаптического
-					if (((neuralController->getNeuronCurrentOut(currentNeuron) > TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(neuralController->getPredConnectionPreNeuronID(currentNeuron, currentPredConnection)) > TNeuron::ACTIVITY_TRESHOLD)) ||
-							((neuralController->getNeuronCurrentOut(currentNeuron) <= TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(neuralController->getPredConnectionPreNeuronID(currentNeuron, currentPredConnection)) <= TNeuron::ACTIVITY_TRESHOLD)))
-							predictorSignificance[neuralController->getPredConnectionID(currentNeuron, currentPredConnection) - 1] += 1;
+			for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron); ++currentPredConnection){
+				int preNeuronID = neuralController->getPredConnectionPreNeuronID(currentNeuron, currentPredConnection);
+        // Если пресинаптический нейрон правильно предсказал активацию / молчание постсинаптического
+				if (((neuralController->getNeuronCurrentOut(currentNeuron) > TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(preNeuronID) > TNeuron::ACTIVITY_TRESHOLD)) ||
+            ((neuralController->getNeuronCurrentOut(currentNeuron) <= TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(preNeuronID) <= TNeuron::ACTIVITY_TRESHOLD)))
+					predictorSignificance[neuralController->getPredConnectionID(currentNeuron, currentPredConnection) - 1] += 1;
+      }
 		}
 	}
 	// Нормировка показателей статистической значимости предикторных связей
