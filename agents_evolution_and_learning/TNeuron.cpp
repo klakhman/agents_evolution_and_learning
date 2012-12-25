@@ -17,7 +17,8 @@ const double TNeuron::ACTIVITY_TRESHOLD = 0.5; // Порог активност�
 void TNeuron::calculateOut(){
 	potential = 0; // На всякий случай
 	potential += bias; // Добавляем смещение
-	for (unsigned int currentSynapse = 1; currentSynapse <= inputSynapsesSet.size(); ++currentSynapse)
+  unsigned int synapsesQuantity = inputSynapsesSet.size();
+	for (unsigned int currentSynapse = 1; currentSynapse <= synapsesQuantity; ++currentSynapse)
 	{
     if (inputSynapsesSet[currentSynapse - 1].preNeuron->active){ // Если нейрон активен, то проводим суммирование, иначе просто пропускаем для улучшения производительности
       // Определяем какая связь - рекуррентная или прямая

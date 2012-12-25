@@ -168,9 +168,10 @@ void TNeuralNetwork::calculateNetwork(double inputVector[]){
 	// Заполняем входные нейроны
 	for (int currentBit = 1; currentBit <= inputResolution; ++currentBit)
 		neuronsStructure[currentBit - 1].currentOut = inputVector[currentBit - 1];
+  unsigned int neuronsQuantity = neuronsStructure.size();
 	// Проходимся по нейронам по слоям (начинаем со второго)
 	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
-    for (unsigned int currentNeuron = inputResolution + 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+    for (unsigned int currentNeuron = inputResolution + 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 			if (neuronsStructure[currentNeuron - 1].layer == currentLayer)
 				neuronsStructure[currentNeuron - 1].calculateOut();
 }
@@ -187,9 +188,10 @@ void TNeuralNetwork::calculateSpontaneousNetwork(double spontaneousActivityProb)
       neuronsStructure[currentNeuron - 1].currentOut = service::uniformDistribution(0.5, 1, false, false);
 		else
 			neuronsStructure[currentNeuron - 1].currentOut = 0.0;
+  unsigned int neuronsQuantity = neuronsStructure.size();
 	// Проходимся по нейронам по слоям (начинаем со второго)
 	for (int currentLayer = 2; currentLayer <= layersQuantity; ++currentLayer)
-		for (unsigned int currentNeuron = inputResolution + 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron)
+    for (unsigned int currentNeuron = inputResolution + 1; currentNeuron <= neuronsQuantity; ++currentNeuron)
 			if (neuronsStructure[currentNeuron - 1].layer == currentLayer)
       {
 				neuronsStructure[currentNeuron - 1].calculateOut();

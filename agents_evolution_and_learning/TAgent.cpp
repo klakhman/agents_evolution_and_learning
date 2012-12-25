@@ -436,8 +436,8 @@ void TAgent::primarySystemogenesis(){
 		// Проходимся по всем нейронам и обновляем суммарные характеристики
 		for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron){
 			neuronsSummaryPotential[currentNeuron - 1] += neuralController->getNeuronPotential(currentNeuron);
-			
-			for (int currentSynapse = 1; currentSynapse <= neuralController->getNeuronInputSynapsesQuantity(currentNeuron); ++currentSynapse)
+			int inputSynapsesQuantity = neuralController->getNeuronInputSynapsesQuantity(currentNeuron);
+			for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
 				// Если связь прямая
 				if (neuralController->getNeuronLayer(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)) < neuralController->getNeuronLayer(currentNeuron))
 					synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] += 
@@ -446,8 +446,8 @@ void TAgent::primarySystemogenesis(){
 				else
 					synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] += 
 							fabs(neuralController->getSynapseWeight(currentNeuron, currentSynapse) * neuralController->getNeuronPreviousOut(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)));
-			
-			for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron); ++currentPredConnection){
+			int inputPredConnectionsQuantity = neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron);
+			for (int currentPredConnection = 1; currentPredConnection <= inputPredConnectionsQuantity; ++currentPredConnection){
 				int preNeuronID = neuralController->getPredConnectionPreNeuronID(currentNeuron, currentPredConnection);
         // Если пресинаптический нейрон правильно предсказал активацию / молчание постсинаптического
 				if (((neuralController->getNeuronCurrentOut(currentNeuron) > TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(preNeuronID) > TNeuron::ACTIVITY_TRESHOLD)) ||
@@ -481,7 +481,8 @@ int TAgent::mismatchDetection(int neuronNumber){
 
 	int activePrediction = 0; // Кол-во связей, предсказавшее активацию
 	int silentPrediction = 0; // Кол-во связей, предсказавшее молчание
-	for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(neuronNumber); ++currentPredConnection){
+  int inputPredConnectionsQuantity = neuralController->getNeuronInputPredConnectionsQuantity(neuronNumber);
+	for (int currentPredConnection = 1; currentPredConnection <= inputPredConnectionsQuantity; ++currentPredConnection){
 		int currentPreNeuron = neuralController->getPredConnectionPreNeuronID(neuronNumber, currentPredConnection);
 		// Если предсказывающий нейрон активен
 		if (neuralController->getNeuronActive(currentPreNeuron))
