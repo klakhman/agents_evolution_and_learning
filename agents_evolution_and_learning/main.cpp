@@ -110,6 +110,78 @@ int main(int argc, char** argv){
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
+    srand(static_cast<unsigned int>(time(0)));
+    string settingsFilename = "C:/Coding/settings.ini";
+    string populationFilename = "C:/Coding/En1113_pc40anp40(34)_bestpopulation.txt";
+    string environmentFilename = "C:/Coding/Environment1113.txt";
+    TPopulation<TAgent> population;
+    THypercubeEnvironment environment;
+    settings::fillPopulationSettingsFromFile(population, settingsFilename);
+    settings::fillAgentsPopulationSettingsFromFile(population, settingsFilename);
+    settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+    environment.loadEnvironment(environmentFilename);
+    population.loadPopulation(populationFilename);
+    ofstream output("C:/Coding/results_population6.txt");
+    for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
+      double max = 0;
+      double average = 0;
+      population.getPointertoAgent(currentAgent)->primarySystemogenesis();
+      TNeuralNetwork initialController;
+      initialController = *(population.getPointertoAgent(currentAgent)->getPointerToAgentController());
+      for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+        environment.setEnvironmentState(currentState);
+        *(population.getPointertoAgent(currentAgent)->getPointerToAgentController()) = initialController;
+        population.getPointertoAgent(currentAgent)->life(environment, population.evolutionSettings.agentLifetime);
+        double reward = population.getPointertoAgent(currentAgent)->getReward();
+        average += reward;
+        if (reward > max) max = reward;
+      }
+      average /= environment.getInitialStatesQuantity();
+      cout << "Agent:\t" << currentAgent << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
+      output << "Agent:\t" << currentAgent << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
+    }
+    /*TAgent* agent = population.getPointertoAgent(49);
+    ofstream output("C:/Coding/results_agent49_nolearndeterm.txt");
+    /*TPoolNetwork* genome = agent->getPointerToAgentGenome();
+    vector<int> poolsCapacity(10, 0);
+    int maxPoolCapacity = 50;
+    vector<int> conDevelopProb(10);
+    for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool){
+      poolsCapacity[(genome->getPoolCapacity(currentPool) - 1)/5] += 1;
+      for (int currentConnection = 1; currentConnection <= genome->getPoolInputConnectionsQuantity(currentPool); ++currentConnection){
+        conDevelopProb[static_cast<int>((genome->getConnectionDevelopSynapseProb(currentPool, currentConnection) - 0.01)*10)] += 1;
+        output << genome->getConnectionWeightMean(currentPool, currentConnection) << "\t" << genome->getConnectionWeightVariance(currentPool, currentConnection) << "\t" << genome->getConnectionDevelopSynapseProb(currentPool, currentConnection) << endl;
+      }
+    }
+    output << endl << endl;
+    for (int i=0; i<10; ++i){
+      output << poolsCapacity[i] << "\t";
+    }
+    output << endl << endl;
+    for (int i=0; i<10; ++i){
+      output << conDevelopProb[i] << "\t";
+    }*/
+    /*agent->setLearningMode(0);
+    environment.setStochasticityCoefficient(0);
+    for (int currentTry = 1; currentTry <= 100; ++currentTry){
+      double max = 0;
+      double average = 0;
+      agent->primarySystemogenesis();
+      TNeuralNetwork initialController;
+      initialController = *(agent->getPointerToAgentController());
+      for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+        environment.setEnvironmentState(currentState);
+        *(agent->getPointerToAgentController()) = initialController; 
+        agent->life(environment, population.evolutionSettings.agentLifetime);
+        double reward = agent->getReward();
+        average += reward;
+        if (reward > max) max = reward;
+      }
+      average /= environment.getInitialStatesQuantity();
+      cout << "Try:\t" << currentTry << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
+      output << "Try:\t" << currentTry << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
+    }*/
+    output.close();
     //TAnalysis::makeBestPopulationAnalysisSummary("C:/Coding/Current_Test_Folder/BestPopulation_analysis_En1001-1360_test.txt", "C:/Coding/Current_Test_Folder/analysis_summary.txt", 18, 20, 10);
     //tests::testPrimarySystemogenesis("C:/Coding/Current_Test_Folder/");
     //vector<double> reward = techanalysis::poolsStabilityAnalysis("C:/EXPERIMENTS/agent.txt", "C:/EXPERIMENTS/Environment1113.txt" , "C:/EXPERIMENTS/settings.ini", 50, 0.1);
