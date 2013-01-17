@@ -13,12 +13,14 @@ class TAnalysis{
 	// ----------- Методы для параллельного стандартного анализа лучших популяций ----------------
 	// Расишифровка парметров командной строки
 	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string& runSign);
+  // Нахождение записи о параметре в строке с сообщением от процесса
+  std::string findParameterNote(std::string inputMessage, std::string parameterString);
 	// Расшифровка сообщения от рабочего процесса 
-	void decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry, double& averageReward);
+	void decodeFinishedWorkMessage(std::string inputMessage, int& processRankSend, int& finishedEnvironment, int& finishedTry, double& averageReward);
 	// Выполнение управляющего процесса (важно, чтобы количество общих заданий не было меньше кол-ва выделенных процессов!!!)
 	void rootProcess(int argc, char **argv);
 	// Расшифровка сообщения от рутового процесса 
-	void decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, std::string& runSign);
+	void decodeTaskMessage(std::string inputMessage, int& currentEnvironment, int& currentTry, std::string& runSign);
 	// Выполнение рабочего процесса
 	void workProcess(int argc, char **argv);
 

@@ -25,15 +25,16 @@ class TParallelEvolutionaryProcess{
 	} directoriesSettings;
 	// Файл настроек
 	std::string settingsFilename;
-
+  // Нахождение записи о параметре в строке с сообщением от процесса
+  std::string findParameterNote(std::string inputMessage, std::string parameterString);
 	// Расишифровка парметров командной строки
 	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string& runSign);
 	// Расшифровка сообщения от рабочего процесса 
-	void decodeFinishedWorkMessage(char inputMessage[], int& processRankSend, int& finishedEnvironment, int& finishedTry);
+	void decodeFinishedWorkMessage(std::string inputMessage, int& processRankSend, int& finishedEnvironment, int& finishedTry);
 	// Выполнение управляющего процесса
 	void rootProcess(int argc, char **argv);
 	// Расшифровка сообщения от рутового процесса 
-	void decodeTaskMessage(char inputMessage[], int& currentEnvironment, int& currentTry, std::string& runSign);
+	void decodeTaskMessage(std::string inputMessage, int& currentEnvironment, int& currentTry, std::string& runSign);
 	// Выполнение рабочего процесса
 	void workProcess(int argc, char **argv);
 public:
