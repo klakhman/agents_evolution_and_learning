@@ -147,6 +147,7 @@ void TPoolNetwork::erasePoolNetwork(){
 
 // Оператор присваивания (фактически полное копирование сети - создание новых структур)
 TPoolNetwork& TPoolNetwork::operator=(const TPoolNetwork& sourcePoolNetwork){
+  if (this == &sourcePoolNetwork) return *this;
 	erasePoolNetwork(); // На всякий случай опустошаем сеть
 	// Копируем пулы
 	for (int currentPool = 1; currentPool <= sourcePoolNetwork.getPoolsQuantity(); ++currentPool){
@@ -170,6 +171,16 @@ TPoolNetwork& TPoolNetwork::operator=(const TPoolNetwork& sourcePoolNetwork){
 								sourcePoolNetwork.getPredConnectionInnovationNumber(currentPool, currentPoolPredConnection));
 	}
 	return *this;
+}
+
+// Копирующий конструктор (применять только для правильного присваивания с одновременным созданием переменной)
+TPoolNetwork::TPoolNetwork(const TPoolNetwork& sourceNetwork){
+  connectionsQuantity = 0;
+  predConnectionsQuantity = 0;
+	layersQuantity = 0;
+	inputResolution = 0;
+	outputResolution = 0;
+  *this = sourceNetwork;
 }
 
 // Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
@@ -679,6 +690,43 @@ istream& operator>>(istream& is, TPoolNetwork& poolNetwork){
 		is >> tmp_string; // Считываем номер пресинаптического пула
 	}
 
+	return is;
+}
+
+//Считывание сети из файла в старом формате
+istream& TPoolNetwork::loadOldFormatNet(std::istream& is, int inputResolution, int outputResolution){
+  erasePoolNetwork(); // На всякий случай опустошаем сеть
+	string tmp_string;
+	// Создаем все пулы сети
+	is >> tmp_string; // Считываем номер слоя пула
+	while (tmp_string != "|"){ // Считываем до разделителя между пулами и связями
+    int newLayer = atoi(tmp_string.c_str());
+		int newType;
+    if (getPoolsQuantity() < inputResolution) newType = TNeuralPool::INPUT_POOL;
+    else if (getPoolsQuantity() < outputResolution + inputResolution) newType = TNeuralPool::OUTPUT_POOL;
+    else newType = TNeuralPool::HIDDEN_POOL;
+		is >> tmp_string; // Считываем смещение нейронов пула
+		double newBias = atof(tmp_string.c_str());
+		addPool(newType, newLayer, newBias, 0, 1);
+		is >> tmp_string; // Считываем слой пула
+	}
+	// Создаем все связи между пулами
+	is >> tmp_string; // Считываем номер пресинаптического пула
+	while (tmp_string != "||"){ // Считываем до разделителя между сетями
+		int prePoolNumber = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем номер постсинаптического пула
+		int postPoolNumber = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем среднее веса связи
+		double newWeight = atof(tmp_string.c_str());
+		is >> tmp_string; // Считываем признак экспресии связи
+		bool newEnabled = (atoi(tmp_string.c_str()) != 0);
+		is >> tmp_string; // Считываем так выключения связи
+		int newDisabledStep = atoi(tmp_string.c_str());
+		is >> tmp_string; // Считываем номер инновации этой связи
+		long newInnovationNumber = atoi(tmp_string.c_str());
+		addConnection(prePoolNumber, postPoolNumber, newWeight, 0, 1, newEnabled, newDisabledStep, newInnovationNumber);
+		is >> tmp_string; // Считываем номер пресинаптического пула
+	}
 	return is;
 }
 

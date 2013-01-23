@@ -11,6 +11,36 @@
 
 using namespace std;
 
+// Копирующий конструктор (применять только для правильного присваивания с одновременным созданием переменной)
+TNeuralNetwork::TNeuralNetwork(const TNeuralNetwork& sourceNetwork){
+  synapsesQuantity = 0;
+  predConnectionsQuantity = 0;
+	layersQuantity = 0;
+	inputResolution = 0;
+	outputResolution = 0;
+  *this = sourceNetwork;
+}
+// Оператор присваивания (фактически полное копирование сети - создание новых структур)
+TNeuralNetwork& TNeuralNetwork::operator=(const TNeuralNetwork& sourceNetwork){
+  if (this == &sourceNetwork) return *this;
+  eraseNeuralNetwork(); // На всякий случай опустошаем сеть
+	// Копируем пулы
+	for (int currentNeuron = 1; currentNeuron <= sourceNetwork.getNeuronsQuantity(); ++currentNeuron){
+		addNeuron(sourceNetwork.getNeuronType(currentNeuron), sourceNetwork.getNeuronLayer(currentNeuron),
+        sourceNetwork.getNeuronBias(currentNeuron), sourceNetwork.getNeuronActive(currentNeuron), sourceNetwork.getNeuronParentPoolID(currentNeuron));
+	}
+	// Копируем все связи сети
+	for (int currentNeuron = 1; currentNeuron <= sourceNetwork.getNeuronsQuantity(); ++currentNeuron){
+		for (int currentSynapse = 1; currentSynapse <= sourceNetwork.getNeuronInputSynapsesQuantity(currentNeuron); ++ currentSynapse)
+			addSynapse(sourceNetwork.getSynapsePreNeuronID(currentNeuron, currentSynapse), sourceNetwork.getSynapsePostNeuronID(currentNeuron, currentSynapse),
+								sourceNetwork.getSynapseWeight(currentNeuron, currentSynapse), sourceNetwork.getSynapseEnabled(currentNeuron, currentSynapse));  
+		for (int currentPredConnection = 1; currentPredConnection <= sourceNetwork.getNeuronInputPredConnectionsQuantity(currentNeuron); ++ currentPredConnection)
+			addPredConnection(sourceNetwork.getPredConnectionPreNeuronID(currentNeuron, currentPredConnection), sourceNetwork.getPredConnectionPostNeuronID(currentNeuron, currentPredConnection),
+								sourceNetwork.getPredConnectionEnabled(currentNeuron, currentPredConnection));
+	}
+	return *this;
+}
+
 // Нахождение номера связи в структуре постсинаптического нейрона - возвращает ноль, если связи нет
 int TNeuralNetwork::findSynapseNumber(int preNeuronNumber, int postNeuronNumber){
   for (unsigned int currentSynapse = 1; currentSynapse <= neuronsStructure[postNeuronNumber - 1].inputSynapsesSet.size(); ++currentSynapse)

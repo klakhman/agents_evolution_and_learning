@@ -17,7 +17,7 @@ class TAnalysis{
   std::string findParameterNote(std::string inputMessage, std::string parameterString);
 	// Расшифровка сообщения от рабочего процесса 
 	void decodeFinishedWorkMessage(std::string inputMessage, int& processRankSend, int& finishedEnvironment, int& finishedTry, double& averageReward);
-	// Выполнение управляющего процесса (важно, чтобы количество общих заданий не было меньше кол-ва выделенных процессов!!!)
+	// Выполнение управляющего процесса
 	void rootProcess(int argc, char **argv);
 	// Расшифровка сообщения от рутового процесса 
 	void decodeTaskMessage(std::string inputMessage, int& currentEnvironment, int& currentTry, std::string& runSign);

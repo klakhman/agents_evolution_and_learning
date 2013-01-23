@@ -36,15 +36,19 @@ public:
 		inputResolution = 0;
 		outputResolution = 0;
 	}
+  // Копирующий конструктор (применять только для правильного присваивания с одновременным созданием переменной)
+  TNeuralNetwork(const TNeuralNetwork& sourceNetwork);
+  // Оператор присваивания (фактически полное копирование сети - создание новых структур)
+	TNeuralNetwork& operator=(const TNeuralNetwork& sourceNetwork);
 	// Деструктор
   ~TNeuralNetwork() {};
 
 	//Геттеры для параметров сети
-	int getNeuronsQuantity() { return neuronsStructure.size(); }
-	int getSynapsesQuantity() { return synapsesQuantity; }
-	int getPredConnectionsQuantity() { return predConnectionsQuantity; }
-	int getInputResolution() { return inputResolution; }
-	int getOutputResolution() { return outputResolution; }
+	int getNeuronsQuantity() const{ return neuronsStructure.size(); }
+	int getSynapsesQuantity() const{ return synapsesQuantity; }
+	int getPredConnectionsQuantity() const{ return predConnectionsQuantity; }
+	int getInputResolution() const{ return inputResolution; }
+	int getOutputResolution() const{ return outputResolution; }
 
 	// Геттеры и сеттеры для всех нейронов сети (во всех случаях передается номер нейрона в массиве нейронов)
 	int getNeuronID(int neuronNumber) const { return neuronsStructure[neuronNumber-1].ID; }

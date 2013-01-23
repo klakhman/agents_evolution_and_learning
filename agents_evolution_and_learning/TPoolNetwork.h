@@ -36,6 +36,8 @@ public:
 		inputResolution = 0;
 		outputResolution = 0;
 	}
+  // Копирующий конструктор (применять только для правильного присваивания с одновременным созданием переменной)
+  TPoolNetwork(const TPoolNetwork& sourceNetwork);
 	// Деструктор
   ~TPoolNetwork(){};
 
@@ -159,6 +161,9 @@ public:
 
 	//Считывание сети из файла или экрана
 	friend std::istream& operator>>(std::istream& is, TPoolNetwork& PoolNetwork);
+
+  //Считывание сети из файла в старом формате
+  std::istream& loadOldFormatNet(std::istream& is, int inputResolution, int outputResolution);
 
 	//Считывание сети со всеми сведениями о пулах из файла или на экрана (вместе с номером пула родителя и временем появления в эволюции)
 	std::istream& readNetworkExtra(std::istream& oi);
