@@ -275,7 +275,7 @@ void TAnalysis::decodeTaskMessage(string inputMessage, int& currentEnvironment, 
   featureNote = findParameterNote(inputMessage, "$TRY$");
   if (featureNote != "") currentTry = atoi(featureNote.c_str());
   // Определяем признак запуска
-  featureNote = findParameterNote(inputMessage, "$ENV$");
+  featureNote = findParameterNote(inputMessage, "$SIGN$");
   runSign = featureNote;
 }
 

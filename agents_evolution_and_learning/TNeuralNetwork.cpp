@@ -80,6 +80,19 @@ void TNeuralNetwork::fixPredConnectionsIDs(){
 
 //Добавление нейрона в сеть
 void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool newActive /*=true*/, int newParentNeuronID /*=0*/){
+  vector<int> preNeuronsIDsSynapses;
+  vector<int> preNeuronsIDsPredConnections;
+  // После добавления нового нейрона в сеть из-за реаллокации вектора потенциально могут поехать все адреса нейронов, поэтому надо это учитывать
+  // Если связей все еще нет (мы можем как всегда создавать сначала все нейроны), то для быстроты не делаем ничего
+  if ((synapsesQuantity != 0) || (predConnectionsQuantity != 0))
+    for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron){
+      for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron-1].getInputSynapsesQuantity(); ++currentSynapse)
+        preNeuronsIDsSynapses.push_back(neuronsStructure[currentNeuron-1].getSynapsePreNeuron(currentSynapse)->ID);
+      for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron-1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+        preNeuronsIDsPredConnections.push_back(neuronsStructure[currentNeuron-1].getPredConnectionPreNeuron(currentPredConnection)->ID);
+    }
+  int previousCapacity = neuronsStructure.capacity();
+  
   TNeuron newNeuron(neuronsStructure.size() + 1, newType, newLayer, newBias, newActive, newParentNeuronID);
   neuronsStructure.push_back(newNeuron);
 	// Если нейрон входной
@@ -88,6 +101,22 @@ void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool n
   if (OUTPUT_NEURON == newType) ++outputResolution;
 	// Смотрим на слой нейрона
 	if (newLayer > layersQuantity) layersQuantity = newLayer;
+
+  // Если capacity изменилась, то есть осуществлялась реаллокация, то надо править ссылки в синапсах
+  if ((previousCapacity != neuronsStructure.capacity()) && ((synapsesQuantity != 0) || (predConnectionsQuantity != 0))){
+    int synapseNumber = 0;
+    int predConnectionNumber = 0;
+    for (unsigned int currentNeuron = 1; currentNeuron <= neuronsStructure.size(); ++currentNeuron){
+      for (int currentSynapse = 1; currentSynapse <= neuronsStructure[currentNeuron-1].getInputSynapsesQuantity(); ++currentSynapse){
+        setSynapsePreNeuronID(currentNeuron, currentSynapse, preNeuronsIDsSynapses[synapseNumber++]);
+        setSynapsePostNeuronID(currentNeuron, currentSynapse, currentNeuron);
+      }
+      for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron-1].getInputPredConnectionsQuantity(); ++currentPredConnection){
+        setSynapsePreNeuronID(currentNeuron, currentPredConnection, preNeuronsIDsPredConnections[predConnectionNumber++]);
+        setSynapsePostNeuronID(currentNeuron, currentPredConnection, currentNeuron);
+      }
+    }
+  }
 }
 
 // Удаление нейрона из сети (с удалением также всех входных и выходных связей из этого нейрона)

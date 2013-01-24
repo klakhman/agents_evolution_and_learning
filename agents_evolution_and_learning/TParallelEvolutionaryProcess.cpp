@@ -200,7 +200,7 @@ void TParallelEvolutionaryProcess::decodeTaskMessage(string inputMessage, int& c
   featureNote = findParameterNote(inputMessage, "$TRY$");
   if (featureNote != "") currentTry = atoi(featureNote.c_str());
   // Определяем признак запуска
-  featureNote = findParameterNote(inputMessage, "$ENV$");
+  featureNote = findParameterNote(inputMessage, "$SIGN$");
   runSign = featureNote;
 }
 

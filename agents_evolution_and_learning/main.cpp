@@ -227,6 +227,11 @@ int main(int argc, char** argv){
 	TTopologyAnalysis *topologyAnalysis = new TTopologyAnalysis;
 	topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
   }
+  // Тестирование различных конструкций, несвязанных с основным кодом
+  else if (programMode == "TESTUN"){
+    cout << 1;
+    cout << 2;
+  }
 
   /*TAnalysis* analysis = new TAnalysis;
 	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");
