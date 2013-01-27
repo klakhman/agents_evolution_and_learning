@@ -229,8 +229,6 @@ int main(int argc, char** argv){
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
-    cout << 1;
-    cout << 2;
   }
 
   /*TAnalysis* analysis = new TAnalysis;

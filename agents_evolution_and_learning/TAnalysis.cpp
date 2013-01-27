@@ -61,9 +61,11 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 		    agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
       // Необходимо сохранять первичную нейронную сеть, так как запуск проходит из всех состояний и возможно обучение
       TNeuralNetwork initialController;
-      initialController = *(agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentController());
+      if (0 != agentsPopulation->getPointertoAgent(currentAgent)->getLearningMode())
+        initialController = *(agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentController());
 		  for (int currentInitialState = 0; currentInitialState < initialStatesQuantity; ++currentInitialState){
-        *(agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentController()) = initialController;
+        if (0 != agentsPopulation->getPointertoAgent(currentAgent)->getLearningMode())
+          *(agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentController()) = initialController;
 			  environment->setEnvironmentState(currentInitialState);
 			  agentsPopulation->getPointertoAgent(currentAgent)->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
 			  double reward = agentsPopulation->getPointertoAgent(currentAgent)->getReward();
