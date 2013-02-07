@@ -449,10 +449,15 @@ void TPopulation<TemplateNeuralAgent>::mutationPoolDuplication(TemplateNeuralAge
 			// Проверяем дуплицирует ли пул (с учетом введеной поправки, уменьшающей вероятность дупликации с ростом структуры генома в эволюции)
 			bool duplicate = (service::uniformDistribution(0, 1, true, false) < mutationSettings.duplicatePoolProb/duplicateDivision(initPoolsQuantity, initConnectionsQuantity));
 			if (duplicate){ // Если пул дуплицирует
+        int newPoolCapacity = 0;
+        int oldPoolCapacity = kidGenome->getPoolCapacity(currentPool);
 				if (kidGenome->getPoolCapacity(currentPool) != 1 ) // Если в пуле не остался только один нейрон (иначе оставляем размерность = 1)
-					kidGenome->setPoolCapacity(currentPool, static_cast<int>(kidGenome->getPoolCapacity(currentPool) * mutationSettings.poolDivisionCoef + 0.5));
+          newPoolCapacity = static_cast<int>(kidGenome->getPoolCapacity(currentPool) * mutationSettings.poolDivisionCoef + 0.5);
+        else 
+          newPoolCapacity = 1;
+        kidGenome->setPoolCapacity(currentPool, newPoolCapacity);
 				kidGenome->addPool(kidGenome->getPoolType(currentPool), kidGenome->getPoolLayer(currentPool),
-											kidGenome->getPoolBiasMean(currentPool), kidGenome->getPoolBiasVariance(currentPool), kidGenome->getPoolCapacity(currentPool));
+											kidGenome->getPoolBiasMean(currentPool), kidGenome->getPoolBiasVariance(currentPool), newPoolCapacity);
 				kidGenome->setPoolRootPoolID(kidGenome->getPoolsQuantity(), currentPool);
 				kidGenome->setPoolAppearenceEvolutionTime(kidGenome->getPoolsQuantity(), evolutionaryTime);
 
@@ -471,19 +476,25 @@ void TPopulation<TemplateNeuralAgent>::mutationPoolDuplication(TemplateNeuralAge
 														kidGenome->getConnectionEnabled(currentPool, currentPoolConnection), kidGenome->getConnectionDisabledStep(currentPool, currentPoolConnection), 
 														++connectionInnovationNumber);
 					}
-            // Копируем все выходящие связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
+        // Копируем все выходящие связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
 				for (int currentPostPool = 1; currentPostPool <= initPoolsQuantity; ++currentPostPool)
 					if (currentPostPool != currentPool) // Если это не дуплицирующий пул
 						for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPostPool); ++currentPoolConnection)
 							if (kidGenome->getConnectionID(currentPostPool, currentPoolConnection) <= initConnectionsQuantity) // Если это старая связь
 								// Если у текущего потенциального пула есть связь с текущим дублицирующим пулом
 								if (kidGenome->getConnectionPrePoolID(currentPostPool, currentPoolConnection) == currentPool){
-									kidGenome->addConnection(kidGenome->getPoolsQuantity(), currentPostPool, kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0,
+                  double newWeightMean = 0;
+                  // Если идет полноценное развитие, то нужно осуществлять правильное преобразование веса связей ("безболезненное")
+                  if (1 == kidAgent.getSystemogenesisMode())
+                    newWeightMean = oldPoolCapacity / (2.0 * newPoolCapacity) * kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection);
+                  else
+                    newWeightMean = kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0;
+									kidGenome->addConnection(kidGenome->getPoolsQuantity(), currentPostPool, newWeightMean,
 														kidGenome->getConnectionWeightVariance(currentPostPool, currentPoolConnection), kidGenome->getConnectionDevelopSynapseProb(currentPostPool, currentPoolConnection), 
 														kidGenome->getConnectionEnabled(currentPostPool, currentPoolConnection), kidGenome->getConnectionDisabledStep(currentPostPool, currentPoolConnection),
 														++connectionInnovationNumber);
 									// Выходные связи дуплицирующего нейрона мы делим пополам между новым и дуплицирующим
-									kidGenome->setConnectionWeightMean(currentPostPool, currentPoolConnection, kidGenome->getConnectionWeightMean(currentPostPool, currentPoolConnection) / 2.0); 
+									kidGenome->setConnectionWeightMean(currentPostPool, currentPoolConnection, newWeightMean); 
 								}
 				// ТЕПЕРЬ КОПИРУЕМ ВСЕ ПРЕДИКТОРНЫЕ СВЯЗИ
 				// Копируем все входящие предикторные связи из дуплицирующего пула в новый
@@ -500,7 +511,7 @@ void TPopulation<TemplateNeuralAgent>::mutationPoolDuplication(TemplateNeuralAge
 														kidGenome->getPredConnectionEnabled(currentPool, currentPoolPredConnection), kidGenome->getPredConnectionDisabledStep(currentPool, currentPoolPredConnection),
 														++predConnectionInnovationNumber);
 					}
-            // Копируем все выходящие предикторные связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
+        // Копируем все выходящие предикторные связи из дуплицирующего пула (для этого надо пройтись по всей сети, так как эти связи разбросаны)
 				for (int currentPostPool = 1; currentPostPool <= initPoolsQuantity; ++currentPostPool)
 					if (currentPostPool != currentPool) // Если это не дуплицирующий пул
 						for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPostPool); ++currentPoolPredConnection)
