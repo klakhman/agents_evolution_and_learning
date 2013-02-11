@@ -7,6 +7,7 @@
 #include <fstream>
 #include "service.h"
 
+
 template <class TemplateNeuralAgent>
 /*
 
@@ -536,7 +537,7 @@ void TPopulation<TemplateNeuralAgent>::mutationDevelopSynapseProb(TemplateNeural
 			if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutDevelopConProbProb)
 				// Важно, чтобы вероятность была между нулем и единицей
 					kidGenome->setConnectionDevelopSynapseProb(currentPool, currentPoolConnection, 
-						min(1.0, max(0.0, kidGenome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
+                                                     std::min(1.0, std::max(0.0, kidGenome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
 }
 
 // Процедура мутации вероятности развития предикторной связи по предикторной связи между пулами
@@ -548,7 +549,7 @@ void TPopulation<TemplateNeuralAgent>::mutationDevelopPredConProb(TemplateNeural
 			if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutDevelopConProbProb)
 				// Важно, чтобы вероятность была между нулем и единицей
 					kidGenome->setDevelopPredConnectionProb(currentPool, currentPoolPredConnection, 
-						min(1.0, max(0.0, kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
+						std::min(1.0, std::max(0.0, kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
 }
 
 // Процедура составления потомка от двух родителей
