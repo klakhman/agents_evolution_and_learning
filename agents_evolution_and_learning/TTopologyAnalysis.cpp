@@ -8,13 +8,13 @@ using namespace std;
 TTopologyAnalysis::TTopologyAnalysis(void){
 }
 
-std::vector<int> TTopologyAnalysis::getPoolId(int id){
+/*std::vector<int> TTopologyAnalysis::getPoolId(int id){
 	return idArray[id];
-}
+}*/
 
 
 
-void TTopologyAnalysis::initializeIdArray(TPoolNetwork *network){
+map< int, vector<int> > TTopologyAnalysis::initializeIdArray(TPoolNetwork *network){
 	// номер поколения текущего пула
 	int currentGeneration = 1;
 	// порядковый номер потомка (как считает родитель)
@@ -24,6 +24,7 @@ void TTopologyAnalysis::initializeIdArray(TPoolNetwork *network){
 	vector<int> newId;
 	// добавляем id для первого пула
 	newId.push_back(currentGeneration);
+	std::map< int, std::vector<int> > idArray;
 	idArray.insert(pair< int, vector<int> >(network->getInputResolution() + network->getOutputResolution() + 1, newId));
 	// цикл по внутренним пулам
 	for(parentId = network->getInputResolution() + network->getOutputResolution() + 1; parentId <= network->getPoolsQuantity(); ++parentId){
@@ -51,6 +52,8 @@ void TTopologyAnalysis::initializeIdArray(TPoolNetwork *network){
 			}
 		}
 	}
+	return idArray;
+
 }
 
 TTopologyAnalysis::~TTopologyAnalysis(void){

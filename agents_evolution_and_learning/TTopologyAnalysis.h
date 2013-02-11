@@ -8,15 +8,15 @@
 
 // класс анализа топологии агента
 class TTopologyAnalysis{
-	std::map< int, std::vector<int> > idArray;
+	
 public:
 	TTopologyAnalysis(void);
 
 	// получить новый id для пула (необходимо предварительно инициализировать массив idArray)
-	std::vector<int> getPoolId(int id);
+//	std::vector<int> getPoolId(int id);
 
 	// инициализация массива новых id для сети
-	void initializeIdArray(TPoolNetwork* network);
+	static std::map< int, std::vector<int> > initializeIdArray(TPoolNetwork* network);
 
 	~TTopologyAnalysis(void);
 };
