@@ -104,3 +104,34 @@ vector<double> techanalysis::poolsStabilityAnalysis(string agentFilename, string
 
   return output;
 }
+
+// Процедура транспонирования записи данных
+// На вход подается файл с данными расположенными по столбцам, на выходе файл с данными по строкам
+// NB! : Kоличество отсчетов данных должно быть одинаково для всех столбцов
+// В основном необходима для дальнешей отрисовки с помощью matplotlib
+void  techanalysis::transponceData(string inputFilename, string outputFilename, int columnsQuantity){
+  if (!columnsQuantity) return;
+
+  vector< vector<double> > data;
+  data.resize(columnsQuantity);
+  ifstream inputFile;
+  inputFile.open(inputFilename);
+  string dataString;
+  while (inputFile >> dataString) {
+    data[0].push_back(atof(dataString.c_str()));
+    for (int currentData = 1; currentData < columnsQuantity; ++currentData){
+      inputFile >> dataString;
+      data[currentData].push_back(atof(dataString.c_str()));
+    }
+  }
+  inputFile.close();
+
+  ofstream outputFile;
+  outputFile.open(outputFilename);
+  for (int currentData = 0; currentData < columnsQuantity; ++currentData){
+    for (unsigned int currentValue = 0; currentValue < data[currentData].size(); ++currentValue)
+      outputFile << data[currentData][currentValue] << "\t";
+    outputFile << "\n";
+  }
+  outputFile.close();
+}

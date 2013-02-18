@@ -36,10 +36,10 @@ public:
 	static void makeBestPopulationAnalysisSummary(std::string analysisFilename, std::string summaryFilname, int occupancyCoeffcientsQuantity, int membersQuantity, int tryQuantity);
 	
 	// Процедура прогона случайного агента (на каждом такте времени действие агента определяется случайно)
-	double randomAgentLife(THypercubeEnvironment& environment, int agentLifeTime);
+	static double randomAgentLife(THypercubeEnvironment& environment, int agentLifeTime);
 
 	// Процедура анализа базового уровня награды для среды (путем прогона случайного агента)
-	void randomAgentAnalysis(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string settingsFilename, std::string resultsFilename);
+	static void randomAgentAnalysis(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string settingsFilename, std::string resultsFilename);
 	
 	// Масштабирование гистограммы (передается последовательность немасшабированной гистограммы - кол-во измерений начиная со значения параметра 1..., scale - значение масштабирования (напр. если передано 10, то масштабируется от 1 до 10, от 11 до 20 и т.д.))
 	static void scaleHistogram(int* unscaledHistogram, int parametersQuantity, int scale, std::string resultFilename);
