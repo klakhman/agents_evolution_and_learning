@@ -76,10 +76,10 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
 //      uploadCycles(cycles, filenameSettings.cyclesFilename);
      // calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
      vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
-      int memory = calculateCycleLongestMemory(cycles[1328], *environment);
+      int memory = calculateCycleLongestMemory(cycles[1358], *environment);
       cout<<memory;
     //  calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
-      drawCycleToDot(cycles[1328], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
+      drawCycleToDot(cycles[1358], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
      // drawAllCyclesToDot(cycles, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
 //      SCycle states = transformActionsCycleToStatesCycle(cycles[1189], *environment);
 //      drawStatesCycleToDot(states , *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
@@ -296,7 +296,7 @@ bool TBehaviorAnalysis::plainSequencesComparison(double* firstSequence, double* 
     return false;
 }
 //Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
-double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle &actionsCycle, const THypercubeEnvironment &environment)
+double*  TBehaviorAnalysis::getSequenceInitialStateVector(std::vector<double> &actionsSequence, const THypercubeEnvironment &environment)
 {
   double *initialEnvironmentVector = new double[environment.getEnvironmentResolution()];
   
@@ -305,7 +305,7 @@ double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle 
     initialEnvironmentVector[bitNumber] = -1;
   
   //Восстанавливаем начальный вектор
-  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
+  for (vector<double>::iterator action = actionsSequence.begin(); action!=actionsSequence.end();++action) {
     //Если мы нам встречается действие, которое менят бит, который мы еще не восстановили, устанавливаем бит на противоположный
     if (*action)
       if (initialEnvironmentVector[static_cast<int>((fabs(*action)))-1] < 0)
@@ -317,24 +317,29 @@ double* TBehaviorAnalysis::getCycleInitialStateVector(TBehaviorAnalysis::SCycle 
       initialEnvironmentVector[bitNumber] = 0;
   return initialEnvironmentVector;
 }
-
+std::vector<double> TBehaviorAnalysis::transformActionsSequenceToStatesSequence(std::vector<double> &actionsSequence, THypercubeEnvironment &environment)
+{
+  std::vector<double> states;
+  //Получаем начальный вектор цикла
+  double *initialEnvironmentVector = getSequenceInitialStateVector(actionsSequence, environment);
+  environment.setEnvironmentVector(initialEnvironmentVector);
+  
+  vector<double> actionVector(environment.getActionResolution());
+  //Заполняем
+  for (vector<double>::iterator action = actionsSequence.begin(); action!=actionsSequence.end();++action) {
+		actionVector[0] = *action;
+		environment.forceEnvironment(actionVector);
+		states.push_back(environment.getEnvironmentState());
+  }
+  delete []initialEnvironmentVector;
+  return states;
+}
 //Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
 //Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
 TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(TBehaviorAnalysis::SCycle &actionsCycle, THypercubeEnvironment &environment)
 {
   TBehaviorAnalysis::SCycle statesCycle;
-  //Получаем начальный вектор цикла
-  double *initialEnvironmentVector = getCycleInitialStateVector(actionsCycle, environment);
-  environment.setEnvironmentVector(initialEnvironmentVector);
- 
-  vector<double> actionVector(environment.getActionResolution());
-  //Заполняем
-  for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
-		actionVector[0] = *action;
-		environment.forceEnvironment(actionVector);
-		statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
-  }
-  delete []initialEnvironmentVector;
+  statesCycle.cycleSequence = transformActionsSequenceToStatesSequence(actionsCycle.cycleSequence, environment);
   return statesCycle;
 }
 
@@ -448,33 +453,36 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 	cyclesFile.close();
 	return detectedCycles;
 }
-
-void TBehaviorAnalysis::addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/)
+void TBehaviorAnalysis::addSingleSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/)
 {
 	environment.setStochasticityCoefficient(0.0);
-	SCycle statesCycle = transformActionsCycleToStatesCycle(cycle, environment);
+	vector<double> states = transformActionsSequenceToStatesSequence(sequence, environment);
   //Надо как-то динамически инициализировать
   bool* currentStateVector = new bool[environment.getEnvironmentResolution()];
   
-  dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[0]<<" [label=\"";
-  service::decToBin(static_cast<int>(statesCycle.cycleSequence[0]), currentStateVector, environment.getEnvironmentResolution());
+  dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[0]<<" [label=\"";
+  service::decToBin(static_cast<int>(states[0]), currentStateVector, environment.getEnvironmentResolution());
   
   for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
     dotFile<<currentStateVector[currentBit];
   dotFile<<"\"]"<<endl;
   
-  for (unsigned int currentStep=1; currentStep<statesCycle.cycleSequence.size(); ++currentStep) {
+  for (unsigned int currentStep=1; currentStep<states.size(); ++currentStep) {
     // Записываем очередную вершину
-    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep]<<" [label=\"";
-    service::decToBin(static_cast<int>(statesCycle.cycleSequence[currentStep]), currentStateVector, environment.getEnvironmentResolution());
+    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\"";
+    service::decToBin(static_cast<int>(states[currentStep]), currentStateVector, environment.getEnvironmentResolution());
     
     for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
       dotFile<<currentStateVector[currentBit];
     dotFile<<"\"]"<<endl;
     // Записываем переход
-    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<statesCycle.cycleSequence[currentStep]<<" [label=\""<<currentStep<<"("<<cycle.cycleSequence[currentStep-1]<<")"<<"\"]"<<endl;
+    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<states[currentStep-1]<<")"<<"\"]"<<endl;
   }
   delete []currentStateVector;
+}
+void TBehaviorAnalysis::addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/)
+{
+	addSingleSequenceToDotStream(cycle.cycleSequence, environment, dotFile);
 }
 
 void TBehaviorAnalysis::drawCyclesListToDot(vector<TBehaviorAnalysis::SCycle> &cycles,THypercubeEnvironment &environment, string outputDotFilename)
@@ -491,15 +499,19 @@ void TBehaviorAnalysis::drawCyclesListToDot(vector<TBehaviorAnalysis::SCycle> &c
   dotFile<<"}"<<endl;
   dotFile.close();
 }
-
-void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, string outputDotFilename)
+void TBehaviorAnalysis::drawSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, string outputDotFilename)
 {
   ofstream dotFile;
   dotFile.open(outputDotFilename.c_str());
   dotFile<<"digraph G {"<<endl;
-  addSingleCycleToDotStream(cycle, environment, dotFile);
+  TBehaviorAnalysis:: addSingleSequenceToDotStream(sequence, environment, dotFile);
   dotFile<<"}"<<endl;
   dotFile.close();
+}
+void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, string outputDotFilename)
+{
+  TBehaviorAnalysis::drawSequenceToDot(cycle.cycleSequence, environment, outputDotFilename);
+  
 }
 
 void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExistanceFilename, string cyclesFilename, THypercubeEnvironment &environment)

@@ -93,7 +93,9 @@ public:
 	static std::vector<SCycle> loadCycles(std::string cyclesFilename);
 
 	//Получаем вектор среды, из которого стартовал цикл
-	static double * getCycleInitialStateVector(SCycle &actionsCycle, const THypercubeEnvironment &environment);
+	static double * getSequenceInitialStateVector(std::vector<double> &actionsSequence, const THypercubeEnvironment &environment);
+  
+  static std::vector<double> transformActionsSequenceToStatesSequence(std::vector<double> &actionsCycle, THypercubeEnvironment &environment);
   
 	//Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
 	//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
@@ -106,6 +108,9 @@ public:
 	//Делается это с целью приближения к ситуации, когда поведение сошлось к этому циклу и награды уже были достигнуты
 	//Поэтому награды восстанавливаются и агенту не дается полная награда
 	static double calculateCycleReward(SCycle &actionsCycle, const THypercubeEnvironment &environment);
+  
+  static void drawSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputDotFilename);
+  static void addSingleSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
   
   static void drawCycleToDot(SCycle &cycle, THypercubeEnvironment &environment, std::string outputDotFilename);
   static void drawCyclesListToDot(std::vector<SCycle> &cycles,THypercubeEnvironment &environment,std::string outputDotFilename);
