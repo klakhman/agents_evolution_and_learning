@@ -326,8 +326,7 @@ TBehaviorAnalysis::SCycle TBehaviorAnalysis::transformActionsCycleToStatesCycle(
   //Получаем начальный вектор цикла
   double *initialEnvironmentVector = getCycleInitialStateVector(actionsCycle, environment);
   environment.setEnvironmentVector(initialEnvironmentVector);
-  //Добавляем его в послдовательность состояний
-  statesCycle.cycleSequence.push_back(environment.getEnvironmentState());
+ 
   vector<double> actionVector(environment.getActionResolution());
   //Заполняем
   for (vector<double>::iterator action = actionsCycle.cycleSequence.begin(); action!=actionsCycle.cycleSequence.end();++action) {
