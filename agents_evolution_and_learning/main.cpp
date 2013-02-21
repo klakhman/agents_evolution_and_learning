@@ -141,53 +141,6 @@ int main(int argc, char** argv){
       cout << "Agent:\t" << currentAgent << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
       output << "Agent:\t" << currentAgent << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
     }
-    /*TAgent* agent = population.getPointertoAgent(49);
-    ofstream output("C:/Coding/results_agent49_nolearndeterm.txt");
-    /*TPoolNetwork* genome = agent->getPointerToAgentGenome();
-    vector<int> poolsCapacity(10, 0);
-    int maxPoolCapacity = 50;
-    vector<int> conDevelopProb(10);
-    for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool){
-      poolsCapacity[(genome->getPoolCapacity(currentPool) - 1)/5] += 1;
-      for (int currentConnection = 1; currentConnection <= genome->getPoolInputConnectionsQuantity(currentPool); ++currentConnection){
-        conDevelopProb[static_cast<int>((genome->getConnectionDevelopSynapseProb(currentPool, currentConnection) - 0.01)*10)] += 1;
-        output << genome->getConnectionWeightMean(currentPool, currentConnection) << "\t" << genome->getConnectionWeightVariance(currentPool, currentConnection) << "\t" << genome->getConnectionDevelopSynapseProb(currentPool, currentConnection) << endl;
-      }
-    }
-    output << endl << endl;
-    for (int i=0; i<10; ++i){
-      output << poolsCapacity[i] << "\t";
-    }
-    output << endl << endl;
-    for (int i=0; i<10; ++i){
-      output << conDevelopProb[i] << "\t";
-    }*/
-    /*agent->setLearningMode(0);
-    environment.setStochasticityCoefficient(0);
-    for (int currentTry = 1; currentTry <= 100; ++currentTry){
-      double max = 0;
-      double average = 0;
-      agent->primarySystemogenesis();
-      TNeuralNetwork initialController;
-      initialController = *(agent->getPointerToAgentController());
-      for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
-        environment.setEnvironmentState(currentState);
-        *(agent->getPointerToAgentController()) = initialController; 
-        agent->life(environment, population.evolutionSettings.agentLifetime);
-        double reward = agent->getReward();
-        average += reward;
-        if (reward > max) max = reward;
-      }
-      average /= environment.getInitialStatesQuantity();
-      cout << "Try:\t" << currentTry << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
-      output << "Try:\t" << currentTry << "\tAverage:\t" << average << "\tMax:\t" << max << endl;
-    }*/
-    output.close();
-    //TAnalysis::makeBestPopulationAnalysisSummary("C:/Coding/Current_Test_Folder/BestPopulation_analysis_En1001-1360_test.txt", "C:/Coding/Current_Test_Folder/analysis_summary.txt", 18, 20, 10);
-    //tests::testPrimarySystemogenesis("C:/Coding/Current_Test_Folder/");
-    //vector<double> reward = techanalysis::poolsStabilityAnalysis("C:/EXPERIMENTS/agent.txt", "C:/EXPERIMENTS/Environment1113.txt" , "C:/EXPERIMENTS/settings.ini", 50, 0.1);
-    //cout << reward[0] << endl << reward[1] << endl;
-    //cout << static_cast<int>(-1.1);
     return 0;
   }
   else if(programMode == "NQ"){ // Режим подсчета количества нейронов
@@ -200,52 +153,36 @@ int main(int argc, char** argv){
     delete behaviorAnalysis;
   }
   else if (programMode == "PRNT"){ // Режим визуализации лучшего агента
-	TAgent testAgent;
-	std::fstream inputFile("pop.txt");
-	std::ofstream outputFile("out_file.txt");
-	testAgent.loadGenome(inputFile);
-	testAgent.uploadGenome(outputFile);
-	(testAgent.getPointerToAgentGenome())->printGraphNetworkAlternative("1", 200, 0);
-	return 0;
+	  TAgent testAgent;
+	  std::fstream inputFile("pop.txt");
+	  std::ofstream outputFile("out_file.txt");
+	  testAgent.loadGenome(inputFile);
+	  testAgent.uploadGenome(outputFile);
+	  (testAgent.getPointerToAgentGenome())->printGraphNetworkAlternative("1", 200, 0);
+	  return 0;
   }
   else if (programMode == "EVLPRNT"){
-	TAgent testAgent;
-	std::fstream inputFile("pop.txt");
-	std::ofstream outputFile("out_file.txt");
-	testAgent.loadGenome(inputFile, true);
-	testAgent.uploadGenome(outputFile, true);
-	(testAgent.getPointerToAgentGenome())->printGraphNetworkAlternative("1", 200, 1);
-	return 0;
+	  TAgent testAgent;
+	  std::fstream inputFile("pop.txt");
+	  std::ofstream outputFile("out_file.txt");
+	  testAgent.loadGenome(inputFile, true);
+	  testAgent.uploadGenome(outputFile, true);
+	  (testAgent.getPointerToAgentGenome())->printGraphNetworkAlternative("1", 200, 1);
+	  return 0;
   }
   else if (programMode == "TLA"){
-	TAgent testAgent;
-	std::fstream inputFile("pop.txt");
-	std::ofstream outputFile("out_file.txt");
-	cout << "we are here" << endl;
-	testAgent.loadGenome(inputFile, true);
-	testAgent.uploadGenome(outputFile, true);
+	  TAgent testAgent;
+	  std::fstream inputFile("pop.txt");
+	  std::ofstream outputFile("out_file.txt");
+	  cout << "we are here" << endl;
+	  testAgent.loadGenome(inputFile, true);
+	  testAgent.uploadGenome(outputFile, true);
 	
-	TTopologyAnalysis *topologyAnalysis = new TTopologyAnalysis;
-	topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
+	  TTopologyAnalysis *topologyAnalysis = new TTopologyAnalysis;
+	  topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
-    //srand(static_cast<unsigned int>(time(0)));
-    //string firstFile = "C:/Experiments/BestPopulation_analysis_En1113-1113_pc40anp40_E-L-AL.txt";
-    //string secondFile = "C:/Experiments/BestPopulation_analysis_En1113-1113_pc40anp40_E-RL-ARL.txt";
-    //vector<double> first = techanalysis::getValuesBPAFile(firstFile);
-    //vector<double> second = techanalysis::getValuesBPAFile(secondFile);
-    //alglib::real_1d_array _first;
-    //_first.setcontent(first.size(), &(first[0]));
-    //alglib::real_1d_array _second;
-    ////_second.setcontent(second.size(), &(second[0]));
-    //double p_value = 0;
-    //double p1 = 0;
-    //double p2 = 0;
-    ////alglib::jarqueberatest(_first, first.size(), p_value);
-    ////alglib::unequalvariancettest(_first, first.size(), _second, second.size(), p_value, p1, p2); 
-    //alglib::mannwhitneyutest(_first, first.size(), _second, second.size(), p_value, p1, p2); 
-    //cout << p_value << "\t" << p1 << "\t" << p2 << endl;
   }
 
   /*TAnalysis* analysis = new TAnalysis;

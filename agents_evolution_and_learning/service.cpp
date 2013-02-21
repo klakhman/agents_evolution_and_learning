@@ -4,15 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <ctime>
-
-//#include <boost/random/mersenne_twister.hpp>
-//#include <boost/random/uniform_int_distribution.hpp>
-//#include <boost/random/uniform_real_distribution.hpp>
-//#include <boost/random/normal_distribution.hpp>
-//boost::random::mt11213b randomGenerator(static_cast<unsigned int>(time(0)));
-//boost::random::normal_distribution<> normalDistr(0, 1);
-//boost::random::uniform_real_distribution<> uniformRealDistr(0, 1);
-
+#include "config.h"
 
 using namespace std;
 
@@ -34,51 +26,57 @@ int service::uniformDiscreteDistribution(int A, int B)
 	//return uniformDiscreteDistr(randomGenerator);
 }
 
-// Функция генерации псеводослучайного СТРОГО равномерно распределенного числа на интервале [min;max)
-// ВНИМАНИЕ! Правый конец интервала не включается
-double service::uniformDistribution(double A, double B)
-{
-  const int SCALE = 10000;
-  return (uniformDiscreteDistribution(0, SCALE - 1)/static_cast<double>(SCALE)) * (B - A) + A;
+// Если пользователь хочет использовать более мощные функции библиотеки boost::random, то необходимо ее установить и отменить директиву NOT_USE_BOOST_LIBRARIES в файле config.h
+#ifndef NOT_USE_BOOST_LIBRARIES
 
-	// Вариант с использованием библиотеки boost
-	// Однако может генерировать только одну ситуацию включения концов: [min; max)
-	//return uniformRealDistr(randomGenerator)*(B-A) + A;
-}
+  #include <boost/random/mersenne_twister.hpp>
+  #include <boost/random/uniform_int_distribution.hpp>
+  #include <boost/random/uniform_real_distribution.hpp>
+  #include <boost/random/normal_distribution.hpp>
+  boost::random::mt11213b randomGenerator(static_cast<unsigned int>(time(0)));
+  boost::random::normal_distribution<> normalDistr(0, 1);
+  boost::random::uniform_real_distribution<> uniformRealDistr(0, 1);
 
-// Функция генерация псевдослучайного нормально распределенного числа
-double service::normalDistribution(double mean, double variance)
-{
-   /* Генерация с использованием центральной предельной теоремы
-   int RandomNumbers = 12; // Количество случайных чисел, которое используется для генерации одного нормально распределенного
-   double RandomSum = 0.0; // Сумма последовательности случайных чисел
-   for (int i=0; i<RandomNumbers; i++)
-      RandomSum += rand()%10001 / 10000.0;
-   return Variance * (RandomSum - 6) + Mean; // Variance * sqrt(12.0/RandomNumbers) * (RandomSum - RandomNumbers/6.0) + Mean;*/
+  // Функция генерации псеводослучайного СТРОГО равномерно распределенного числа на интервале [min;max)
+  // ВНИМАНИЕ! Правый конец интервала не включается
+  double service::uniformDistribution(double A, double B)
+  {
+	  // Вариант с использованием библиотеки boost::random
+	  return uniformRealDistr(randomGenerator)*(B-A) + A;
+  }
 
-   /* Генерация методом Бокса-Мюллера - необходимы две СВ распределенные равномерно (0; 1] */
-  const int SCALE = 10000;
-  double firstValue = uniformDiscreteDistribution(1, SCALE)/static_cast<double>(SCALE);
-  double secondValue = uniformDiscreteDistribution(1, SCALE)/static_cast<double>(SCALE);
-  return variance*sqrt(-2*log(firstValue))*cos(2*PI*secondValue) + mean;
+  // Функция генерация псевдослучайного нормально распределенного числа
+  double service::normalDistribution(double mean, double variance)
+  {
+	  // Вариант с использованием библиотеки boost::random
+    return normalDistr(randomGenerator)*variance + mean; 
+  }
 
-	// Вариант с использованием библиотеки boost
-  //return normalDistr(randomGenerator)*variance + mean; 
-}
+#else
+
+  // Функция генерации псеводослучайного СТРОГО равномерно распределенного числа на интервале [min;max)
+  // ВНИМАНИЕ! Правый конец интервала не включается
+  double service::uniformDistribution(double A, double B)
+  {
+    const int SCALE = 10000;
+    return (uniformDiscreteDistribution(0, SCALE - 1)/static_cast<double>(SCALE)) * (B - A) + A;
+  }
+
+  // Функция генерация псевдослучайного нормально распределенного числа
+  double service::normalDistribution(double mean, double variance)
+  {
+     /* Генерация методом Бокса-Мюллера - необходимы две СВ распределенные равномерно (0; 1] */
+    const int SCALE = 10000;
+    double firstValue = uniformDiscreteDistribution(1, SCALE)/static_cast<double>(SCALE);
+    double secondValue = uniformDiscreteDistribution(1, SCALE)/static_cast<double>(SCALE);
+    return variance*sqrt(-2*log(firstValue))*cos(2*PI*secondValue) + mean;
+  }
+
+#endif
 
 // Процедура перевода десятичного числа в двоичное (старшие разряды в начале массива)
 void service::decToBin(int decNumber, bool binNumber[], int binResolution)
 {
-   /*for (int CurrentPosition = BinResolution; CurrentPosition>0; --CurrentPosition)
-   {
-      if (DecNumber >= (int) trunc(exp((CurrentPosition-1)*log(2))+0.5))
-      {
-         BinNumber[BinResolution - CurrentPosition] = 1;
-         DecNumber -= (int) trunc(exp((CurrentPosition-1)*log(2))+0.5);
-      }
-      else
-         BinNumber[BinResolution - CurrentPosition] = 0;
-   }*/
    //Algorithm from "Thinking in C++" by Bruce Eckel (vol.1 p.127 in russian edition)
    for (int currentPosition = binResolution; currentPosition > 0; --currentPosition)
       binNumber[binResolution - currentPosition] = (decNumber & (1 << (currentPosition-1))) ? true : false;
