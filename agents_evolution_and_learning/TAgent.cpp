@@ -278,7 +278,7 @@ void TAgent::buildPrimaryNeuralController(){
 					int currentPrePool = genome->getConnectionPrePoolID(currentPool, currentPoolConnection);
 					// Проходимся по всем потенциальным пресинаптическим нейронам для текущего нейрона
 					for (int currentPreNeuron = 1; currentPreNeuron <= genome->getPoolCapacity(currentPrePool); ++currentPreNeuron)
-						if (service::uniformDistribution(0, 1, true, false) < genome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection))
+						if (service::uniformDistribution(0, 1) < genome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection))
 							neuralController->addSynapse(poolsAndNeurons[currentPrePool-1][currentPreNeuron-1], poolsAndNeurons[currentPool-1][currentNeuron-1], 
 																service::normalDistribution(genome->getConnectionWeightMean(currentPool, currentPoolConnection), genome->getConnectionWeightVariance(currentPool, currentPoolConnection)), true);
         }
@@ -291,7 +291,7 @@ void TAgent::buildPrimaryNeuralController(){
 					int currentPrePool = genome->getPredConnectionPrePoolID(currentPool, currentPoolPredConnection);
 					// Проходимся по всем потенциальным пресинаптическим нейронам для текущего нейрона
 					for (int currentPreNeuron = 1; currentPreNeuron <= genome->getPoolCapacity(currentPrePool); ++currentPreNeuron)
-						if (service::uniformDistribution(0, 1, true, false) < genome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection))
+						if (service::uniformDistribution(0, 1) < genome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection))
 							neuralController->addPredConnection(poolsAndNeurons[currentPrePool-1][currentPreNeuron-1], poolsAndNeurons[currentPool-1][currentNeuron-1], true);
 
 				}
@@ -323,7 +323,7 @@ void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
 	int currentActiveNeuronsQuantity = 0;
 	// Пока мы не набрали достаточное кол-во нейронов
 	while (currentActiveNeuronsQuantity < neededActiveNeurons){
-		double randomPotential = service::uniformDistribution(0, totalPotential, false, false);
+		double randomPotential = service::uniformDistribution(0.0001, totalPotential);
 		double currentPotential = 0;
 		int currentNeuron = neuralController->getInputResolution() + neuralController->getOutputResolution();
 		while (randomPotential > currentPotential)
@@ -470,6 +470,70 @@ void TAgent::primarySystemogenesis(){
 	delete []predictorSignificance;
 }
 
+// Альтернативный системогенез (активным становится только один нейрон в пуле с детерминированной структурой связей)
+void TAgent::alternativeSystemogenesis(){
+  int maxCapacity = 0; // Максимальная размерность пула
+	// Находим максимальную размерность пула
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+		if (maxCapacity < genome->getPoolCapacity(currentPool))
+			maxCapacity = genome->getPoolCapacity(currentPool);
+	// Создаем двумерный массив принадлежности различных нейронов пулам (по идентификатору), чтобы потом не проходить несколько раз по сети из пулов или нейросети
+	int** poolsAndNeurons = new int*[genome->getPoolsQuantity()];
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+		poolsAndNeurons[currentPool - 1] = new int[maxCapacity];
+	// Проходим по всем пулам и создаем нейроны
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+		// Создаем все нейроны пула
+		for (int currentNeuron = 1; currentNeuron <= genome->getPoolCapacity(currentPool); ++currentNeuron){
+      if (1 == currentNeuron) // Первый нейрон в пуле всегда активен и детерминирован
+        neuralController->addNeuron(genome->getPoolType(currentPool), genome->getPoolLayer(currentPool),  
+												            genome->getPoolBiasMean(currentPool), 
+												            true, genome->getPoolID(currentPool));
+      else
+			  neuralController->addNeuron(genome->getPoolType(currentPool), genome->getPoolLayer(currentPool),  
+				  								          service::normalDistribution(genome->getPoolBiasMean(currentPool), genome->getPoolBiasVariance(currentPool)), 
+					  							          false, genome->getPoolID(currentPool));
+			poolsAndNeurons[currentPool - 1][currentNeuron - 1] = neuralController->getNeuronsQuantity();
+		}
+	// Проходимся по все пулам и нейронам и создаем синапсы
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+    for (int currentNeuron = 1; currentNeuron <= genome->getPoolCapacity(currentPool); ++currentNeuron)
+			// Проходимся по всем входным связям пула
+			for (int currentPoolConnection = 1; currentPoolConnection <= genome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
+				if (genome->getConnectionEnabled(currentPool, currentPoolConnection)){
+					int currentPrePool = genome->getConnectionPrePoolID(currentPool, currentPoolConnection);
+					// Проходимся по всем потенциальным пресинаптическим нейронам для текущего нейрона
+					for (int currentPreNeuron = 1; currentPreNeuron <= genome->getPoolCapacity(currentPrePool); ++currentPreNeuron)
+            if ((1 == currentNeuron) && (1 == currentPreNeuron)) // Если это связь между активными нейронами, то она детерминирована
+              neuralController->addSynapse(poolsAndNeurons[currentPrePool-1][currentPreNeuron-1], poolsAndNeurons[currentPool-1][currentNeuron-1], 
+																          genome->getConnectionWeightMean(currentPool, currentPoolConnection), true);
+						else if (service::uniformDistribution(0, 1) < genome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection))
+							neuralController->addSynapse(poolsAndNeurons[currentPrePool-1][currentPreNeuron-1], poolsAndNeurons[currentPool-1][currentNeuron-1], 
+															          	service::normalDistribution(genome->getConnectionWeightMean(currentPool, currentPoolConnection), genome->getConnectionWeightVariance(currentPool, currentPoolConnection)), true);
+        }
+	// Создаем все предикторные связи
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+    for (int currentNeuron = 1; currentNeuron <= genome->getPoolCapacity(currentPool); ++currentNeuron)
+			// Проходимся по всем входным предикторным связям пула
+			for (int currentPoolPredConnection = 1; currentPoolPredConnection <= genome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
+				if (genome->getPredConnectionEnabled(currentPool, currentPoolPredConnection)){
+					int currentPrePool = genome->getPredConnectionPrePoolID(currentPool, currentPoolPredConnection);
+					// Проходимся по всем потенциальным пресинаптическим нейронам для текущего нейрона
+					for (int currentPreNeuron = 1; currentPreNeuron <= genome->getPoolCapacity(currentPrePool); ++currentPreNeuron)
+            if ((1 == currentNeuron) && (1 == currentPreNeuron)) // Если это связь между активными нейронами, то она детерминирована
+              neuralController->addPredConnection(poolsAndNeurons[currentPrePool-1][currentPreNeuron-1], poolsAndNeurons[currentPool-1][currentNeuron-1], true);
+						else if (service::uniformDistribution(0, 1) < genome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection))
+							neuralController->addPredConnection(poolsAndNeurons[currentPrePool-1][currentPreNeuron-1], poolsAndNeurons[currentPool-1][currentNeuron-1], true);
+
+				}
+
+	// Проводим зачистку
+	for (int currentPool = 1; currentPool <= genome->getPoolsQuantity(); ++currentPool)
+		delete [](poolsAndNeurons[currentPool - 1]);
+	delete []poolsAndNeurons;
+
+}
+
 //-------------------- МЕТОДЫ, ОБЕСПЕЧИВАЮЩИЕ ОБУЧЕНИЕ АГЕНТА --------------------
 
 // Детекция рассогласования на нейроне
@@ -589,7 +653,7 @@ void TAgent::learning(){
 void TAgent::randomLearning(){
   const double activeProb = 0.5; // Вероятность случайного включения молчащего нейрона (на всю сеть)
   // Считаем кол-во молчащих нейронв
-  if (service::uniformDistribution(0, 1, true, false) < activeProb){ // Если должен включиться нейрон
+  if (service::uniformDistribution(0, 1) < activeProb){ // Если должен включиться нейрон
     int silentNeuronsQuantity = 0;
     for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
       if (!neuralController->getNeuronActive(currentNeuron))

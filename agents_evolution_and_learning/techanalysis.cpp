@@ -1,9 +1,13 @@
 ﻿#include "techanalysis.h"
 
 #include <vector>
+#define _USE_MATH_DEFINES
+#include "math.h"
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <limits>
 
 #include "TAgent.h"
 #include "THypercubeEnvironment.h"
@@ -115,7 +119,7 @@ void  techanalysis::transponceData(string inputFilename, string outputFilename, 
   vector< vector<double> > data;
   data.resize(columnsQuantity);
   ifstream inputFile;
-  inputFile.open(inputFilename);
+  inputFile.open(inputFilename.c_str());
   string dataString;
   while (inputFile >> dataString) {
     data[0].push_back(atof(dataString.c_str()));
@@ -127,11 +131,71 @@ void  techanalysis::transponceData(string inputFilename, string outputFilename, 
   inputFile.close();
 
   ofstream outputFile;
-  outputFile.open(outputFilename);
+  outputFile.open(outputFilename.c_str());
   for (int currentData = 0; currentData < columnsQuantity; ++currentData){
     for (unsigned int currentValue = 0; currentValue < data[currentData].size(); ++currentValue)
       outputFile << data[currentData][currentValue] << "\t";
     outputFile << "\n";
   }
   outputFile.close();
+}
+
+// Критерий Колмогорова-Смирнова на принадлежность выборки нормальному распределению 
+// alpha - уровень значимости (с учетом используемых приближений alpha = {0.15; 0.10; 0.05; 0.03; 0.01})
+bool techanalysis::KS_NormalDistrTest(const vector<double>& sample, double alpha /*= 0.01*/){
+  vector<double> sorted_sample = sample;
+  sort(sorted_sample.begin(), sorted_sample.end());
+  // Находим среднее и отклонение
+  double mean = 0;
+  for (unsigned int currentValue = 0; currentValue < sorted_sample.size(); ++currentValue)
+    mean += sorted_sample[currentValue];
+  mean /= sorted_sample.size();
+  double variance = 0;
+  for (unsigned int currentValue = 0; currentValue < sorted_sample.size(); ++currentValue)
+    variance += (mean - sorted_sample[currentValue]) * (mean - sorted_sample[currentValue]);
+  variance = sqrt(variance / sorted_sample.size());
+  // Аппроксимируем нормальное распределение
+  // По формуле (Кобзарь, стр.28)
+  vector<double> normDistr(sorted_sample.size());
+  for (unsigned int currentValue = 0; currentValue < sorted_sample.size(); ++currentValue){
+    // Нормируем значение
+    double z = (sorted_sample[currentValue] - mean) / variance;
+    normDistr[currentValue] = 1.0/(1 + exp(-0.0725*abs(z)*(22+pow(abs(z), 1.96))));; 
+    normDistr[currentValue] = (z >= 0) ? normDistr[currentValue] : (1 - normDistr[currentValue]); 
+  }
+  // Теперь находим максимальные sup и inf множества отклонений эмпирической частоты от теоретической
+  double D_minus = -numeric_limits<double>::max();
+  double D_plus = -numeric_limits<double>::max();
+  for (unsigned int currentValue = 0; currentValue < sorted_sample.size(); ++currentValue){
+    D_plus = max(D_plus, (currentValue + 1) / static_cast<double>(sorted_sample.size()) - normDistr[currentValue]);
+    D_minus = max(D_minus, normDistr[currentValue] - currentValue / static_cast<double>(sorted_sample.size())); 
+  }
+  // Используем модифицированную статистику (Кобзарь, стр.215)
+  double D = max(D_plus, D_minus) * (sqrt(sorted_sample.size()) - 0.01 +  0.85/sqrt(sorted_sample.size()));
+  // Используем точную формулу для нахождения критического значения (Кобзарь, стр.215)
+  // double D_crit = sqrt(1.0/(2.0*sorted_sample.size()) * (-log(alpha) - (2*log(alpha)*log(alpha) + 4*log(alpha) - 1)/(18.0 * sorted_sample.size()))) - 1.0 / (6.0 * sorted_sample.size());
+  // Для сравнения выборки с нормальным распределением с параметрами, выделенным из выборки нужно использовать данное критическое значение (Кобзарь, стр.233)
+  double D_crit = 0;
+  if (0.15 == alpha) D_crit = 0.775;
+  else if (0.1 == alpha) D_crit = 0.819;
+  else if (0.05 == alpha) D_crit = 0.895;
+  else if (0.03 == alpha) D_crit = 0.995;
+  else if (0.01 == alpha) D_crit = 1.035;
+  return (D < D_crit);
+}
+
+// Разбор файлов с результатами по анализу лучших популяций
+vector<double> techanalysis::getValuesBPAFile(string bestPopulationAnalysisFile){
+  string tmpStr;
+  vector<double> values;
+  ifstream inputFile;
+  inputFile.open(bestPopulationAnalysisFile.c_str());
+  for (int i = 0; i < 100; ++i){
+    inputFile >> tmpStr; // Считываем номер среды
+    inputFile >> tmpStr; // Считываем номер попытки
+    inputFile >> tmpStr; // Считываем награду
+    values.push_back(atof(tmpStr.c_str()));
+  }
+  inputFile.close();
+  return values;
 }

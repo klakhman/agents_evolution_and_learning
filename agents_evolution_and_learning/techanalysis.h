@@ -15,6 +15,11 @@ namespace techanalysis{
   // Подсчитывается средняя награда контроллера, полученного линейным системогенезом, и контроллера, полученного первичным системогенезом, если бы все пулы имели не единичный размер, а некоторый стандартный 
   std::vector<double> poolsStabilityAnalysis(std::string agentFilename, std::string environmentFilename, std::string settingsFilename, int poolsStandartCapacity = 20, double developSynapseStandartProb = 0.1); 
   void transponceData(std::string inputFilename, std::string outputFilename, int columnsQuantity);
+
+  bool KS_NormalDistrTest(const std::vector<double>& sample, double alpha = 0.01);
+
+  // Разобор файлов с результатами по анализу лучших популяций
+  std::vector<double> getValuesBPAFile(std::string bestPopulationAnalysisFile);
 }
 
 #endif // TECHANALYSIS_H

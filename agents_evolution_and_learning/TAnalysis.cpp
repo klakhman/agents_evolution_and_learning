@@ -48,7 +48,7 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	long double averageReward = 0.0;
   // Для корректного анализа агентов, которые проходят процедуру первичного системогенеза (и возможно обучения) нужно проводить их построение несколько раз
   int runsQuantity;
-  if (1 == agentsPopulation->getPointertoAgent(1)->getSystemogenesisMode())
+  if (0 != agentsPopulation->getPointertoAgent(1)->getSystemogenesisMode())
     runsQuantity = 10;
   else 
     runsQuantity = 1;
@@ -59,6 +59,8 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
         agentsPopulation->getPointertoAgent(currentAgent)->primarySystemogenesis();
       else if (0 == agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
 		    agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
+      else if (2 == agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
+        agentsPopulation->getPointertoAgent(currentAgent)->alternativeSystemogenesis();
       // Необходимо сохранять первичную нейронную сеть, так как запуск проходит из всех состояний и возможно обучение
       TNeuralNetwork initialController;
       if (0 != agentsPopulation->getPointertoAgent(currentAgent)->getLearningMode())

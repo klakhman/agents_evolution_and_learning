@@ -21,11 +21,9 @@ namespace service{
 	// Функция генерации псевдослучайного равномерно распределенного дискретной величины (куски интервалов включаются)
 	int uniformDiscreteDistribution(int A, int B);
 
-	// Функция генерации псеводослучайного СТРОГО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ МЕДЛЕННО
-	double uniformDistribution(double A, double B, bool include_start = true, bool include_end = true);
-
-	// Функция генерации псеводослучайного СЛАБО равномерно распределенного числа (сами куски интервала включаются, если не указано иного) - РАБОТАЕТ БЫСТРО
-	//double uniformDistributionWeak(double A, double B, bool include_start = true, bool include_end = true);
+  // Функция генерации псеводослучайного СТРОГО равномерно распределенного числа на интервале [min;max)
+  // ВНИМАНИЕ! Правый конец интервала не включается
+  double uniformDistribution(double A, double B);
 
 	// Функция генерация псевдослучайного нормально распределенного числа
 	double normalDistribution(double mean, double variance);

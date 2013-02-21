@@ -197,6 +197,8 @@ void TPopulation<TemplateNeuralAgent>::evolutionaryStep(TEnvironment& environmen
 			agents[currentAgent - 1]->primarySystemogenesis();
 		else if (0 == agents[currentAgent - 1]->getSystemogenesisMode())
 			agents[currentAgent - 1]->linearSystemogenesis();
+    else if (2 == agents[currentAgent - 1]->getSystemogenesisMode())
+      agents[currentAgent - 1]->alternativeSystemogenesis();
 
 		environment.setRandomEnvironmentState();
 		agents[currentAgent - 1]->life(environment, evolutionSettings.agentLifetime);
@@ -254,7 +256,7 @@ void  TPopulation<TemplateNeuralAgent>::mutationConnectionsWeight(TemplateNeural
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool){
 		// Сначала мутируем смещение
-		if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutWeightProbability){
+		if (service::uniformDistribution(0, 1) < mutationSettings.mutWeightProbability){
 			kidGenome->setPoolBiasMean(currentPool, kidGenome->getPoolBiasMean(currentPool) +
 																service::uniformDistribution(-mutationSettings.mutWeightMeanDisp, mutationSettings.mutWeightMeanDisp));
 			// Важно, чтобы дисперсия была не меньше нуля
@@ -263,7 +265,7 @@ void  TPopulation<TemplateNeuralAgent>::mutationConnectionsWeight(TemplateNeural
 		}
 		for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
 			 // Если мутация имеет место быть и связь включена
-			if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.mutWeightProbability) && (kidGenome->getConnectionEnabled(currentPool, currentPoolConnection))) {
+			if ((service::uniformDistribution(0, 1) < mutationSettings.mutWeightProbability) && (kidGenome->getConnectionEnabled(currentPool, currentPoolConnection))) {
 				kidGenome->setConnectionWeightMean(currentPool, currentPoolConnection, kidGenome->getConnectionWeightMean(currentPool, currentPoolConnection) +
 																service::uniformDistribution(-mutationSettings.mutWeightMeanDisp, mutationSettings.mutWeightMeanDisp));
 				// Важно, чтобы дисперсия была не меньше нуля
@@ -280,12 +282,12 @@ void TPopulation<TemplateNeuralAgent>::mutationEnableDisableConnections(Template
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
 			if (kidGenome->getConnectionEnabled(currentPool, currentPoolConnection)){
-				if (service::uniformDistribution(0, 1, true, false) < mutationSettings.disableConnectionProb){
+				if (service::uniformDistribution(0, 1) < mutationSettings.disableConnectionProb){
 					kidGenome->setConnectionEnabled(currentPool, currentPoolConnection, false);
 					kidGenome->setConnectionDisabledStep(currentPool, currentPoolConnection, currentEvolutionStep);
 				}
 			} else
-				if (service::uniformDistribution(0, 1, true, false) < mutationSettings.enableConnectionProb){
+				if (service::uniformDistribution(0, 1) < mutationSettings.enableConnectionProb){
 					kidGenome->setConnectionEnabled(currentPool, currentPoolConnection, true);
 					kidGenome->setConnectionDisabledStep(currentPool, currentPoolConnection, 0);
 				}
@@ -298,12 +300,12 @@ void TPopulation<TemplateNeuralAgent>::mutationEnableDisablePredConnections(Temp
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
 			if (kidGenome->getPredConnectionEnabled(currentPool, currentPoolPredConnection)){
-				if (service::uniformDistribution(0, 1, true, false) < mutationSettings.disableConnectionProb){
+				if (service::uniformDistribution(0, 1) < mutationSettings.disableConnectionProb){
 					kidGenome->setPredConnectionEnabled(currentPool, currentPoolPredConnection, false);
 					kidGenome->setPredConnectionDisabledStep(currentPool, currentPoolPredConnection, currentEvolutionStep);
 				}
 			} else
-				if (service::uniformDistribution(0, 1, true, false) < mutationSettings.enableConnectionProb){
+				if (service::uniformDistribution(0, 1) < mutationSettings.enableConnectionProb){
 					kidGenome->setPredConnectionEnabled(currentPool, currentPoolPredConnection, true);
 					kidGenome->setPredConnectionDisabledStep(currentPool, currentPoolPredConnection, 0);
 				}
@@ -343,7 +345,7 @@ void TPopulation<TemplateNeuralAgent>::mutationDeletePredConnectionPopulation(Te
 template<class TemplateNeuralAgent>
 void TPopulation<TemplateNeuralAgent>::mutationAddPoolConnection(TemplateNeuralAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addConnectionProb){ // Если имеет место мутация
+	if (service::uniformDistribution(0, 1) < mutationSettings.addConnectionProb){ // Если имеет место мутация
 		int prePoolID, postPoolID; // Пресинаптический и постсинаптический пул потенциальной связи
 		int tryCount = 0; //Количество ложных генераций связи - введено, чтобы не было зацикливания
 		int findedConnection = 0;
@@ -377,7 +379,7 @@ void TPopulation<TemplateNeuralAgent>::mutationAddPoolConnection(TemplateNeuralA
 template<class TemplateNeuralAgent>
 void TPopulation<TemplateNeuralAgent>::mutationAddPoolPredConnection(TemplateNeuralAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if (service::uniformDistribution(0, 1, true, false) < mutationSettings.addPredConnectionProb){ // Если имеет место мутация
+	if (service::uniformDistribution(0, 1) < mutationSettings.addPredConnectionProb){ // Если имеет место мутация
 		int prePoolID, postPoolID; // Пресинаптический и постсинаптический пул потенциальной предикторной связи
 		int tryCount = 0; //Количество ложных генераций предикторной связи - введено, чтобы не было зацикливания
 		int findedConnection = 0;
@@ -401,7 +403,7 @@ void TPopulation<TemplateNeuralAgent>::mutationAddPoolPredConnection(TemplateNeu
 template<class TemplateNeuralAgent>
 void TPopulation<TemplateNeuralAgent>::mutationDeletePoolConnection(TemplateNeuralAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deleteConnectionProb) && (kidGenome->getConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
+	if ((service::uniformDistribution(0, 1) < mutationSettings.deleteConnectionProb) && (kidGenome->getConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
 		int deletingConnectionID = service::uniformDiscreteDistribution(1, kidGenome->getConnectionsQuantity());
 		// Нахождение удаляемой связи
 		for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
@@ -417,7 +419,7 @@ void TPopulation<TemplateNeuralAgent>::mutationDeletePoolConnection(TemplateNeur
 template<class TemplateNeuralAgent>
 void TPopulation<TemplateNeuralAgent>::mutationDeletePoolPredConnection(TemplateNeuralAgent& kidAgent){
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
-	if ((service::uniformDistribution(0, 1, true, false) < mutationSettings.deletePredConnectionProb) && (kidGenome->getPredConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
+	if ((service::uniformDistribution(0, 1) < mutationSettings.deletePredConnectionProb) && (kidGenome->getPredConnectionsQuantity())){ //  Если имеет место мутация и есть что удалять
 		int deletingPredConnectionID = service::uniformDiscreteDistribution(1, kidGenome->getPredConnectionsQuantity());
 		// Нахождение удаляемой предикторной связи
 		for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
@@ -448,7 +450,7 @@ void TPopulation<TemplateNeuralAgent>::mutationPoolDuplication(TemplateNeuralAge
 	for (int currentPool = 1; currentPool <= initPoolsQuantity; ++currentPool)
     if (kidGenome->getPoolType(currentPool) == TPoolNetwork::HIDDEN_POOL){ // Если пул внутренний
 			// Проверяем дуплицирует ли пул (с учетом введеной поправки, уменьшающей вероятность дупликации с ростом структуры генома в эволюции)
-			bool duplicate = (service::uniformDistribution(0, 1, true, false) < mutationSettings.duplicatePoolProb/duplicateDivision(initPoolsQuantity, initConnectionsQuantity));
+			bool duplicate = (service::uniformDistribution(0, 1) < mutationSettings.duplicatePoolProb/duplicateDivision(initPoolsQuantity, initConnectionsQuantity));
 			if (duplicate){ // Если пул дуплицирует
         int newPoolCapacity = 0;
         int oldPoolCapacity = kidGenome->getPoolCapacity(currentPool);
@@ -534,7 +536,7 @@ void TPopulation<TemplateNeuralAgent>::mutationDevelopSynapseProb(TemplateNeural
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolConnection = 1; currentPoolConnection <= kidGenome->getPoolInputConnectionsQuantity(currentPool); ++currentPoolConnection)
-			if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutDevelopConProbProb)
+			if (service::uniformDistribution(0, 1) < mutationSettings.mutDevelopConProbProb)
 				// Важно, чтобы вероятность была между нулем и единицей
 					kidGenome->setConnectionDevelopSynapseProb(currentPool, currentPoolConnection, 
                                                      std::min(1.0, std::max(0.0, kidGenome->getConnectionDevelopSynapseProb(currentPool, currentPoolConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
@@ -546,7 +548,7 @@ void TPopulation<TemplateNeuralAgent>::mutationDevelopPredConProb(TemplateNeural
 	TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
 	for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
 		for (int currentPoolPredConnection = 1; currentPoolPredConnection <= kidGenome->getPoolInputPredConnectionsQuantity(currentPool); ++currentPoolPredConnection)
-			if (service::uniformDistribution(0, 1, true, false) < mutationSettings.mutDevelopConProbProb)
+			if (service::uniformDistribution(0, 1) < mutationSettings.mutDevelopConProbProb)
 				// Важно, чтобы вероятность была между нулем и единицей
 					kidGenome->setDevelopPredConnectionProb(currentPool, currentPoolPredConnection, 
 						std::min(1.0, std::max(0.0, kidGenome->getDevelopPredConnectionProb(currentPool, currentPoolPredConnection) + service::uniformDistribution(-mutationSettings.mutDevelopConProbDisp, mutationSettings.mutDevelopConProbDisp))));
@@ -591,7 +593,7 @@ int TPopulation<TemplateNeuralAgent>::rouletteWheelSelection(double populationFi
 	for (int currentAgent = 1; currentAgent <= populationSize; currentAgent++) 
 		totalFitness += populationFitness[currentAgent - 1];
 
-   double currentRandomFitness = service::uniformDistribution(0, totalFitness, false, false);
+   double currentRandomFitness = service::uniformDistribution(0.0001, totalFitness);
    double currentSum = 0.0;
    int currentAgent = 0;
    while (currentRandomFitness > currentSum)

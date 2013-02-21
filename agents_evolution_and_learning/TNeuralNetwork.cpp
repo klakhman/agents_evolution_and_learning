@@ -243,8 +243,8 @@ void TNeuralNetwork::calculateSpontaneousNetwork(double spontaneousActivityProb)
 	// Отдельно обсчитываем входные нейроны
 	for (int currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron)
 		// Если нейрон спотанно активируется
-		if (service::uniformDistribution(0, 1, true, false) < spontaneousActivityProb)
-      neuronsStructure[currentNeuron - 1].currentOut = service::uniformDistribution(0.5, 1, false, false);
+		if (service::uniformDistribution(0, 1) < spontaneousActivityProb)
+      neuronsStructure[currentNeuron - 1].currentOut = service::uniformDistribution(0.5001, 1);
 		else
 			neuronsStructure[currentNeuron - 1].currentOut = 0.0;
   unsigned int neuronsQuantity = neuronsStructure.size();
@@ -255,8 +255,8 @@ void TNeuralNetwork::calculateSpontaneousNetwork(double spontaneousActivityProb)
       {
 				neuronsStructure[currentNeuron - 1].calculateOut();
 				// Если нейрон спонтанно активируется, то просто заменяем выход на спонтанный (при этом оставляем потенциал, таким какой был в результате подсчета)
-				if (service::uniformDistribution(0, 1, true, false) < spontaneousActivityProb)
-					neuronsStructure[currentNeuron - 1].currentOut = service::uniformDistribution(0.5, 1, false, false);
+				if (service::uniformDistribution(0, 1) < spontaneousActivityProb)
+					neuronsStructure[currentNeuron - 1].currentOut = service::uniformDistribution(0.5001, 1);
 			}
 }
 

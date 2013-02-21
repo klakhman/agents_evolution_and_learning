@@ -20,6 +20,8 @@
 #include <ctime>
 #include <new>
 
+//#include "alglib/statistics.h"
+
 //#include <boost/program_options.hpp>
 
 using namespace std;
@@ -110,33 +112,6 @@ int main(int argc, char** argv){
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
-    string firstFile = "C:/Experiments/BestPopulation_analysis_En1113-1113_pc40anp40_E-L-ARL.txt";
-    string secondFile = "C:/Experiments/BestPopulation_analysis_En1113-1113_pc40anp40_E-RL-ARL.txt";
-    string tmpStr;
-    vector<double> firstData;
-    vector<double> secondData;
-    ifstream inputFile;
-    inputFile.open(firstFile.c_str());
-    for (int i = 0; i < 100; ++i){
-      inputFile >> tmpStr;
-      inputFile >> tmpStr;
-      inputFile >> tmpStr;
-      firstData.push_back(atof(tmpStr.c_str()));
-    }
-    inputFile.close();
-    inputFile.open(secondFile.c_str());
-    for (int i = 0; i < 100; ++i){
-      inputFile >> tmpStr;
-      inputFile >> tmpStr;
-      inputFile >> tmpStr;
-      secondData.push_back(atof(tmpStr.c_str()));
-    }
-    cout << firstData[0] << "\n" << secondData[0] << "\n";
-    cout << techanalysis::checkMeanDifSignificance(firstData, secondData) << "\n";
-    
-    //techanalysis::transponceData("C:/Experiments/1.txt", "C:/Experiments/2.txt", 3);
-    return 0;
-
     string settingsFilename = "C:/Coding/settings.ini";
     string populationFilename = "C:/Coding/En1113_pc40anp40(34)_bestpopulation.txt";
     string environmentFilename = "C:/Coding/Environment1113.txt";
@@ -255,6 +230,22 @@ int main(int argc, char** argv){
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
+    //srand(static_cast<unsigned int>(time(0)));
+    //string firstFile = "C:/Experiments/BestPopulation_analysis_En1113-1113_pc40anp40_E-L-AL.txt";
+    //string secondFile = "C:/Experiments/BestPopulation_analysis_En1113-1113_pc40anp40_E-RL-ARL.txt";
+    //vector<double> first = techanalysis::getValuesBPAFile(firstFile);
+    //vector<double> second = techanalysis::getValuesBPAFile(secondFile);
+    //alglib::real_1d_array _first;
+    //_first.setcontent(first.size(), &(first[0]));
+    //alglib::real_1d_array _second;
+    ////_second.setcontent(second.size(), &(second[0]));
+    //double p_value = 0;
+    //double p1 = 0;
+    //double p2 = 0;
+    ////alglib::jarqueberatest(_first, first.size(), p_value);
+    ////alglib::unequalvariancettest(_first, first.size(), _second, second.size(), p_value, p1, p2); 
+    //alglib::mannwhitneyutest(_first, first.size(), _second, second.size(), p_value, p1, p2); 
+    //cout << p_value << "\t" << p1 << "\t" << p2 << endl;
   }
 
   /*TAnalysis* analysis = new TAnalysis;
