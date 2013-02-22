@@ -14,7 +14,7 @@ class TAnalysis{
 	// Расишифровка парметров командной строки
 	void decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, std::string& runSign, std::string& analysisRunSign, double& stochasticityCoefficient);
   // Составление сообщения для рабочего процесса
-  std::stringstream composeMessageForWorkProcess(int currentEnvironment, int currentTry, std::string runSign, double stochasticityCoefficient);
+  std::string composeMessageForWorkProcess(int currentEnvironment, int currentTry, std::string runSign, double stochasticityCoefficient);
   // Нахождение записи о параметре в строке с сообщением от процесса
   std::string findParameterNote(std::string inputMessage, std::string parameterString);
 	// Расшифровка сообщения от рабочего процесса 

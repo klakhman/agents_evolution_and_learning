@@ -108,10 +108,10 @@ void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentN
 }
 
 // Составление сообщения для рабочего процесса
-stringstream TAnalysis::composeMessageForWorkProcess(int currentEnvironment, int currentTry, string runSign, double stochasticityCoefficient){
+string TAnalysis::composeMessageForWorkProcess(int currentEnvironment, int currentTry, string runSign, double stochasticityCoefficient){
   stringstream outStream;
   outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign << "$STOCH$" << stochasticityCoefficient;
-  return outStream;
+  return outStream.str();
 }
 
 // Нахождение записи о параметре в строке с сообщением от процесса
@@ -168,7 +168,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
   decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, analysisRunSign, stochasticityCoefficient);
 	// Создаем файл с логом
 	stringstream logFilename;
-	logFilename << workDirectory << "/Analysis_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << runSign << ".txt";
+	logFilename << workDirectory << "/Analysis_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << (analysisRunSign == "" ? runSign : analysisRunSign) << ".txt";
 	ofstream logFile;
 	logFile.open(logFilename.str().c_str());
 	// Создаем массив со всеми средними наградами по запускам
@@ -185,7 +185,9 @@ void TAnalysis::rootProcess(int argc, char **argv){
 				int processRankSend = (currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1;
 				// Составляем сообщение для рабочего процесса
 				char outMessage[messageLength];
-				composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient) >> outMessage;
+        stringstream out;
+				out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient);
+        out >> outMessage; 
 				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
@@ -208,7 +210,9 @@ void TAnalysis::rootProcess(int argc, char **argv){
 					<< "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
 				// Составляем сообщение и высылаем задание рабочему процессу
         char outMessage[messageLength];
-				composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient) >> outMessage;				
+        stringstream out;
+				out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient);
+        out >> outMessage;         
         MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
@@ -292,8 +296,6 @@ void TAnalysis::decodeTaskMessage(string inputMessage, int& currentEnvironment, 
   // Определяем степень стохастичности
   featureNote = findParameterNote(inputMessage, "$STOCH$");
   if (featureNote != "") stochasticityCoefficient = atof(featureNote.c_str());
-
-  runSign = featureNote;
 }
 
 // Выполнение рабочего процесса
@@ -309,7 +311,6 @@ void TAnalysis::workProcess(int argc, char **argv){
 	string settingsFilename = settings::getSettingsFilename(argc, argv);
 	string workDirectory, environmentDirectory, resultsDirectory;
 	settings::fillDirectoriesSettings(workDirectory, environmentDirectory, resultsDirectory, settingsFilename);
-
 	char _inputMessage[messageLength];
 	MPI_Recv(_inputMessage, messageLength-1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD, &status); // Ждем сообщения с заданием
   string inputMessage = _inputMessage;
