@@ -8,9 +8,11 @@
 #include <fstream>
 #include <algorithm>
 #include <limits>
+#include <sstream>
 
 #include "TAgent.h"
 #include "THypercubeEnvironment.h"
+#include "TBehaviorAnalysis.h"
 #include "settings.h"
 #include "config.h"
 
@@ -199,6 +201,129 @@ vector<double> techanalysis::getValuesBPAFile(string bestPopulationAnalysisFile)
   }
   inputFile.close();
   return values;
+}
+
+// Удобная обертка для анализа на зависимость размера области сходимости стратегии от ее длины
+// Создает файл с парами - (длина стратегии, размер области сходимости)
+void techanalysis::analysisSLengthVsConvSize(string settingsFilename, string populationFilename, string environmentFilename, string outputFilename){
+  THypercubeEnvironment environment(environmentFilename);
+  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+	TPopulation<TAgent> agentsPopulation;
+  settings::fillPopulationSettingsFromFile(agentsPopulation, settingsFilename);
+	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
+	settings::fillAgentsPopulationSettingsFromFile(agentsPopulation, settingsFilename);  
+  agentsPopulation.loadPopulation(populationFilename);
+  vector< pair<int, int> > data = analysisSLengthVsConvSize(agentsPopulation, environment);
+  ofstream outFile;
+  outFile.open(outputFilename.c_str());
+  for (unsigned i=0; i < data.size(); ++i)
+    outFile << data[i].first << "\t" << data[i].second << endl;
+  outFile.close();
+}
+
+// Анализ на зависимость размера области сходимости стратегии от ее длины (для одной популяции, циклы находятся независимо для каждого агента)
+// Возвращает вектор пар - (длина стратегии, размер области сходимости)
+vector< pair<int, int> > techanalysis::analysisSLengthVsConvSize(TPopulation<TAgent>& population, THypercubeEnvironment& environment){
+  environment.setStochasticityCoefficient(0.0);
+  vector< pair<int, int> > strategyLengthVsConvSize;
+  // Прогоняем всех агентов и находим соответствие длины цикла и его области сходимости
+  for (int agentNumber = 1; agentNumber <= population.getPopulationSize(); ++agentNumber){
+    TAgent& currentAgent = *population.getPointertoAgent(agentNumber);
+    currentAgent.linearSystemogenesis();
+    vector< TBehaviorAnalysis::SCycle > agentStrategies;
+    vector<int> strategiesConvSize;
+    // Находим все стратегии агента и определяем размер их областей притяжения
+    for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+      environment.setEnvironmentState(currentState);
+      TBehaviorAnalysis::SCycle currentStrategy  = TBehaviorAnalysis::findCycleInAgentLife(currentAgent, environment);
+      if (currentStrategy.cycleSequence.size()){
+        int strategyNumber = TBehaviorAnalysis::findCycleInExistingCycles(currentStrategy, agentStrategies);
+        if (strategyNumber) // Если такая стратегия уже была
+          strategiesConvSize[strategyNumber - 1] += 1;
+        else{
+          agentStrategies.push_back(currentStrategy);
+          strategiesConvSize.push_back(1);
+        }
+      }
+    }
+    // Записываем найденные стратегии
+    for (unsigned int currentStrategy = 0; currentStrategy < agentStrategies.size(); ++currentStrategy)
+      strategyLengthVsConvSize.push_back(make_pair(agentStrategies[currentStrategy].cycleSequence.size(), strategiesConvSize[currentStrategy]));
+  }
+  return strategyLengthVsConvSize;
+}
+
+// Анализ и подготовка данных для отображения развития в эволюции зависимости размера области сходимости стратегии от ее длины
+// На выходе файл с четыремя строками: 1) Длины стратегий; 2) Области сходимости стратегий; 3) Цвет даннных (в соответствии с номером эволюционного такта); 4) Соответствующий номер эволюционного такта 
+// Цветовая палитра: ранние такты - голубые, поздние - красные (через желтый и зеленый). Дальнейшая отрисовка происходит с помощью matplotlib.
+void techanalysis::evolutionSLengthVsConvSize(string settingsFilename, string bestAgentsFilename, int evolutionTime, string environmentFilename, string outputFilename, string colorPalette /*="RGB"*/){
+  vector< pair<int, int> > strategyLengthVsConvSize; // Соответствующие пары
+  vector<int> evolutionTacts; // Номера эволюционных тактов для всех пар
+  THypercubeEnvironment environment(environmentFilename);
+  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  environment.setStochasticityCoefficient(0.0);
+  TAgent currentAgent;
+  settings::fillAgentSettingsFromFile(currentAgent, settingsFilename);
+  ifstream bestAgentsFile;
+  bestAgentsFile.open(bestAgentsFilename.c_str());
+   // Прогоняем всех лучших агентов и находим соответствие длины цикла и его области сходимости
+  for (int curEvolutionTime = 1; curEvolutionTime <= evolutionTime; ++curEvolutionTime){
+    currentAgent.loadGenome(bestAgentsFile);
+    currentAgent.linearSystemogenesis();
+    vector< TBehaviorAnalysis::SCycle > agentStrategies;
+    vector<int> strategiesConvSize;
+    // Находим все стратегии агента и определяем размер их областей притяжения
+    for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+      environment.setEnvironmentState(currentState);
+      TBehaviorAnalysis::SCycle currentStrategy  = TBehaviorAnalysis::findCycleInAgentLife(currentAgent, environment);
+      if (currentStrategy.cycleSequence.size()){
+        int strategyNumber = TBehaviorAnalysis::findCycleInExistingCycles(currentStrategy, agentStrategies);
+        if (strategyNumber) // Если такая стратегия уже была
+          strategiesConvSize[strategyNumber - 1] += 1;
+        else{
+          agentStrategies.push_back(currentStrategy);
+          strategiesConvSize.push_back(1);
+        }
+      }
+    }
+    // Записываем найденные стратегии
+    for (unsigned int currentStrategy = 0; currentStrategy < agentStrategies.size(); ++currentStrategy){
+      strategyLengthVsConvSize.push_back(make_pair(agentStrategies[currentStrategy].cycleSequence.size(), strategiesConvSize[currentStrategy]));
+      evolutionTacts.push_back(curEvolutionTime);
+    }
+    cout << curEvolutionTime << endl;
+  }
+  bestAgentsFile.close();
+  // Записываем результаты
+  ofstream outputFile;
+  outputFile.open(outputFilename);
+  for (unsigned int currentStrategy = 0; currentStrategy < strategyLengthVsConvSize.size(); ++currentStrategy)
+    outputFile << strategyLengthVsConvSize[currentStrategy].first << "\t";
+  outputFile << endl;
+  for (unsigned int currentStrategy = 0; currentStrategy < strategyLengthVsConvSize.size(); ++currentStrategy)
+    outputFile << strategyLengthVsConvSize[currentStrategy].second << "\t";
+  outputFile << endl;
+  for (unsigned int currentStrategy = 0; currentStrategy < evolutionTacts.size(); ++currentStrategy)
+    outputFile << evolutionTacts[currentStrategy] << "\t";
+  outputFile << endl;
+  // Теперь записываем подготовленные цвета в нужной палитре (от голубого к красному через желтый и зеленый)
+  for (unsigned int currentStrategy = 0; currentStrategy < evolutionTacts.size(); ++currentStrategy){
+    double H = 360 * (0.5 - (0.5 * evolutionTacts[currentStrategy]) / evolutionTime); // Hue 
+    double S = 0.9; // Saturation
+    double V = 0.9; // Brightness
+    if (colorPalette == "HSB")
+      outputFile << H << ";" << S << ";" << V << "\t";
+    else if (colorPalette == "RGB"){
+      int R, G, B;
+      service::HSVtoRGB(R, G, B, H, S, V);
+      string Rhex, Ghex, Bhex; 
+      service::decToHex(R, Rhex, 2);
+      service::decToHex(G, Ghex, 2);
+      service::decToHex(B, Bhex, 2);
+      outputFile << "#" << Rhex + Ghex + Bhex << "\t";
+    }
+  }
+  outputFile.close();
 }
 
 #ifndef NOT_USE_ALGLIB_LIBRARY

@@ -183,6 +183,12 @@ int main(int argc, char** argv){
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
+    //techanalysis::analysisSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(1)_bestpopulation.txt", 
+    //                                        "C:/Test/Environments/Environment1001.txt", "C:/Test/An_SLengthVsConvSize_En1001_linsys(1).txt");
+    //techanalysis::evolutionSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(3)_bestagents.txt", 5000, 
+    //                                       "C:/Test/Environments/Environment1001.txt", "C:/Test/An_evolutionSLengthVsConvSize_En1001_linsys(3).txt");
+    TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_analysis_En1001-1360.txt", "C:/Test/random.txt", 18, 20, 1);
+
   }
 
   /*TAnalysis* analysis = new TAnalysis;

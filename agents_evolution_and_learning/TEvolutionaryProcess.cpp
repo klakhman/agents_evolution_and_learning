@@ -78,7 +78,7 @@ void TEvolutionaryProcess::createMainResultsFile(ofstream& resultsFile, unsigned
   // Записываем параметры обучения
   resultsFile << "Learning_parameters:" << "\tlearning-mode=" << pointerToAgent->learningSettings.learningMode << "\tmismatch-significance-treshold=" << pointerToAgent->learningSettings.mismatchSignificanceTreshold << endl << endl;
 	// Записываем параметры среды
-	resultsFile << "Environment_parameters:" << "\tnstochasticity-coefficient=" << environment->getStochasticityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
+	resultsFile << "Environment_parameters:" << "\tstochasticity-coefficient=" << environment->getStochasticityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
 	//Записываем уникальное ядро рандомизации
 	resultsFile << "Random_seed:\t" << randomSeed << endl << endl; 
 	// Записываем заголовки

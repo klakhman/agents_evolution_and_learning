@@ -38,6 +38,8 @@ namespace service{
 	// По умолчанию кодируется service::MAX_HEX_RESOLUTION разрядов, так что в начале могут быть нули, а большие числа будут обрезаться
 	void decToHex(int decNumber, std::string& hexNumber, int hexResolution = MAX_HEX_RESOLUTION);
 
+  // Перевод окраски из формата HSV в RGB (ссылка http://www.cs.rit.edu/~ncs/color/t_convert.html)
+  void HSVtoRGB(int& R, int& G, int& B, double H, double S, double V);
 };
 
 #endif // SERVICE_H
