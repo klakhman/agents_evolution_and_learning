@@ -275,7 +275,8 @@ int TBehaviorAnalysis::findCycleInExistingCycles(SCycle &cycleToAdd, vector<SCyc
         double *shiftedCycleHead = &cycleToAdd.cycleSequence[shift];
         //Если сдвинутое начало цикла совпадает с началом цикла в массиве, и если совпадают хвосты - циклы одинаковы
         if (plainSequencesComparison(shiftedCycleHead, &existingCycles.at(cycleNumber).cycleSequence[0], static_cast<int>(cycleToAdd.cycleSequence.size())-shift) &&
-            plainSequencesComparison(cycleTail, &existingCycles.at(cycleNumber).cycleSequence[cycleToAdd.cycleSequence.size()-shift], shift))
+            // В проверке "хвостов" последовательностей нужно проверять не нулевой ли сдвиг, чтобы не выйти за границы вектора (в этом случае просто вычитаем единицу - все равно длина для сравнения ноль)
+            plainSequencesComparison(cycleTail, &existingCycles.at(cycleNumber).cycleSequence[cycleToAdd.cycleSequence.size()-std::max(static_cast<int>(shift), 1)], shift))
           return cycleNumber+1;
       }
     }
@@ -290,10 +291,7 @@ bool TBehaviorAnalysis::plainSequencesComparison(double* firstSequence, double* 
   while ((currentPosition < sequenceLength) && (firstSequence[currentPosition] == secondSequence[currentPosition]))
     ++currentPosition;
   
-  if (currentPosition == sequenceLength) //Если мы дошли до конца последовательности
-    return true;
-  else
-    return false;
+  return (currentPosition == sequenceLength); //Если мы дошли до конца последовательности
 }
 //Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
 double*  TBehaviorAnalysis::getSequenceInitialStateVector(std::vector<double> &actionsSequence, const THypercubeEnvironment &environment)
