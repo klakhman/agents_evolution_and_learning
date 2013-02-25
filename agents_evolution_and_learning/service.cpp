@@ -107,3 +107,43 @@ void service::decToHex(int decNumber, string& hexNumber, int hexResolution /* = 
       decNumber = decNumber % 16;
    }
 }
+
+// Перевод окраски из формата HSV в RGB (ссылка http://www.cs.rit.edu/~ncs/color/t_convert.html)
+void service::HSVtoRGB(int& R, int& G, int& B, double H, double S, double V)
+{
+	double _R, _G, _B;
+	if(S == 0)
+		_R = _G = _B = V; // achromatic (grey)
+  else{
+	  double f, p, q, t;
+	  H /= 60;			// sector 0 to 5
+	  int i = static_cast<int>(floor(H));
+	  f = H - i;			// factorial part of h
+	  p = V * ( 1 - S );
+	  q = V * ( 1 - S * f );
+	  t = V * ( 1 - S * ( 1 - f ) );
+	  switch( i ) {
+		  case 0:
+			  _R = V; _G = t; _B = p;
+			  break;
+		  case 1:
+			  _R = q; _G = V; _B = p;
+			  break;
+		  case 2:
+			  _R = p; _G = V; _B = t;
+			  break;
+		  case 3:
+			  _R = p; _G = q; _B = V;
+			  break;
+		  case 4:
+			  _R = t; _G = p; _B = V;
+			  break;
+		  default:		// case 5:
+			  _R = V; _G = p; _B = q;
+			  break;
+	  }
+  }
+  R = static_cast<int>(255*_R);
+  G = static_cast<int>(255*_G);
+  B = static_cast<int>(255*_B);
+}
