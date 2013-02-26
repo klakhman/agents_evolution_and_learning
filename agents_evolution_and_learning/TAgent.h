@@ -130,6 +130,8 @@ public:
 	void loadController(std::istream& is);
 	// Загрузка генома нейрононтроллера
 	void loadGenome(std::istream& is, bool extra = false);
+  // Загрузка генома нейроконтроллера по номеру из файла (номер начинается с 1) 
+  void loadGenome(std::string filename, int genomeNumber);
   // Загрузка генома из файлов старого формата
   void loadOldFormatGenome(std::istream& is, int inputResolution, int outputResolution);
 	// Выгрузка нейроконтроллера агета в файл или на экран

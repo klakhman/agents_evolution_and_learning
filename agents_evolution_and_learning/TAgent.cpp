@@ -30,6 +30,15 @@ void TAgent::loadGenome(istream& is, bool extra /*=false*/){
 	else genome->readNetworkExtra(is);
 }
 
+// Загрузка генома нейроконтроллера по номеру из файла (номер начинается с 1) 
+void TAgent::loadGenome(string filename, int genomeNumber){
+  // Так как скорость здесь пока не критична, то не делаем отдельную процедуру для пропуска агента, а просто загружаем всех агентов до нужного
+  ifstream genomeFile;
+  genomeFile.open(filename.c_str());
+  for (int currentAgent = 1; currentAgent <= genomeNumber; ++currentAgent)
+    loadGenome(genomeFile);
+}
+
 void TAgent::loadOldFormatGenome(istream& is, int inputResolution, int outputResolution){
   if (!genome) genome = new TPoolNetwork;
   genome->loadOldFormatNet(is, inputResolution, outputResolution);
