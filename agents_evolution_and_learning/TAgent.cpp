@@ -30,6 +30,11 @@ void TAgent::loadGenome(istream& is, bool extra /*=false*/){
 	else genome->readNetworkExtra(is);
 }
 
+void TAgent::loadOldFormatGenome(istream& is, int inputResolution, int outputResolution){
+  if (!genome) genome = new TPoolNetwork;
+  genome->loadOldFormatNet(is, inputResolution, outputResolution);
+}
+
 // Выгрузка нейроконтроллера агета в файл или на экран
 void TAgent::uploadController(ostream& os) const{
 	if (neuralController) os << *neuralController;
