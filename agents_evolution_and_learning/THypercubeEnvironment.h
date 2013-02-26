@@ -10,6 +10,7 @@
 Класс окружающей среды - ГИПЕРКУБА
 */
 class THypercubeEnvironment: public TEnvironment{
+public:
 	//Класс цели в среде (вложенный)
 	class TAim{	
 	public:
@@ -30,7 +31,8 @@ class THypercubeEnvironment: public TEnvironment{
 			reward = 0;
 		}
 	};
-	// Максимальное кол-во целей в среде
+private:
+  // Максимальное кол-во целей в среде
 	static const int MAX_AIMS_QUANTITY = 3000;
 	// Массив целей в среде (включая все подцели)
 	TAim aimsSet[MAX_AIMS_QUANTITY];
@@ -82,6 +84,9 @@ public:
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			environmentVector[currentBit - 1] = static_cast<double>(currentEnvironmentVector[currentBit - 1]);
 	}
+
+  // Получение константной ссылки на цель в среде (номер цели начинается с единица)
+  const TAim& getAimReference(int aimNumber) const { return aimsSet[aimNumber-1]; }
 
 	// Получение кол-ва начальных состояний среды (для текущей бинарной среды - фактически общее кол-во состояний)
 	int getInitialStatesQuantity() const {
