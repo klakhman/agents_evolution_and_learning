@@ -65,14 +65,14 @@ public:
   std::vector<SCycle> findCyclesInPopulation(TPopulation<TAgent> &population, THypercubeEnvironment &environment);
 
   //Прогон агента из всех возможных состояний среды для обнаружения всех возможных циклов
-  static std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, THypercubeEnvironment &environment);
+  static std::vector<SCycle> findAllCyclesOfAgent(TAgent &agent, THypercubeEnvironment &environment, bool aimCycles = false);
 
 	// Нахождение цикла в массиве существующих циклов (0 - цикла в массиве нет, иначе возвращает номер цикла, начиная с 1)
   static int findCycleInExistingCycles(SCycle &cycleToAdd,std::vector<SCycle> &existingCycles);
 
   //Находит цикл в жизни данного агента - возвращает пустой цикл, если цикл не найден 
   //(!!! состояние среды, из которого должен запускаться агент должно быть уже становлено, коэффициент стохастичности среды должен быть уже установлен!!!)
-  static SCycle findCycleInAgentLife(TAgent &agent, THypercubeEnvironment &environment);
+  static SCycle findCycleInAgentLife(TAgent &agent, THypercubeEnvironment &environment, bool aimCycle = false);
 
 	// Поиск цикла в последовательности (возвращает пустой вектор, если цикл не найден, но !!! может вернуть цикл из нуля длиной 1 !!!)
   static std::vector<double> findCycleInSequence(double *sequence,int sequenceLength);
@@ -87,7 +87,7 @@ public:
   std::vector<SCycle> findCyclesInEvolution(THypercubeEnvironment &environment);
 
 	// Выгрузка списка циклов в файл
-	static void uploadCycles(std::vector<SCycle> cyclesList, std::string cyclesFilename);
+	static void uploadCycles(const std::vector<SCycle>& cyclesList, std::string cyclesFilename);
 
 	// Загрузка циклов из файла
 	static std::vector<SCycle> loadCycles(std::string cyclesFilename);
@@ -117,6 +117,9 @@ public:
   static void addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
   static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, THypercubeEnvironment &environment);
 
+  // Преобразование последовательности действий (вероятно жизни агента) в последовательность достигнутых целей
+  // Возвращает массив последовательности целей (вызывающая сторона должна обеспечить достаточный размер - одинаковый размер с массивом действий является достаточным) и длину последовательности
+  static void actionsSequence2aimSequence(double* actionsSequence, int actionsQuantity, const THypercubeEnvironment& environment, double* aimsSequence, int& aimsQuantity);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

@@ -35,7 +35,7 @@ void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
 				filenameSettings.settingsFilename = argv[++currentArgNumber];
 			else if (!strcmp("-env", argv[currentArgNumber])) 
 				filenameSettings.environmentFilename = argv[++currentArgNumber];
-			else if (!strcmp("-population", argv[currentArgNumber])) 
+			else if (!strcmp("-population", argv[currentArgNumber]))
 				filenameSettings.populationFilename = argv[++currentArgNumber];
 			else if (!strcmp("-cycles", argv[currentArgNumber]))
 				filenameSettings.cyclesFilename = argv[++currentArgNumber];
@@ -157,7 +157,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInPopulation(TPop
 }
 
 //Прогон агента из всех возможных состояний среды для обнаружения всех возможных циклов
-vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, THypercubeEnvironment &environment)
+vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent &agent, THypercubeEnvironment &environment,  bool aimCycles /*=false*/)
 {
   vector<SCycle> currentAgentCycles;
   //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
@@ -169,7 +169,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent
   for (int currentInitialState = 0; currentInitialState < intitalStatesQuantity; ++currentInitialState){
     environment.setEnvironmentState(currentInitialState);
     //Находим цикл
-    SCycle newCycle = findCycleInAgentLife(agent, environment);
+    SCycle newCycle = findCycleInAgentLife(agent, environment, aimCycles);
     //Если цикл найден - провереяем его уникальность
     if (newCycle.cycleSequence.size())
       if (!findCycleInExistingCycles(newCycle, currentAgentCycles))//Проверяем его уникальности среди циклов данного конекретного агента
@@ -180,7 +180,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findAllCyclesOfAgent(TAgent
 
 //Находит цикл в жизни данного агента - возвращает пустой цикл, если содержательный цикл не найден (агент что-то делает) 
 //(!!! состояние среды, из которого должен запускаться агент должно быть уже становлено, коэффициент стохастичности среды должен быть уже установлен!!!)
-TBehaviorAnalysis::SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent, THypercubeEnvironment &environment){
+TBehaviorAnalysis::SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent, THypercubeEnvironment &environment,  bool aimCycle /*=false*/){
   SCycle agentCycle;
   //Прогоняем жизнь агента (без подсчета награды, так как она нам не нужна)
   agent.life(environment, agentLifeTime, false);
@@ -189,14 +189,24 @@ TBehaviorAnalysis::SCycle TBehaviorAnalysis::findCycleInAgentLife(TAgent &agent,
   double* agentLifeArray = new double[agentLifeTime];
   for (int currentAction = 1; currentAction <= agentLifeTime; ++currentAction)
 	  agentLifeArray[currentAction - 1] = agentLife[currentAction - 1][0];
-  //Находим цикл
-  vector<double> cycle = findCycleInSequence(agentLifeArray, agentLifeTime/*Продолжительность жизни, надо бы узнавать размер*/);
-  delete []agentLifeArray;
-  //Если агент бездействовал - возвращаем пустой веткор
-  if (cycle.size() == 1)
-    return agentCycle;
-  else //В противном циклв возвращаем найденный 
+  vector<double> cycle;
+  // Если нужно найти цикл целей, то сначала преобразовываем
+  if (aimCycle){
+    double* aimsSequence = new double[agentLifeTime]; // Для страховки делаем массив заведомо большим
+    int aimsSequenceLength;
+    actionsSequence2aimSequence(agentLifeArray, agentLifeTime, environment, aimsSequence, aimsSequenceLength);
+    cycle = findCycleInSequence(aimsSequence, aimsSequenceLength);
+    delete []aimsSequence;
     agentCycle.cycleSequence = cycle;
+  }
+  else{
+    cycle = findCycleInSequence(agentLifeArray, agentLifeTime/*Продолжительность жизни, надо бы узнавать размер*/);
+    //Если агент не бездействовал, то найден цикл
+    if (cycle.size() > 1)
+      agentCycle.cycleSequence = cycle;
+  }
+
+  delete []agentLifeArray;
   
 	return agentCycle;
 }
@@ -406,7 +416,7 @@ double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &action
 }
 
 // Выгрузка списка циклов в файл
-void TBehaviorAnalysis::uploadCycles(vector<TBehaviorAnalysis::SCycle> cyclesList, string cyclesFilename){
+void TBehaviorAnalysis::uploadCycles(const vector<TBehaviorAnalysis::SCycle>& cyclesList, string cyclesFilename){
 	ofstream cyclesFile;
 	cyclesFile.open(cyclesFilename.c_str());
 	cyclesFile << cyclesList.size()<<endl; // Записываем кол-во циклов
@@ -591,4 +601,35 @@ void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExis
     metrics<<evolutionaryStep<<"\t"<<averageReward<<"\t"<<maximumReward<<"\t"<<currentAverageEfficiency<<"\t"<<averageLength<<"\t"<<maximumLength<<"\t"<<maximumMemory<<endl;
   }
   metrics.close();
+}
+
+// Преобразование последовательности действий (вероятно жизни агента) в последовательность достигнутых целей
+// Возвращает массив последовательности целей (вызывающая сторона должна обеспечить достаточный размер - одинаковый размер с массивом действий является достаточным) и длину последовательности
+void TBehaviorAnalysis::actionsSequence2aimSequence(double* actionsSequence, int actionsQuantity, const THypercubeEnvironment& environment, double* aimsSequence, int& aimsQuantity){
+  aimsQuantity = 0;
+  for (int currentTimeStep = 1; currentTimeStep <= actionsQuantity; ++currentTimeStep){
+		// Проверяем все цели относительно конкретного шага вермени
+    for (int currentAimNumber = 1; currentAimNumber <= environment.getAimsQuantity(); ++currentAimNumber){
+      const THypercubeEnvironment::TAim& currentAim = environment.getAimReference(currentAimNumber);
+      if (currentAim.aimComplexity <= currentTimeStep){ // Проверяем успел ли бы вообще агент достичь эту цель в начале "жизни" (для экономии времени) 
+        int achivedFlag = 1; // Признак того, что цель достигнута
+				int currentAction = 1; // Текущее проверяемое действие
+				// Пока не найдено нарушение последовательности цели или проверка цели закончена
+				while (achivedFlag && (currentAction <= currentAim.aimComplexity)){
+					// Определение направления изменения и изменяемого бита (с откатыванием времени назад)
+          bool changedDirection = (actionsSequence[currentTimeStep - 1 - currentAim.aimComplexity + currentAction] > 0);
+          int changedBit = static_cast<int>(fabs(actionsSequence[currentTimeStep - 1 - currentAim.aimComplexity + currentAction]));
+					/* Проверяем совпадает ли реальное действие с действием в цели на нужном месте 
+						Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
+          if ((changedBit != currentAim.actionsSequence[currentAction - 1].bitNumber) ||
+                    (changedDirection != currentAim.actionsSequence[currentAction - 1].desiredValue))
+						achivedFlag = false;
+					++currentAction;
+        }
+        // Если не было нарушения последовательности, то цель достигнута (записываем ее в последовательность целей)
+				if (achivedFlag)
+          aimsSequence[aimsQuantity++] = currentAimNumber;
+			} // Конец проверки одной цели
+		} // Конец проверки всех целей относительно одного фронта времени
+	} // Конец проверки всей "жизни"
 }

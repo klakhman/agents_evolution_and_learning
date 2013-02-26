@@ -326,6 +326,41 @@ void techanalysis::evolutionSLengthVsConvSize(string settingsFilename, string be
   outputFile.close();
 }
 
+// Проведение анализа по эволюции поведения на основе лучших агентов в каждой популяции
+// Создает два файла: analysisOutputFileName - файл с парами (эв. такт; номер стратегии), обозначает присутствие стратегии в поведении агента на данном эв. такте;
+// dataOutputFilename - файл со всеми стратегиями
+// По умолчанию проводит анализ на основе циклов действий (при указании параметра true проводит анализ на основе циклов целей)
+void techanalysis::conductBehaviorEvolutionAnalysis(string settingsFilename, string environmentFilename, string bestAgentsFilename, int evolutionTime, 
+                                                    string analysisOutputFilename, string dataOutputFilename, bool aimCycles /*=false*/){
+  THypercubeEnvironment environment(environmentFilename);
+  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  environment.setStochasticityCoefficient(0.0);
+  TAgent currentAgent;
+  settings::fillAgentSettingsFromFile(currentAgent, settingsFilename);
+  ifstream bestAgentsFile;
+  bestAgentsFile.open(bestAgentsFilename.c_str());
+  ofstream analysisOutputFile;
+  analysisOutputFile.open(analysisOutputFilename.c_str());
+  vector<TBehaviorAnalysis::SCycle> cyclesData;
+  for (int curEvolutionTime = 1; curEvolutionTime <= evolutionTime; ++curEvolutionTime){
+    currentAgent.loadGenome(bestAgentsFile);
+    vector<TBehaviorAnalysis::SCycle> currentAgentCycles = TBehaviorAnalysis::findAllCyclesOfAgent(currentAgent, environment, aimCycles);
+    for (unsigned int currentCycle = 1; currentCycle <= currentAgentCycles.size(); ++currentCycle){
+      int cycleNumber = TBehaviorAnalysis::findCycleInExistingCycles(currentAgentCycles[currentCycle - 1], cyclesData);
+      if (cycleNumber) // Если такой цикл уже был
+        analysisOutputFile << curEvolutionTime << "\t" << cycleNumber << endl;
+      else{
+        cyclesData.push_back(currentAgentCycles[currentCycle - 1]);
+        analysisOutputFile << curEvolutionTime << "\t" << cyclesData.size() << endl;
+      }
+    }
+    cout << curEvolutionTime << "\t" << cyclesData.size() << endl;
+  }
+  bestAgentsFile.close();
+  analysisOutputFile.close();
+  TBehaviorAnalysis::uploadCycles(cyclesData, dataOutputFilename);
+}
+
 #ifndef NOT_USE_ALGLIB_LIBRARY
   #include "statistics.h"
 

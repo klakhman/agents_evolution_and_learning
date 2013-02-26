@@ -187,8 +187,24 @@ int main(int argc, char** argv){
     //                                        "C:/Test/Environments/Environment1001.txt", "C:/Test/An_SLengthVsConvSize_En1001_linsys(1).txt");
     //techanalysis::evolutionSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(3)_bestagents.txt", 5000, 
     //                                       "C:/Test/Environments/Environment1001.txt", "C:/Test/An_evolutionSLengthVsConvSize_En1001_linsys(3).txt");
-    TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_analysis_En1001-1360.txt", "C:/Test/random.txt", 18, 20, 1);
-
+    //TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_analysis_En1001-1360.txt", "C:/Test/random.txt", 18, 20, 1);
+    //TAgent agent;
+    //string oldFilename = "D:/1/Test/SANDBOX/En1120_63(5)_maxaverage_mod.txt";
+    //ifstream oldFile;
+    //oldFile.open(oldFilename.c_str());
+    //string newFilename = "D:/1/Test/SANDBOX/En1120_63(5)_maxaverage_mod_newformat.txt";
+    //ofstream newFile;
+    //newFile.open(newFilename.c_str());
+    //int agentsQuantity = 250;
+    //for (int i = 0; i<agentsQuantity; ++i){
+    //  agent.loadOldFormatGenome(oldFile, 8, 7);
+    //  agent.uploadGenome(newFile);
+    //  cout << i << endl;
+    //}
+    //oldFile.close();
+    //newFile.close();
+    techanalysis::conductBehaviorEvolutionAnalysis("D:/1/Test/SANDBOX/settings_LINSYS.ini","D:/1/Test/SANDBOX/Environment1120.txt",  "D:/1/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
+                                                    "D:/1/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "D:/1/Test/SANDBOX/AimCyclesEvolution(CyclesData)_En1120_63(5).txt", true);
   }
 
   /*TAnalysis* analysis = new TAnalysis;

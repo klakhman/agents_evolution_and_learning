@@ -37,6 +37,13 @@ namespace techanalysis{
   // На выходе файл с четыремя строками: 1) Длины стратегий; 2) Области сходимости стратегий; 3) Цвет даннных (в соответствии с номером эволюционного такта); 4) Соответствующий номер эволюционного такта 
   // Цветовая палитра: ранние такты - голубые, поздние - красные (через желтый и зеленый). Дальнейшая отрисовка происходит с помощью matplotlib.
   void evolutionSLengthVsConvSize(std::string settingsFilename, std::string bestAgentsFilename, int evolutionTime, std::string environmentFilename, std::string outputFilename, std::string colorPalette ="RGB");
+  // Проведение анализа по эволюции поведения на основе лучших агентов в каждой популяции
+  // Создает два файла: analysisOutputFileName - файл с парами (эв. такт; номер стратегии), обозначает присутствие стратегии в поведении агента на данном эв. такте;
+  // dataOutputFilename - файл со всеми стратегиями
+  // По умолчанию проводит анализ на основе циклов действий (при указании параметра true проводит анализ на основе циклов целей)
+  void conductBehaviorEvolutionAnalysis(std::string settingsFilename, std::string environmentFilename, std::string bestAgentsFilename, int evolutionTime, 
+                                        std::string analysisOutputFilename, std::string dataOutputFilename, bool aimCycles = false);
+
 
   #ifndef NOT_USE_ALGLIB_LIBRARY
     // Обертка над функцией из ALGLIB - тестирование нормальности выборки по методу Харки — Бера.
