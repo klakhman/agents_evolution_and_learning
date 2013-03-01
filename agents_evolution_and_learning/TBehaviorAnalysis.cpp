@@ -61,7 +61,8 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
        settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
        agentsPopulation->loadPopulation(filenameSettings.populationFilename);
        //Запускаем процесс поиска
-       findCyclesInPopulation(*agentsPopulation, *environment);
+       vector<SCycle>cycles = findCyclesInPopulation(*agentsPopulation, *environment);
+       uploadCycles(cycles, filenameSettings.cyclesFilename);
       break;
      }
     case TBAModeSingleAgent:
@@ -72,14 +73,14 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
       environment->setStochasticityCoefficient(0.0);
       //Запускаем поиск циклов
-//      vector<SCycle>cycles = findCyclesInEvolution(*environment);
-//      uploadCycles(cycles, filenameSettings.cyclesFilename);
+      vector<SCycle>cycles = findCyclesInEvolution(*environment);
+      uploadCycles(cycles, filenameSettings.cyclesFilename);
      // calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
-     vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
-      int memory = calculateCycleLongestMemory(cycles[1358], *environment);
-      cout<<memory;
-    //  calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
-      drawCycleToDot(cycles[1358], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
+//     vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
+//      int memory = calculateCycleLongestMemory(cycles[1358], *environment);
+//      cout<<memory;
+      calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Results/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
+     // drawCycleToDot(cycles[1358], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
      // drawAllCyclesToDot(cycles, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
 //      SCycle states = transformActionsCycleToStatesCycle(cycles[1189], *environment);
 //      drawStatesCycleToDot(states , *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv", false);
@@ -100,7 +101,7 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::findCyclesInEvolution(THype
   ofstream evoCyclesFile;
   //Открываем файл с агентами
   agentsFile.open(filenameSettings.populationFilename.c_str());
-  evoCyclesFile.open("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt");
+  evoCyclesFile.open("/Users/nikitapestrov/Desktop/Neurointellect/Results/EvoCycles.txt");
   time_t start_time = time(0);
   //Ищем появившиеся циклы на каждом шаге эволюции
   for (int currentAgentNumber = 0; currentAgentNumber <5000; ++currentAgentNumber){
@@ -552,7 +553,7 @@ void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExis
 {
   ifstream cyclesExistance;
   ofstream metrics;
-  metrics.open("/Users/nikitapestrov/Desktop/Neurointellect/Settings/metrics.txt");
+  metrics.open("/Users/nikitapestrov/Desktop/Neurointellect/Results/metrics.txt");
   cyclesExistance.open(cyclesExistanceFilename.c_str());
   
   vector<SCycle> cycles = loadCycles(cyclesFilename);
