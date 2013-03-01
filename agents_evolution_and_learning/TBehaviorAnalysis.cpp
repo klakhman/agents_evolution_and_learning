@@ -73,8 +73,9 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       //!!! Обнуляем степень стохастичности среды (чтобы все было детерминировано)
       environment->setStochasticityCoefficient(0.0);
       //Запускаем поиск циклов
-      vector<SCycle>cycles = findCyclesInEvolution(*environment);
-      uploadCycles(cycles, filenameSettings.cyclesFilename);
+      vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);//findCyclesInEvolution(*environment);
+      double reward = calculateCycleReward(cycles.at(1170), *environment);
+    //  uploadCycles(cycles, filenameSettings.cyclesFilename);
      // calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
 //     vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
 //      int memory = calculateCycleLongestMemory(cycles[1358], *environment);
@@ -413,7 +414,7 @@ double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &action
   doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
 	vector< vector<double> > cycleVector(3 * actionsCycle.cycleSequence.size());
   for (unsigned int currentAction = 1; currentAction <= doubledActionsCycle.cycleSequence.size(); ++currentAction)
-	  cycleVector[currentAction-1].push_back(doubledActionsCycle.cycleSequence[0]);
+	  cycleVector[currentAction-1].push_back(doubledActionsCycle.cycleSequence[currentAction-1]);
 
   //Вычисляем награду за прохождение удвоенного цикла
   double doubledCycleReward = environment.calculateReward(cycleVector, static_cast<int>(doubledActionsCycle.cycleSequence.size()));
@@ -421,7 +422,7 @@ double TBehaviorAnalysis::calculateCycleReward(TBehaviorAnalysis::SCycle &action
   doubledActionsCycle.cycleSequence.insert(doubledActionsCycle.cycleSequence.end(), actionsCycle.cycleSequence.begin(), actionsCycle.cycleSequence.end());
   for (unsigned int currentAction = 1; currentAction <= doubledActionsCycle.cycleSequence.size(); ++currentAction){
 	  cycleVector[currentAction-1].clear();
-	  cycleVector[currentAction-1].push_back(doubledActionsCycle.cycleSequence[0]);
+	  cycleVector[currentAction-1].push_back(doubledActionsCycle.cycleSequence[currentAction-1]);
   }
   double trippledCycleReward = environment.calculateReward(cycleVector,  static_cast<int>(doubledActionsCycle.cycleSequence.size()));
   
