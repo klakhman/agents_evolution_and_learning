@@ -21,10 +21,13 @@ public:
 	virtual void getCurrentEnvironmentVector(double environmentVector[]) const = 0; 
 	// Задание случайного состояния среды
 	virtual void setRandomEnvironmentState() = 0;
-	// Возоздействие на среду - возвращает успешность воздействия (!!! если такого понятия нет для конкретной среды, то должна возвращать true)
-	virtual bool forceEnvironment(const std::vector<double>& action) = 0;
+	// Возоздействие на среду - возвращает успешность воздействия (!!! если такого понятия нет для конкретной среды, то должна возвращать true = 1)
+	virtual int forceEnvironment(const std::vector<double>& action) = 0;
 	// Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
 	virtual double calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const = 0;
+  // Определения какие цели были достигнуты на фронте текущей последовательности действий (на текущем шаге времени)
+  // Возвращает массив достигнутых целей
+  virtual std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const = 0;
 };
 
 #endif // TENVIRONMENT_H

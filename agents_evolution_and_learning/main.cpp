@@ -183,10 +183,11 @@ int main(int argc, char** argv){
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
+    srand(static_cast<unsigned int>(time(0)));
     //techanalysis::analysisSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(1)_bestpopulation.txt", 
     //                                        "C:/Test/Environments/Environment1001.txt", "C:/Test/An_SLengthVsConvSize_En1001_linsys(1).txt");
-    //techanalysis::evolutionSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(3)_bestagents.txt", 5000, 
-    //                                       "C:/Test/Environments/Environment1001.txt", "C:/Test/An_evolutionSLengthVsConvSize_En1001_linsys(3).txt");
+    techanalysis::evolutionSLengthVsConvSize("C:/Test/SANDBOX/settings_LINSYS.ini", "C:/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
+                                           "C:/Test/SANDBOX/Environment1120.txt", "C:/Test/SANDBOX/An_evolutionSLengthVsConvSize_En1120_63(5)_olddata.txt");
     //TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_analysis_En1001-1360.txt", "C:/Test/random.txt", 18, 20, 1);
     //TAgent agent;
     //string oldFilename = "D:/1/Test/SANDBOX/En1120_63(5)_maxaverage_mod.txt";
@@ -203,8 +204,21 @@ int main(int argc, char** argv){
     //}
     //oldFile.close();
     //newFile.close();
-    techanalysis::conductBehaviorEvolutionAnalysis("D:/1/Test/SANDBOX/settings_LINSYS.ini","D:/1/Test/SANDBOX/Environment1120.txt",  "D:/1/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
-                                                    "D:/1/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "D:/1/Test/SANDBOX/AimCyclesEvolution(CyclesData)_En1120_63(5).txt", true);
+    //techanalysis::conductBehaviorEvolutionAnalysis("D:/1/Test/SANDBOX/settings_LINSYS.ini","D:/1/Test/SANDBOX/Environment1120.txt",  "D:/1/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
+    //                                                "D:/1/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "D:/1/Test/SANDBOX/AimCyclesEvolution(CyclesData)_En1120_63(5).txt", true);
+    //techanalysis::transponceData("C:/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "C:/Test/SANDBOX/aim_cycles_evolution.txt", 2);
+    //vector<double> results = techanalysis::runPopulation("C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpopulation.txt", "C:/Test/SANDBOX/Environment1113.txt",
+    //                                                    "C:/Test/SANDBOX/settings_PC40ANP40.ini", 0.0);
+    //service::printVectorToFile(results, "C:/Test/SANDBOX/Analysis_OneRun_En1113_pc40anp40(18)_bestpopulation_1.txt");
+    //TAgent agent;
+    //agent.loadGenome("C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpopulation.txt", 179);
+    //settings::fillAgentSettingsFromFile(agent, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
+    //THypercubeEnvironment environment("C:/Test/SANDBOX/Environment1113.txt");
+    //settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
+    //environment.setStochasticityCoefficient(0.0);
+    //environment.setRandomEnvironmentState();
+    //agent.primarySystemogenesis();
+    //agent.printLife(environment, 100);
   }
 
   /*TAnalysis* analysis = new TAnalysis;

@@ -10,6 +10,14 @@
 
 using namespace std;
 
+// Печать цели на экран
+void THypercubeEnvironment::TAim::print(std::ostream& os) const{
+  for (int currentAction = 1; currentAction < aimComplexity; ++currentAction)
+    os << actionsSequence[currentAction - 1].bitNumber << "->" << actionsSequence[currentAction - 1].desiredValue << " ; ";
+  os << endl;
+}
+
+
 // Загрузка структуры целей среды из файла
 void THypercubeEnvironment::loadEnvironment(std::string environmentFilename){
 	// Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
@@ -104,7 +112,7 @@ void THypercubeEnvironment::randomizeEnvironment(){
 Изменение среды под действием агента (возвращает совершено ли действие (true) или его невозможно совершить(false))
 В рамках данной архитектуры actionID кодируется как +-(bitNumber), при этом знак определяет в какую сторону изменяется бит (+ это с нуля на единицу)
 */
-bool THypercubeEnvironment::forceEnvironment(const std::vector<double>& action){
+int THypercubeEnvironment::forceEnvironment(const std::vector<double>& action){
 	// Признак успешности совершаемого действия
 	bool actionSuccess = false;
 	//Направление изменения
@@ -123,7 +131,7 @@ bool THypercubeEnvironment::forceEnvironment(const std::vector<double>& action){
 }
 
 // Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
-double THypercubeEnvironment::calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const{
+double THypercubeEnvironment::calculateReward(const vector< vector<double> >& actions, int actionsQuantity) const{
   /*double* actionsIDs = new double[actionsQuantity];
   for (int currentAction = 0; currentAction < actionsQuantity; ++currentAction)
     actionsIDs[currentAction] = actions[currentAction][0];*/
@@ -164,6 +172,35 @@ double THypercubeEnvironment::calculateReward(const std::vector< std::vector<dou
   //delete []actionsIDs;
 	delete []achievingTime;
 	return accumulatedReward;
+}
+
+// Определения какие цели были достигнуты на фронте текущей последовательности действий (на текущем шаге времени)
+// Возвращает массив достигнутых целей
+vector<int> THypercubeEnvironment::testReachingAims(const vector< vector<double> >& actions, int actionsQuantity) const{
+  vector<int> reachedAims;
+  // Проверяем все цели относительно конкретного шага вермени
+	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
+	  if (aimsSet[currentAim-1].aimComplexity <= actionsQuantity){ // Проверяем успел ли бы вообще агент достичь эту цель в начале "жизни" (для экономии времени)
+		int achivedFlag = 1; // Признак того, что цель достигнута
+		int currentAction = 1; // Текущее проверяемое действие
+		// Пока не найдено нарушение последовательности цели или проверка цели закончена
+		while (achivedFlag && (currentAction <= aimsSet[currentAim - 1].aimComplexity)){
+			// Определение направления изменения и изменяемого бита (с откатыванием времени назад)
+			bool changedDirection = (actions[actionsQuantity - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0] > 0);
+			int changedBit = static_cast<int>(fabs(actions[actionsQuantity - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0]));
+			/* Проверяем совпадает ли реальное действие с действием в цели на нужном месте 
+			Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
+			if ((changedBit != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber) ||
+			      (changedDirection != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue))
+			  achivedFlag = false;
+				++currentAction;
+			}
+		  // Если не было нарушения последовательности, то цель достигнута
+		  if (achivedFlag)
+        reachedAims.push_back(currentAim);
+    } // Конец проверки одной цели
+  } // Конец проверки всех целей относительно одного фронта времени
+  return reachedAims;
 }
 
 // Сравнение двух полных целей для процедуры генерации среды (возвращает true - если есть хотя бы одна совпадающая подцель)

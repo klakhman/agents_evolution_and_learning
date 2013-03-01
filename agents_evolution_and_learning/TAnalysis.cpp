@@ -391,7 +391,7 @@ double TAnalysis::randomAgentLife(THypercubeEnvironment& environment, int agentL
 		}
 		agentLife[agentLifeStep - 1].push_back(action);
 		// Действуем на среду и проверяем успешно ли действие
-		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
+		bool actionSuccess = (environment.forceEnvironment(agentLife[agentLifeStep - 1]) != 0);
 		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
 	}
 	

@@ -30,6 +30,8 @@ public:
 			aimComplexity = 0;
 			reward = 0;
 		}
+    // Печать цели на экран
+    void print(std::ostream& os) const;
 	};
 private:
   // Максимальное кол-во целей в среде
@@ -129,10 +131,13 @@ public:
 	Изменение среды под действием агента (возвращает совершено ли действие или его невозможно совершить)
 	В рамках данной архитектуры actionID кодируется как +-(bitNumber), при этом знак определяет в какую сторону изменяется бит (+ это с нуля на единицу)
 	*/
-	bool forceEnvironment(const std::vector<double>& action);
+	int forceEnvironment(const std::vector<double>& action);
 
 	// Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
 	double calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
+  // Определения какие цели были достигнуты на фронте текущей последовательности действий (на текущем шаге времени)
+  // Возвращает массив достигнутых целей
+  std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
 
 	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
 	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps = 0.001, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3);

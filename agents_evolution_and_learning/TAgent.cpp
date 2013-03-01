@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #include <cmath>
 #include <algorithm>
 
@@ -186,7 +187,7 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 		neuralController->getOutputVector(outputVector);
 		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
 		// Действуем на среду и проверяем успешно ли действие
-		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
+		bool actionSuccess = (environment.forceEnvironment(agentLife[agentLifeStep - 1]) != 0);
 		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
 		// Проводим процедуру обучения (если такой режим)
 		if (1 == learningSettings.learningMode) learning();
@@ -223,43 +224,65 @@ TAgent& TAgent::operator=(const TAgent& sourceAgent){
 	return *this;
 }
 
-//// Временная процедура печати жизни агента
-//void TAgent::printLife(TEnvironment& environment, int agentLifeTime){
-//	double* environmentVector = new double[neuralController->getInputResolution()];
-//	double* outputVector = new double[neuralController->getOutputResolution()];
-//	agentLife = new double[agentLifeTime];
-//	// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
-//	environment.getCurrentEnvironmentVector(environmentVector);
-//	cout << "Environment: ";
-//	for (int currentBit = 1; currentBit <= neuralController->getInputResolution(); ++currentBit)
-//		cout << environmentVector[currentBit - 1] << "\t";
-//	cout << endl << endl;
-//
-//	neuralController->reset();
-//	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
-//		neuralController->calculateNetwork(environmentVector);
-//		neuralController->getOutputVector(outputVector);
-//		cout << "Output: ";
-//		for (int currentBit = 1; currentBit <= neuralController->getOutputResolution(); ++currentBit)
-//			cout << outputVector[currentBit - 1] << "\t";
-//		cout << endl;
-//		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
-//		// Действуем на среду и проверяем успешно ли действие
-//		bool actionSuccess = environment.forceEnvironment(agentLife[agentLifeStep - 1]);
-//		environment.getCurrentEnvironmentVector(environmentVector);
-//		cout << "Environment: ";
-//		for (int currentBit = 1; currentBit <= neuralController->getInputResolution(); ++currentBit)
-//			cout << environmentVector[currentBit - 1] << "\t";
-//		cout << endl;
-//		if (!actionSuccess) agentLife[agentLifeStep - 1] = 0;
-//		cout << "Action: " <<  agentLife[agentLifeStep - 1] << endl;
-//	}
-//	reward = environment.calculateReward(agentLife, agentLifeTime);
-//	delete []agentLife;
-//	agentLife = 0;
-//	delete []outputVector;
-//	delete []environmentVector;
-//}
+// Подсчет количества активных нейронов
+int TAgent::getActiveNeuronsQuantity() const{
+  int activeNeurons = 0;
+  for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++ currentNeuron)
+    if (neuralController->getNeuronActive(currentNeuron)) ++activeNeurons;
+  return activeNeurons;
+}
+
+// Временная процедура печати жизни агента
+void TAgent::printLife(TEnvironment& environment, int agentLifeTime){
+	double* environmentVector = new double[neuralController->getInputResolution()];
+	double* outputVector = new double[neuralController->getOutputResolution()];
+
+	agentLife.resize(agentLifeTime);
+
+	environment.getCurrentEnvironmentVector(environmentVector);
+	cout << "Start environment state: ";
+	for (int currentBit = 1; currentBit <= neuralController->getInputResolution(); ++currentBit)
+		cout << environmentVector[currentBit - 1] << " ";
+	cout << endl;
+  cout << "Initial active neurons quantity: " << getActiveNeuronsQuantity()
+        << "\tTotal neurons: " << neuralController->getNeuronsQuantity() << endl << endl;
+
+
+	neuralController->reset();
+	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
+		neuralController->calculateNetwork(environmentVector);
+		neuralController->getOutputVector(outputVector);
+		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
+		// Действуем на среду и проверяем успешно ли действие
+		bool actionSuccess = (environment.forceEnvironment(agentLife[agentLifeStep - 1]) != 0);
+    cout << "Step:" << agentLifeStep << "\tAgent action: " <<  agentLife[agentLifeStep - 1][0] 
+          << "\tSuccess: " << actionSuccess << endl;
+		environment.getCurrentEnvironmentVector(environmentVector);
+		cout << "Current environment: ";
+		for (int currentBit = 1; currentBit <= neuralController->getInputResolution(); ++currentBit)
+			cout << environmentVector[currentBit - 1] << " ";
+		cout << endl;
+		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
+    // Находим достигнутые цели
+    vector<int> reachedAims = environment.testReachingAims(agentLife, agentLifeStep);
+    if (reachedAims.size()){
+      cout << "Aims reached: ";
+      for (unsigned int i = 0; i < reachedAims.size(); ++i)
+        cout << reachedAims[i] << "; ";
+      cout << endl;
+    }
+    // Проводим процедуру обучения (если такой режим)
+		if (1 == learningSettings.learningMode) learning();
+    // !!!! Случайное обучение - только для контроля качества обучения !!!!!
+    else if (2 == learningSettings.learningMode) randomLearning();
+    cout << "Active neurons quantity: " << getActiveNeuronsQuantity() 
+          << "\tTotal neurons: " << neuralController->getNeuronsQuantity() << endl << endl;
+    getchar();
+  }
+  reward = 0;
+	delete []outputVector;
+	delete []environmentVector;
+}
 
 //-------------------- МЕТОДЫ, ОБЕСПЕЧИВАЮЩИЕ ПЕРВИЧНЫЙ СИСТЕМОГЕНЕЗ --------------------
 

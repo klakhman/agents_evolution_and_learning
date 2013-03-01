@@ -144,9 +144,10 @@ public:
 	virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
 	// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
 	TAgent& operator=(const TAgent& sourceAgent);
-
-	// Временная процедура печати жизни агента
-	//void printLife(TEnvironment& environment, int agentLifeTime);
+  // Подсчет количества активных нейронов
+  int getActiveNeuronsQuantity() const;
+  //Временная процедура печати жизни агента
+  void printLife(TEnvironment& environment, int agentLifeTime);
 
 	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
 	void linearSystemogenesis();
