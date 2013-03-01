@@ -94,12 +94,14 @@ public:
 
 	//Получаем вектор среды, из которого стартовал цикл
 	static double * getSequenceInitialStateVector(std::vector<double> &actionsSequence, const THypercubeEnvironment &environment);
+
+  // Преобразование последовательности действий в последовательность состояний (последовательность состояний на одно больше, чем последовательность действий)
+  // Если начальное состояние не задано, то оно автоматически восстанавливается с точностью до неиспользуемых битов
+  static std::vector<double> transformActionsSequenceToStatesSequence(std::vector<double> &actionsCycle, THypercubeEnvironment &environment, double startStateNumber = -1);
   
-  static std::vector<double> transformActionsSequenceToStatesSequence(std::vector<double> &actionsCycle, THypercubeEnvironment &environment);
-  
-	//Переводим последоваетльность действий в последовательность environmentStates, плюс добавляем в начале начальное состояние
-	//Начальное состояние определяется с точностью до неиспользуемых битов - их заполняем нулями
-	static SCycle transformActionsCycleToStatesCycle(SCycle &actionsCycle, THypercubeEnvironment &environment);
+  //Переводим последоваетльность действий в последовательность environmentStates (длина последовательности состояний такая же как длина последовательности действий, так как это цикл)
+  // Если начальное состояние не задано, то оно автоматически восстанавливается с точностью до неиспользуемых битов
+	static SCycle transformActionsCycleToStatesCycle(SCycle &actionsCycle, THypercubeEnvironment &environment, double startStateNumber = -1);
   
   //Подсчитываем длину максимальной памяти в цикле
   static int calculateCycleLongestMemory(SCycle &cycle, THypercubeEnvironment &environment);
@@ -108,13 +110,20 @@ public:
 	//Делается это с целью приближения к ситуации, когда поведение сошлось к этому циклу и награды уже были достигнуты
 	//Поэтому награды восстанавливаются и агенту не дается полная награда
 	static double calculateCycleReward(SCycle &actionsCycle, const THypercubeEnvironment &environment);
-  
-  static void drawSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputDotFilename);
-  static void addSingleSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
-  
+  // Отрисовка последовательности действий в файл(с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+  // Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
+  static void drawActionSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputImageFilename);
+  // Служебная процедура записи одной последовательности действий в dot-файл
+  static void addActionSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
+  // Отрисовка одного цикла в файл(с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+  // Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
   static void drawCycleToDot(SCycle &cycle, THypercubeEnvironment &environment, std::string outputDotFilename);
-  static void drawCyclesListToDot(std::vector<SCycle> &cycles,THypercubeEnvironment &environment,std::string outputDotFilename);
+  // Отрисовка списка циклов в файл(с использованием сторонней утилиты dot.exe из пакета GraphViz) 
+  // Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
+  static void drawCyclesListToDot(std::vector<SCycle> &cycles,THypercubeEnvironment &environment,std::string outputImageFilename);
+  // Служебная процедура записи одного цикла действий в dot-файл
   static void addSingleCycleToDotStream(TBehaviorAnalysis::SCycle &cycle, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
+
   static void calculateMetricsForEvolutionaryProcess(std::string cyclesExistanceFile,std::string cyclesFile, THypercubeEnvironment &environment);
 
   // Преобразование последовательности действий (вероятно жизни агента) в последовательность достигнутых целей

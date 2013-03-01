@@ -97,12 +97,12 @@ public:
 	// Задание вектора среды (по значению целого вектора)
 	void setEnvironmentVector(double environmentVector[]) {
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
-			currentEnvironmentVector[currentBit - 1] = (environmentVector[currentBit - 1] == 1);
+			currentEnvironmentVector[currentBit - 1] = (static_cast<int>(environmentVector[currentBit - 1] + 0.1) == 1);
 	}
 	// Задание вектора среды (по номеру - !!!начиная с нуля!!!!) 
 	void setEnvironmentState(double stateNumber){
 		bool* requiredEnvironmentVector = new bool[environmentResolution];
-		service::decToBin(static_cast<int>(stateNumber), requiredEnvironmentVector, environmentResolution);
+		service::decToBin(static_cast<int>(stateNumber + 0.1), requiredEnvironmentVector, environmentResolution);
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			currentEnvironmentVector[currentBit - 1] = requiredEnvironmentVector[currentBit - 1];
 		delete []requiredEnvironmentVector;

@@ -118,7 +118,9 @@ int THypercubeEnvironment::forceEnvironment(const std::vector<double>& action){
 	//Направление изменения
 	bool changeDirection = (action[0] > 0);
 	// Номер изменяемого бита
-	int changeBit = static_cast<int>(fabs(action[0]));
+	int changeBit = static_cast<int>(fabs(action[0]) + 0.1); // Добавляем 0.1, чтобы избежать неверного трактования double
+  // Если был передан ноль, то агент бездействует
+  if (changeBit == 0) return true;
 	// Если бит в противоположной позиции, то действие совершается
 	if (currentEnvironmentVector[changeBit -1] != changeDirection){
 		currentEnvironmentVector[changeBit - 1] = changeDirection;
