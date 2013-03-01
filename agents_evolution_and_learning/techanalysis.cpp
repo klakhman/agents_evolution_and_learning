@@ -188,12 +188,12 @@ void  techanalysis::transponceData(string inputFilename, string outputFilename, 
 }
 
 // Разбор файлов с результатами по анализу лучших популяций
-vector<double> techanalysis::getValuesBPAFile(string bestPopulationAnalysisFile){
+vector<double> techanalysis::getValuesBPAFile(string bestPopulationAnalysisFile, int runsQuantity /*= 100*/){
   string tmpStr;
   vector<double> values;
   ifstream inputFile;
   inputFile.open(bestPopulationAnalysisFile.c_str());
-  for (int i = 0; i < 100; ++i){
+  for (int i = 0; i < runsQuantity; ++i){
     inputFile >> tmpStr; // Считываем номер среды
     inputFile >> tmpStr; // Считываем номер попытки
     inputFile >> tmpStr; // Считываем награду
@@ -221,7 +221,7 @@ void techanalysis::analysisSLengthVsConvSize(string settingsFilename, string pop
   outFile.close();
 }
 
-// Анализ на зависимость размера области сходимости стратегии от ее длины (для одной популяции, циклы находятся независимо для каждого агента)
+// Анализ на зависимость показателя размера областей сходимости стратегий от их длин (для одной популяции, циклы находятся независимо для каждого агента)
 // Возвращает вектор пар - (длина стратегии, размер области сходимости)
 vector< pair<int, int> > techanalysis::analysisSLengthVsConvSize(TPopulation<TAgent>& population, THypercubeEnvironment& environment){
   environment.setStochasticityCoefficient(0.0);
@@ -253,10 +253,11 @@ vector< pair<int, int> > techanalysis::analysisSLengthVsConvSize(TPopulation<TAg
   return strategyLengthVsConvSize;
 }
 
-// Анализ и подготовка данных для отображения развития в эволюции зависимости размера области сходимости стратегии от ее длины
+// Анализ и подготовка данных для отображения развития в эволюции зависимости показателя размера областей сходимости стратегий от их длины
 // На выходе файл с четыремя строками: 1) Длины стратегий; 2) Области сходимости стратегий; 3) Цвет даннных (в соответствии с номером эволюционного такта); 4) Соответствующий номер эволюционного такта 
 // Цветовая палитра: ранние такты - голубые, поздние - красные (через желтый и зеленый). Дальнейшая отрисовка происходит с помощью matplotlib.
-void techanalysis::evolutionSLengthVsConvSize(string settingsFilename, string bestAgentsFilename, int evolutionTime, string environmentFilename, string outputFilename, string colorPalette /*="RGB"*/){
+void techanalysis::evolutionSLengthVsConvSize(string settingsFilename, string bestAgentsFilename, int evolutionTime, 
+                                              string environmentFilename, string outputFilename, string colorPalette /*="RGB"*/){
   vector< pair<int, int> > strategyLengthVsConvSize; // Соответствующие пары
   vector<int> evolutionTacts; // Номера эволюционных тактов для всех пар
   THypercubeEnvironment environment(environmentFilename);
@@ -359,6 +360,52 @@ void techanalysis::conductBehaviorEvolutionAnalysis(string settingsFilename, str
   bestAgentsFile.close();
   analysisOutputFile.close();
   TBehaviorAnalysis::uploadCycles(cyclesData, dataOutputFilename);
+}
+
+// Обертка для прогона популяции - возвращает средние награды (при запуске из всех состояний) для всех агентов в популяции.
+// Системогенез проводится один раз для каждого агента. Если коэффициент стохастичности не указан, то берется значение из файла настроек. 
+vector<double> techanalysis::runPopulation(string populationFilename, string environmentFilename, 
+                                           string settingsFilename, double stochasticityCoefficient /*=-1*/){
+  THypercubeEnvironment* environment = new THypercubeEnvironment(environmentFilename);
+	settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
+  if (stochasticityCoefficient != -1)
+    environment->setStochasticityCoefficient(stochasticityCoefficient);
+	TPopulation<TAgent>* agentsPopulation = new TPopulation<TAgent>;
+	settings::fillPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
+	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
+	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
+	agentsPopulation->loadPopulation(populationFilename);
+  return runPopulation(*agentsPopulation, *environment);
+}
+// Прогона популяции - возвращает средние награды (при запуске из всех состояний) для всех агентов в популяции.
+// Системогенез проводится один раз для каждого агента. Если коэффициент стохастичности не указан, то берется значение из файла настроек. 
+vector<double> techanalysis::runPopulation(TPopulation<TAgent>& population, THypercubeEnvironment& environment){
+  vector<double> agentsRewards;
+  int initialStatesQuantity = environment.getInitialStatesQuantity();
+  // Прогоняем всех агентов и записываем награды в массив
+	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
+    double averageReward = 0;
+    if (1 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
+      population.getPointertoAgent(currentAgent)->primarySystemogenesis();
+    else if (0 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
+		  population.getPointertoAgent(currentAgent)->linearSystemogenesis();
+    else if (2 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
+      population.getPointertoAgent(currentAgent)->alternativeSystemogenesis();
+    // Необходимо сохранять первичную нейронную сеть, так как запуск проходит из всех состояний и возможно обучение
+    TNeuralNetwork initialController;
+    if (0 != population.getPointertoAgent(currentAgent)->getLearningMode())
+      initialController = *(population.getPointertoAgent(currentAgent)->getPointerToAgentController());
+		for (int currentInitialState = 0; currentInitialState < initialStatesQuantity; ++currentInitialState){
+      if (0 != population.getPointertoAgent(currentAgent)->getLearningMode())
+        *(population.getPointertoAgent(currentAgent)->getPointerToAgentController()) = initialController;
+			environment.setEnvironmentState(currentInitialState);
+			population.getPointertoAgent(currentAgent)->life(environment, population.evolutionSettings.agentLifetime);
+      averageReward += population.getPointertoAgent(currentAgent)->getReward() / initialStatesQuantity;
+    }
+    agentsRewards.push_back(averageReward);
+    cout << currentAgent << "\t" << averageReward << endl;
+	}
+  return agentsRewards;
 }
 
 #ifndef NOT_USE_ALGLIB_LIBRARY

@@ -25,25 +25,32 @@ namespace techanalysis{
   void transponceData(std::string inputFilename, std::string outputFilename, int columnsQuantity);
 
   // Разбор файлов с результатами по анализу лучших популяций
-  std::vector<double> getValuesBPAFile(std::string bestPopulationAnalysisFile);
+  std::vector<double> getValuesBPAFile(std::string bestPopulationAnalysisFile, int runsQuantity = 100);
 
-  // Удобная обертка для анализа на зависимость размера области сходимости стратегии от ее длины
+  // Удобная обертка для анализа на зависимость размера области сходимости стратегии от ее длины (для одной популяции, циклы находятся независимо для каждого агента)
   // Создает файл с парами - (длина стратегии, размер области сходимости)
   void analysisSLengthVsConvSize(std::string settingsFilename, std::string populationFilename, std::string environmentFilename, std::string outputFilename);
-  // Анализ на зависимость размера области сходимости стратегии от ее длины (для одной популяции, циклы находятся независимо для каждого агента)
+  // Анализ на зависимость показателя размера областей сходимости стратегий от их длин (для одной популяции, циклы находятся независимо для каждого агента)
   // Возвращает вектор пар - (длина стратегии, размер области сходимости)  
   std::vector< std::pair<int, int> > analysisSLengthVsConvSize(TPopulation<TAgent>& population, THypercubeEnvironment& environment);
-  // Анализ и подготовка данных для отображения развития в эволюции зависимости размера области сходимости стратегии от ее длины
+  // Анализ и подготовка данных для отображения развития в эволюции зависимости показателя размера областей сходимости стратегий от их длины
   // На выходе файл с четыремя строками: 1) Длины стратегий; 2) Области сходимости стратегий; 3) Цвет даннных (в соответствии с номером эволюционного такта); 4) Соответствующий номер эволюционного такта 
   // Цветовая палитра: ранние такты - голубые, поздние - красные (через желтый и зеленый). Дальнейшая отрисовка происходит с помощью matplotlib.
-  void evolutionSLengthVsConvSize(std::string settingsFilename, std::string bestAgentsFilename, int evolutionTime, std::string environmentFilename, std::string outputFilename, std::string colorPalette ="RGB");
+  void evolutionSLengthVsConvSize(std::string settingsFilename, std::string bestAgentsFilename, int evolutionTime, 
+                                  std::string environmentFilename, std::string outputFilename, std::string colorPalette ="RGB");
   // Проведение анализа по эволюции поведения на основе лучших агентов в каждой популяции
   // Создает два файла: analysisOutputFileName - файл с парами (эв. такт; номер стратегии), обозначает присутствие стратегии в поведении агента на данном эв. такте;
   // dataOutputFilename - файл со всеми стратегиями
   // По умолчанию проводит анализ на основе циклов действий (при указании параметра true проводит анализ на основе циклов целей)
   void conductBehaviorEvolutionAnalysis(std::string settingsFilename, std::string environmentFilename, std::string bestAgentsFilename, int evolutionTime, 
                                         std::string analysisOutputFilename, std::string dataOutputFilename, bool aimCycles = false);
-
+  // Обертка для прогона популяции - возвращает средние награды (при запуске из всех состояний) для всех агентов в популяции.
+  // Системогенез проводится один раз для каждого агента. Если коэффициент стохастичности не указан, то берется значение из файла настроек. 
+  std::vector<double> runPopulation(std::string populationFilename, std::string environmentFilename, 
+                                    std::string settingsFilename, double stochasticityCoefficient =-1);
+  // Прогона популяции - возвращает средние награды (при запуске из всех состояний) для всех агентов в популяции.
+  // Системогенез проводится один раз для каждого агента. Если коэффициент стохастичности не указан, то берется значение из файла настроек. 
+  std::vector<double> runPopulation(TPopulation<TAgent>& population, THypercubeEnvironment& environment);
 
   #ifndef NOT_USE_ALGLIB_LIBRARY
     // Обертка над функцией из ALGLIB - тестирование нормальности выборки по методу Харки — Бера.

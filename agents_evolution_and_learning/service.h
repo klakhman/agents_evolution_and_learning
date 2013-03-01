@@ -3,6 +3,8 @@
 
 #include <string>
 #include <cmath>
+#include <vector>
+#include <fstream>
 
 
 namespace service{
@@ -40,6 +42,20 @@ namespace service{
 
   // Перевод окраски из формата HSV в RGB (ссылка http://www.cs.rit.edu/~ncs/color/t_convert.html)
   void HSVtoRGB(int& R, int& G, int& B, double H, double S, double V);
+
+  // Печать вектора в файл (шаблонная функция)
+  template<class T>
+  void printVectorToFile(const std::vector<T>& _vector, std::string outputFilename); 
 };
+
+// Печать вектора в файл (шаблонная функция)
+template<class T>
+void service::printVectorToFile(const std::vector<T>& _vector, std::string outputFilename){
+  std::ofstream outputFile;
+  outputFile.open(outputFilename.c_str());
+  for (unsigned int i = 0; i < _vector.size(); ++i)
+    outputFile << _vector[i] << std::endl;
+  outputFile.close();
+}
 
 #endif // SERVICE_H
