@@ -112,9 +112,9 @@ public:
 	static double calculateCycleReward(SCycle &actionsCycle, const THypercubeEnvironment &environment);
   // Отрисовка последовательности действий в файл(с использованием сторонней утилиты dot.exe из пакета GraphViz) 
   // Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
-  static void drawActionSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputImageFilename);
+  static void drawActionSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputImageFilename, double initialState = -1);
   // Служебная процедура записи одной последовательности действий в dot-файл
-  static void addActionSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0);
+  static void addActionSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, std::ofstream &dotFile, int cycleNumber = 0, double initialState = -1);
   // Отрисовка одного цикла в файл(с использованием сторонней утилиты dot.exe из пакета GraphViz) 
   // Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
   static void drawCycleToDot(SCycle &cycle, THypercubeEnvironment &environment, std::string outputDotFilename);

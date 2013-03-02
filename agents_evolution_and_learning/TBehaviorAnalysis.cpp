@@ -477,10 +477,10 @@ vector<TBehaviorAnalysis::SCycle> TBehaviorAnalysis::loadCycles(string cyclesFil
 }
 
 // Служебная процедура записи одной последовательности действий в dot-файл
-void TBehaviorAnalysis::addActionSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/)
+void TBehaviorAnalysis::addActionSequenceToDotStream(std::vector<double> &sequence, THypercubeEnvironment &environment, ofstream &dotFile, int cycleNumber /*=0*/, double initialState /*=-1*/)
 {
 	environment.setStochasticityCoefficient(0.0);
-	vector<double> states = transformActionsSequenceToStatesSequence(sequence, environment);
+  vector<double> states = transformActionsSequenceToStatesSequence(sequence, environment, initialState);
   //Надо как-то динамически инициализировать
   bool* currentStateVector = new bool[environment.getEnvironmentResolution()];
   
@@ -500,7 +500,7 @@ void TBehaviorAnalysis::addActionSequenceToDotStream(std::vector<double> &sequen
       dotFile<<currentStateVector[currentBit];
     dotFile<<"\"]"<<endl;
     // Записываем переход
-    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<states[currentStep-1]<<")"<<"\"]"<<endl;
+    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<sequence[currentStep-1]<<")"<<"\"]"<<endl;
   }
   delete []currentStateVector;
 }
@@ -539,12 +539,12 @@ void TBehaviorAnalysis::drawCycleToDot(TBehaviorAnalysis::SCycle &cycle, THyperc
 
 // Отрисовка последовательности действий в файл(с использованием сторонней утилиты dot.exe из пакета GraphViz) 
 // Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
-void TBehaviorAnalysis::drawActionSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, string outputImageFilename)
+void TBehaviorAnalysis::drawActionSequenceToDot(std::vector<double> &sequence, THypercubeEnvironment &environment, string outputImageFilename, double initialState /*=-1*/)
 {
   ofstream dotFile;
   dotFile.open((outputImageFilename+".dot").c_str());
   dotFile<<"digraph G {"<<endl;
-  addActionSequenceToDotStream(sequence, environment, dotFile);
+  addActionSequenceToDotStream(sequence, environment, dotFile, 0, initialState);
   dotFile<<"}"<<endl;
   dotFile.close();
   system(("dot -Tjpg " + outputImageFilename + ".dot -o " + outputImageFilename).c_str());

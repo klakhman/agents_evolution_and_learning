@@ -186,39 +186,64 @@ int main(int argc, char** argv){
     srand(static_cast<unsigned int>(time(0)));
     //techanalysis::analysisSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(1)_bestpopulation.txt", 
     //                                        "C:/Test/Environments/Environment1001.txt", "C:/Test/An_SLengthVsConvSize_En1001_linsys(1).txt");
-    techanalysis::evolutionSLengthVsConvSize("C:/Test/SANDBOX/settings_LINSYS.ini", "C:/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
-                                           "C:/Test/SANDBOX/Environment1120.txt", "C:/Test/SANDBOX/An_evolutionSLengthVsConvSize_En1120_63(5)_olddata.txt");
+    //techanalysis::evolutionSLengthVsConvSize("C:/Test/SANDBOX/settings_LINSYS.ini", "C:/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
+    //                                       "C:/Test/SANDBOX/Environment1120.txt", "C:/Test/SANDBOX/An_evolutionSLengthVsConvSize_En1120_63(5)_olddata.txt");
     //TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_analysis_En1001-1360.txt", "C:/Test/random.txt", 18, 20, 1);
-    //TAgent agent;
-    //string oldFilename = "D:/1/Test/SANDBOX/En1120_63(5)_maxaverage_mod.txt";
-    //ifstream oldFile;
-    //oldFile.open(oldFilename.c_str());
-    //string newFilename = "D:/1/Test/SANDBOX/En1120_63(5)_maxaverage_mod_newformat.txt";
-    //ofstream newFile;
-    //newFile.open(newFilename.c_str());
-    //int agentsQuantity = 250;
-    //for (int i = 0; i<agentsQuantity; ++i){
-    //  agent.loadOldFormatGenome(oldFile, 8, 7);
-    //  agent.uploadGenome(newFile);
-    //  cout << i << endl;
-    //}
-    //oldFile.close();
-    //newFile.close();
     //techanalysis::conductBehaviorEvolutionAnalysis("D:/1/Test/SANDBOX/settings_LINSYS.ini","D:/1/Test/SANDBOX/Environment1120.txt",  "D:/1/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
     //                                                "D:/1/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "D:/1/Test/SANDBOX/AimCyclesEvolution(CyclesData)_En1120_63(5).txt", true);
     //techanalysis::transponceData("C:/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "C:/Test/SANDBOX/aim_cycles_evolution.txt", 2);
     //vector<double> results = techanalysis::runPopulation("C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpopulation.txt", "C:/Test/SANDBOX/Environment1113.txt",
     //                                                    "C:/Test/SANDBOX/settings_PC40ANP40.ini", 0.0);
     //service::printVectorToFile(results, "C:/Test/SANDBOX/Analysis_OneRun_En1113_pc40anp40(18)_bestpopulation_1.txt");
-    //TAgent agent;
+    TAgent agent;
+    settings::fillAgentSettingsFromFile(agent, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
     //agent.loadGenome("C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpopulation.txt", 179);
-    //settings::fillAgentSettingsFromFile(agent, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
-    //THypercubeEnvironment environment("C:/Test/SANDBOX/Environment1113.txt");
-    //settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
-    //environment.setStochasticityCoefficient(0.0);
-    //environment.setRandomEnvironmentState();
     //agent.primarySystemogenesis();
-    //agent.printLife(environment, 100);
+    //ofstream out;
+    //out.open("C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agentController.txt");
+    //agent.uploadController(out);
+    //out.close();
+    ifstream in;
+    in.open("C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agentController_poorNoAL.txt");
+    agent.loadController(in);
+    in.close();
+    TNeuralNetwork initialController = *(agent.getPointerToAgentController());
+    THypercubeEnvironment environment("C:/Test/SANDBOX/Environment1113.txt");
+    settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
+    environment.setStochasticityCoefficient(0.0);
+    //double reward = 0;
+    //agent.setLearningMode(0);
+    //for (int i=0; i<environment.getInitialStatesQuantity(); ++i){
+    //  environment.setEnvironmentState(i);
+    //  agent.life(environment, 250);
+    //  reward += agent.getReward();
+    //  //cout << i;
+    //}
+    //cout << reward/environment.getInitialStatesQuantity() << endl;
+    //reward = 0;
+    //agent.setLearningMode(1);
+    //for (int i=0; i<environment.getInitialStatesQuantity(); ++i){
+    //  *(agent.getPointerToAgentController()) = initialController;
+    //  environment.setEnvironmentState(i);
+    //  agent.life(environment, 250);
+    //  reward += agent.getReward();
+    //}
+    //cout << reward/environment.getInitialStatesQuantity() << endl;
+    agent.setLearningMode(1);
+    double env[] = {1,1,0,1,0,0,0,0};
+    bool _env[] = {1,1,0,1,0,0,0,0};
+    double state = service::binToDec(_env, 8);
+    cout << "State: " << state << endl;
+    environment.setEnvironmentVector(env);
+    //agent.printLife(environment, 50);
+    //return 0;
+    agent.life(environment, 50);
+    cout << agent.getReward() << endl;
+    vector<double> life;
+    const vector< vector<double> >& agentLife = agent.getPointerToAgentLife(); 
+    for (unsigned int i=0; i < agentLife.size(); ++i)
+      life.push_back(agentLife[i][0]);
+    TBehaviorAnalysis::drawActionSequenceToDot(life, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agent_poorNoAL_state208.jpg", state);
   }
 
   /*TAnalysis* analysis = new TAnalysis;
