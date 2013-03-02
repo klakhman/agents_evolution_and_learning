@@ -7,6 +7,7 @@
 #include "TAgent.h"
 #include "TPopulation.h"
 #include "THypercubeEnvironment.h"
+#include "TBehaviorAnalysis.h"
 
 namespace techanalysis{
   // Проверка разницы двух выброк по t-критерию (подрузамевается, что дисперсии выборок неизвестны и неравны - используется критерий Кохрена-Кокса для этого случая) 
@@ -51,6 +52,10 @@ namespace techanalysis{
   // Прогона популяции - возвращает средние награды (при запуске из всех состояний) для всех агентов в популяции.
   // Системогенез проводится один раз для каждого агента. Если коэффициент стохастичности не указан, то берется значение из файла настроек. 
   std::vector<double> runPopulation(TPopulation<TAgent>& population, THypercubeEnvironment& environment);
+
+  // Подсчет диаграммы сходимости поведения агента (возвращает пары - (поведенческий цикл действий, размер бассейна притяжения в кол-ве начальных состояний))
+  // ВАЖНО: агент уже должен иметь нейроконтроллер (т.е. пройти системогенез)
+  std::vector< std::pair<TBehaviorAnalysis::SCycle, int> > calculateBehaviorConvergenceData(TAgent& agent, THypercubeEnvironment& environment);
 
   #ifndef NOT_USE_ALGLIB_LIBRARY
     // Обертка над функцией из ALGLIB - тестирование нормальности выборки по методу Харки — Бера.

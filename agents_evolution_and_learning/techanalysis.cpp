@@ -230,25 +230,11 @@ vector< pair<int, int> > techanalysis::analysisSLengthVsConvSize(TPopulation<TAg
   for (int agentNumber = 1; agentNumber <= population.getPopulationSize(); ++agentNumber){
     TAgent& currentAgent = *population.getPointertoAgent(agentNumber);
     currentAgent.linearSystemogenesis();
-    vector< TBehaviorAnalysis::SCycle > agentStrategies;
-    vector<int> strategiesConvSize;
     // Находим все стратегии агента и определяем размер их областей притяжения
-    for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
-      environment.setEnvironmentState(currentState);
-      TBehaviorAnalysis::SCycle currentStrategy  = TBehaviorAnalysis::findCycleInAgentLife(currentAgent, environment);
-      if (currentStrategy.cycleSequence.size()){
-        int strategyNumber = TBehaviorAnalysis::findCycleInExistingCycles(currentStrategy, agentStrategies);
-        if (strategyNumber) // Если такая стратегия уже была
-          strategiesConvSize[strategyNumber - 1] += 1;
-        else{
-          agentStrategies.push_back(currentStrategy);
-          strategiesConvSize.push_back(1);
-        }
-      }
-    }
+    vector< pair<TBehaviorAnalysis::SCycle, int> > convergenceData = calculateBehaviorConvergenceData(currentAgent, environment);
     // Записываем найденные стратегии
-    for (unsigned int currentStrategy = 0; currentStrategy < agentStrategies.size(); ++currentStrategy)
-      strategyLengthVsConvSize.push_back(make_pair(agentStrategies[currentStrategy].cycleSequence.size(), strategiesConvSize[currentStrategy]));
+    for (unsigned int currentStrategy = 0; currentStrategy < convergenceData.size(); ++currentStrategy)
+      strategyLengthVsConvSize.push_back(make_pair(convergenceData[currentStrategy].first.cycleSequence.size(), convergenceData[currentStrategy].second));
   }
   return strategyLengthVsConvSize;
 }
@@ -271,25 +257,10 @@ void techanalysis::evolutionSLengthVsConvSize(string settingsFilename, string be
   for (int curEvolutionTime = 1; curEvolutionTime <= evolutionTime; ++curEvolutionTime){
     currentAgent.loadGenome(bestAgentsFile);
     currentAgent.linearSystemogenesis();
-    vector< TBehaviorAnalysis::SCycle > agentStrategies;
-    vector<int> strategiesConvSize;
-    // Находим все стратегии агента и определяем размер их областей притяжения
-    for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
-      environment.setEnvironmentState(currentState);
-      TBehaviorAnalysis::SCycle currentStrategy  = TBehaviorAnalysis::findCycleInAgentLife(currentAgent, environment);
-      if (currentStrategy.cycleSequence.size()){
-        int strategyNumber = TBehaviorAnalysis::findCycleInExistingCycles(currentStrategy, agentStrategies);
-        if (strategyNumber) // Если такая стратегия уже была
-          strategiesConvSize[strategyNumber - 1] += 1;
-        else{
-          agentStrategies.push_back(currentStrategy);
-          strategiesConvSize.push_back(1);
-        }
-      }
-    }
+    vector< pair<TBehaviorAnalysis::SCycle, int> > convergenceData = calculateBehaviorConvergenceData(currentAgent, environment);
     // Записываем найденные стратегии
-    for (unsigned int currentStrategy = 0; currentStrategy < agentStrategies.size(); ++currentStrategy){
-      strategyLengthVsConvSize.push_back(make_pair(agentStrategies[currentStrategy].cycleSequence.size(), strategiesConvSize[currentStrategy]));
+    for (unsigned int currentStrategy = 0; currentStrategy < convergenceData.size(); ++currentStrategy){
+      strategyLengthVsConvSize.push_back(make_pair(convergenceData[currentStrategy].first.cycleSequence.size(), convergenceData[currentStrategy].second));
       evolutionTacts.push_back(curEvolutionTime);
     }
     cout << curEvolutionTime << endl;
@@ -406,6 +377,32 @@ vector<double> techanalysis::runPopulation(TPopulation<TAgent>& population, THyp
     cout << currentAgent << "\t" << averageReward << endl;
 	}
   return agentsRewards;
+}
+
+// Подсчет диаграммы сходимости поведения агента (возвращает пары - (поведенческий цикл действий, размер бассейна притяжения в кол-ве начальных состояний))
+// ВАЖНО: агент уже должен иметь нейроконтроллер (т.е. пройти системогенез)
+vector< pair<TBehaviorAnalysis::SCycle, int> > techanalysis::calculateBehaviorConvergenceData(TAgent& agent, THypercubeEnvironment& environment){
+  vector< pair<TBehaviorAnalysis::SCycle, int> > convergenceData;
+  vector< TBehaviorAnalysis::SCycle > agentStrategies;
+  environment.setStochasticityCoefficient(0.0);
+  // Так как может происходить обучение, то записываем изначальную сеть
+  TNeuralNetwork initialController = *(agent.getPointerToAgentController());
+  // Находим все стратегии агента и определяем размер их областей притяжения
+  for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+      environment.setEnvironmentState(currentState);
+      TBehaviorAnalysis::SCycle currentStrategy  = TBehaviorAnalysis::findCycleInAgentLife(agent, environment);
+      *(agent.getPointerToAgentController()) = initialController;
+      if (currentStrategy.cycleSequence.size()){
+        int strategyNumber = TBehaviorAnalysis::findCycleInExistingCycles(currentStrategy, agentStrategies);
+        if (strategyNumber) // Если такая стратегия уже была
+          convergenceData[strategyNumber - 1].second += 1;
+        else{
+          agentStrategies.push_back(currentStrategy);
+          convergenceData.push_back(make_pair(currentStrategy, 1));
+        }
+      }
+  }
+  return convergenceData;
 }
 
 #ifndef NOT_USE_ALGLIB_LIBRARY
