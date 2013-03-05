@@ -44,7 +44,6 @@ local.properties
 # Build results
 [Dd]ebug/
 [Rr]elease/
-config.h
 *_i.c
 *_p.c
 *.ilk
@@ -107,6 +106,9 @@ ClientBin
 stylecop.*
 ~$*
 *.dbmdl
+
+config.h
+
 Generated_Code #added for RIA/Silverlight projects
 
 # Backup & report files from converting an old project file to a newer
