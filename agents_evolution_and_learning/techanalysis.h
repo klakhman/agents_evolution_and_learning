@@ -55,7 +55,13 @@ namespace techanalysis{
 
   // Подсчет диаграммы сходимости поведения агента (возвращает пары - (поведенческий цикл действий, размер бассейна притяжения в кол-ве начальных состояний))
   // ВАЖНО: агент уже должен иметь нейроконтроллер (т.е. пройти системогенез)
-  std::vector< std::pair<TBehaviorAnalysis::SCycle, int> > calculateBehaviorConvergenceData(TAgent& agent, THypercubeEnvironment& environment);
+  std::vector< std::pair< TBehaviorAnalysis::SCycle, std::vector<int> > > calculateBehaviorConvergenceData(TAgent& agent, THypercubeEnvironment& environment);
+
+  void conductLearningVsNonLearningAnalysis(TAgent& agent, THypercubeEnvironment& environment, std::string outputFilename, 
+                                            int runsQuantity = 200, int agentLifetime = 100);
+
+  void makeBehaviorConvergenceDiagram(TAgent& agent, THypercubeEnvironment& environment, std::string imageFilename);
+
 
   #ifndef NOT_USE_ALGLIB_LIBRARY
     // Обертка над функцией из ALGLIB - тестирование нормальности выборки по методу Харки — Бера.

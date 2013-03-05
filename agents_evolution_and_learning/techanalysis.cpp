@@ -231,10 +231,10 @@ vector< pair<int, int> > techanalysis::analysisSLengthVsConvSize(TPopulation<TAg
     TAgent& currentAgent = *population.getPointertoAgent(agentNumber);
     currentAgent.linearSystemogenesis();
     // Находим все стратегии агента и определяем размер их областей притяжения
-    vector< pair<TBehaviorAnalysis::SCycle, int> > convergenceData = calculateBehaviorConvergenceData(currentAgent, environment);
+    vector< pair< TBehaviorAnalysis::SCycle, vector<int> > >convergenceData = calculateBehaviorConvergenceData(currentAgent, environment);
     // Записываем найденные стратегии
     for (unsigned int currentStrategy = 0; currentStrategy < convergenceData.size(); ++currentStrategy)
-      strategyLengthVsConvSize.push_back(make_pair(convergenceData[currentStrategy].first.cycleSequence.size(), convergenceData[currentStrategy].second));
+      strategyLengthVsConvSize.push_back(make_pair(convergenceData[currentStrategy].first.cycleSequence.size(), convergenceData[currentStrategy].second.size()));
   }
   return strategyLengthVsConvSize;
 }
@@ -257,10 +257,10 @@ void techanalysis::evolutionSLengthVsConvSize(string settingsFilename, string be
   for (int curEvolutionTime = 1; curEvolutionTime <= evolutionTime; ++curEvolutionTime){
     currentAgent.loadGenome(bestAgentsFile);
     currentAgent.linearSystemogenesis();
-    vector< pair<TBehaviorAnalysis::SCycle, int> > convergenceData = calculateBehaviorConvergenceData(currentAgent, environment);
+    vector< pair< TBehaviorAnalysis::SCycle, vector<int> > > convergenceData = calculateBehaviorConvergenceData(currentAgent, environment);
     // Записываем найденные стратегии
     for (unsigned int currentStrategy = 0; currentStrategy < convergenceData.size(); ++currentStrategy){
-      strategyLengthVsConvSize.push_back(make_pair(convergenceData[currentStrategy].first.cycleSequence.size(), convergenceData[currentStrategy].second));
+      strategyLengthVsConvSize.push_back(make_pair(convergenceData[currentStrategy].first.cycleSequence.size(), convergenceData[currentStrategy].second.size()));
       evolutionTacts.push_back(curEvolutionTime);
     }
     cout << curEvolutionTime << endl;
@@ -268,7 +268,7 @@ void techanalysis::evolutionSLengthVsConvSize(string settingsFilename, string be
   bestAgentsFile.close();
   // Записываем результаты
   ofstream outputFile;
-  outputFile.open(outputFilename);
+  outputFile.open(outputFilename.c_str());
   for (unsigned int currentStrategy = 0; currentStrategy < strategyLengthVsConvSize.size(); ++currentStrategy)
     outputFile << strategyLengthVsConvSize[currentStrategy].first << "\t";
   outputFile << endl;
@@ -379,10 +379,10 @@ vector<double> techanalysis::runPopulation(TPopulation<TAgent>& population, THyp
   return agentsRewards;
 }
 
-// Подсчет диаграммы сходимости поведения агента (возвращает пары - (поведенческий цикл действий, размер бассейна притяжения в кол-ве начальных состояний))
+// Подсчет диаграммы сходимости поведения агента (возвращает пары - (поведенческий цикл действий, список состояний в бассейне притяжения поведенческой стратегии))
 // ВАЖНО: агент уже должен иметь нейроконтроллер (т.е. пройти системогенез)
-vector< pair<TBehaviorAnalysis::SCycle, int> > techanalysis::calculateBehaviorConvergenceData(TAgent& agent, THypercubeEnvironment& environment){
-  vector< pair<TBehaviorAnalysis::SCycle, int> > convergenceData;
+vector< pair< TBehaviorAnalysis::SCycle, vector<int> > > techanalysis::calculateBehaviorConvergenceData(TAgent& agent, THypercubeEnvironment& environment){
+  vector< pair< TBehaviorAnalysis::SCycle, vector<int> > > convergenceData;
   vector< TBehaviorAnalysis::SCycle > agentStrategies;
   environment.setStochasticityCoefficient(0.0);
   // Так как может происходить обучение, то записываем изначальную сеть
@@ -395,14 +395,91 @@ vector< pair<TBehaviorAnalysis::SCycle, int> > techanalysis::calculateBehaviorCo
       if (currentStrategy.cycleSequence.size()){
         int strategyNumber = TBehaviorAnalysis::findCycleInExistingCycles(currentStrategy, agentStrategies);
         if (strategyNumber) // Если такая стратегия уже была
-          convergenceData[strategyNumber - 1].second += 1;
+          convergenceData[strategyNumber - 1].second.push_back(currentState);
         else{
           agentStrategies.push_back(currentStrategy);
-          convergenceData.push_back(make_pair(currentStrategy, 1));
+          vector<int> tmp;
+          tmp.push_back(currentState);
+          convergenceData.push_back(make_pair(currentStrategy, tmp));
         }
       }
   }
   return convergenceData;
+}
+
+void techanalysis::conductLearningVsNonLearningAnalysis(TAgent& agent, THypercubeEnvironment& environment, string outputFilename, 
+                                          int runsQuantity /*=200*/, int agentLifetime /*=100*/){
+  ofstream outputFile;
+  outputFile.open(outputFilename.c_str());
+  environment.setStochasticityCoefficient(0.0);
+  for (int currentRun = 0; currentRun < runsQuantity; ++currentRun){  
+    agent.primarySystemogenesis();
+    agent.setLearningMode(1);
+    double averageDiffNeurons = 0;
+    int initNeurons = agent.getActiveNeuronsQuantity();
+    double averageLearningReward = 0;
+    TNeuralNetwork initController = *(agent.getPointerToAgentController());
+    for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+      environment.setEnvironmentState(currentState);
+      *(agent.getPointerToAgentController()) = initController;
+      agent.life(environment, agentLifetime);
+      averageLearningReward += agent.getReward() / environment.getInitialStatesQuantity();
+      averageDiffNeurons += (agent.getActiveNeuronsQuantity() - initNeurons)/static_cast<double>(environment.getInitialStatesQuantity());
+    }
+    *(agent.getPointerToAgentController()) = initController;
+    double averageNonLearningReward = 0;
+    agent.setLearningMode(0);
+    for (int currentState = 0; currentState < environment.getInitialStatesQuantity(); ++currentState){
+      environment.setEnvironmentState(currentState);
+      agent.life(environment, agentLifetime);
+      averageNonLearningReward += agent.getReward() / environment.getInitialStatesQuantity();
+    }
+    cout << currentRun << ":\t" << averageLearningReward << "\t" << (averageLearningReward - averageNonLearningReward) << "\t" << averageDiffNeurons << endl;
+    outputFile << averageLearningReward << "\t" << (averageLearningReward - averageNonLearningReward) << "\t" << averageDiffNeurons << endl;
+  }
+}
+
+void techanalysis::makeBehaviorConvergenceDiagram(TAgent& agent, THypercubeEnvironment& environment, string imageFilename){
+  vector< pair< TBehaviorAnalysis::SCycle, vector<int> > > convergenceData = calculateBehaviorConvergenceData(agent, environment);
+  double sizeScaleCoef = 0.1; // Масштабирование размера круга в зависимости от длины цикла
+  ofstream outputDotFile;
+  outputDotFile.open((imageFilename + ".dot").c_str());
+  outputDotFile << "graph G{" << endl << "dpi = \"600\";" << endl;
+  // Необходимо дополнительно определить состояния, из которых агент никуда не сходится
+  vector<bool> noCycleStatesInd(environment.getInitialStatesQuantity(), false); 
+  for (unsigned int currentCycle = 1; currentCycle <= convergenceData.size(); ++currentCycle){
+    double circleSize = convergenceData[currentCycle - 1].first.cycleSequence.size() * sizeScaleCoef;
+    string color = "grey60";
+    outputDotFile << "\tc" << currentCycle << " [label=\"" << currentCycle << "\", shape=doublecircle, fillcolor=" << color
+                  << ", style=filled, height=" << circleSize << ", fixedsize=true]" << endl;
+    // Записываем бассейн притяжения
+    for (unsigned int currentState = 1; currentState <= convergenceData[currentCycle - 1].second.size(); ++currentState){
+      int stateNumber = convergenceData[currentCycle - 1].second[currentState - 1];
+      outputDotFile << "\ts" << stateNumber << " [label = \"" << stateNumber << "\", fontname=\"Arial\"]" << endl;
+      outputDotFile << "\ts" << stateNumber << " -- c" << currentCycle << endl;
+      noCycleStatesInd[stateNumber] = true;
+    }
+  }
+  vector<int> noCycleStates;
+  for (unsigned int currenState = 0; currenState < noCycleStatesInd.size(); ++currenState)
+    if (!noCycleStatesInd[currenState]) noCycleStates.push_back(currenState);
+  // Если есть хотя бы одно состояние, из которого агент никуда не сходится
+  if (noCycleStates.size()){
+    outputDotFile << "\tc0 [height=0, fixedsize=true]" << endl;
+    for (unsigned int currentState = 1; currentState <= noCycleStates.size(); ++currentState){
+      int stateNumber = noCycleStates[currentState - 1];
+      outputDotFile << "\ts" << stateNumber << " [label = \"" << stateNumber << "\", fontname=\"Arial\"]" << endl;
+      outputDotFile << "\ts" << stateNumber << " -- c0" << endl;
+    }
+  }
+  outputDotFile << "}" << endl;
+  // Записываем циклы
+  vector<TBehaviorAnalysis::SCycle> cycles;
+  for (unsigned int currentCycle = 0; currentCycle < convergenceData.size(); ++currentCycle)
+    cycles.push_back(convergenceData[currentCycle].first);
+  TBehaviorAnalysis::uploadCycles(cycles, imageFilename + ".txt");
+  // Отрисовываем картинку
+  system(("fdp -Tjpg " + imageFilename + ".dot -o " + imageFilename).c_str());
 }
 
 #ifndef NOT_USE_ALGLIB_LIBRARY
