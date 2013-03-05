@@ -3,6 +3,7 @@
 #include "TParallelEvolutionaryProcess.h"
 
 #include "TEvolutionaryProcess.h"
+#include "TSharedEvolutionaryProcess.h"
 #include "settings.h"
 
 #include <string>
@@ -11,17 +12,19 @@
 #include <sstream>
 #include <ctime>
 #include <cstring>
+#include <vector>
 
 using namespace std;
 
 // Расишифровка парметров командной строки
-void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign){
+void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign, unsigned int& sharedCoef){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
 			if (!strcmp("-env", argv[currentArgNumber])) { firstEnvironmentNumber = atoi(argv[++currentArgNumber]); lastEnvironmentNumber = atoi(argv[++currentArgNumber]);}
 			else if (!strcmp("-try", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
 			else if (!strcmp("-sign", argv[currentArgNumber])) { runSign = argv[++currentArgNumber]; }
+      else if (!strcmp("-shared", argv[currentArgNumber])) { sharedCoef = atoi(argv[++currentArgNumber]); }
 		}
 		++currentArgNumber;
 	}
@@ -85,85 +88,113 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	int lastTryNumber;
 	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
 	unsigned long startTime = static_cast<unsigned long>(time(0)); // Время старта процесса эволюции
-	decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign);
+  unsigned int sharedCoef = 1; // Количество процессов на один эволюционный запуск
+  decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, sharedCoef);
+  // Если кол-во процессов на запуск больше, чем кол-во доступных рабочих процессов, то выходим
+  if (sharedCoef > processesQuantity - 1) exit(-1);
+  if (sharedCoef < 1) sharedCoef = 1;
 	// Создаем файл с логом
 	stringstream logFilename;
 	logFilename << directoriesSettings.workDirectory << "/Evolution_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << runSign << ".txt";
 	ofstream logFile;
 	logFile.open(logFilename.str().c_str());
+  // Создаем стек свободных процессов (исключая рутовый)
+  vector<int> processesStack;
+  for (int currentProcess = processesQuantity - 1; currentProcess > 0; --currentProcess)
+    processesStack.push_back(currentProcess);
+
 	// Выдача дочерним процессам всех заданий данных на выполнение программе
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment)
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)
-			// Если не всем процессам выданы изначальные задания (простой подсчет)
-			if ((currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1 <= processesQuantity - 1){
-				// Подсчитываем номер следущего процесса для посылки задания
-				int processRankSend = (currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1;
-				// Составляем сообщение для рабочего процесса
+      if (processesStack.size() >= sharedCoef){ // Если есть достаточное кол-во свободных процессов
+				// Извлекаем необходимое кол-во процессов из стека
+        vector<int> runPool;
+        for (unsigned int i=0; i<sharedCoef; ++i){
+          runPool.push_back(processesStack.back());
+          processesStack.pop_back();
+        }
+				// Составляем сообщение для рабочих процессов в данном запуске (с полным списком процессов)
 				stringstream outStream;
+        outStream << "$PROCQ$" << runPool.size();
+        for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
+          outStream << "$PROC" << currentProcess + 1 << "$" << runPool[currentProcess];
         outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign;
 				char outMessage[messageLength];
 				outStream >> outMessage;
-				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
+        // Посылаем команду на выполнение всем процессам 
+        for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
+          MPI_Send(outMessage, messageLength - 1, MPI_CHAR, runPool[currentProcess], messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
-					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
+					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for root process " << runPool[0] << endl; 
 			} // Если все процессы получили задание,  то ждем завершения выполнения и по ходу выдаем оставшиеся задания
 			else {
 				char _inputMessage[messageLength];
-				// Ждем входящее сообщение о том, что процесс выполнил задание
-				MPI_Recv(_inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
-        string inputMessage = _inputMessage;
-				// Расшифровываем сообщение от рабочего процесса
-				int processRankSend, finishedEnvironment, finishedTry;
-				decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
-				// Записываем в лог прием задания
-				unsigned long currentTime = static_cast<unsigned long>(time(0));
-				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
-					<< "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-				// Составляем сообщение и высылаем задание рабочему процессу
+        while (processesStack.size() < sharedCoef){
+				  // Ждем входящее сообщение о том, что процесс выполнил задание
+				  MPI_Recv(_inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+          string inputMessage = _inputMessage;
+				  // Расшифровываем сообщение от рабочего процесса
+				  int processRankSend, finishedEnvironment, finishedTry;
+          finishedTry = finishedEnvironment = 0;
+				  decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
+				  // Записываем в лог прием задания если это сообщение от рутового процесса (в нем есть номера задания)
+          if ((0 != finishedTry) && (0 != finishedEnvironment)){
+            unsigned long currentTime = static_cast<unsigned long>(time(0));
+				    logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
+				  	  << "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from root process " << processRankSend << endl; 
+          }
+          processesStack.push_back(processRankSend);
+        }
+        // Извлекаем необходимое кол-во процессов из стека
+        vector<int> runPool;
+        for (unsigned int i=0; i<sharedCoef; ++i){
+          runPool.push_back(processesStack.back());
+          processesStack.pop_back();
+        }
+				// Составляем сообщение для рабочих процессов в данном запуске (с полным списком процессов)
 				stringstream outStream;
+        outStream << "$PROCQ$" << runPool.size();
+        for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
+          outStream << "$PROC" << currentProcess + 1 << "$" << runPool[currentProcess];
         outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign;
 				char outMessage[messageLength];
 				outStream >> outMessage;
-				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
+				// Посылаем команду на выполнение всем процессам 
+        for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
+          MPI_Send(outMessage, messageLength - 1, MPI_CHAR, runPool[currentProcess], messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
+        unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
-					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
+					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for root process " << runPool[0] << endl; 
 			}
 
-	// Когда все задания закончились, ждем пока все они будут выполнены и по ходу посылаем всем процессам команду о завершении
-	int processTillQuit; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
-  int tasksQuantity = (lastEnvironmentNumber - firstEnvironmentNumber + 1) * (lastTryNumber - firstTryNumber + 1);
-  if (tasksQuantity < processesQuantity - 1){
-    // Если количество процессов больше, чем кол-во заданий, то посылаем команду о завершении всем оставшимся
-    for (int prRankSend = tasksQuantity + 1; prRankSend < processesQuantity; ++prRankSend){
-      char outMessage[messageLength];
-		  strcpy(outMessage, "$Q$");
-		  MPI_Send(outMessage, messageLength - 1, MPI_CHAR, prRankSend, messageType, MPI_COMM_WORLD);
-    }
-    processTillQuit = (lastEnvironmentNumber - firstEnvironmentNumber + 1) * (lastTryNumber - firstTryNumber + 1);
-  }
-  else
-    processTillQuit = processesQuantity - 1; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
-
-	while (processTillQuit > 0){
+	// Когда все задания закончились, ждем пока все они будут выполнены
+  while (processesStack.size() < processesQuantity - 1){
 		char _inputMessage[messageLength];
 		MPI_Recv(_inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
     string inputMessage = _inputMessage;
 		// Расшифровываем сообщение от рабочего процесса
 		int processRankSend, finishedEnvironment, finishedTry;
+    finishedEnvironment = finishedTry = 0;
 		decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry);
-		// Записываем в лог прием задания
-		unsigned long currentTime = static_cast<unsigned long>(time(0));
-		logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
-			<< "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-		// Составляем сообщение о выходе и высылаем
-		char outMessage[messageLength];
-		strcpy(outMessage, "$Q$");
-		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
-		--processTillQuit;
+		// Если это сообщение от рутового процесса, то записываем в лог прием задания
+    if ((0 != finishedTry) && (0 != finishedEnvironment)){
+		  unsigned long currentTime = static_cast<unsigned long>(time(0));
+		  logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
+			  << "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from root process " << processRankSend << endl; 
+    }
+    processesStack.push_back(processRankSend);
 	}
+  // Составляем сообщение о выходе и высылаем всем процессам
+	char outMessage[messageLength];
+	strcpy(outMessage, "$Q$");
+  while (processesStack.size()){
+    MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processesStack[processesStack.size() - 1], messageType, MPI_COMM_WORLD);
+    processesStack.pop_back();
+  }
+		
   logFile << endl << "Done." << endl;
 	logFile.close();
 }
@@ -191,8 +222,20 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 //}
 
 // Расшифровка сообщения от рутового процесса 
-void TParallelEvolutionaryProcess::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign){
+void TParallelEvolutionaryProcess::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign, vector<int>& processesPool){
   string featureNote;
+  // Определяем кол-во процессов в пуле и их структуру
+  int processPoolCapacity = 0;
+  featureNote = findParameterNote(inputMessage, "$PROCQ$");
+  if (featureNote != "") processPoolCapacity = atoi(featureNote.c_str());
+  processesPool.resize(processPoolCapacity);
+  stringstream currentProcessSign;
+  for (int currentProcess = 1; currentProcess <= processPoolCapacity; ++currentProcess){
+    currentProcessSign.str("");
+    currentProcessSign << "$PROC" << currentProcess << "$";
+    featureNote = findParameterNote(inputMessage, currentProcessSign.str());
+    processesPool[currentProcess - 1] = atoi(featureNote.c_str());
+  }
   // Определяем номер среды $ENV$
   featureNote = findParameterNote(inputMessage, "$ENV$");
   if (featureNote != "") currentEnvironment = atoi(featureNote.c_str());
@@ -213,12 +256,14 @@ void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 		// Декодируем сообщение с заданием
 		int currentEnvironment, currentTry;
 		string runSign;
-		decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign);
+    vector<int> processesPool;
+		decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign, processesPool);
 		// Определяем уникальное ядро рандомизации
 		// К ядру инициализации случайных чисел добавляется номер процесса, чтобы развести изначально инициализируемые процессы
 		unsigned int randomSeed = static_cast<unsigned int>(time(0)) + processRank;
 		// Заполняем параметры эволюционного процесса и запускаем его
-		TEvolutionaryProcess* evolutionaryProcess = new TEvolutionaryProcess;
+    // Если в локальном пуле процессов всего один процесс, то запускаем более простой метод
+    TEvolutionaryProcess* evolutionaryProcess = (processesPool.size() > 1) ? (new TSharedEvolutionaryProcess) : (new TEvolutionaryProcess);
 		stringstream tmpStream;
 		tmpStream << directoriesSettings.environmentDirectory << "/Environment" << currentEnvironment << ".txt";
 		evolutionaryProcess->filenameSettings.environmentFilename = tmpStream.str();
@@ -232,11 +277,21 @@ void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 		tmpStream << directoriesSettings.resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestagents.txt";
 		evolutionaryProcess->filenameSettings.bestAgentsFilename = tmpStream.str();
 		evolutionaryProcess->filenameSettings.settingsFilename = settingsFilename;
-		evolutionaryProcess->start(randomSeed);
+    if (processesPool.size() > 1){
+      (dynamic_cast<TSharedEvolutionaryProcess*>(evolutionaryProcess))->processesLocalPool = processesPool;
+      (dynamic_cast<TSharedEvolutionaryProcess*>(evolutionaryProcess))->tmpDirectory = directoriesSettings.workDirectory;
+      (dynamic_cast<TSharedEvolutionaryProcess*>(evolutionaryProcess))->runSign = runSign;
+      evolutionaryProcess->start();
+    }
+    else
+		  evolutionaryProcess->start(randomSeed);
 		delete evolutionaryProcess;
 		// Посылаем ответ о завершении работы над заданием
-		tmpStream.str(""); // Очищаем поток
-    tmpStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$PR$" << processRank;
+    tmpStream.str(""); // Очищаем поток
+    if (processRank == processesPool[0]) // Если это рутовый процесс для этого запуска
+      tmpStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$PR$" << processRank;
+    else
+      tmpStream << "$PR$" << processRank;
 		char outMessage[messageLength];
 		tmpStream >> outMessage;
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD);

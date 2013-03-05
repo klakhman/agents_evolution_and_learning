@@ -71,8 +71,6 @@ class TPopulation{
 	void generateOffspring(TemplateNeuralAgent& kidAgent, const TemplateNeuralAgent& firstParentAgent, const TemplateNeuralAgent& secondParentAgent, int currentEvolutionStep);
 	//Процедура получения номера агента, используемая в рулеточном алгоритме
 	int rouletteWheelSelection(double populationFitness[]);
-	// Процедура генерации нового поколения и замены старого на новое
-	void generateNextPopulation(int currentEvolutionStep);
 
 public:
 	// Структура параметры эволюции
@@ -142,6 +140,9 @@ public:
 
 	// Процедура эволюции популяции
 	void evolution(TEnvironment& environment);
+
+  // Процедура генерации нового поколения и замены старого на новое
+	void generateNextPopulation(int currentEvolutionStep);
 
 	// Копирование популяции (создание всех новых структур)
 	TPopulation<TemplateNeuralAgent>& operator=(const TPopulation<TemplateNeuralAgent>& sourcePopulation);

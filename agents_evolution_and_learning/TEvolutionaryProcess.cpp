@@ -8,6 +8,8 @@
 #include <fstream>
 
 #include <sstream>
+#include "mpi.h"
+
 
 
 using namespace std;
@@ -136,4 +138,5 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	resultsFile.close();
 	bestAgentsFile.close();
 }
+
 

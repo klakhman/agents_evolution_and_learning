@@ -109,6 +109,9 @@ public:
 	}
 	// Геттеры и сеттеры
 	double getReward() const { return reward; }
+  // Данный сеттер практически не используется
+  void setReward(double _reward){ reward = _reward; }
+
 	int getMoreFitParent() const { return parents[0]; }
 	int getLessFitParent() const { return parents[1]; }
 	void setMoreFitParent(int moreFitParent) { parents[0] = moreFitParent; }

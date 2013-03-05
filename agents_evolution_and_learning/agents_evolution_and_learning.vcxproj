@@ -110,6 +110,7 @@
     <ClInclude Include="TPoolPredConnection.h" />
     <ClInclude Include="TPopulation.h" />
     <ClInclude Include="TPredConnection.h" />
+    <ClInclude Include="TSharedEvolutionaryProcess.h" />
     <ClInclude Include="TSynapse.h" />
     <ClInclude Include="TTopologyAnalysis.h" />
   </ItemGroup>
@@ -132,6 +133,7 @@
     <ClCompile Include="TPoolNetwork.cpp" />
     <ClCompile Include="TPoolPredConnection.cpp" />
     <ClCompile Include="TPredConnection.cpp" />
+    <ClCompile Include="TSharedEvolutionaryProcess.cpp" />
     <ClCompile Include="TSynapse.cpp" />
     <ClCompile Include="TTopologyAnalysis.cpp" />
   </ItemGroup>

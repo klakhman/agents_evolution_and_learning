@@ -9,6 +9,7 @@
 #include <fstream>
 
 class TEvolutionaryProcess{
+protected:  
 	// Популяция агентов
 	TPopulation<TAgent>* agentsPopulation;
 	// Среда для агентов
@@ -17,6 +18,7 @@ class TEvolutionaryProcess{
 	double bestAverageReward;
 	// Признак того, что надо печатать расширенную информацию про пулы, когда мы записываем агентов
 	bool extraPrint;
+
 public:
 	// Настройки файлов процесса
 	struct SFilenameSettings{
@@ -25,6 +27,8 @@ public:
 		std::string bestPopulationFilename;
 		std::string bestAgentsFilename;
 		std::string settingsFilename;
+    // Название файла временной популяции (используется для временной записи популяции в режиме с "общей" памятью)
+    std::string tmpPopulationFilename;
 	} filenameSettings;
 	// Конструктор по умолчанию
 	TEvolutionaryProcess(){
@@ -35,7 +39,7 @@ public:
 		extraPrint = false;
 	}
 	// Деструктор
-	~TEvolutionaryProcess(){
+	virtual ~TEvolutionaryProcess(){
 		if (agentsPopulation) delete agentsPopulation;
 		if (environment) delete environment;
 	}
@@ -49,7 +53,7 @@ public:
 	void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
 
 	// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
-	void start(unsigned int randomSeed = 0);
+	virtual void start(unsigned int randomSeed = 0);
 };
 
 
