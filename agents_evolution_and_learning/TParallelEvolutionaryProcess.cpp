@@ -277,14 +277,9 @@ void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 		tmpStream << directoriesSettings.resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestagents.txt";
 		evolutionaryProcess->filenameSettings.bestAgentsFilename = tmpStream.str();
 		evolutionaryProcess->filenameSettings.settingsFilename = settingsFilename;
-    if (processesPool.size() > 1){
+    if (processesPool.size() > 1)
       (dynamic_cast<TSharedEvolutionaryProcess*>(evolutionaryProcess))->processesLocalPool = processesPool;
-      (dynamic_cast<TSharedEvolutionaryProcess*>(evolutionaryProcess))->tmpDirectory = directoriesSettings.workDirectory;
-      (dynamic_cast<TSharedEvolutionaryProcess*>(evolutionaryProcess))->runSign = runSign;
-      evolutionaryProcess->start();
-    }
-    else
-		  evolutionaryProcess->start(randomSeed);
+		evolutionaryProcess->start(randomSeed);
 		delete evolutionaryProcess;
 		// Посылаем ответ о завершении работы над заданием
     tmpStream.str(""); // Очищаем поток

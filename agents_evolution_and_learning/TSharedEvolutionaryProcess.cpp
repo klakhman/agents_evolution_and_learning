@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+п»ї#define _CRT_SECURE_NO_WARNINGS
 
 #include "TSharedEvolutionaryProcess.h"
 #include "mpi.h"
@@ -14,101 +14,75 @@
 
 using namespace std;
 
-// Нахождение записи о параметре в строке с сообщением от процесса
-string TSharedEvolutionaryProcess::findParameterNote(string inputMessage, string parameterString){
-  int featurePosition = 0;
-  string parameterNote;
-  if ((featurePosition = inputMessage.find(parameterString)) != string::npos){
-    int parameterEnd = 0;
-    // Ищем до следующего параметра или конца строки
-    if ((parameterEnd = inputMessage.find("$", featurePosition + parameterString.length())) == string::npos)
-      parameterEnd = inputMessage.length();
-    parameterNote = inputMessage.substr(featurePosition + parameterString.length(), parameterEnd - featurePosition - parameterString.length());
-  }
-  return parameterNote;
-}
-
-// Расшифровка сообщения от рутового процесса рабочему
-void TSharedEvolutionaryProcess::decodeWorkMessage(const string& workMessage, string& tmpAgentsFilename, int& agentsQuantity){
-  tmpAgentsFilename = findParameterNote(workMessage, "$TMPFILE$");
-  agentsQuantity = atoi(findParameterNote(workMessage, "$AGQ$").c_str());
-}
-
-// Расшифровка сообщения от рабочего процесса рутовому с результатами обсчетов (возвращает награду всех агентов)
+// Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР° СЂСѓС‚РѕРІРѕРјСѓ СЃ СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё РѕР±СЃС‡РµС‚РѕРІ (РІРѕР·РІСЂР°С‰Р°РµС‚ РЅР°РіСЂР°РґСѓ РІСЃРµС… Р°РіРµРЅС‚РѕРІ)
 vector<double> TSharedEvolutionaryProcess::decodeFineshedWorkMessage(const string& finishedWorkMessage, int& process){
   vector<double> rewards;
-  // Считается, что награды в агенте записаны в формате PROCN$R1$R2$R3$...$RN
+  // РЎС‡РёС‚Р°РµС‚СЃСЏ, С‡С‚Рѕ РЅР°РіСЂР°РґС‹ РІ Р°РіРµРЅС‚Рµ Р·Р°РїРёСЃР°РЅС‹ РІ С„РѕСЂРјР°С‚Рµ PROCN$R1$R2$R3$...$RN
   process = atoi(finishedWorkMessage.substr(0, finishedWorkMessage.find("$")).c_str());
   unsigned int currentPos = finishedWorkMessage.find("$") + 1;
   while (currentPos <= finishedWorkMessage.length()){
     int nextSepPos = finishedWorkMessage.find("$", currentPos);
     rewards.push_back( (string::npos != nextSepPos) ? atof(finishedWorkMessage.substr(currentPos, nextSepPos-currentPos).c_str()) : 
                                                       atof(finishedWorkMessage.substr(currentPos).c_str()) );
-    // Сдвигаем текущую позциию
+    // РЎРґРІРёРіР°РµРј С‚РµРєСѓС‰СѓСЋ РїРѕР·С†РёРёСЋ
     currentPos = (string::npos != nextSepPos) ? (nextSepPos + 1) : (finishedWorkMessage.length() + 1);
   }
   return rewards;
 }
 
-// Рутовый процесс
+// Р СѓС‚РѕРІС‹Р№ РїСЂРѕС†РµСЃСЃ
 void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
-  // Загружаем среду
+  // Р—Р°РіСЂСѓР¶Р°РµРј СЃСЂРµРґСѓ
 	if (environment)
 		delete environment;
 	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
 	settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
-  // Создаем популяцию
+  // РЎРѕР·РґР°РµРј РїРѕРїСѓР»СЏС†РёСЋ
   if (agentsPopulation)
 		  delete agentsPopulation;
 	agentsPopulation = new TPopulation<TAgent>;
 	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
-  // Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
+  // Р¤РёР·РёС‡РµСЃРєРё Р°РіРµРЅС‚С‹ РІ РїРѕРїСѓР»СЏС†РёРё СѓР¶Рµ СЃРѕР·РґР°РЅС‹ (РїРѕСЃР»Рµ С‚РѕРіРѕ, РєР°Рє Р·Р°РіСЂСѓР·РёР»СЃСЏ СЂР°Р·РјРµСЂ РїРѕРїСѓР»СЏС†РёРё), РїРѕСЌС‚РѕРјСѓ РјРѕР¶РµРј Р·Р°РіСЂСѓР·РёС‚СЊ РІ РЅРёС… РЅР°СЃС‚СЂРѕР№РєРё
 	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
-  // Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
+  // РќР°СЃС‚СЂРѕР№РєРё СѓР¶Рµ Р·Р°РіСЂСѓР¶РµРЅС‹ РІ Р°РіРµРЅС‚РѕРІ, РїРѕСЌС‚РѕРјСѓ РјРѕР¶РµРј РіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ РјРёРЅРёРјР°Р»СЊРЅСѓСЋ РїРѕРїСѓР»СЏС†РёСЋ
 	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
-  // Опустошаем файл лучших агентов если он есть и создаем файл результатов
+  // РћРїСѓСЃС‚РѕС€Р°РµРј С„Р°Р№Р» Р»СѓС‡С€РёС… Р°РіРµРЅС‚РѕРІ РµСЃР»Рё РѕРЅ РµСЃС‚СЊ Рё СЃРѕР·РґР°РµРј С„Р°Р№Р» СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 	ofstream resultsFile;
 	createMainResultsFile(resultsFile, randomSeed);
 	ofstream bestAgentsFile;
 	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str());
-	// Создаем структуру лучшей популяции (если процессор достаточно быстрый, то копирование популяций будет быстрее чем каждый раз записывать популяцию в файл)
+	// РЎРѕР·РґР°РµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ Р»СѓС‡С€РµР№ РїРѕРїСѓР»СЏС†РёРё (РµСЃР»Рё РїСЂРѕС†РµСЃСЃРѕСЂ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ Р±С‹СЃС‚СЂС‹Р№, С‚Рѕ РєРѕРїРёСЂРѕРІР°РЅРёРµ РїРѕРїСѓР»СЏС†РёР№ Р±СѓРґРµС‚ Р±С‹СЃС‚СЂРµРµ С‡РµРј РєР°Р¶РґС‹Р№ СЂР°Р· Р·Р°РїРёСЃС‹РІР°С‚СЊ РїРѕРїСѓР»СЏС†РёСЋ РІ С„Р°Р№Р»)
 	TPopulation<TAgent>* bestPopulation = new TPopulation<TAgent>;
-  // Вычисление информации о различных процессах в пуле данного рутового процесса
-  // Распределение агентов для обсчета по процессам (ключ - номер процесса, значение - <номер первого агента(с 0), кол-во агентов>)
+  // Р’С‹С‡РёСЃР»РµРЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЂР°Р·Р»РёС‡РЅС‹С… РїСЂРѕС†РµСЃСЃР°С… РІ РїСѓР»Рµ РґР°РЅРЅРѕРіРѕ СЂСѓС‚РѕРІРѕРіРѕ РїСЂРѕС†РµСЃСЃР°
+  // Р Р°СЃРїСЂРµРґРµР»РµРЅРёРµ Р°РіРµРЅС‚РѕРІ РґР»СЏ РѕР±СЃС‡РµС‚Р° РїРѕ РїСЂРѕС†РµСЃСЃР°Рј (РєР»СЋС‡ - РЅРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°, Р·РЅР°С‡РµРЅРёРµ - <РЅРѕРјРµСЂ РїРµСЂРІРѕРіРѕ Р°РіРµРЅС‚Р°(СЃ 0), РєРѕР»-РІРѕ Р°РіРµРЅС‚РѕРІ>)
   map< int, pair<int, int> > processesAgents;
-  // В первый (рутовый) процесс для обсчета помещается весь остаток от деления общего числа агентов на все процессы
+  // Р’ РїРµСЂРІС‹Р№ (СЂСѓС‚РѕРІС‹Р№) РїСЂРѕС†РµСЃСЃ РґР»СЏ РѕР±СЃС‡РµС‚Р° РїРѕРјРµС‰Р°РµС‚СЃСЏ РІРµСЃСЊ РѕСЃС‚Р°С‚РѕРє РѕС‚ РґРµР»РµРЅРёСЏ РѕР±С‰РµРіРѕ С‡РёСЃР»Р° Р°РіРµРЅС‚РѕРІ РЅР° РІСЃРµ РїСЂРѕС†РµСЃСЃС‹
   processesAgents[processesLocalPool[0]] = make_pair(0, agentsPopulation->getPopulationSize()/processesLocalPool.size() +
                                                      agentsPopulation->getPopulationSize()%processesLocalPool.size());
   for (unsigned int currentProcess = 1; currentProcess < processesLocalPool.size(); ++currentProcess)
     processesAgents[processesLocalPool[currentProcess]] = 
       make_pair((currentProcess-1)*agentsPopulation->getPopulationSize()/processesLocalPool.size() + processesAgents[processesLocalPool[0]].second,
                 agentsPopulation->getPopulationSize()/processesLocalPool.size());
-  // Запускаем эволюционный процесс
-
+  // Р—Р°РїСѓСЃРєР°РµРј СЌРІРѕР»СЋС†РёРѕРЅРЅС‹Р№ РїСЂРѕС†РµСЃСЃ
   stringstream tmpStream;
   for (int currentEvolutionStep = 1; currentEvolutionStep <= agentsPopulation->evolutionSettings.evolutionTime; ++currentEvolutionStep){
     if (currentEvolutionStep != 1) agentsPopulation->generateNextPopulation(currentEvolutionStep);
-    // Записываем временные файлы c агентами для процессов и высылаем задание всем процессам
+    // Р’С‹СЃС‹Р»Р°РµРј Р·Р°РґР°РЅРёРµ (РґР°РЅРЅС‹Рµ) РІСЃРµРј РїСЂРѕС†РµСЃСЃР°Рј
     for (unsigned int currentProcess = 1; currentProcess < processesLocalPool.size(); ++currentProcess){
-      tmpStream.str("");
-      tmpStream << tmpDirectory << "/tmpPop" << processRank << "_" << currentProcess << "_" << randomSeed << ".txt";
-      ofstream tmpOutputFile;
-      tmpOutputFile.open(tmpStream.str().c_str());
-      // Записываем агентов в файл для рабочего процесса
+      // РЈРєР°Р·С‹РІР°РµРј, С‡С‚Рѕ Р·Р°РґР°РЅРёРµ РЅР°С‡Р°Р»РѕСЃСЊ
+      strcpy(outputMessage, "$START$");
+      MPI_Send(outputMessage, messageLength, MPI_CHAR, processesLocalPool[currentProcess], messageType, MPI_COMM_WORLD);
+      // РџРµСЂРµСЃС‹Р»Р°РµРј РєРѕР»-РІРѕ Р°РіРµРЅС‚РѕРІ
+      MPI_Send(&(processesAgents[processesLocalPool[currentProcess]].second), 1, MPI_INT, processesLocalPool[currentProcess], messageType, MPI_COMM_WORLD);
+      // Р—Р°РїРёСЃС‹РІР°РµРј Р°РіРµРЅС‚РѕРІ РІ С„Р°Р№Р» РґР»СЏ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР°
       for (int currentAgent = 0; currentAgent < processesAgents[processesLocalPool[currentProcess]].second; ++currentAgent)
-        agentsPopulation->getPointertoAgent(currentAgent + processesAgents[processesLocalPool[currentProcess]].first + 1)->uploadGenome(tmpOutputFile);
-      tmpOutputFile.close();
-      // Посылаем задание процессу
-      tmpStream.str("");
-      tmpStream << "$TMPFILE$" << tmpDirectory << "/tmpPop" << processRank << "_" << currentProcess << ".txt"
-              << "$AGQ$" << processesAgents[processesLocalPool[currentProcess]].second;
-      strcpy(outputMessage,tmpStream.str().c_str());
-      MPI_Send(outputMessage, messageLength, MPI_CHAR, processesLocalPool[currentProcess], messageType, MPI_COMM_WORLD); 
+        sendAgentGenomeViaMPI(*(agentsPopulation->getPointertoAgent(currentAgent + processesAgents[processesLocalPool[currentProcess]].first + 1)->getPointerToAgentGenome()),
+                              processesLocalPool[currentProcess]); 
     }
-    // Выполняем свою часть работы (агенты рутового процесса находятся в начале)
+    // Р’С‹РїРѕР»РЅСЏРµРј СЃРІРѕСЋ С‡Р°СЃС‚СЊ СЂР°Р±РѕС‚С‹ (Р°РіРµРЅС‚С‹ СЂСѓС‚РѕРІРѕРіРѕ РїСЂРѕС†РµСЃСЃР° РЅР°С…РѕРґСЏС‚СЃСЏ РІ РЅР°С‡Р°Р»Рµ)
     for (int currentAgent = 1; currentAgent <= processesAgents[processesLocalPool[0]].second; ++currentAgent){
         TAgent* agent = agentsPopulation->getPointertoAgent(currentAgent); 
-		    // Проводим первичный системогенез (если нужно)
+		    // РџСЂРѕРІРѕРґРёРј РїРµСЂРІРёС‡РЅС‹Р№ СЃРёСЃС‚РµРјРѕРіРµРЅРµР· (РµСЃР»Рё РЅСѓР¶РЅРѕ)
 		    if (1 == agent->getSystemogenesisMode())
 			    agent->primarySystemogenesis();
 		    else if (0 == agent->getSystemogenesisMode())
@@ -119,10 +93,10 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
 		    environment->setRandomEnvironmentState();
 		    agent->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
     }
-    // Теперь ждем сообщей от других процессов
+    // РўРµРїРµСЂСЊ Р¶РґРµРј СЃРѕРѕР±С‰РµР№ РѕС‚ РґСЂСѓРіРёС… РїСЂРѕС†РµСЃСЃРѕРІ
     unsigned int processesReturns = 0;
     while (processesReturns < processesLocalPool.size() - 1){
-      // Обрабатываем сообщение о выполненной работе
+      // РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ Рѕ РІС‹РїРѕР»РЅРµРЅРЅРѕР№ СЂР°Р±РѕС‚Рµ
       MPI_Recv(inputMessage, messageLength, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
       string input = inputMessage;
       int process;
@@ -134,7 +108,7 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
     }
     makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
 	}
-  // Засписываем лучшую популяцию
+  // Р—Р°СЃРїРёСЃС‹РІР°РµРј Р»СѓС‡С€СѓСЋ РїРѕРїСѓР»СЏС†РёСЋ
 	if (!extraPrint) bestPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
 	else	{
 				ofstream bestPopulationFile;
@@ -146,43 +120,38 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
   delete bestPopulation;
 	resultsFile.close();
 	bestAgentsFile.close();
-  // Удаляем временные файлы и посылаем сигнал всем дочерним процессам о завершении
-  for (unsigned int currentProcess = 1; currentProcess < processesLocalPool.size(); ++currentProcess){
-      tmpStream.str("");
-      tmpStream << tmpDirectory << "/tmpPop_" << runSign << processRank << "_" << currentProcess << "_" << randomSeed << ".txt";
-      remove(tmpStream.str().c_str());
-      strcpy(outputMessage, "$Q$");
+  strcpy(outputMessage, "$Q$");
+  // РџРѕСЃС‹Р»Р°РµРј СЃРёРіРЅР°Р» РІСЃРµРј РґРѕС‡РµСЂРЅРёРј РїСЂРѕС†РµСЃСЃР°Рј Рѕ Р·Р°РІРµСЂС€РµРЅРёРё
+  for (unsigned int currentProcess = 1; currentProcess < processesLocalPool.size(); ++currentProcess)
       MPI_Send(outputMessage, messageLength, MPI_CHAR, processesLocalPool[currentProcess], messageType, MPI_COMM_WORLD); 
-  }
 }
 
-// Рабочий процесс
+// Р Р°Р±РѕС‡РёР№ РїСЂРѕС†РµСЃСЃ
 void TSharedEvolutionaryProcess::workProcess(){
-  // Загружаем среду
+  // Р—Р°РіСЂСѓР¶Р°РµРј СЃСЂРµРґСѓ
 	if (environment)
 		delete environment;
 	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
 	settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
-  // Создаем популяцию - единственное, что нам нужно знать - это время жизни агента
+  // РЎРѕР·РґР°РµРј РїРѕРїСѓР»СЏС†РёСЋ
   agentsPopulation = new TPopulation<TAgent>;
 	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
-  // Создаем агента
-  TAgent agent;
-  settings::fillAgentSettingsFromFile(agent, filenameSettings.settingsFilename);
+  settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
   stringstream tmpStream;
   MPI_Recv(inputMessage, messageLength, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
   string input = inputMessage;
   while (input != "$Q$"){
-    string tmpFilename;
+    // РџСЂРёРЅРёРјР°РµРј РІ РЅР°С‡Р°Р»Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ Р°РіРµРЅС‚РѕРІ
     int agentsQuantity;
-    decodeWorkMessage(input, tmpFilename, agentsQuantity);
-    ifstream tmpFile;
-    tmpFile.open(tmpFilename.c_str());
-    vector<double> rewards; // Награды агентов, за которые ответственен текущий процесс
+    MPI_Recv(&agentsQuantity, 1, MPI_INT, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+    for (int currentAgent = 1; currentAgent <= agentsQuantity; ++currentAgent)
+      receiveAgentGenomeViaMPI(*(agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentGenome()));
+
+    vector<double> rewards; // РќР°РіСЂР°РґС‹ Р°РіРµРЅС‚РѕРІ, Р·Р° РєРѕС‚РѕСЂС‹Рµ РѕС‚РІРµС‚СЃС‚РІРµРЅРµРЅ С‚РµРєСѓС‰РёР№ РїСЂРѕС†РµСЃСЃ
     for (int currentAgent = 0; currentAgent < agentsQuantity; ++currentAgent){
-      agent.loadGenome(tmpFile);
-      // Проводим первичный системогенез (если нужно)
-		  if (1 == agent.getSystemogenesisMode())
+      TAgent& agent = *(agentsPopulation->getPointertoAgent(currentAgent+1));
+      // РџСЂРѕРІРѕРґРёРј РїРµСЂРІРёС‡РЅС‹Р№ СЃРёСЃС‚РµРјРѕРіРµРЅРµР· (РµСЃР»Рё РЅСѓР¶РЅРѕ)
+ 		  if (1 == agent.getSystemogenesisMode())
 			  agent.primarySystemogenesis();
 		  else if (0 == agent.getSystemogenesisMode())
 		   agent.linearSystemogenesis();
@@ -192,30 +161,216 @@ void TSharedEvolutionaryProcess::workProcess(){
 		  agent.life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
       rewards.push_back(agent.getReward());
     }
-    tmpFile.close();
-    // Составляем ответ рутовому процессу и посылаем
+    // РЎРѕСЃС‚Р°РІР»СЏРµРј РѕС‚РІРµС‚ СЂСѓС‚РѕРІРѕРјСѓ РїСЂРѕС†РµСЃСЃСѓ Рё РїРѕСЃС‹Р»Р°РµРј
     tmpStream.str("");
     tmpStream << processRank;
     for (int i=0; i<agentsQuantity; ++i)
       tmpStream << "$" << rewards[i];
     strcpy(outputMessage, tmpStream.str().c_str());
     MPI_Send(outputMessage, messageLength, MPI_CHAR, processesLocalPool[0], messageType, MPI_COMM_WORLD); 
-    // Ждем дальнейших указаний
+    // Р–РґРµРј РґР°Р»СЊРЅРµР№С€РёС… СѓРєР°Р·Р°РЅРёР№
     MPI_Recv(inputMessage, messageLength, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
     input = inputMessage;
   }
 }
 
-// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
+// Р—Р°РїСѓСЃРє СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° (РїРµСЂРµРґР°РµС‚СЃСЏ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё, РµСЃР»Рё 0, С‚Рѕ СЂР°РЅРґРѕРјРёР·Р°С‚РѕСЂ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚СЃСЏ СЃС‚Р°РЅРґР°СЂС‚РЅРѕ)
 void TSharedEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
-   // Если не было передано зерно рандомизации
+   // Р•СЃР»Рё РЅРµ Р±С‹Р»Рѕ РїРµСЂРµРґР°РЅРѕ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё
 	if (!randomSeed) randomSeed = static_cast<unsigned int>(time(0));
 	srand(randomSeed);
-	// Запуски генератора случайных чисел, чтобы развести значения
+	// Р—Р°РїСѓСЃРєРё РіРµРЅРµСЂР°С‚РѕСЂР° СЃР»СѓС‡Р°Р№РЅС‹С… С‡РёСЃРµР», С‡С‚РѕР±С‹ СЂР°Р·РІРµСЃС‚Рё Р·РЅР°С‡РµРЅРёСЏ
 	rand(); rand(); rand();
-  MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // Определение процессом своего номера
+  MPI_Comm_rank(MPI_COMM_WORLD, &processRank); // РћРїСЂРµРґРµР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃРѕРј СЃРІРѕРµРіРѕ РЅРѕРјРµСЂР°
   if (processRank == processesLocalPool[0])
     rootProcess(randomSeed);
   else 
     workProcess();
+}
+
+// РР·РЅР°С‡Р°Р»СЊРЅРѕРµ РєРѕРЅСЃС‚СЂСѓРёСЂРѕРІР°РЅРёРµ РІСЃРµС… "СЃС‹СЂС‹С…" РїСЂРµРґСЃС‚Р°РІР»РµРЅРёР№ РІ РЅРѕС‚Р°С†РёРё MPI РґР»СЏ СЃР»РѕР¶РЅРѕРіРѕ С‚РёРїР° TPoolNetwork
+void TSharedEvolutionaryProcess::constructMPIDataTypes(){
+  // РЎРЅР°С‡Р°Р»Р° СЃС‚СЂРѕРёРј С‚РёРї РїСѓР»Р°
+  int pool_blocklens[5]; // Р”Р»РёРЅР° РєР°Р¶РґРѕРіРѕ Р±Р»РѕРєР° РґР°РЅРЅС‹С…  
+  MPI_Aint pool_indices[5]; // РЎРјРµС‰РµРЅРёРµ РєР°Р¶РґРѕРіРѕ Р±Р»РѕРєР° РґР°РЅРЅС‹С…
+  MPI_Datatype pool_old_types[5]; // Р‘Р°Р·РѕРІС‹Р№ С‚РёРї Р±Р»РѕРєР°
+  for (int i=0; i<5; ++i) pool_blocklens[i] = 1;
+  pool_old_types[0] = MPI_INT; pool_old_types[1] = MPI_INT; pool_old_types[2] = MPI_DOUBLE;
+  pool_old_types[3] = MPI_DOUBLE; pool_old_types[4] = MPI_INT;
+  // РџРѕРґСЃС‡РёС‚С‹РІР°РµРј СЃРјРµС‰РµРЅРёСЏ
+  _mpi_pool tmp_pool;
+  MPI_Address(&(tmp_pool.type), &(pool_indices[0]));
+  MPI_Address(&(tmp_pool.capacity), &(pool_indices[1]));
+  MPI_Address(&(tmp_pool.biasMean), &(pool_indices[2]));
+  MPI_Address(&(tmp_pool.biasVariance), &(pool_indices[3]));
+  MPI_Address(&(tmp_pool.layer), &(pool_indices[4]));
+  for (int i=5; i>=0; --i)
+    pool_indices[i] -= pool_indices[0]; 
+  // РЎРѕР·РґР°РµРј С‚РёРїР° РґР°РЅРЅС‹С… Рё СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РµРіРѕ
+  MPI_Type_struct(5, pool_blocklens, pool_indices, pool_old_types, &MPI_POOL);
+  MPI_Type_commit(&MPI_POOL);
+  
+  //РЎС‚СЂРѕРёРј С‚РёРї СЃРІСЏР·Рё РјРµР¶РґСѓ РїСѓР»Р°РјРё
+  int connection_blocklens[8]; // Р”Р»РёРЅР° РєР°Р¶РґРѕРіРѕ Р±Р»РѕРєР° РґР°РЅРЅС‹С…  
+  MPI_Aint connection_indices[8]; // РЎРјРµС‰РµРЅРёРµ РєР°Р¶РґРѕРіРѕ Р±Р»РѕРєР° РґР°РЅРЅС‹С…
+  MPI_Datatype connection_old_types[8]; // Р‘Р°Р·РѕРІС‹Р№ С‚РёРї Р±Р»РѕРєР°
+  for (int i=0; i<8; ++i) connection_blocklens[i] = 1;
+  connection_old_types[0] = MPI_INT; connection_old_types[1] = MPI_INT; connection_old_types[2] = MPI_DOUBLE;
+  connection_old_types[3] = MPI_DOUBLE; connection_old_types[4] = MPI_INT; connection_old_types[5] = MPI_INT;
+  connection_old_types[6] = MPI_DOUBLE; connection_old_types[7] = MPI_LONG;
+  // РџРѕРґСЃС‡РёС‚С‹РІР°РµРј СЃРјРµС‰РµРЅРёСЏ
+  _mpi_connection tmp_connection;
+  MPI_Address(&(tmp_connection.prePoolID), &(connection_indices[0]));
+  MPI_Address(&(tmp_connection.postPoolID), &(connection_indices[1]));
+  MPI_Address(&(tmp_connection.weightMean), &(connection_indices[2]));
+  MPI_Address(&(tmp_connection.weightVariance), &(connection_indices[3]));
+  MPI_Address(&(tmp_connection.enabled), &(connection_indices[4]));
+  MPI_Address(&(tmp_connection.disabledStep), &(connection_indices[5]));
+  MPI_Address(&(tmp_connection.developSynapseProb), &(connection_indices[6]));
+  MPI_Address(&(tmp_connection.innovationNumber), &(connection_indices[7]));
+  for (int i=7; i>=0; --i)
+    connection_indices[i] -= connection_indices[0]; 
+  // РЎРѕР·РґР°РµРј С‚РёРїР° РґР°РЅРЅС‹С… Рё СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РµРіРѕ
+  MPI_Type_struct(8, connection_blocklens, connection_indices, connection_old_types, &MPI_CONNECTION);
+  MPI_Type_commit(&MPI_CONNECTION);
+
+  //РЎС‚СЂРѕРёРј С‚РёРї РїСЂРµРґРёРєС‚РѕСЂРЅРѕР№ СЃРІСЏР·Рё РјРµР¶РґСѓ РїСѓР»Р°РјРё
+  int predconnection_blocklens[6]; // Р”Р»РёРЅР° РєР°Р¶РґРѕРіРѕ Р±Р»РѕРєР° РґР°РЅРЅС‹С…  
+  MPI_Aint predconnection_indices[6]; // РЎРјРµС‰РµРЅРёРµ РєР°Р¶РґРѕРіРѕ Р±Р»РѕРєР° РґР°РЅРЅС‹С…
+  MPI_Datatype predconnection_old_types[6]; // Р‘Р°Р·РѕРІС‹Р№ С‚РёРї Р±Р»РѕРєР°
+  for (int i=0; i<6; ++i) predconnection_blocklens[i] = 1;
+  predconnection_old_types[0] = MPI_INT; predconnection_old_types[1] = MPI_INT;
+  predconnection_old_types[2] = MPI_INT; predconnection_old_types[3] = MPI_INT;
+  predconnection_old_types[4] = MPI_DOUBLE; predconnection_old_types[5] = MPI_LONG;
+  // РџРѕРґСЃС‡РёС‚С‹РІР°РµРј СЃРјРµС‰РµРЅРёСЏ
+  _mpi_predconnection tmp_predconnection;
+  MPI_Address(&(tmp_predconnection.prePoolID), &(predconnection_indices[0]));
+  MPI_Address(&(tmp_predconnection.postPoolID), &(predconnection_indices[1]));
+  MPI_Address(&(tmp_predconnection.enabled), &(predconnection_indices[2]));
+  MPI_Address(&(tmp_predconnection.disabledStep), &(predconnection_indices[3]));
+  MPI_Address(&(tmp_predconnection.developPredConnectionProb), &(predconnection_indices[4]));
+  MPI_Address(&(tmp_predconnection.innovationNumber), &(predconnection_indices[5]));
+  for (int i=5; i>=0; --i)
+    predconnection_indices[i] -= predconnection_indices[0]; 
+  // РЎРѕР·РґР°РµРј С‚РёРїР° РґР°РЅРЅС‹С… Рё СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РµРіРѕ
+  MPI_Type_struct(6, predconnection_blocklens, predconnection_indices, predconnection_old_types, &MPI_PREDCONNECTION);
+  MPI_Type_commit(&MPI_PREDCONNECTION);
+}
+
+// РћС‚РїСЂР°РІРєР° РіРµРЅРѕРјР° СѓРґР°Р»РµРЅРЅРѕРјСѓ РїСЂРѕС†РµСЃСЃСѓ РїРѕ MPI
+void TSharedEvolutionaryProcess::sendAgentGenomeViaMPI(const TPoolNetwork& genome, int processSendRank){
+  int poolsQuantity = genome.getPoolsQuantity();
+  // РЎРЅР°С‡Р°Р»Р° РїРѕСЃС‹Р»Р°РµРј РєРѕР»-РІРѕ РїСѓР»РѕРІ РІ СЃРµС‚Рё
+  MPI_Send(&poolsQuantity, 1, MPI_INT, processSendRank, messageType, MPI_COMM_WORLD);
+  // Р—Р°РїРёСЃС‹РІР°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїСѓР»Р°С… РІ СЃРїРµС†РёР°Р»СЊРЅС‹Р№ С„РѕСЂРјР°С‚ РґР»СЏ РїРµСЂРµСЃС‹Р»РєРё
+  _mpi_pool* pools = new _mpi_pool[poolsQuantity];
+  // РўР°РєР¶Рµ РґР»СЏ РѕРїС‚РёРјРёР·Р°С†РёРё СЃРѕР±РёСЂР°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РјР°РєСЃРёРјР°Р»СЊРЅРѕРј РєРѕР»РёС‡РµСЃС‚РІРµ СЃРІСЏР·РµР№ Рё РїСЂРµРґРёРєС‚РѕСЂРЅС‹С… СЃРІСЏР·РµР№ Сѓ РїСѓР»РѕРІ
+  int maxConnectionsQuantity = 0;
+  int maxPredConnectionsQuantity = 0;
+  for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
+    pools[currentPool - 1].type = genome.getPoolType(currentPool); pools[currentPool - 1].capacity = genome.getPoolCapacity(currentPool);
+    pools[currentPool - 1].biasMean = genome.getPoolBiasMean(currentPool); pools[currentPool - 1].biasVariance = genome.getPoolBiasVariance(currentPool);
+    pools[currentPool - 1].layer = genome.getPoolLayer(currentPool);
+    maxConnectionsQuantity = std::max(maxConnectionsQuantity, genome.getPoolInputConnectionsQuantity(currentPool));
+    maxPredConnectionsQuantity = std::max(maxPredConnectionsQuantity, genome.getPoolInputPredConnectionsQuantity(currentPool));
+  }
+  MPI_Send(pools, poolsQuantity, MPI_POOL, processSendRank, messageType, MPI_COMM_WORLD);
+  delete []pools;
+  // РџРѕСЃС‹Р»Р°РµРј РІСЃРµ СЃРІСЏР·Рё
+  // РЎРЅР°С‡Р°Р»Р° РїРѕСЃС‹Р»Р°РµРј РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»-РІРѕ СЃРІСЏР·РµР№ (РґР»СЏ РѕРїС‚РёРјРёР·Р°С†РёРё РІС‹РґРµР»РµРЅРёСЏ РїР°РјСЏС‚Рё РІ РєСѓС‡Рµ)
+  MPI_Send(&maxConnectionsQuantity, 1, MPI_INT, processSendRank, messageType, MPI_COMM_WORLD);
+  if (maxConnectionsQuantity){ // Р•СЃР»Рё РІ СЃРµС‚Рё РІРѕРѕР±С‰Рµ РµСЃС‚СЊ СЃРІСЏР·Рё
+    _mpi_connection* connections = new _mpi_connection[maxConnectionsQuantity];
+    for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
+      int poolConnectionsQuantity = genome.getPoolInputConnectionsQuantity(currentPool);
+      // РџРѕСЃС‹Р»Р°РµРј РєРѕР»-РІРѕ СЃРІСЏР·РµР№ С‚РµРєСѓС‰РµРіРѕ РїСѓР»Р° Рё РїРѕС‚РѕРј РїРѕРґРіР°С‚Р°РІР»РёРІР°РµРј СЃРїРµС†РёР°Р»СЊРЅСѓСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ РґР°РЅРЅС‹С… Рё РїРѕСЃС‹Р»Р°РµРј
+      MPI_Send(&poolConnectionsQuantity, 1, MPI_INT, processSendRank, messageType, MPI_COMM_WORLD);
+      if (poolConnectionsQuantity){
+        for (int currentConnection = 1; currentConnection <= poolConnectionsQuantity; ++currentConnection){
+          connections[currentConnection - 1].prePoolID = genome.getConnectionPrePoolID(currentPool, currentConnection);
+          connections[currentConnection - 1].postPoolID = genome.getConnectionPostPoolID(currentPool, currentConnection);
+          connections[currentConnection - 1].weightMean = genome.getConnectionWeightMean(currentPool, currentConnection);
+          connections[currentConnection - 1].weightVariance = genome.getConnectionWeightVariance(currentPool, currentConnection);
+          connections[currentConnection - 1].enabled = genome.getConnectionEnabled(currentPool, currentConnection);
+          connections[currentConnection - 1].disabledStep = genome.getConnectionDisabledStep(currentPool, currentConnection);
+          connections[currentConnection - 1].developSynapseProb = genome.getConnectionDevelopSynapseProb(currentPool, currentConnection);
+          connections[currentConnection - 1].innovationNumber = genome.getConnectionInnovationNumber(currentPool, currentConnection);
+        }
+        MPI_Send(connections, poolConnectionsQuantity, MPI_CONNECTION, processSendRank, messageType, MPI_COMM_WORLD);
+      }
+    }
+    delete []connections;
+  }
+  // РўР°РєРёРј Р¶Рµ РѕР±СЂР°Р·РѕРј РїРѕСЃС‹Р»Р°РµРј РІСЃРµ РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё
+  MPI_Send(&maxPredConnectionsQuantity, 1, MPI_INT, processSendRank, messageType, MPI_COMM_WORLD);
+  if (maxPredConnectionsQuantity){
+    _mpi_predconnection* predConnections = new _mpi_predconnection[maxPredConnectionsQuantity];
+    for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
+      int poolPredConnectionsQuantity = genome.getPoolInputPredConnectionsQuantity(currentPool);
+      MPI_Send(&poolPredConnectionsQuantity, 1, MPI_INT, processSendRank, messageType, MPI_COMM_WORLD);
+      if (poolPredConnectionsQuantity){
+        for (int currentPredConnection = 1; currentPredConnection <= poolPredConnectionsQuantity; ++currentPredConnection){
+          predConnections[currentPredConnection - 1].prePoolID = genome.getPredConnectionPrePoolID(currentPool, currentPredConnection);
+          predConnections[currentPredConnection - 1].postPoolID = genome.getPredConnectionPostPoolID(currentPool, currentPredConnection);
+          predConnections[currentPredConnection - 1].enabled = genome.getPredConnectionEnabled(currentPool, currentPredConnection);
+          predConnections[currentPredConnection - 1].disabledStep = genome.getPredConnectionDisabledStep(currentPool, currentPredConnection);
+          predConnections[currentPredConnection - 1].developPredConnectionProb = genome.getDevelopPredConnectionProb(currentPool, currentPredConnection);
+          predConnections[currentPredConnection - 1].innovationNumber = genome.getPredConnectionInnovationNumber(currentPool, currentPredConnection);
+        }
+        MPI_Send(predConnections, poolPredConnectionsQuantity, MPI_PREDCONNECTION, processSendRank, messageType, MPI_COMM_WORLD);
+      }
+    }
+    delete []predConnections;
+  }
+}
+
+// РџСЂРёРµРј РіРµРЅРѕРјР° РѕС‚ СѓРґР°Р»РµРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° РїРѕ MPI
+void TSharedEvolutionaryProcess::receiveAgentGenomeViaMPI(TPoolNetwork& genome){
+  genome.erasePoolNetwork();
+  int poolsQuantity;
+  MPI_Recv(&poolsQuantity, 1, MPI_INT, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+  // РџСЂРёРЅРёРјР°РµРј СЃРїРёСЃРѕРє РїСѓР»РѕРІ Рё СЃРѕР·РґР°РµРј РІСЃРµ РїСѓР»С‹
+  _mpi_pool* pools = new _mpi_pool[poolsQuantity];
+  MPI_Recv(pools, poolsQuantity, MPI_POOL, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+  for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool)
+    genome.addPool(pools[currentPool - 1].type, pools[currentPool - 1].layer, pools[currentPool - 1].biasMean, 
+                    pools[currentPool - 1].biasVariance, pools[currentPool - 1].capacity);
+  delete []pools;
+  // РџСЂРёРЅРёРјР°РµРј РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»-РІРѕ СЃРІСЏР·РµР№ Сѓ РїСѓР»Р°
+  int maxConnectionsQuantity;
+  MPI_Recv(&maxConnectionsQuantity, 1, MPI_INT, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+  if (maxConnectionsQuantity){
+    _mpi_connection* connections = new _mpi_connection[maxConnectionsQuantity];
+    for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
+      //РџСЂРёРЅРёРјР°РµРј РєРѕР»-РІРѕ СЃРІСЏР·РµР№ Сѓ РїСѓР»Р°
+      int poolConnectionsQuantity;
+      MPI_Recv(&poolConnectionsQuantity, 1, MPI_INT, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+      if (poolConnectionsQuantity){
+        MPI_Recv(connections, poolConnectionsQuantity, MPI_CONNECTION, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+        for (int currentConnection = 1; currentConnection <= poolConnectionsQuantity; ++currentConnection)
+          genome.addConnection(connections[currentConnection - 1].prePoolID, connections[currentConnection - 1].postPoolID, connections[currentConnection - 1].weightMean, 
+                                connections[currentConnection - 1].weightVariance, connections[currentConnection - 1].developSynapseProb, 
+                                connections[currentConnection - 1].enabled != 0, connections[currentConnection - 1].disabledStep, connections[currentConnection - 1].innovationNumber);
+      }
+    }
+    delete []connections;
+  }
+  // РўРµРїРµСЂСЊ РїСЂРёРЅРёРјР°РµРј РїСЂРµРґРёРєС‚РѕСЂРЅС‹Рµ СЃРІСЏР·Рё
+  int maxPredConnectionsQuantity;
+  MPI_Recv(&maxPredConnectionsQuantity, 1, MPI_INT, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+  if (maxPredConnectionsQuantity){
+    _mpi_predconnection* predConnections = new _mpi_predconnection[maxPredConnectionsQuantity];
+    for (int currentPool = 1; currentPool <= poolsQuantity; ++currentPool){
+      //РџСЂРёРЅРёРјР°РµРј РєРѕР»-РІРѕ СЃРІСЏР·РµР№ Сѓ РїСѓР»Р°
+      int poolPredConnectionsQuantity;
+      MPI_Recv(&poolPredConnectionsQuantity, 1, MPI_INT, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+      if (poolPredConnectionsQuantity){
+        MPI_Recv(predConnections, poolPredConnectionsQuantity, MPI_PREDCONNECTION, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+        for (int currentPredConnection = 1; currentPredConnection <= poolPredConnectionsQuantity; ++currentPredConnection)
+          genome.addPredConnection(predConnections[currentPredConnection - 1].prePoolID, predConnections[currentPredConnection - 1].postPoolID, predConnections[currentPredConnection - 1].developPredConnectionProb, 
+                                   predConnections[currentPredConnection - 1].enabled != 0, predConnections[currentPredConnection - 1].disabledStep, predConnections[currentPredConnection - 1].innovationNumber);
+      }
+    }
+    delete []predConnections;
+  }
 }

@@ -1,4 +1,4 @@
-#ifndef TSHAREDEVOLUTIONARYPROCESS_H
+п»ї#ifndef TSHAREDEVOLUTIONARYPROCESS_H
 #define TSHAREDEVOLUTIONARYPROCESS_H
 
 #include "TEvolutionaryProcess.h"
@@ -6,45 +6,74 @@
 #include <string>
 #include <cstring>
 
-// Запуск эволюционного процесса с "расшаренной" памятью через диск (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
-// Передается список процессов, которые находятся в распоряжении данного эволюционного запуска (этот список должен включать также номер данного процесса, в качестве первого в векторе)
+// Р—Р°РїСѓСЃРє СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° СЃ "СЂР°СЃС€Р°СЂРµРЅРЅРѕР№" РїР°РјСЏС‚СЊСЋ С‡РµСЂРµР· РґРёСЃРє (РїРµСЂРµРґР°РµС‚СЃСЏ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё, РµСЃР»Рё 0, С‚Рѕ СЂР°РЅРґРѕРјРёР·Р°С‚РѕСЂ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚СЃСЏ СЃС‚Р°РЅРґР°СЂС‚РЅРѕ)
+// РџРµСЂРµРґР°РµС‚СЃСЏ СЃРїРёСЃРѕРє РїСЂРѕС†РµСЃСЃРѕРІ, РєРѕС‚РѕСЂС‹Рµ РЅР°С…РѕРґСЏС‚СЃСЏ РІ СЂР°СЃРїРѕСЂСЏР¶РµРЅРёРё РґР°РЅРЅРѕРіРѕ СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ Р·Р°РїСѓСЃРєР° (СЌС‚РѕС‚ СЃРїРёСЃРѕРє РґРѕР»Р¶РµРЅ РІРєР»СЋС‡Р°С‚СЊ С‚Р°РєР¶Рµ РЅРѕРјРµСЂ РґР°РЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°, РІ РєР°С‡РµСЃС‚РІРµ РїРµСЂРІРѕРіРѕ РІ РІРµРєС‚РѕСЂРµ)
 class TSharedEvolutionaryProcess : public TEvolutionaryProcess{
-  // Стандартная максимальная длина сообщения
+  // РЎС‚Р°РЅРґР°СЂС‚РЅР°СЏ РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° СЃРѕРѕР±С‰РµРЅРёСЏ
 	static const int messageLength = 3000;
-	// Стандартный служебный тип сообщения
+	// РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ СЃР»СѓР¶РµР±РЅС‹Р№ С‚РёРї СЃРѕРѕР±С‰РµРЅРёСЏ
 	static const int messageType = 99;
-	// Служебная перемення статуса процесса
+	// РЎР»СѓР¶РµР±РЅР°СЏ РїРµСЂРµРјРµРЅРЅСЏ СЃС‚Р°С‚СѓСЃР° РїСЂРѕС†РµСЃСЃР°
 	MPI_Status status;
-  // Номер процесса
+  // РќРѕРјРµСЂ РїСЂРѕС†РµСЃСЃР°
 	int processRank;
   char outputMessage[messageLength];
   char inputMessage[messageLength];
 
-  // Нахождение записи о параметре в строке с сообщением от процесса (имя параметра в строке $NAME$)
-  std::string findParameterNote(std::string inputMessage, std::string parameterString);
-  // Расшифровка сообщения от рутового процесса рабочему
-  void decodeWorkMessage(const std::string& workMessage, std::string& tmpAgentsFilename, int& agentsQuantity);
-  // Расшифровка сообщения от рабочего процесса рутовому с результатами обсчетов (возвращает награду всех агентов)
+  // Р Р°СЃС€РёС„СЂРѕРІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ СЂР°Р±РѕС‡РµРіРѕ РїСЂРѕС†РµСЃСЃР° СЂСѓС‚РѕРІРѕРјСѓ СЃ СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё РѕР±СЃС‡РµС‚РѕРІ (РІРѕР·РІСЂР°С‰Р°РµС‚ РЅР°РіСЂР°РґСѓ РІСЃРµС… Р°РіРµРЅС‚РѕРІ)
   std::vector<double> decodeFineshedWorkMessage(const std::string& finishedWorkMessage, int& process);
-  // Рутовый процесс
+  // Р СѓС‚РѕРІС‹Р№ РїСЂРѕС†РµСЃСЃ
   void rootProcess(unsigned int randomSeed);
-  // Рабочий процесс
+  // Р Р°Р±РѕС‡РёР№ РїСЂРѕС†РµСЃСЃ
   void workProcess();
+  // Р’РЅСѓС‚СЂРµРЅРЅРёРµ С‚РёРїС‹ MPI РґР»СЏ РїРµСЂРµСЃС‹Р»РєРё РіРµРЅРѕРјРѕРІ РјРµР¶РґСѓ РїСЂРѕС†РµСЃСЃР°РјРё
+  MPI_Datatype MPI_POOL, MPI_CONNECTION, MPI_PREDCONNECTION;
+  // Р—Р°РіРѕС‚РѕРІРєРё "СЃС‹СЂС‹С…" С‚РёРїРѕРІ РґР»СЏ РІРЅСѓС‚СЂРµРЅРЅРёС… С‚РёРїРѕРІ MPI
+  struct _mpi_pool {
+    int type;
+    int capacity;
+    double biasMean;
+    double biasVariance;
+    int layer;
+  };
+  struct _mpi_connection {
+    int prePoolID;
+    int postPoolID;
+    double weightMean;
+    double weightVariance;
+    int enabled;
+    int disabledStep;
+    double developSynapseProb;
+    long innovationNumber;
+  };
+  struct _mpi_predconnection {
+    int prePoolID;
+    int postPoolID;
+    int enabled;
+    int disabledStep;
+    double developPredConnectionProb;
+    long innovationNumber;
+  };
+  // РР·РЅР°С‡Р°Р»СЊРЅРѕРµ РєРѕРЅСЃС‚СЂСѓРёСЂРѕРІР°РЅРёРµ РІСЃРµС… "СЃС‹СЂС‹С…" РїСЂРµРґСЃС‚Р°РІР»РµРЅРёР№ РІ РЅРѕС‚Р°С†РёРё MPI РґР»СЏ СЃР»РѕР¶РЅРѕРіРѕ С‚РёРїР° TPoolNetwork
+  // РћР·РЅР°С‡РёРІР°РµС‚ С‚РёРїС‹ MPI_POOL, MPI_CONNECTION, MPI_PREDCONNECTION
+  void constructMPIDataTypes();
+  // РћС‚РїСЂР°РІРєР° РіРµРЅРѕРјР° СѓРґР°Р»РµРЅРЅРѕРјСѓ РїСЂРѕС†РµСЃСЃСѓ РїРѕ MPI
+  void receiveAgentGenomeViaMPI(TPoolNetwork& agent);
+  // РџСЂРёРµРј РіРµРЅРѕРјР° РѕС‚ СѓРґР°Р»РµРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° РїРѕ MPI
+  void sendAgentGenomeViaMPI(const TPoolNetwork& genome, int processSendRank);
 
 public:
   TSharedEvolutionaryProcess(){
     strcpy(inputMessage, "");
     strcpy(outputMessage, "");
+    // РљРѕРЅСЃС‚СЂСѓРёСЂСѓРµРј С‚РёРїС‹
+    constructMPIDataTypes();
   }
   ~TSharedEvolutionaryProcess(){
   }
-  // Директория в которую записываются временные файлы
-  std::string tmpDirectory;
-  // Локальный для этого задания пул процессов (рутовый процесс записан первым)
+  // Р›РѕРєР°Р»СЊРЅС‹Р№ РґР»СЏ СЌС‚РѕРіРѕ Р·Р°РґР°РЅРёСЏ РїСѓР» РїСЂРѕС†РµСЃСЃРѕРІ (СЂСѓС‚РѕРІС‹Р№ РїСЂРѕС†РµСЃСЃ Р·Р°РїРёСЃР°РЅ РїРµСЂРІС‹Рј)
   std::vector<int> processesLocalPool;
-  // Знак данного запуска (так как создаются временные файлы, то надо быть уверенным, что они не пересекаются для разных запусков)
-  std::string runSign;
-	// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
+	// Р—Р°РїСѓСЃРє СЌРІРѕР»СЋС†РёРѕРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР° (РїРµСЂРµРґР°РµС‚СЃСЏ Р·РµСЂРЅРѕ СЂР°РЅРґРѕРјРёР·Р°С†РёРё, РµСЃР»Рё 0, С‚Рѕ СЂР°РЅРґРѕРјРёР·Р°С‚РѕСЂ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚СЃСЏ СЃС‚Р°РЅРґР°СЂС‚РЅРѕ)
 	void start(unsigned int randomSeed = 0);
 };
 

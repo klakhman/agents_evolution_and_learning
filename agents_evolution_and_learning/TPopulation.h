@@ -632,7 +632,7 @@ void TPopulation<TemplateNeuralAgent>::generateNextPopulation(int currentEvoluti
          } while (firstParentAgent == secondParentAgent);
       }
       // Пусть более приспособленный родитель всегда будет на первом месте
-		if (agents[firstParentAgent - 1]->getReward() > agents[secondParentAgent - 1]->getReward()){
+		if (agents[firstParentAgent - 1]->getReward() < agents[secondParentAgent - 1]->getReward()){
 			int tmp = firstParentAgent;
 			firstParentAgent = secondParentAgent;
 			secondParentAgent = tmp;
