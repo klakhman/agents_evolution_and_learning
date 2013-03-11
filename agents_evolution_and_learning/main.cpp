@@ -113,7 +113,30 @@ int main(int argc, char** argv){
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
+    THypercubeEnvironment environment("C:/Test/Environment");
+    settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/settings.ini");
+    environment.setStochasticityCoefficient(0.0);
+    TAgent agent;
+    settings::fillAgentSettingsFromFile(agent, "C:/Test/settings.ini");
+    agent.loadGenome("C:/Test/bestagent_lastGen.txt", 1);
+    agent.linearSystemogenesis();
+    double reward = 0;
+    for (int i=0; i<environment.getInitialStatesQuantity(); ++i){
+      environment.setEnvironmentState(i);
+      agent.life(environment, 250);
+      reward += agent.getReward()/environment.getInitialStatesQuantity();
+    }
+    cout << reward << endl;
+        return 0;
 
+    agent.getPointerToAgentGenome()->printGraphNetwork("C:/Test/net.jpg");
+    vector<TBehaviorAnalysis::SCycle> cycles = TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment,true);
+    TBehaviorAnalysis::uploadCycles(cycles, "C:/Test/aim_cycles.txt");
+    TBehaviorAnalysis::drawCyclesListToDot(cycles, environment, "C:/Test/cycles.jpg");
+    techanalysis::makeBehaviorConvergenceDiagram(agent, environment, "C:/Test/BehConv.jpg");
+    for (int i =0; i<cycles.size(); ++i)
+      cout << TBehaviorAnalysis::calculateCycleReward(cycles[i], environment) << "\t" 
+        << TBehaviorAnalysis::calculateCycleLongestMemory(cycles[i], environment) << endl;
   }
   else if(programMode == "NQ"){ // Режим подсчета количества нейронов
     TAnalysis::calculateOneEnvironmentAverageNeurons(argc, argv);
