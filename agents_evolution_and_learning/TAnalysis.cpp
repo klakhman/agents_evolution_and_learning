@@ -21,14 +21,6 @@ using namespace std;
 // Запуск процедуры анализа путем прогона лучшей популяции (возвращает среднее значений награды по популяции после прогона всех агентов из всех состояний)
 // Если stochasticityCoefficient не равен -1, то он переписывает загруженный из файла настроек.
 double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, string environmentFilename, string settingsFilename, unsigned int randomSeed /*=0*/, double stochasticityCoefficient /*=-1*/){
-	// Если не было передано зерно рандомизации
-	if (!randomSeed)
-		randomSeed = static_cast<unsigned int>(time(0));
-	srand(randomSeed);
-	// Запуски генератора случайных чисел, чтобы развести значения
-	rand();
-	rand();
-	rand();
 	THypercubeEnvironment* environment = new THypercubeEnvironment(environmentFilename);
 	settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
   if (stochasticityCoefficient != -1)
@@ -38,10 +30,25 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
 	agentsPopulation->loadPopulation(bestPopulationFilename);
-	// Создаем массив наград всех агентов при запуске из всех начальных состояний (чтобы если что, то можно было проводить более сложный анализ)
-	int initialStatesQuantity = environment->getInitialStatesQuantity();
-	double** agentsRewards = new double*[agentsPopulation->getPopulationSize()];
-	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
+  double averageReward = startBestPopulationAnalysis(*agentsPopulation, *environment, randomSeed);
+	delete agentsPopulation;
+	delete environment;
+	return averageReward;
+}
+
+double TAnalysis::startBestPopulationAnalysis(TPopulation<TAgent>& population, THypercubeEnvironment& environment, unsigned int randomSeed /*=0*/){
+  // Если не было передано зерно рандомизации
+	if (!randomSeed)
+		randomSeed = static_cast<unsigned int>(time(0));
+	srand(randomSeed);
+	// Запуски генератора случайных чисел, чтобы развести значения
+	rand();
+	rand();
+	rand();
+  // Создаем массив наград всех агентов при запуске из всех начальных состояний (чтобы если что, то можно было проводить более сложный анализ)
+	int initialStatesQuantity = environment.getInitialStatesQuantity();
+	double** agentsRewards = new double*[population.getPopulationSize()];
+	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
 		agentsRewards[currentAgent - 1] = new double[initialStatesQuantity];
     memset(agentsRewards[currentAgent - 1], 0, sizeof(*(agentsRewards[currentAgent - 1])) * initialStatesQuantity);
   }
@@ -49,31 +56,31 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	long double averageReward = 0.0;
   // Для корректного анализа агентов, которые проходят процедуру первичного системогенеза (и возможно обучения) нужно проводить их построение несколько раз
   int runsQuantity;
-  if (0 != agentsPopulation->getPointertoAgent(1)->getSystemogenesisMode())
+  if (0 != population.getPointertoAgent(1)->getSystemogenesisMode())
     runsQuantity = 10;
   else 
     runsQuantity = 1;
 	// Прогоняем всех агентов и записываем награды в массив
-	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent){
+	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
     for (int currentRun = 1; currentRun <= runsQuantity; ++currentRun){
-      if (1 == agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
-        agentsPopulation->getPointertoAgent(currentAgent)->primarySystemogenesis();
-      else if (0 == agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
-		    agentsPopulation->getPointertoAgent(currentAgent)->linearSystemogenesis();
-      else if (2 == agentsPopulation->getPointertoAgent(currentAgent)->getSystemogenesisMode())
-        agentsPopulation->getPointertoAgent(currentAgent)->alternativeSystemogenesis();
+      if (1 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
+        population.getPointertoAgent(currentAgent)->primarySystemogenesis();
+      else if (0 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
+		    population.getPointertoAgent(currentAgent)->linearSystemogenesis();
+      else if (2 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
+        population.getPointertoAgent(currentAgent)->alternativeSystemogenesis();
       // Необходимо сохранять первичную нейронную сеть, так как запуск проходит из всех состояний и возможно обучение
       TNeuralNetwork initialController;
-      if (0 != agentsPopulation->getPointertoAgent(currentAgent)->getLearningMode())
-        initialController = *(agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentController());
+      if (0 != population.getPointertoAgent(currentAgent)->getLearningMode())
+        initialController = *(population.getPointertoAgent(currentAgent)->getPointerToAgentController());
 		  for (int currentInitialState = 0; currentInitialState < initialStatesQuantity; ++currentInitialState){
-        if (0 != agentsPopulation->getPointertoAgent(currentAgent)->getLearningMode())
-          *(agentsPopulation->getPointertoAgent(currentAgent)->getPointerToAgentController()) = initialController;
-			  environment->setEnvironmentState(currentInitialState);
-			  agentsPopulation->getPointertoAgent(currentAgent)->life(*environment, agentsPopulation->evolutionSettings.agentLifetime);
-			  double reward = agentsPopulation->getPointertoAgent(currentAgent)->getReward();
+        if (0 != population.getPointertoAgent(currentAgent)->getLearningMode())
+          *(population.getPointertoAgent(currentAgent)->getPointerToAgentController()) = initialController;
+			  environment.setEnvironmentState(currentInitialState);
+			  population.getPointertoAgent(currentAgent)->life(environment, population.evolutionSettings.agentLifetime);
+			  double reward = population.getPointertoAgent(currentAgent)->getReward();
         agentsRewards[currentAgent - 1][currentInitialState] += reward/runsQuantity;			
-			  averageReward += reward / (agentsPopulation->getPopulationSize() *  initialStatesQuantity);
+			  averageReward += reward / (population.getPopulationSize() *  initialStatesQuantity);
 			  if (reward > maxReward)
 				  maxReward = reward;
 		  }
@@ -81,11 +88,9 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 	}
   averageReward /= runsQuantity;
 	// Удаляем все переменные
-	for (int currentAgent = 1; currentAgent <= agentsPopulation->getPopulationSize(); ++currentAgent)
+	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent)
 		delete []agentsRewards[currentAgent - 1];
 	delete []agentsRewards;
-	delete agentsPopulation;
-	delete environment;
 	return static_cast<double>(averageReward);
 }
 
@@ -93,7 +98,8 @@ double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, str
 // ---------------- Процедуры параллельного анализа по лучшим популяциям в каждом запуске -----------------------
 
 // Расшифровка парaметров командной строки
-void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign, string& analysisRunSign, double& stochasticityCoefficient){
+void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, 
+                                   string& runSign, string& analysisRunSign, double& stochasticityCoefficient, unsigned int& sharedCoef){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
@@ -102,14 +108,19 @@ void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentN
 			else if (!strcmp("-sign", argv[currentArgNumber])) { runSign = argv[++currentArgNumber]; }
       else if (!strcmp("-ansign", argv[currentArgNumber])) { analysisRunSign = argv[++currentArgNumber]; }
       else if (!strcmp("-stoch", argv[currentArgNumber])) { stochasticityCoefficient = atof(argv[++currentArgNumber]); }
+      else if (!strcmp("-shared", argv[currentArgNumber])) { sharedCoef = atoi(argv[++currentArgNumber]); }
 		}
 		++currentArgNumber;
 	}
 }
 
 // Составление сообщения для рабочего процесса
-string TAnalysis::composeMessageForWorkProcess(int currentEnvironment, int currentTry, string runSign, double stochasticityCoefficient){
+string TAnalysis::composeMessageForWorkProcess(int currentEnvironment, int currentTry, string runSign, double stochasticityCoefficient, const vector<int>& runPool){
   stringstream outStream;
+  // Составляем сообщение для рабочих процессов в данном запуске (с полным списком процессов)
+  outStream << "$PROCQ$" << runPool.size();
+  for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
+    outStream << "$PROC" << currentProcess + 1 << "$" << runPool[currentProcess];
   outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign << "$STOCH$" << stochasticityCoefficient;
   return outStream.str();
 }
@@ -150,7 +161,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 	int processesQuantity;	
 	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // Определение общего количества процессов
 	MPI_Status status;
-	const int messageLength = 100;
+	const int messageLength = 500;
 	const int messageType = 99;
 
 	string settingsFilename = settings::getSettingsFilename(argc, argv);
@@ -165,7 +176,11 @@ void TAnalysis::rootProcess(int argc, char **argv){
 	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
   string analysisRunSign; // Некоторый отличительный признак данного конкретного анализа (может быть нулевым, тогда рабочие процессы используют runSign)
   double stochasticityCoefficient = -1; // Коэффициент стохастичности который переписывает для рабочего процесса указанный в файле настроек (только если указывается)
-  decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, analysisRunSign, stochasticityCoefficient);
+  unsigned int sharedCoef = 1; // Количество процессов на один эволюционный запуск
+  decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, analysisRunSign, stochasticityCoefficient, sharedCoef);
+  // Если кол-во процессов на запуск больше, чем кол-во доступных рабочих процессов, то выходим
+  if (sharedCoef > processesQuantity - 1) exit(-1);
+  if (sharedCoef < 1) sharedCoef = 1;
 	// Создаем файл с логом
 	stringstream logFilename;
 	logFilename << workDirectory << "/Analysis_run_log_En" << firstEnvironmentNumber << "-" << lastEnvironmentNumber << "_" << (analysisRunSign == "" ? runSign : analysisRunSign) << ".txt";
@@ -175,84 +190,98 @@ void TAnalysis::rootProcess(int argc, char **argv){
 	double** averageRewards = new double*[lastEnvironmentNumber - firstEnvironmentNumber + 1];
 	for (int currentEnvironment = 1; currentEnvironment <= lastEnvironmentNumber - firstEnvironmentNumber + 1; ++currentEnvironment)
 		averageRewards[currentEnvironment - 1] = new double[lastTryNumber - firstTryNumber + 1];
-
+  // Создаем стек свободных процессов (исключая рутовый)
+  vector<int> processesStack;
+  for (int currentProcess = processesQuantity - 1; currentProcess > 0; --currentProcess)
+    processesStack.push_back(currentProcess);
 	// Выдача дочерним процессам всех заданий данных на выполнение программе
 	for (int currentEnvironment = firstEnvironmentNumber; currentEnvironment <= lastEnvironmentNumber; ++currentEnvironment)
 		for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry)
 			// Если не всем процессам выданы изначальные задания (простой подсчет)
-			if ((currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1 <= processesQuantity - 1){
-				// Подсчитываем номер следущего процесса для посылки задания
-				int processRankSend = (currentEnvironment - firstEnvironmentNumber) * (lastTryNumber - firstTryNumber + 1) + currentTry - firstTryNumber + 1;
+			 if (processesStack.size() >= sharedCoef){ // Если есть достаточное кол-во свободных процессов
+        // Извлекаем необходимое кол-во процессов из стека
+        vector<int> runPool;
+        for (unsigned int i=0; i<sharedCoef; ++i){
+          runPool.push_back(processesStack.back());
+          processesStack.pop_back();
+        }
 				// Составляем сообщение для рабочего процесса
 				char outMessage[messageLength];
         stringstream out;
-				out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient);
+				out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient, runPool);
         out >> outMessage; 
-				MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
+        for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess) 
+          MPI_Send(outMessage, messageLength - 1, MPI_CHAR, runPool[currentProcess], messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
 				unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
-					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
+					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for root process " <<  runPool[0] << endl; 
 			} // Если все процессы получили задание,  то ждем завершения выполнения и по ходу выдаем оставшиеся задания
 			else {
 				char _inputMessage[messageLength];
-				// Ждем входящее сообщение о том, что процесс выполнил задание
-				MPI_Recv(_inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
-        string inputMessage = _inputMessage;
-				// Расшифровываем сообщение от рабочего процесса
-				int processRankSend, finishedEnvironment, finishedTry;
-				double averageReward;
-				decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry, averageReward);
-				averageRewards[finishedEnvironment - firstEnvironmentNumber][finishedTry - firstTryNumber] = averageReward;
-				// Записываем в лог прием задания
-				unsigned long currentTime = static_cast<unsigned long>(time(0));
-				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
-					<< "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-				// Составляем сообщение и высылаем задание рабочему процессу
+        while (processesStack.size() < sharedCoef){
+				  // Ждем входящее сообщение о том, что процесс выполнил задание
+				  MPI_Recv(_inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
+          string inputMessage = _inputMessage;
+				  // Расшифровываем сообщение от рабочего процесса
+				  int processRankSend, finishedEnvironment, finishedTry;
+          finishedTry = finishedEnvironment = 0;
+				  double averageReward;
+				  decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry, averageReward);
+          // Записываем в лог прием задания если это сообщение от рутового процесса (в нем есть номера задания)
+          if ((0 != finishedTry) && (0 != finishedEnvironment)){
+            averageRewards[finishedEnvironment - firstEnvironmentNumber][finishedTry - firstTryNumber] = averageReward;
+            unsigned long currentTime = static_cast<unsigned long>(time(0));
+				    logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
+				  	  << "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from root process " << processRankSend << endl; 
+          }
+          processesStack.push_back(processRankSend);
+        }
+        // Извлекаем необходимое кол-во процессов из стека
+        vector<int> runPool;
+        for (unsigned int i=0; i<sharedCoef; ++i){
+          runPool.push_back(processesStack.back());
+          processesStack.pop_back();
+        }
+				// Составляем сообщение и высылаем задание пулу рабочих процессов
         char outMessage[messageLength];
         stringstream out;
-				out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient);
+        out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient, runPool);
         out >> outMessage;         
-        MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
+        for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess) 
+          MPI_Send(outMessage, messageLength - 1, MPI_CHAR, runPool[currentProcess], messageType, MPI_COMM_WORLD);
 				// Записываем в лог выдачу задания
+        unsigned long currentTime = static_cast<unsigned long>(time(0));
 				logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60)
-					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for process " << processRankSend << endl; 
+					<< "\tEnvironment: " << currentEnvironment << "\tTry: " << currentTry << "\tIssued for root process " << runPool[0] << endl; 
 			}
 
-	// Когда все задания закончились, ждем пока все они будут выполнены и по ходу посылаем всем процессам команду о завершении
-	int processTillQuit; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
-  int tasksQuantity = (lastEnvironmentNumber - firstEnvironmentNumber + 1) * (lastTryNumber - firstTryNumber + 1);
-  if (tasksQuantity < processesQuantity - 1){
-    // Если количество процессов больше, чем кол-во заданий, то посылаем команду о завершении всем оставшимся
-    for (int prRankSend = tasksQuantity + 1; prRankSend < processesQuantity; ++prRankSend){
-      char outMessage[messageLength];
-		  strcpy(outMessage, "$Q$");
-		  MPI_Send(outMessage, messageLength - 1, MPI_CHAR, prRankSend, messageType, MPI_COMM_WORLD);
-    }
-    processTillQuit = (lastEnvironmentNumber - firstEnvironmentNumber + 1) * (lastTryNumber - firstTryNumber + 1);
-  }
-  else
-    processTillQuit = processesQuantity - 1; // Количество процессов которые еще выполняются и необходимо дождаться их окончания
-
-	while (processTillQuit > 0){
+  // Когда все задания закончились, ждем пока все они будут выполнены
+  while (processesStack.size() < processesQuantity - 1){
 		char _inputMessage[messageLength];
 		MPI_Recv(_inputMessage, messageLength - 1, MPI_CHAR, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status);
     string inputMessage = _inputMessage;
 		// Расшифровываем сообщение от рабочего процесса
 		int processRankSend, finishedEnvironment, finishedTry;
+    finishedEnvironment = finishedTry = 0;
 		double averageReward;
 		decodeFinishedWorkMessage(inputMessage, processRankSend, finishedEnvironment, finishedTry, averageReward);
-		averageRewards[finishedEnvironment - firstEnvironmentNumber][finishedTry - firstTryNumber] = averageReward;
-		// Записываем в лог прием задания
-		unsigned long currentTime = static_cast<unsigned long>(time(0));
-		logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
-			<< "Environment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from process " << processRankSend << endl; 
-		// Составляем сообщение о выходе и высылаем
-		char outMessage[messageLength];
-		strcpy(outMessage, "$Q$");
-		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processRankSend, messageType, MPI_COMM_WORLD);
-		--processTillQuit;
+    // Если это сообщение от рутового процесса, то записываем в лог прием задания
+    if ((0 != finishedTry) && (0 != finishedEnvironment)){
+      averageRewards[finishedEnvironment - firstEnvironmentNumber][finishedTry - firstTryNumber] = averageReward;
+		  unsigned long currentTime = static_cast<unsigned long>(time(0));
+		  logFile << (currentTime-startTime)/(3600) << ":" << ((currentTime-startTime)%(3600))/60 << ":" << (currentTime-startTime)%(60) 
+			  << "\tEnvironment: " << finishedEnvironment << "\tTry: " << finishedTry << "\tDone from root process " << processRankSend << endl; 
+    }
+    processesStack.push_back(processRankSend);
 	}
+  // Составляем сообщение о выходе и высылаем всем процессам
+	char outMessage[messageLength];
+	strcpy(outMessage, "$Q$");
+  while (processesStack.size()){
+    MPI_Send(outMessage, messageLength - 1, MPI_CHAR, processesStack[processesStack.size() - 1], messageType, MPI_COMM_WORLD);
+    processesStack.pop_back();
+  }
   logFile << endl << "Done." << endl;
 	logFile.close();
 	// Записываем файл с полными данными по всем попыткам и усредненные по средам
@@ -282,8 +311,20 @@ void TAnalysis::rootProcess(int argc, char **argv){
 }
 
 // Расшифровка сообщения от рутового процесса 
-void TAnalysis::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign, double& stochasticityCoefficient){
+void TAnalysis::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign, double& stochasticityCoefficient, vector<int>& processesPool){
   string featureNote;
+   // Определяем кол-во процессов в пуле и их структуру
+  int processPoolCapacity = 0;
+  featureNote = findParameterNote(inputMessage, "$PROCQ$");
+  if (featureNote != "") processPoolCapacity = atoi(featureNote.c_str());
+  processesPool.resize(processPoolCapacity);
+  stringstream currentProcessSign;
+  for (int currentProcess = 1; currentProcess <= processPoolCapacity; ++currentProcess){
+    currentProcessSign.str("");
+    currentProcessSign << "$PROC" << currentProcess << "$";
+    featureNote = findParameterNote(inputMessage, currentProcessSign.str());
+    processesPool[currentProcess - 1] = atoi(featureNote.c_str());
+  }
   // Определяем номер среды $ENV$
   featureNote = findParameterNote(inputMessage, "$ENV$");
   if (featureNote != "") currentEnvironment = atoi(featureNote.c_str());
@@ -305,7 +346,7 @@ void TAnalysis::workProcess(int argc, char **argv){
 	int processesQuantity;	
 	MPI_Comm_size(MPI_COMM_WORLD, &processesQuantity); // Определение общего количества процессов
 	MPI_Status status;
-	const int messageLength = 100;
+	const int messageLength = 500;
 	const int messageType = 99;
 
 	string settingsFilename = settings::getSettingsFilename(argc, argv);
@@ -319,7 +360,8 @@ void TAnalysis::workProcess(int argc, char **argv){
 		int currentEnvironment, currentTry;
 		string runSign;
     double stochasticityCoefficient = -1; // Рабочий процесс в случае, если коэффицент стохастичности не был передан в командной строке, передает рабочему процессу -1
-		decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign, stochasticityCoefficient);
+    vector<int> processesPool;
+    decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign, stochasticityCoefficient, processesPool);
 		// Определяем уникальное ядро рандомизации
 		// К ядру инициализации случайных чисел добавляется номер процесса, чтобы развести изначально инициализируемые процессы
 		unsigned int randomSeed = static_cast<unsigned int>(time(0)) + processRank;
@@ -330,10 +372,75 @@ void TAnalysis::workProcess(int argc, char **argv){
 		tmpStream.str(""); // Очищаем поток
 		tmpStream << resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestpopulation.txt";
 		string bestPopulationFilename = tmpStream.str();
-    double averageReward = startBestPopulationAnalysis(bestPopulationFilename, environmentFilename, settingsFilename, randomSeed, stochasticityCoefficient);
+    double averageReward = 0;
+    if (processesPool.size() > 1){ // Если надо расшарить задание
+      THypercubeEnvironment* environment = new THypercubeEnvironment(environmentFilename);
+	    settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
+      if (stochasticityCoefficient != -1)
+        environment->setStochasticityCoefficient(stochasticityCoefficient);
+	    TPopulation<TAgent>* agentsPopulation = new TPopulation<TAgent>;
+	    settings::fillPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
+      ifstream bestPopulationFile;
+      bestPopulationFile.open(bestPopulationFilename.c_str());
+      if (processRank == processesPool[0]){// Если это подрутовый процесс
+        int fullPopulationSize = agentsPopulation->getPopulationSize();
+        int firstAgent = 1;
+        // Подрутовый процесс забирает весь остаток агентов от округления
+        int lastAgent = agentsPopulation->getPopulationSize() / processesPool.size() + agentsPopulation->getPopulationSize() % processesPool.size();
+        agentsPopulation->setPopulationSize(lastAgent - firstAgent + 1);
+        settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
+        for (int currentAgent = firstAgent; currentAgent <= lastAgent; ++currentAgent)
+          agentsPopulation->getPointertoAgent(currentAgent)->loadGenome(bestPopulationFile);
+        // Выполняем свою часть работы
+        double thisProcessReward = startBestPopulationAnalysis(*agentsPopulation, *environment, randomSeed);
+        // Ждем пока выполнятся все дочерние процессы
+        int processesToWait = processesPool.size() - 1;
+        long double accumulatedSideReward = 0;
+        while (processesToWait > 0){
+          double currentReward = 0;
+          MPI_Recv(&currentReward, 1, MPI_DOUBLE, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status); 
+          accumulatedSideReward += currentReward;
+          --processesToWait;
+        }
+        //Подсчитываем полную награду (с учетом того, что у подрутового процесса больше агентов)
+        averageReward = static_cast<double>(((lastAgent - firstAgent + 1) * thisProcessReward + 
+                                            (fullPopulationSize/processesPool.size())*accumulatedSideReward/(processesPool.size() - 1)) 
+                                            / fullPopulationSize);
+      }
+      else{ // Если это рабочий процесс
+        int fullPopulationSize = agentsPopulation->getPopulationSize();
+        // Находим какой мы процесс в локальном пуле
+        int processLocalRank = 1;
+        for (unsigned int currentProcess = 0; currentProcess < processesPool.size(); ++currentProcess)
+          if (processesPool[++processLocalRank - 1] == processRank) break;
+        int firstAgent = agentsPopulation->getPopulationSize() / processesPool.size() + agentsPopulation->getPopulationSize() % processesPool.size() + 1 + 
+                        (processLocalRank - 2) * agentsPopulation->getPopulationSize() / processesPool.size();
+        int lastAgent = firstAgent + agentsPopulation->getPopulationSize() / processesPool.size() - 1;
+        agentsPopulation->setPopulationSize(lastAgent - firstAgent + 1);
+        settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
+        // Сначала пропускаем ненужных нам агентов в файле
+        for (int currentAgent = 1; currentAgent < firstAgent; ++currentAgent)
+          agentsPopulation->getPointertoAgent(1)->loadGenome(bestPopulationFile);
+        //Записываем нужную популяцию
+        for (int currentAgent = firstAgent; currentAgent <= lastAgent; ++currentAgent)
+          agentsPopulation->getPointertoAgent(currentAgent-firstAgent+1)->loadGenome(bestPopulationFile);
+        // Выполняем свою часть работы
+        double thisProcessReward = startBestPopulationAnalysis(*agentsPopulation, *environment, randomSeed);
+        // Отправляем информацию подрутовому процессу
+        MPI_Send(&thisProcessReward, 1, MPI_DOUBLE, processesPool[0], messageType, MPI_COMM_WORLD);
+      }
+      bestPopulationFile.close();
+      delete agentsPopulation;
+      delete environment;
+    }
+    else
+      averageReward = startBestPopulationAnalysis(bestPopulationFilename, environmentFilename, settingsFilename, randomSeed, stochasticityCoefficient);
 		// Посылаем ответ о завершении работы над заданием
 		tmpStream.str(""); // Очищаем поток
-		tmpStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$PR$" << processRank << "$AVREW$" << averageReward;
+    if (processRank == processesPool[0])
+		  tmpStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$PR$" << processRank << "$AVREW$" << averageReward;
+    else
+      tmpStream << "$PR$" << processRank;
 		char outMessage[messageLength];
 		tmpStream >> outMessage;
 		MPI_Send(outMessage, messageLength - 1, MPI_CHAR, 0, messageType, MPI_COMM_WORLD);
