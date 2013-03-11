@@ -36,7 +36,7 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
 	if (environment)
 		delete environment;
 	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
-	settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
+	settings::fillEnvironmentSettingsFromFile(*dynamic_cast<THypercubeEnvironment*>(environment), filenameSettings.settingsFilename);
   // Создаем популяцию
   if (agentsPopulation)
 		  delete agentsPopulation;
@@ -101,8 +101,9 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
       string input = inputMessage;
       int process;
       vector<double> rewards = decodeFineshedWorkMessage(input, process);
-      for (int currentAgent = processesAgents[process].first+1; currentAgent <= processesAgents[process].first+processesAgents[process].second; ++currentAgent)
-        agentsPopulation->getPointertoAgent(currentAgent)->setReward(rewards[currentAgent-processesAgents[process].first-1]);
+      for (int currentAgent = processesAgents[processesLocalPool[process]].first+1; 
+        currentAgent <= processesAgents[processesLocalPool[process]].first+processesAgents[processesLocalPool[process]].second; ++currentAgent)
+        agentsPopulation->getPointertoAgent(currentAgent)->setReward(rewards[currentAgent-processesAgents[processesLocalPool[process]].first-1]);
       ++processesReturns;
     }
     makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
@@ -131,7 +132,7 @@ void TSharedEvolutionaryProcess::workProcess(){
 	if (environment)
 		delete environment;
 	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
-	settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
+	settings::fillEnvironmentSettingsFromFile(*dynamic_cast<THypercubeEnvironment*>(environment), filenameSettings.settingsFilename);
   // Создаем популяцию
   agentsPopulation = new TPopulation<TAgent>;
 	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);

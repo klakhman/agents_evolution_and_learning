@@ -46,6 +46,27 @@ void settings::fillEnvironmentSettingsFromFile(THypercubeEnvironment& environmen
 	settingsFile.close();
 }
 
+// Загрузка параметров среды ENKI из файла
+void settings::fillEnvironmentSettingsFromFile(TEnkiEnvironment& environment, string settingsFilename){
+  string optionString;
+  ifstream settingsFile;
+  settingsFile.open(settingsFilename.c_str());
+  while (settingsFile >> optionString) {
+    if (optionString == "world-step") {
+      settingsFile >> optionString;
+      environment.worldStep = atof(optionString.c_str());
+    } else if (optionString == "cube-size") {
+      settingsFile >> optionString;
+      environment.cubeSize = atof(optionString.c_str());
+    } else if (optionString == "cube-radius") {
+      settingsFile >> optionString;
+      environment.cubeRadius = atof(optionString.c_str());
+    }
+  }
+  settingsFile.close();
+}
+
+
 // Загрузка параметров популяции из файла
 void settings::fillPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, string settingsFilename){
 	string optionString;

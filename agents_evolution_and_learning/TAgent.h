@@ -23,6 +23,7 @@ virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 class tests;
 
 class TAgent{
+protected:
 	// Геном агента из которого транслируется контроллер
 	TPoolNetwork* genome;
 	// Контроллер агент

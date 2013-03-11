@@ -13,7 +13,7 @@ protected:
 	// Популяция агентов
 	TPopulation<TAgent>* agentsPopulation;
 	// Среда для агентов
-	THypercubeEnvironment* environment;
+	TEnvironment* environment;
 	// Лучшая средняя награда по популяции в текущем запуске
 	double bestAverageReward;
 	// Признак того, что надо печатать расширенную информацию про пулы, когда мы записываем агентов
@@ -50,7 +50,7 @@ public:
 	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation<TAgent>* bestPopulation, int currentEvolutionStep /*=0*/);
 	
 	// Создание и заполнение предварительного файла основных результатов
-	void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
+	virtual void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
 
 	// Запуск эволюционного процесса (передается зерно рандомизации, если 0, то рандомизатор инициализируется стандартно)
 	virtual void start(unsigned int randomSeed = 0);

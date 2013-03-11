@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 /*
 Класс окружающей среды - виртуальный (интерфейсный) класс - все среды должны от него наследовать предоставляя правильный интерфейс!!! 
@@ -28,6 +29,11 @@ public:
   // Определения какие цели были достигнуты на фронте текущей последовательности действий (на текущем шаге времени)
   // Возвращает массив достигнутых целей
   virtual std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const = 0;
+  
+  // Деструктор
+  virtual ~TEnvironment(){};
+  
+  virtual void printSettings(std::ostream& os) = 0;
 };
 
 #endif // TENVIRONMENT_H

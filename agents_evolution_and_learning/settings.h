@@ -6,6 +6,8 @@
 #include "TAgent.h"
 #include <string>
 
+#include "TEnkiEnvironment.h"
+
 namespace settings{
 	// Нахождение имени файла парметров
 	std::string getSettingsFilename(int argc, char** argv);
@@ -19,6 +21,8 @@ namespace settings{
 	void fillAgentsPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, std::string settingsFilename);
 	// Загрузка параметров агента из файла
 	void fillAgentSettingsFromFile(TAgent& agent, std::string settingsFilename);
+  // Загрузка параметров среды ENKI из файла
+  void fillEnvironmentSettingsFromFile(TEnkiEnvironment& environment, std::string settingsFilename);
 };
 
 #endif // SETTINGS_H

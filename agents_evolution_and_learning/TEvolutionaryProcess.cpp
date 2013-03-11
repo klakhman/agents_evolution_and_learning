@@ -80,7 +80,7 @@ void TEvolutionaryProcess::createMainResultsFile(ofstream& resultsFile, unsigned
   // Записываем параметры обучения
   resultsFile << "Learning_parameters:" << "\tlearning-mode=" << pointerToAgent->learningSettings.learningMode << "\tmismatch-significance-treshold=" << pointerToAgent->learningSettings.mismatchSignificanceTreshold << endl << endl;
 	// Записываем параметры среды
-	resultsFile << "Environment_parameters:" << "\tstochasticity-coefficient=" << environment->getStochasticityCoefficient() << "\treward-recovery-time=" << environment->getRewardRecoveryTime() << endl << endl;
+	environment->printSettings(resultsFile);
 	//Записываем уникальное ядро рандомизации
 	resultsFile << "Random_seed:\t" << randomSeed << endl << endl; 
 	// Записываем заголовки
@@ -102,7 +102,7 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	if (environment)
 		delete environment;
 	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
-	settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);
+	settings::fillEnvironmentSettingsFromFile(*dynamic_cast<THypercubeEnvironment*>(environment), filenameSettings.settingsFilename);
 	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
 	if (agentsPopulation)
 		delete agentsPopulation;
