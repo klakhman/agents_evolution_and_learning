@@ -33,9 +33,9 @@ void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	if (agentsPopulation)
 		delete agentsPopulation;
 	agentsPopulation = new TPopulation<TEnkiAgent>;
-	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
+	//settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
-	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
+	//settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
 	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
 	ofstream resultsFile;
 	createMainResultsFile(resultsFile, randomSeed);

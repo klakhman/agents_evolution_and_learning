@@ -5,11 +5,11 @@
 //  Created by Сергей Муратов on 17.12.12.
 //
 //
+#include "config.h"
+#ifndef NOT_USE_ROBOT_LIB
 
 #include "TEnkiEnvironment.h"
 #include <iostream>
-
-#ifndef NOT_USE_ROBOT_LIB
 
 using namespace std;
 

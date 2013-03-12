@@ -97,6 +97,9 @@
     <ClInclude Include="TAnalysis.h" />
     <ClInclude Include="TBehaviorAnalysis.h" />
     <ClInclude Include="techanalysis.h" />
+    <ClInclude Include="TEnkiAgent.h" />
+    <ClInclude Include="TEnkiEnvironment.h" />
+    <ClInclude Include="TEnkiEvolutionaryProcess.h" />
     <ClInclude Include="TEnvironment.h" />
     <ClInclude Include="tests.h" />
     <ClInclude Include="TEvolutionaryProcess.h" />
@@ -122,6 +125,9 @@
     <ClCompile Include="TAnalysis.cpp" />
     <ClCompile Include="TBehaviorAnalysis.cpp" />
     <ClCompile Include="techanalysis.cpp" />
+    <ClCompile Include="TEnkiAgent.cpp" />
+    <ClCompile Include="TEnkiEnvironment.cpp" />
+    <ClCompile Include="TEnkiEvolutionaryProcess.cpp" />
     <ClCompile Include="tests.cpp" />
     <ClCompile Include="TEvolutionaryProcess.cpp" />
     <ClCompile Include="THypercubeEnvironment.cpp" />

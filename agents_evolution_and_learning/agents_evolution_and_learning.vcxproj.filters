@@ -84,6 +84,15 @@
     <ClInclude Include="TSharedEvolutionaryProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TEnkiAgent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TEnkiEnvironment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TEnkiEvolutionaryProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TNeuralPool.cpp">
@@ -147,6 +156,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TSharedEvolutionaryProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TEnkiAgent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TEnkiEnvironment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TEnkiEvolutionaryProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

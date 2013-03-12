@@ -10,9 +10,9 @@
 #define TENKIEVOLUTIONARYPROCESS_H
 
 #include <iostream>
-#include <TEvolutionaryProcess.h>
-#include <TEnkiAgent.h>
-#include <TEnkiEnvironment.h>
+#include "TEvolutionaryProcess.h"
+#include "TEnkiAgent.h"
+#include "TEnkiEnvironment.h"
 
 class TEnkiEvolutionaryProcess:public TEvolutionaryProcess
 {

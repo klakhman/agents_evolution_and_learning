@@ -123,7 +123,7 @@ public:
   // Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
   double calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
   std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
-  void printSettings(std::ofstream& os);
+  void printSettings(std::ostream& os);
 };
 
 #else 
@@ -136,10 +136,11 @@ public:
   double worldStep;
   double cubeRadius;
   double cubeSize;
-
-  void loadEnvironment(std::string environmentFilename);
+  TEnkiEnvironment(){};
+  TEnkiEnvironment(std::string){};
+  void loadEnvironment(std::string environmentFilename) {};
   // Выгрузка структуры целей в файл (вместе с целями среды)
-  void uploadEnvironment(std::string environmentFilename) const;
+  void uploadEnvironment(std::string environmentFilename) const {};
   // Получения размерности вектора признаков среды
   int getEnvironmentResolution() const {
     return 0;
@@ -149,9 +150,9 @@ public:
     return 0;
   }
   // Получение текущего вектора признаков среды
-  void getCurrentEnvironmentVector(double environmentVector[]) const;
+  void getCurrentEnvironmentVector(double environmentVector[]) const {};
   // Задание случайного состояния среды
-  void setRandomEnvironmentState(); //здесь под случайным состоянием понимается случайное положение робота в среде, а также случайное направление его взгляда
+  void setRandomEnvironmentState() {}; //здесь под случайным состоянием понимается случайное положение робота в среде, а также случайное направление его взгляда
   // Возоздействие на среду - возвращает успешность воздействия (!!! если такого понятия нет для конкретной среды, то должна возвращать true)
   int forceEnvironment(const std::vector<double>& action) {
     return 0;
@@ -172,7 +173,7 @@ public:
     cubeSize = 0;
   }
   
-  void printSettings(std::ofstream& os);
+  void printSettings(std::ostream& os) {};
   
 };
 #endif
