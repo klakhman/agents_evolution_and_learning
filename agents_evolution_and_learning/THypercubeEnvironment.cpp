@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstring>
 #include <cmath>
+#include <sstream>
 
 
 using namespace std;
@@ -236,7 +237,7 @@ bool THypercubeEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int m
 }
 
 // Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
-double THypercubeEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps /*=0.001*/, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/){
+double THypercubeEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/, double eps /*=0.001*/){
 	if (environmentResolution) delete []currentEnvironmentVector;
 	environmentResolution = _environmentResolution;
 	currentEnvironmentVector = new bool[environmentResolution];
@@ -245,7 +246,7 @@ double THypercubeEnvironment::generateEnvironment(int _environmentResolution, do
 	double occupancyCoef = 0.0;
 	do {
 		// !!!! Количество полных целей (которые потом будут разбиты на подцели) !!!
-		const int MAX_FULL_AIMS = 1000; //1000
+		const int MAX_FULL_AIMS = 1500; //1000
 		int fullAimsQuantity = service::uniformDiscreteDistribution(1, MAX_FULL_AIMS);
 		// Создаем среду, в которую будут записываться полные цели
 		THypercubeEnvironment environmentWithFullAims;
@@ -322,4 +323,34 @@ double THypercubeEnvironment::generateEnvironment(int _environmentResolution, do
 	} while ( (occupancyCoef < (requiredOccupancyCoef - eps)) || (occupancyCoef > (requiredOccupancyCoef + eps)) );
 	
 	return occupancyCoef;
+}
+
+// Генерация пула сред
+// Входные параметры:
+// environmentDirectory - директория, в которую записываеются сгенерированные среды; environmentResolution - размерность среды
+// firstEnvironmentNumber - номер (в названии) первой среды
+// firstGoalDensity - начальная плотность целей; lastGoalDensity - последняя плотность целей
+// goalDensityStep - шаг изменения плотности целей (если между первым и последним значения плотности целей помещается целое число шагов, то генерируются цели и для последней плотности)
+// sameGDenvQuantity - количество сред в пуле с одинаковыми значения плотности целей
+void THypercubeEnvironment::generateEnvironmentsPool(string environmentDirectory, int environmentResolution, int firstEnvironmentNumber, double firstGoalDensity, double lastGoalDensity, 
+                                                     double goalDensityStep, int sameGDenvQuantity, int maxAimComplexity/*=5*/, int minAimComplexity/*=2*/, int minMaxAimComplexity/*=3*/){
+  stringstream environmentFilename;
+  int currentEnvironmentNumber = firstEnvironmentNumber;
+  double eps = 0.0001; // Техническая точность (для генерации правильного количества сред)
+  // Файл с результатами генерации сред
+  ofstream summaryFile;
+  environmentFilename << environmentDirectory << "/EnvironmentSummary_" << firstEnvironmentNumber << "-" 
+    << firstEnvironmentNumber - 1 + static_cast<int>((lastGoalDensity + goalDensityStep  - firstGoalDensity)/goalDensityStep + eps) * sameGDenvQuantity << ".txt";
+  summaryFile.open(environmentFilename.str().c_str());
+  for (double currentGoalDensity = firstGoalDensity; currentGoalDensity <= lastGoalDensity + eps; currentGoalDensity += goalDensityStep)
+    // Генерируем нужное количество сред одинаковой заполненности
+    for (int currentEnvMember = 0; currentEnvMember < sameGDenvQuantity; ++currentEnvMember){
+      THypercubeEnvironment currentEnvironment;
+      double realGD = currentEnvironment.generateEnvironment(environmentResolution, currentGoalDensity, maxAimComplexity, minAimComplexity, minMaxAimComplexity);
+      environmentFilename.str("");
+      environmentFilename << environmentDirectory << "/Environment" << currentEnvironmentNumber << ".txt";
+      currentEnvironment.uploadEnvironment(environmentFilename.str());
+      summaryFile << "Environment" << currentEnvironmentNumber << "\t" << realGD << "\t" << currentEnvironment.getAimsQuantity() << endl;
+      ++currentEnvironmentNumber;
+    }
 }

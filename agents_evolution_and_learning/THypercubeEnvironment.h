@@ -35,7 +35,7 @@ public:
 	};
 private:
   // Максимальное кол-во целей в среде
-	static const int MAX_AIMS_QUANTITY = 3000;
+	static const int MAX_AIMS_QUANTITY = 4000;
 	// Массив целей в среде (включая все подцели)
 	TAim aimsSet[MAX_AIMS_QUANTITY];
 	// Кол-во целей в среде
@@ -140,7 +140,7 @@ public:
   std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
 
 	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
-	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, double eps = 0.001, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3);
+	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3, double eps = 0.001);
 
   void printSettings(std::ostream& os) {
     os << "Environment_parameters:" << "\tstochasticity-coefficient=" << getStochasticityCoefficient() << "\treward-recovery-time=" << getRewardRecoveryTime() << std::endl << std::endl;
@@ -148,6 +148,16 @@ public:
   
 	// Добавляем в друзья тестовые процедуры
 	friend class tests;
+  // Генерация пула сред
+  // Входные параметры:
+  // environmentDirectory - директория, в которую записываеются сгенерированные среды; environmentResolution - размерность среды
+  // firstEnvironmentNumber - номер (в названии) первой среды
+  // firstGoalDensity - начальная плотность целей; lastGoalDensity - последняя плотность целей
+  // goalDensityStep - шаг изменения плотности целей (если между первым и последним значения плотности целей помещается целое число шагов, то генерируются цели и для последней плотности)
+  // sameGDenvQuantity - количество сред в пуле с одинаковыми значения плотности целей
+  static void generateEnvironmentsPool(std::string environmentDirectory, int environmentResolution, int firstEnvironmentNumber, double firstGoalDensity, double lastGoalDensity,
+                                        double goalDensityStep, int sameGDenvQuantity, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity =3);
+
 };
 
 #endif //THYPERCUBE_ENVIRONMENT_H
