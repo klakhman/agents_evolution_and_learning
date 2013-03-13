@@ -34,7 +34,7 @@ public:
 	TEvolutionaryProcess(){
 		agentsPopulation = 0;
 		environment = 0;
-		bestAverageReward = 0.0;
+		bestAverageReward = -1.0; // Чтобы записывалась хоть какая-то популяции в случае, если на всех шагах эволюции награда 0
 
 		extraPrint = false;
 	}
