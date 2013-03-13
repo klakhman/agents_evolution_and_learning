@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdlib>
 #include <cmath>
+#include <vector>
 #include "service.h"
 #include "TEnvironment.h"
 /*
@@ -32,12 +33,20 @@ public:
 		}
     // Печать цели на экран
     void print(std::ostream& os) const;
+    TAim(const TAim& sourceAim){
+      *this = sourceAim; 
+    }
+    TAim& operator=(const TAim& sourceAim){
+      aimComplexity = sourceAim.aimComplexity;
+      reward = sourceAim.reward;
+      for (int currentAction = 0; currentAction < aimComplexity; ++currentAction)
+        actionsSequence[currentAction] = sourceAim.actionsSequence[currentAction];
+      return *this;
+    }
 	};
 private:
-  // Максимальное кол-во целей в среде
-	static const int MAX_AIMS_QUANTITY = 4000;
 	// Массив целей в среде (включая все подцели)
-	TAim aimsSet[MAX_AIMS_QUANTITY];
+	std::vector<TAim> aimsSet;
 	// Кол-во целей в среде
 	int aimsQuantity;
 	// Время восстановления награды за цель после ее достижения
@@ -53,6 +62,13 @@ private:
 	void randomizeEnvironment();
 	// Сравнение двух полных целей для процедуры генерации среды (возвращает true - если есть хотя бы одна совпадающая подцель)
 	bool compareDifferentLengthFullAims(TAim& firstAim, int minFirstSubAimComplexity, TAim& secondAim, int minSecondSubAimComplexity);
+  // Генерация непротиворечивой цели
+ static TAim generateSelfConsistentAim(int environmentResolution, int aimComplexity);
+
+  void setAimsQuantity(int _aimsQuantity){ 
+    aimsSet.resize(_aimsQuantity);
+    aimsQuantity = _aimsQuantity;
+  }
 
 public:
 	// Конструктор по умолчанию
@@ -61,6 +77,7 @@ public:
 		environmentResolution = 0;
 		rewardRecoveryTime = 0;
 		stochasticityCoefficient = 0;
+    currentEnvironmentVector = 0;
 	}
 	// Конструктор сразу с загрузкой целей и возможной установкой параметров среды
 	THypercubeEnvironment(std::string aimsFilename, int _rewardRecoveryTime = 0, double _nonstaionarityCoefficient = 0){
@@ -72,7 +89,7 @@ public:
 	}
 	// Деструктор
 	~THypercubeEnvironment(){
-		if (environmentResolution) delete []currentEnvironmentVector;
+		if (currentEnvironmentVector) delete []currentEnvironmentVector;
 	}
 
 	// Геттеры и сеттеры параметров среды

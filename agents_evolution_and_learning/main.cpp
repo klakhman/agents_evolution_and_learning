@@ -114,7 +114,7 @@ int main(int argc, char** argv){
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
     srand(static_cast<unsigned int>(time(0)));
-    THypercubeEnvironment::generateEnvironmentsPool("C:/Test/", 8, 1, 0.01, 0.12, 0.02, 5, 5, 3, 3);
+    THypercubeEnvironment::generateEnvironmentsPool("C:/Test/", 8, 1, 0.1, 0.6, 0.05, 20, 5, 2, 3);
     return 0;
     THypercubeEnvironment environment("C:/Test/Environment");
     settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/settings.ini");

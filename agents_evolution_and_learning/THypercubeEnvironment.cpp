@@ -23,7 +23,6 @@ void THypercubeEnvironment::TAim::print(std::ostream& os) const{
 void THypercubeEnvironment::loadEnvironment(std::string environmentFilename){
 	// Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
 	if (environmentResolution) delete []currentEnvironmentVector;
-
 	ifstream environmentFile;
 	environmentFile.open(environmentFilename.c_str());
 	string tmp_str;
@@ -31,6 +30,7 @@ void THypercubeEnvironment::loadEnvironment(std::string environmentFilename){
 	environmentResolution = atoi(tmp_str.c_str());
 	environmentFile >> tmp_str; // Считываем кол-во целей
 	aimsQuantity = atoi(tmp_str.c_str());
+  aimsSet.resize(aimsQuantity);
 	// Заполняем все цели
 	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
 		environmentFile >> tmp_str; // Считываем сложность цели
@@ -236,92 +236,109 @@ bool THypercubeEnvironment::compareDifferentLengthFullAims(TAim& firstAim, int m
 	return true;
 }
 
+// Генерация непротиворечивой цели
+THypercubeEnvironment::TAim THypercubeEnvironment::generateSelfConsistentAim(int environmentResolution, int aimComplexity){
+  TAim desiredAim;
+  // Генерируем действия цели
+  for (int currentAction = 1; currentAction <= aimComplexity; ++currentAction){
+    int currentBit = 0; // Новый бит
+		bool currentDirection = false; // Направление изменения
+		bool stop = false; // Признак того, что сгенерированный бит противоречит предыдущим
+		do {
+		  stop = false;
+			currentBit = service::uniformDiscreteDistribution(1, environmentResolution);
+			currentDirection = (service::uniformDiscreteDistribution(0, 1) == 1);
+			// Находим последнее действие в цели, которое использует тот же бит, что и сгенерированное
+			int currentCompareAction = 0;
+			for (currentCompareAction = currentAction - 1; currentCompareAction > 0; --currentCompareAction){
+        if (desiredAim.actionsSequence[currentCompareAction - 1].bitNumber == currentBit){
+          if (desiredAim.actionsSequence[currentCompareAction - 1].desiredValue != currentDirection)
+					  stop = true;
+					break; // Не идем дальше по цели
+				}
+			}
+			// Если мы дошли до конца и не встретили нужного бита
+			if (currentCompareAction == 0) stop = true;
+		} while (!stop); // Конец генерирования действий цели
+		desiredAim.actionsSequence[currentAction - 1].bitNumber = currentBit;
+		desiredAim.actionsSequence[currentAction - 1].desiredValue = currentDirection;
+	}
+  desiredAim.aimComplexity = aimComplexity;
+  desiredAim.reward = 20 + 10*(desiredAim.aimComplexity - 2);
+  return desiredAim;
+}
+
 // Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
 double THypercubeEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/, double eps /*=0.001*/){
 	if (environmentResolution) delete []currentEnvironmentVector;
 	environmentResolution = _environmentResolution;
 	currentEnvironmentVector = new bool[environmentResolution];
 	memset(currentEnvironmentVector, 0, environmentResolution * sizeof(*currentEnvironmentVector));
-
+  // !!!! Количество полных целей (которые потом будут разбиты на подцели) !!!
+	const int MAX_FULL_AIMS = 2000; //1000
+  // Чтобы избежать фрагментации мы инициализируем максимальным числом все сначала
+  // Создаем среду, в которую будут записываться полные цели
+  THypercubeEnvironment environmentWithFullAims;
+  environmentWithFullAims.setAimsQuantity(MAX_FULL_AIMS);
+  environmentWithFullAims.environmentResolution = environmentResolution;
+  // Массив со сложностями минимальной подцели в полной цели
+  int* minSubAimComplexity = new int[MAX_FULL_AIMS];
 	double occupancyCoef = 0.0;
+  int totalAimsQuantity = 0;
 	do {
-		// !!!! Количество полных целей (которые потом будут разбиты на подцели) !!!
-		const int MAX_FULL_AIMS = 1500; //1000
 		int fullAimsQuantity = service::uniformDiscreteDistribution(1, MAX_FULL_AIMS);
-		// Создаем среду, в которую будут записываться полные цели
-		THypercubeEnvironment environmentWithFullAims;
-		environmentWithFullAims.environmentResolution = environmentResolution;
-		// Создаем фиктивный вектор среды (чтобы при удалении типа не происходило ошибки)
-		environmentWithFullAims.currentEnvironmentVector = new bool[environmentResolution];
-		environmentWithFullAims.aimsQuantity = fullAimsQuantity;
-		// Массив со сложностями минимальной подцели в полной цели
-		int* minSubAimComplexity = new int[environmentWithFullAims.aimsQuantity];
 		// Генерируем полные цели
-		for (int currentAim = 1; currentAim <= environmentWithFullAims.aimsQuantity; ++currentAim){
+		for (int currentAim = 1; currentAim <= fullAimsQuantity; ++currentAim){
 			// Находим длину полной цели
-			environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity = service::uniformDiscreteDistribution(minMaxAimComplexity, maxAimComplexity);
+			int currentAimMaxComplexity = service::uniformDiscreteDistribution(minMaxAimComplexity, maxAimComplexity);
 			// Находим длину минимальной подцели
-			minSubAimComplexity[currentAim - 1] = service::uniformDiscreteDistribution(minAimComplexity, environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity);
+			minSubAimComplexity[currentAim - 1] = service::uniformDiscreteDistribution(minAimComplexity, currentAimMaxComplexity);
 			// Генерируем новую (неидентичную старым) цель
 			bool identicAimFound = false; // Признак того, что найдена идентичная цель
+      TAim aim;
 			do {
-				// Генерируем действия цели
-				for (int currentAction = 1; currentAction <= environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity; ++currentAction){
-					int currentBit = 0; // Новый бит
-					bool currentDirection = false; // Направление изменения
-					bool stop = false; // Признак того, что сгенерированный бит противоречит предыдущим
-					do {
-						stop = false;
-						currentBit = service::uniformDiscreteDistribution(1, environmentWithFullAims.environmentResolution);
-						currentDirection = (service::uniformDiscreteDistribution(0, 1) == 1);
-						// Находим последнее действие в цели, которое использует тот же бит, что и сгенерированное
-						int currentCompareAction = 0;
-						for (currentCompareAction = currentAction - 1; currentCompareAction > 0; --currentCompareAction){
-							if (environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentCompareAction - 1].bitNumber == currentBit){
-								if (environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentCompareAction - 1].desiredValue != currentDirection)
-									stop = true;
-								break; // Не идем дальше по цели
-							}
-						}
-						// Если мы дошли до конца и не встретили нужного бита
-						if (currentCompareAction == 0) stop = true;
-					} while (!stop); // Конец генерирования действий цели
-					environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber = currentBit;
-					environmentWithFullAims.aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue = currentDirection;
-				}
+				// Генерируем непротиворечивую цель
+        aim = generateSelfConsistentAim(environmentResolution, currentAimMaxComplexity);
+        //cout << currentAim << " : " << fullAimsQuantity << endl;
 				// После генерации новой цели нужно сравнить ее с предыдущими на факт идентичности
 				identicAimFound = false; // Признак того, что найдена идентичная цель
 				int currentCompareAim = 1;
 				while ((currentCompareAim < currentAim) && (!identicAimFound)){
 					//Сравниваем две цели
-					identicAimFound = compareDifferentLengthFullAims(environmentWithFullAims.aimsSet[currentAim - 1], minSubAimComplexity[currentAim - 1], 
-																					environmentWithFullAims.aimsSet[currentCompareAim - 1], minSubAimComplexity[currentCompareAim - 1]);
+					identicAimFound = compareDifferentLengthFullAims(aim, minSubAimComplexity[currentAim - 1], 
+            environmentWithFullAims.aimsSet[currentCompareAim - 1], minSubAimComplexity[currentCompareAim - 1]);
 					// Если сравнение показывает, что цели идентичны, то пытаемся увеличить минимальную сложность подцели пока цели не станут не идентичны
-					while ((identicAimFound) && (++minSubAimComplexity[currentAim - 1] <= environmentWithFullAims.aimsSet[currentAim - 1].aimComplexity))
-						identicAimFound = compareDifferentLengthFullAims(environmentWithFullAims.aimsSet[currentAim - 1], minSubAimComplexity[currentAim - 1], 
-																						environmentWithFullAims.aimsSet[currentCompareAim - 1], minSubAimComplexity[currentCompareAim - 1]);
+					while ((identicAimFound) && (minSubAimComplexity[currentAim - 1] < aim.aimComplexity)){
+            ++minSubAimComplexity[currentAim - 1];
+						identicAimFound = compareDifferentLengthFullAims(aim, minSubAimComplexity[currentAim - 1], 
+                              environmentWithFullAims.aimsSet[currentCompareAim - 1], minSubAimComplexity[currentCompareAim - 1]);
+          }
 					++currentCompareAim;
 				}
-
 			} while (identicAimFound);
+      environmentWithFullAims.aimsSet[currentAim - 1] = aim;
 		}
 		// После генерации всех полных целей необходимо сгенерировать итоговую среду с подцелями
-		aimsQuantity = 0;
-		for (int currentFullAim = 1; currentFullAim <= environmentWithFullAims.aimsQuantity; ++currentFullAim)
+    // Определяем общее кол-во целей в среде после генерации подцелей
+    totalAimsQuantity = 0;
+    for (int currentFullAim = 0; currentFullAim < fullAimsQuantity; ++currentFullAim)
+      totalAimsQuantity += environmentWithFullAims.aimsSet[currentFullAim].aimComplexity - minSubAimComplexity[currentFullAim] + 1;
+    int _aimsQuantity = 0;
+    setAimsQuantity(totalAimsQuantity);
+		for (int currentFullAim = 1; currentFullAim <= fullAimsQuantity; ++currentFullAim)
 			for (int currentSubAim = 1; currentSubAim <= environmentWithFullAims.aimsSet[currentFullAim - 1].aimComplexity - minSubAimComplexity[currentFullAim - 1] + 1; ++currentSubAim){
-				aimsSet[aimsQuantity++].aimComplexity = minSubAimComplexity[currentFullAim - 1] + currentSubAim - 1;
+				aimsSet[_aimsQuantity++].aimComplexity = minSubAimComplexity[currentFullAim - 1] + currentSubAim - 1;
 				//!!!! Здесь можно менять схему начисления награды
-				aimsSet[aimsQuantity - 1].reward = 20 + 10*(aimsSet[aimsQuantity - 1].aimComplexity - 2);
-				for (int currentAction = 1; currentAction <= aimsSet[aimsQuantity - 1].aimComplexity; ++currentAction){
-					aimsSet[aimsQuantity - 1].actionsSequence[currentAction - 1].bitNumber = environmentWithFullAims.aimsSet[currentFullAim - 1].actionsSequence[currentAction - 1].bitNumber;
-					aimsSet[aimsQuantity - 1].actionsSequence[currentAction - 1].desiredValue = environmentWithFullAims.aimsSet[currentFullAim - 1].actionsSequence[currentAction - 1].desiredValue;
+				aimsSet[_aimsQuantity - 1].reward = 20 + 10*(aimsSet[_aimsQuantity - 1].aimComplexity - 2);
+				for (int currentAction = 1; currentAction <= aimsSet[_aimsQuantity - 1].aimComplexity; ++currentAction){
+					aimsSet[_aimsQuantity - 1].actionsSequence[currentAction - 1].bitNumber = environmentWithFullAims.aimsSet[currentFullAim - 1].actionsSequence[currentAction - 1].bitNumber;
+					aimsSet[_aimsQuantity - 1].actionsSequence[currentAction - 1].desiredValue = environmentWithFullAims.aimsSet[currentFullAim - 1].actionsSequence[currentAction - 1].desiredValue;
 				}
 			}
-		delete []minSubAimComplexity;
-
-		occupancyCoef = calculateOccupancyCoefficient(); 
+		occupancyCoef = calculateOccupancyCoefficient();    
 	} while ( (occupancyCoef < (requiredOccupancyCoef - eps)) || (occupancyCoef > (requiredOccupancyCoef + eps)) );
-	
+
+  delete []minSubAimComplexity;
 	return occupancyCoef;
 }
 
