@@ -101,9 +101,8 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
       string input = inputMessage;
       int process;
       vector<double> rewards = decodeFineshedWorkMessage(input, process);
-      for (int currentAgent = processesAgents[processesLocalPool[process]].first+1; 
-        currentAgent <= processesAgents[processesLocalPool[process]].first+processesAgents[processesLocalPool[process]].second; ++currentAgent)
-        agentsPopulation->getPointertoAgent(currentAgent)->setReward(rewards[currentAgent-processesAgents[processesLocalPool[process]].first-1]);
+      for (int currentAgent = processesAgents[process].first+1; currentAgent <= processesAgents[process].first+processesAgents[process].second; ++currentAgent)
+        agentsPopulation->getPointertoAgent(currentAgent)->setReward(rewards[currentAgent-processesAgents[process].first-1]);
       ++processesReturns;
     }
     makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);

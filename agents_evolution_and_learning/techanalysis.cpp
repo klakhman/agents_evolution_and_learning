@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
-
+#include <ctime>
 #include "TAgent.h"
 #include "THypercubeEnvironment.h"
 #include "TBehaviorAnalysis.h"
@@ -407,6 +407,7 @@ vector< pair< TBehaviorAnalysis::SCycle, vector<int> > > techanalysis::calculate
   return convergenceData;
 }
 
+// Анализ прироста количества включающихся нейронов при обучения в зависимости от разницы награды при прогоне с обучением и без
 void techanalysis::conductLearningVsNonLearningAnalysis(TAgent& agent, THypercubeEnvironment& environment, string outputFilename, 
                                           int runsQuantity /*=200*/, int agentLifetime /*=100*/){
   ofstream outputFile;
@@ -439,6 +440,7 @@ void techanalysis::conductLearningVsNonLearningAnalysis(TAgent& agent, THypercub
   }
 }
 
+// Отрисовка с помощью утилиты dot пакета GraphViz "поведенческой карты" агента (бассейнов притяжения различных поведенческих стратегий)
 void techanalysis::makeBehaviorConvergenceDiagram(TAgent& agent, THypercubeEnvironment& environment, string imageFilename){
   vector< pair< TBehaviorAnalysis::SCycle, vector<int> > > convergenceData = calculateBehaviorConvergenceData(agent, environment);
   double sizeScaleCoef = 0.1; // Масштабирование размера круга в зависимости от длины цикла
@@ -480,6 +482,51 @@ void techanalysis::makeBehaviorConvergenceDiagram(TAgent& agent, THypercubeEnvir
   TBehaviorAnalysis::uploadCycles(cycles, imageFilename + ".txt");
   // Отрисовываем картинку
   system(("fdp -Tjpg " + imageFilename + ".dot -o " + imageFilename).c_str());
+}
+
+// Возвращает эмпирическое значение плотности целей для среды (рассчитывается путем прогона случайных агентов на среде)
+double techanalysis::empiricalGD(THypercubeEnvironment& environment, int runsQuantity/*=250*/, int agentLifeTime/*=400*/){
+  double empiricalGD = 0;
+  for (int currentRun = 0; currentRun < runsQuantity; ++currentRun){
+    environment.setRandomEnvironmentState();
+    vector< vector<double> > agentLife(agentLifeTime);
+    int goalsReached = 0;
+    // Жизнь одного агента
+    for (int currentLifestep = 1; currentLifestep <= agentLifeTime; ++currentLifestep){
+      // Определяем случайное действие агента (отличное от нуля)
+		  double action = 0;
+		  while (!action){
+			  action = static_cast<double>(service::uniformDiscreteDistribution(-environment.getEnvironmentResolution(), environment.getEnvironmentResolution()));
+		  }
+      agentLife[currentLifestep - 1].push_back(action);
+      // Действуем на среду и проверяем успешно ли действие
+      bool actionSuccess = (environment.forceEnvironment(agentLife[currentLifestep - 1]) != 0);
+      if (!actionSuccess) agentLife[currentLifestep - 1][0] = 0;
+      // Определяем количество целей достигнутых на данном шаге
+      goalsReached += environment.testReachingAims(agentLife, currentLifestep).size();
+    }
+    empiricalGD += (goalsReached / static_cast<double>(agentLifeTime)) / runsQuantity;
+  }
+  return empiricalGD;
+}
+
+// Эмпирическая проверка коэффициента плотности целей в среде
+// Проверка проводится путем запуска случайного агента в среду на фиксированное время (все действия агента равновероятны) и подсчета количества достигнутых целей
+void techanalysis::empiricalCheckGD(string environmentDirectory, int firstEnvNumber, int lastEnvNumber, string resultsFile){
+  srand(static_cast<unsigned int>(time(0)));
+  ofstream outputFile(resultsFile.c_str());
+  outputFile << "Environment number\tTheoretical GD\tEmpirical GD" << endl;
+  stringstream environmentFilename;
+  const int runsQuantity = 400;
+  const int agentLifeTime = 600;
+  for (int currentEnvironment = firstEnvNumber; currentEnvironment <= lastEnvNumber; ++currentEnvironment){
+    environmentFilename.str("");
+    environmentFilename << environmentDirectory << "/Environment" << currentEnvironment << ".txt";
+    THypercubeEnvironment environment(environmentFilename.str());
+    double averageGD = empiricalGD(environment, runsQuantity, agentLifeTime);
+    outputFile << currentEnvironment << "\t" << environment.calculateOccupancyCoefficient() << "\t" << averageGD << endl;
+  }
+  outputFile.close();
 }
 
 #ifndef NOT_USE_ALGLIB_LIBRARY

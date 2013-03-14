@@ -56,11 +56,16 @@ namespace techanalysis{
   // Подсчет диаграммы сходимости поведения агента (возвращает пары - (поведенческий цикл действий, размер бассейна притяжения в кол-ве начальных состояний))
   // ВАЖНО: агент уже должен иметь нейроконтроллер (т.е. пройти системогенез)
   std::vector< std::pair< TBehaviorAnalysis::SCycle, std::vector<int> > > calculateBehaviorConvergenceData(TAgent& agent, THypercubeEnvironment& environment);
-
+  // Анализ прироста количества включающихся нейронов при обучения в зависимости от разницы награды при прогоне с обучением и без
   void conductLearningVsNonLearningAnalysis(TAgent& agent, THypercubeEnvironment& environment, std::string outputFilename, 
                                             int runsQuantity = 200, int agentLifetime = 100);
-
+  // Отрисовка с помощью утилиты dot пакета GraphViz "поведенческой карты" агента (бассейнов притяжения различных поведенческих стратегий)
   void makeBehaviorConvergenceDiagram(TAgent& agent, THypercubeEnvironment& environment, std::string imageFilename);
+  // Возвращает эмпирическое значение плотности целей для среды (рассчитывается путем прогона случайных агентов на среде)
+  double empiricalGD(THypercubeEnvironment& environment, int runsQuantity = 250, int agentLifeTime = 400);
+  // Эмпирическая проверка коэффициента плотности целей в среде
+  // Проверка проводится путем запуска случайного агента в среду на фиксированное время (все действия агента равновероятны) и подсчета количества достигнутых целей
+  void empiricalCheckGD(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string resultsFile);
 
 
   #ifndef NOT_USE_ALGLIB_LIBRARY

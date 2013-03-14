@@ -16,7 +16,7 @@ public:
 	class TAim{	
 	public:
 		// Максимальное кол-во действий в цели
-		static const int MAX_AIM_COMPLEXITY = 7;
+		static const int MAX_AIM_COMPLEXITY = 10;
 		// Структура одного необходимого действия в цели
 		struct SAction{
 			int bitNumber; // Номер бита в векторе состояния среды
@@ -157,7 +157,7 @@ public:
   std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
 
 	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
-	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3, double eps = 0.001);
+	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3, double eps = 0.0005);
 
   void printSettings(std::ostream& os) {
     os << "Environment_parameters:" << "\tstochasticity-coefficient=" << getStochasticityCoefficient() << "\treward-recovery-time=" << getRewardRecoveryTime() << std::endl << std::endl;

@@ -91,7 +91,7 @@ double THypercubeEnvironment::calculateOccupancyCoefficient() const{
 		// Вероятность совершения k последовательных действий (с учетом что перевод из нуля в единицу и обратно - это разные действия)
 		double sequenceProbability = 1.0 / pow(2.0*environmentResolution, aimsSet[currentAim - 1].aimComplexity);
 		// Часть заполненности, которую вносит эта цель
-		double aimOccupancyPart = sequenceProbability * pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
+		double aimOccupancyPart = sequenceProbability / pow(2.0, differentBitsQuantity);  //* pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
 		
 		occupancyCoefficient += aimOccupancyPart;
 	}
@@ -269,13 +269,13 @@ THypercubeEnvironment::TAim THypercubeEnvironment::generateSelfConsistentAim(int
 }
 
 // Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
-double THypercubeEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/, double eps /*=0.001*/){
+double THypercubeEnvironment::generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity /*=5*/, int minAimComplexity /*=2*/, int minMaxAimComplexity /*=3*/, double eps /*=0.0005*/){
 	if (environmentResolution) delete []currentEnvironmentVector;
 	environmentResolution = _environmentResolution;
 	currentEnvironmentVector = new bool[environmentResolution];
 	memset(currentEnvironmentVector, 0, environmentResolution * sizeof(*currentEnvironmentVector));
   // !!!! Количество полных целей (которые потом будут разбиты на подцели) !!!
-	const int MAX_FULL_AIMS = 2000; //1000
+	const int MAX_FULL_AIMS = 1500; //1000
   // Чтобы избежать фрагментации мы инициализируем максимальным числом все сначала
   // Создаем среду, в которую будут записываться полные цели
   THypercubeEnvironment environmentWithFullAims;
@@ -353,7 +353,7 @@ void THypercubeEnvironment::generateEnvironmentsPool(string environmentDirectory
                                                      double goalDensityStep, int sameGDenvQuantity, int maxAimComplexity/*=5*/, int minAimComplexity/*=2*/, int minMaxAimComplexity/*=3*/){
   stringstream environmentFilename;
   int currentEnvironmentNumber = firstEnvironmentNumber;
-  double eps = 0.0001; // Техническая точность (для генерации правильного количества сред)
+  double eps = 0.00001; // Техническая точность (для генерации правильного количества сред)
   // Файл с результатами генерации сред
   ofstream summaryFile;
   environmentFilename << environmentDirectory << "/EnvironmentSummary_" << firstEnvironmentNumber << "-" 
