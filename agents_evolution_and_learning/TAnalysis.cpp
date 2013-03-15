@@ -414,7 +414,7 @@ void TAnalysis::workProcess(int argc, char **argv){
         for (unsigned int currentProcess = 0; currentProcess < processesPool.size(); ++currentProcess)
           if (processesPool[++processLocalRank - 1] == processRank) break;
         int firstAgent = agentsPopulation->getPopulationSize() / processesPool.size() + agentsPopulation->getPopulationSize() % processesPool.size() + 1 + 
-                        (processLocalRank - 2) * agentsPopulation->getPopulationSize() / processesPool.size();
+                        (processLocalRank - 2) * (agentsPopulation->getPopulationSize() / processesPool.size());
         int lastAgent = firstAgent + agentsPopulation->getPopulationSize() / processesPool.size() - 1;
         agentsPopulation->setPopulationSize(lastAgent - firstAgent + 1);
         settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);

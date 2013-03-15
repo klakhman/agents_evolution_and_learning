@@ -114,10 +114,11 @@ int main(int argc, char** argv){
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
     srand(static_cast<unsigned int>(time(0)));
-    //techanalysis::empiricalCheckGD("C:/Test/8-dim Environments (3-min comp)", 1, 100, "C:/Test/SANDBOX/envEmpiricalVsTheoryGD_8dim_3mincomp_modifiedGD.txt"); 
-    THypercubeEnvironment::generateEnvironmentsPool("C:/Test/NewEnvironments", 8, 2181, 0.05, 0.15, 0.0125, 20, 5, 2, 3);
+    //techanalysis::empiricalCheckGD("C:/Test/SANDBOX/8-dim Environments", 1, 100, "C:/Test/SANDBOX/envEmpiricalVsTheoryGD_8dim_rewardedGD.txt"); 
+    THypercubeEnvironment::generateEnvironmentsPool("C:/Test//SANDBOX/8-dim_3mincomp_Environments_GDrewarded", 8, 500001, 0.1, 1, 0.1, 10, 6, 3, 4);
     //THypercubeEnvironment::generateEnvironmentsPool("C:/Test/NewEnvironments", 8, 2001, 0.005, 0.049, 0.005, 20, 5, 2, 3);
-
+    //THypercubeEnvironment env("C:/Test/SANDBOX/Environment20071.txt");
+    //env.printEnvironmentsGoalsHierarchy("C:/Test/SANDBOX/Envrionment20071Graph.jpg");
     return 0;
     THypercubeEnvironment environment("C:/Test/Environment");
     settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/settings.ini");

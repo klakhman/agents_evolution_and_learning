@@ -61,7 +61,7 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
                                                      agentsPopulation->getPopulationSize()%processesLocalPool.size());
   for (unsigned int currentProcess = 1; currentProcess < processesLocalPool.size(); ++currentProcess)
     processesAgents[processesLocalPool[currentProcess]] = 
-      make_pair((currentProcess-1)*agentsPopulation->getPopulationSize()/processesLocalPool.size() + processesAgents[processesLocalPool[0]].second,
+      make_pair((currentProcess-1)*(agentsPopulation->getPopulationSize()/processesLocalPool.size()) + processesAgents[processesLocalPool[0]].second,
                 agentsPopulation->getPopulationSize()/processesLocalPool.size());
   // Запускаем эволюционный процесс
   stringstream tmpStream;

@@ -503,9 +503,9 @@ double techanalysis::empiricalGD(THypercubeEnvironment& environment, int runsQua
       bool actionSuccess = (environment.forceEnvironment(agentLife[currentLifestep - 1]) != 0);
       if (!actionSuccess) agentLife[currentLifestep - 1][0] = 0;
       // Определяем количество целей достигнутых на данном шаге
-      goalsReached += environment.testReachingAims(agentLife, currentLifestep).size();
+      //goalsReached += environment.testReachingAims(agentLife, currentLifestep).size();
     }
-    empiricalGD += (goalsReached / static_cast<double>(agentLifeTime)) / runsQuantity;
+    empiricalGD += environment.calculateReward(agentLife, agentLifeTime) / (agentLifeTime * runsQuantity);//(goalsReached / static_cast<double>(agentLifeTime)) / runsQuantity;
   }
   return empiricalGD;
 }
