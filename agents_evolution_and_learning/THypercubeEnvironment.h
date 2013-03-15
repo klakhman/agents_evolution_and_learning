@@ -174,7 +174,27 @@ public:
   // sameGDenvQuantity - количество сред в пуле с одинаковыми значения плотности целей
   static void generateEnvironmentsPool(std::string environmentDirectory, int environmentResolution, int firstEnvironmentNumber, double firstGoalDensity, double lastGoalDensity,
                                         double goalDensityStep, int sameGDenvQuantity, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity =3);
-
+  // Класс дерева действий, приводящих к достижению целей в среде (нужен в основном для отрисовки структуры целей в виде графа)
+  class TEnvironmentTree{
+  public:
+    TEnvironmentTree** subActions;
+    int actionsQuantity;
+    bool aimTerminate;
+    TEnvironmentTree(int _actionsQuantity) : actionsQuantity(_actionsQuantity) {
+      subActions = new TEnvironmentTree*[actionsQuantity];
+      memset(subActions, 0, sizeof(TEnvironmentTree*) * actionsQuantity);
+      aimTerminate = false;
+    }
+    ~TEnvironmentTree(){
+      for (int action = 0; action < actionsQuantity; ++action)
+        if (subActions[action])
+          delete subActions[action];
+      delete []subActions;
+    }
+  };
+  // Отрисовка структуры целей в среде в виде графа (узлы графа - действия, признак окончания цели на этом действии - красный цвет)
+  void printEnvironmentsGoalsHierarchy(std::string imageFilename);
+  
 };
 
 #endif //THYPERCUBE_ENVIRONMENT_H

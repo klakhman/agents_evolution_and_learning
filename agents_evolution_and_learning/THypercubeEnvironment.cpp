@@ -91,7 +91,7 @@ double THypercubeEnvironment::calculateOccupancyCoefficient() const{
 		// Вероятность совершения k последовательных действий (с учетом что перевод из нуля в единицу и обратно - это разные действия)
 		double sequenceProbability = 1.0 / pow(2.0*environmentResolution, aimsSet[currentAim - 1].aimComplexity);
 		// Часть заполненности, которую вносит эта цель
-		double aimOccupancyPart = sequenceProbability / pow(2.0, differentBitsQuantity);  //* pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
+    double aimOccupancyPart = sequenceProbability / pow(2.0, differentBitsQuantity) * aimsSet[currentAim - 1].reward;  //* pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
 		
 		occupancyCoefficient += aimOccupancyPart;
 	}
@@ -275,7 +275,7 @@ double THypercubeEnvironment::generateEnvironment(int _environmentResolution, do
 	currentEnvironmentVector = new bool[environmentResolution];
 	memset(currentEnvironmentVector, 0, environmentResolution * sizeof(*currentEnvironmentVector));
   // !!!! Количество полных целей (которые потом будут разбиты на подцели) !!!
-	const int MAX_FULL_AIMS = 1500; //1000
+	const int MAX_FULL_AIMS = 4000; //1000
   // Чтобы избежать фрагментации мы инициализируем максимальным числом все сначала
   // Создаем среду, в которую будут записываться полные цели
   THypercubeEnvironment environmentWithFullAims;
@@ -371,3 +371,41 @@ void THypercubeEnvironment::generateEnvironmentsPool(string environmentDirectory
       ++currentEnvironmentNumber;
     }
 }
+
+// Вспомогательная рекуррентная процедра для отрисовки целей в среде в виде графа
+void printLeaftoDotFile(THypercubeEnvironment::TEnvironmentTree* currentLeaf, ofstream& outputFile, int parentNodeID, int& globalNodeID){
+  for (int currentAction = 0; currentAction < currentLeaf->actionsQuantity; ++currentAction)
+    if (currentLeaf->subActions[currentAction]){ // Если такое действие есть в структуре
+      outputFile << "\tnode" << ++globalNodeID << "[label = \"" << currentAction / 2 + 1 << " - " << (currentAction % 2) * 1 << "\"" <<
+        ((currentLeaf->subActions[currentAction]->aimTerminate) ? ", color=red, style=filled" : "") << "]\n";
+      if (parentNodeID) // Если это не первый слой, то надо печатать связь
+        outputFile << "\tnode" << parentNodeID << " -> node" << globalNodeID << endl;
+      printLeaftoDotFile(currentLeaf->subActions[currentAction], outputFile, globalNodeID, globalNodeID);
+    }
+}
+
+// Отрисовка структуры целей в среде в виде графа (узлы графа - действия, признак окончания цели на этом действии - красный цвет)
+void THypercubeEnvironment::printEnvironmentsGoalsHierarchy(string imageFilename){
+  // Сначала необходимо построить древовидную структуру
+  TEnvironmentTree initialTree(2*environmentResolution);
+  // Обходим все цели
+  for (int currentAimNumber = 0; currentAimNumber < aimsQuantity; ++currentAimNumber){
+    TAim& currentAim = aimsSet[currentAimNumber];
+    TEnvironmentTree* currentLeaf = &initialTree;
+    for (int currentAction = 0; currentAction < currentAim.aimComplexity; ++currentAction){
+      int currentActionNumber = (currentAim.actionsSequence[currentAction].bitNumber - 1) * 2 + currentAim.actionsSequence[currentAction].desiredValue;
+      if (!currentLeaf->subActions[currentActionNumber])
+        currentLeaf->subActions[currentActionNumber] = new TEnvironmentTree(2*environmentResolution);
+      if (currentAction + 1 == currentAim.aimComplexity) currentLeaf->subActions[currentActionNumber]->aimTerminate = true;
+      currentLeaf = currentLeaf->subActions[currentActionNumber];
+    }
+  }
+  ofstream dotFile((imageFilename + ".dot").c_str());
+  dotFile << "digraph G{\n";
+  int globalNodesQuantity = 0;
+  printLeaftoDotFile(&initialTree, dotFile, 0, globalNodesQuantity);
+  dotFile << "}";
+  dotFile.close();
+  system(("dot -Tjpg " + imageFilename + ".dot -o " + imageFilename).c_str());
+}
+
