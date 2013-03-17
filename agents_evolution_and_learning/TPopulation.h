@@ -61,6 +61,8 @@ class TPopulation{
 	double duplicateDivision(int poolsQuantity, int connectionsQuantity);
 	// Процедура мутации - дупликация пула
 	void mutationPoolDuplication(TemplateNeuralAgent& kidAgent, int evolutionaryTime =0);
+  // Процедура мутации - мутация размерности пулов
+  void mutationPoolCapacity(TemplateNeuralAgent& kidAgent);
 	// Процедура мутации вероятности развития синапса по связи между пулами
 	void mutationDevelopSynapseProb(TemplateNeuralAgent& KidAgent);
 	// Процедура мутации вероятности развития предикторной связи по предикторной связи между пулами
@@ -97,6 +99,9 @@ public:
 		int connectionStandartAmount; // Стандартное кол-во связей в сети
 		double mutDevelopConProbProb; // Вероятность мутации вероятности образования связи связи
 		double mutDevelopConProbDisp; // Дисперсия мутации вероятности образования связи связи
+
+    double mutPoolCapacityProb; // Вероятность мутация размерности пула
+    double mutPoolCapacityVariance; // Значение мутации размерности пула (в интервале [-mutPoolCapacityVariance; mutPoolCapacityVariance])
 	} mutationSettings;
 
 	// Конструктор по умолчанию
@@ -105,10 +110,16 @@ public:
 		populationSize = 0;
 		connectionInnovationNumber = 0;
 		predConnectionInnovationNumber = 0;
+
+    mutationSettings.mutPoolCapacityProb = 0;
+    mutationSettings.mutPoolCapacityVariance = 0;
 	}
 	// Конструктор сразу с загрузкой геномов агентов
 	TPopulation(std::string populationFilename, int _populationSize){
 		loadPopulation(populationFilename, _populationSize);
+
+    mutationSettings.mutPoolCapacityProb = 0;
+    mutationSettings.mutPoolCapacityVariance = 0;
 	}
 	// Деструктор
 	~TPopulation(){ 
@@ -225,22 +236,7 @@ TPopulation<TemplateNeuralAgent>& TPopulation<TemplateNeuralAgent>::operator=(co
 	evolutionSettings.agentLifetime = sourcePopulation.evolutionSettings.agentLifetime;
 	evolutionSettings.evolutionTime = sourcePopulation.evolutionSettings.evolutionTime;
 	// Копируем параметры мутаций
-	mutationSettings.mutWeightProbability = sourcePopulation.mutationSettings.mutWeightProbability;
-	mutationSettings.mutWeightMeanDisp = sourcePopulation.mutationSettings.mutWeightMeanDisp;
-	mutationSettings.mutWeightDispDisp = sourcePopulation.mutationSettings.mutWeightDispDisp; 
-	mutationSettings.disLimit = sourcePopulation.mutationSettings.disLimit;
-	mutationSettings.enableConnectionProb = sourcePopulation.mutationSettings.enableConnectionProb;
-	mutationSettings.disableConnectionProb = sourcePopulation.mutationSettings.disableConnectionProb;
-	mutationSettings.addConnectionProb = sourcePopulation.mutationSettings.addConnectionProb;
-	mutationSettings.addPredConnectionProb = sourcePopulation.mutationSettings.addPredConnectionProb;
-	mutationSettings.deleteConnectionProb = sourcePopulation.mutationSettings.deleteConnectionProb;
-	mutationSettings.deletePredConnectionProb = sourcePopulation.mutationSettings.deletePredConnectionProb;
-	mutationSettings.duplicatePoolProb = sourcePopulation.mutationSettings.duplicatePoolProb;
-	mutationSettings.poolDivisionCoef = sourcePopulation.mutationSettings.poolDivisionCoef;
-	mutationSettings.poolStandartAmount = sourcePopulation.mutationSettings.poolStandartAmount;
-	mutationSettings.connectionStandartAmount = sourcePopulation.mutationSettings.connectionStandartAmount;
-	mutationSettings.mutDevelopConProbProb = sourcePopulation.mutationSettings.mutDevelopConProbProb;
-	mutationSettings.mutDevelopConProbDisp = sourcePopulation.mutationSettings.mutDevelopConProbDisp;
+	mutationSettings = sourcePopulation.mutationSettings;
 	// Копируем всех агентов
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent)
 		*(agents[currentAgent - 1]) = *(sourcePopulation.agents[currentAgent - 1]);
@@ -529,6 +525,16 @@ void TPopulation<TemplateNeuralAgent>::mutationPoolDuplication(TemplateNeuralAge
 		}
 	kidGenome->fixConnectionsIDs();
 	kidGenome->fixPredConnectionsIDs();
+}
+// Процедура мутации - мутация размерности пулов
+template<class TemplateNeuralAgent>
+void TPopulation<TemplateNeuralAgent>::mutationPoolCapacity(TemplateNeuralAgent& kidAgent){
+  TPoolNetwork* kidGenome = kidAgent.getPointerToAgentGenome();
+  for (int currentPool = 1; currentPool <= kidGenome->getPoolsQuantity(); ++currentPool)
+    if ((kidGenome->getPoolType(currentPool) == TPoolNetwork::HIDDEN_POOL) && 
+        (service::uniformDiscreteDistribution(0,1) < mutationSettings.mutPoolCapacityProb))
+      kidGenome->setPoolCapacity(currentPool, std::max(1, kidGenome->getPoolCapacity(currentPool) + 
+        service::uniformDiscreteDistribution(-mutationSettings.mutPoolCapacityVariance,mutationSettings.mutPoolCapacityVariance))); 
 }
 
 // Процедура мутации вероятности развития синапса по связи между пулами

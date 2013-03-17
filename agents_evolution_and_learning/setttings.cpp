@@ -93,7 +93,9 @@ void settings::fillPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulat
 		else if (optionString == "connection-standart-amount") { settingsFile >> optionString; agentsPopulation.mutationSettings.connectionStandartAmount = atoi(optionString.c_str()); }
 		else if (optionString == "mut-develop-con-prob-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutDevelopConProbProb = atof(optionString.c_str()); }
 		else if (optionString == "mut-develop-con-prob-disp") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutDevelopConProbDisp = atof(optionString.c_str()); }
-	}
+	  else if (optionString == "mut-pool-capacity-prob") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutPoolCapacityProb = atof(optionString.c_str()); }
+    else if (optionString == "mut-pool-capacity-variance") { settingsFile >> optionString; agentsPopulation.mutationSettings.mutPoolCapacityVariance = atof(optionString.c_str()); }
+  }
 	settingsFile.close();
 }
 
