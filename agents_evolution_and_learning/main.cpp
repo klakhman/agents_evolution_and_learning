@@ -175,13 +175,22 @@ int main(int argc, char** argv){
   }
   else if (programMode == "TLA"){
 	  TAgent testAgent;
-	  std::fstream inputFile("pop.txt");
-	  std::ofstream outputFile("out_file.txt");
+	  std::fstream inputFile("agent1.txt");
+	  std::ofstream outputFile("out_file1.txt");
 	  cout << "we are here" << endl;
 	  testAgent.loadGenome(inputFile, true);
 	  testAgent.uploadGenome(outputFile, true);
+	  (testAgent.getPointerToAgentGenome())->printGraphNetworkGraal("grl1");
 	
 	  TTopologyAnalysis *topologyAnalysis = new TTopologyAnalysis;
+	  topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
+
+	  std::fstream inputFile1("agent2.txt");
+	  std::ofstream outputFile1("out_file2.txt");
+	  testAgent.loadGenome(inputFile1, true);
+	  testAgent.uploadGenome(outputFile1, true);
+	  (testAgent.getPointerToAgentGenome())->printGraphNetworkGraal("grl2");
+
 	  topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
   }
   // Тестирование различных конструкций, несвязанных с основным кодом

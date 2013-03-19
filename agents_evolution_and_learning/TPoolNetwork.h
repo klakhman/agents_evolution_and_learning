@@ -149,6 +149,9 @@ public:
 	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
 	void printGraphNetwork(std::string graphFilename,  bool printWeights = false) const;
 
+	// Вывод сети в файл как списка связей между вершинами для дальнейшего Network Alignment
+	void printGraphNetworkGraal(std::string graphFilename);
+
 	// Вывод сети в файл как супер-графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
 	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
 	void printGraphNetworkAlternative(std::string graphFilename, int scale, int genealogy) const;
