@@ -8,6 +8,7 @@
 #include "TBehaviorAnalysis.h"
 #include "settings.h"
 #include <vector>
+#include "techanalysis.h"
 
 #include "mpi.h"
 #include <string>
@@ -17,6 +18,47 @@
 #include <sstream>
 
 using namespace std;
+
+double TAnalysis::startBestPopulationCycleLengthAnalysis(string bestPopulationFilename, string environmentFilename, string settingsFilename){
+  THypercubeEnvironment* environment = new THypercubeEnvironment(environmentFilename);
+	settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
+  environment->setStochasticityCoefficient(0.0);
+  TPopulation<TAgent>* agentsPopulation = new TPopulation<TAgent>;
+	settings::fillPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
+	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
+	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, settingsFilename);
+	agentsPopulation->loadPopulation(bestPopulationFilename);
+  double averageCycle = 0;
+  // ЭТО ИНОРОДНАЯ ВСТАВКА :)
+  for (int currentAgentNumber = 0; currentAgentNumber < agentsPopulation->getPopulationSize(); ++currentAgentNumber)
+    averageCycle += agentsPopulation->getPointertoAgent(currentAgentNumber + 1)->getPointerToAgentGenome()->getPoolsQuantity() / static_cast<double>(agentsPopulation->getPopulationSize());
+  return averageCycle;
+  // ОКОНЧАНИЕ ИНОРОДНОЙ ВСТАВКИ
+
+  for (int currentAgentNumber = 0; currentAgentNumber < agentsPopulation->getPopulationSize(); ++currentAgentNumber){
+    TAgent& currentAgent = *agentsPopulation->getPointertoAgent(currentAgentNumber + 1);
+     if (1 == currentAgent.getSystemogenesisMode())
+        currentAgent.primarySystemogenesis();
+      else if (0 == currentAgent.getSystemogenesisMode())
+		    currentAgent.linearSystemogenesis();
+      else if (2 == currentAgent.getSystemogenesisMode())
+        currentAgent.alternativeSystemogenesis();
+      vector< pair<TBehaviorAnalysis::SCycle, vector<int> > > convergence = 
+        techanalysis::calculateBehaviorConvergenceData(currentAgent, *environment);
+      // Теперь взвшенно (с учетом области сходимости) складываем все длины циклов (если агент никуда не сходится, то мы просто ничего не добавляем)
+      //cout << currentAgentNumber << " : ";
+
+      for (unsigned int i = 0; i < convergence.size(); ++i){
+        averageCycle += convergence[i].first.cycleSequence.size() * (convergence[i].second.size() / static_cast<double>(environment->getInitialStatesQuantity())) / 
+          agentsPopulation->getPopulationSize();
+        //cout << convergence[i].first.cycleSequence.size() << " - " << convergence[i].second.size() << ", ";
+      }
+      //cout << endl;    
+  }
+  delete agentsPopulation;
+	delete environment;
+	return averageCycle;
+}
 
 // Запуск процедуры анализа путем прогона лучшей популяции (возвращает среднее значений награды по популяции после прогона всех агентов из всех состояний)
 // Если stochasticityCoefficient не равен -1, то он переписывает загруженный из файла настроек.
@@ -434,6 +476,7 @@ void TAnalysis::workProcess(int argc, char **argv){
       delete environment;
     }
     else
+      //averageReward = startBestPopulationCycleLengthAnalysis(bestPopulationFilename, environmentFilename, settingsFilename);
       averageReward = startBestPopulationAnalysis(bestPopulationFilename, environmentFilename, settingsFilename, randomSeed, stochasticityCoefficient);
 		// Посылаем ответ о завершении работы над заданием
 		tmpStream.str(""); // Очищаем поток
