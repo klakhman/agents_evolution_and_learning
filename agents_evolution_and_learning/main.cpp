@@ -114,12 +114,15 @@ int main(int argc, char** argv){
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
     srand(static_cast<unsigned int>(time(0)));
+    cout << TAnalysis::startBestPopulationCycleLengthAnalysis("C:/Test/SANDBOX/En51_linsys(2)_bestpopulation.txt", "C:/Test/SANDBOX/Environment51.txt", "C:/Test/SANDBOX/settings_LINSYS.ini");
+
+    //TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_En2001-2360_GDinvariant.txt", "C:/Test/SANDBOX/SummaryBestPopulation_random-agents.txt", 18, 20, 1);
     //techanalysis::empiricalCheckGD("C:/Test/SANDBOX/8-dim Environments", 1, 100, "C:/Test/SANDBOX/envEmpiricalVsTheoryGD_8dim_rewardedGD.txt"); 
     //THypercubeEnvironment::generateEnvironmentsPool("C:/Test//SANDBOX/8-dim_3mincomp_Environments_GDrewarded", 8, 500001, 0.1, 1, 0.1, 10, 6, 3, 4);
     //THypercubeEnvironment::generateEnvironmentsPool("C:/Test/NewEnvironments", 8, 2001, 0.005, 0.049, 0.005, 20, 5, 2, 3);
     //THypercubeEnvironment env("C:/Test/SANDBOX/Environment20071.txt");
     //env.printEnvironmentsGoalsHierarchy("C:/Test/SANDBOX/Envrionment20071Graph.jpg");
-    TAnalysis::randomAgentAnalysis("C:/Test/SANDBOX/Environments GD_invariant/", 2001, 2360, "C:/Test/SANBDOX/settings_LINSYS.ini", "C:/Test/SANDBOX/random_agents_GDinvariant.txt");
+    //TAnalysis::randomAgentAnalysis("C:/Test/SANDBOX/Environments GD_invariant/", 2001, 2360, "C:/Test/SANBDOX/settings_LINSYS.ini", "C:/Test/SANDBOX/random_agents_GDinvariant.txt");
     return 0;
     THypercubeEnvironment environment("C:/Test/Environment");
     settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/settings.ini");

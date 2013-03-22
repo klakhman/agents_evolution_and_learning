@@ -194,6 +194,8 @@ public:
   };
   // Отрисовка структуры целей в среде в виде графа (узлы графа - действия, признак окончания цели на этом действии - красный цвет)
   void printEnvironmentsGoalsHierarchy(std::string imageFilename);
+  // Возвращает распределение длин целей в среде (нулевой элемент - цель длины два и т.д.) 
+  std::vector<int> getAimLengthDistr() const;
   
 };
 
