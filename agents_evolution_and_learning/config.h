@@ -1,2 +1,0 @@
-#define NOT_USE_ROBOT_LIB
-#define NOT_USE_ALGLIB_LIBRARY
