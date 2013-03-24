@@ -123,7 +123,14 @@ public:
   // Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
   double calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
   std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
-  void printSettings(std::ostream& os);
+  void printSettings(std::ostream& os) {
+    os << "world-step" << std::endl;
+    os << worldStep << std::endl;
+    os << "cube-size" << std::endl;
+    os << cubeSize << std::endl;
+    os << "cube-radius" << std::endl;
+    os << cubeRadius << std::endl;
+  };
 };
 
 #else 
