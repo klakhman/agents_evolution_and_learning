@@ -15,7 +15,6 @@
 #include "TBehaviorAnalysis.h"
 #include "settings.h"
 #include "config.h"
-#include <map>
 
 using namespace std;
 
@@ -528,54 +527,6 @@ void techanalysis::empiricalCheckGD(string environmentDirectory, int firstEnvNum
     outputFile << currentEnvironment << "\t" << environment.calculateOccupancyCoefficient() << "\t" << averageGD << endl;
   }
   outputFile.close();
-}
-
-void parseCommandLine(int argc, char** argv, vector<string> parametersNames, map<string, pair<string, void*> > parameters){
-   int currentArgNumber = 1; // Текущий номер параметра
-   while (currentArgNumber < argc){
-		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
-      for (unsigned int currentParam = 0; currentParam < parametersNames.size(); ++currentParam)
-        if (parametersNames[currentParam] == argv[currentArgNumber]){
-          pair<string, void*>& paramProperties = parameters[parametersNames[currentParam]];
-          if (paramProperties.first == "int") *static_cast<int*>(paramProperties.second) = atoi(argv[++currentArgNumber]);
-          else if (paramProperties.first == "double") *static_cast<double*>(paramProperties.second) = atof(argv[++currentArgNumber]);
-          else if (paramProperties.first == "string") *static_cast<string*>(paramProperties.second) = argv[++currentArgNumber];
-          else if (paramProperties.first == "bool") *static_cast<bool*>(paramProperties.second) = (atoi(argv[++currentArgNumber]) != 0);
-          break;
-        }
-		}
-		++currentArgNumber;
-	}
-}
-
-// Обертка для проведения анализа топологии агентов лучших популяций
-// Передается ссылка на функцию, которая принимает агента и возвращает вектор значений (напр. кол-во нейронов, кол-во синапсов и т.д.)
-void statisticsOnAgents(int argc, char** argv, vector<double> (*statFunc)(TAgent& agent)){
-  // Расшифровываем параметры командной строки
-  string settingsFilename = settings::getSettingsFilename(argc, argv);
-  int currentArgNumber = 1; // Текущий номер параметра
-  int firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber;
-  string runSign, outputFilename;
-	while (currentArgNumber < argc){
-		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
-			if (!strcmp("-env", argv[currentArgNumber])) { firstEnvironmentNumber = atoi(argv[++currentArgNumber]); lastEnvironmentNumber = atoi(argv[++currentArgNumber]);}
-			else if (!strcmp("-try", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
-			else if (!strcmp("-sign", argv[currentArgNumber])) { runSign = argv[++currentArgNumber]; }
-      else if (!strcmp("-outf", argv[currentArgNumber])) { outputFilename = argv[++currentArgNumber]; }
-		}
-		++currentArgNumber;
-	}
-  ofstream outputFile(outputFilename.c_str());
-  string workDirectory, environmentDirectory, resultsDirectory;
-  settings::fillDirectoriesSettings(workDirectory, environmentDirectory, resultsDirectory, settingsFilename);
-  stringstream tmpStream;
-  for (int currentEnv = firstEnvironmentNumber; currentEnv <= lastEnvironmentNumber; ++currentEnv){
-    for (int currentTry = firstTryNumber; currentTry <= lastTryNumber; ++currentTry){
-      tmpStream.str(""); // Очищаем поток
-		  tmpStream << resultsDirectory << "/En" << currentEnv << "/En" << currentEnv << "_" << runSign << "(" << currentTry << ")_bestpopulation.txt";
-		  string bestPopulationFilename = tmpStream.str();
-    }
-  }
 }
 
 #ifndef NOT_USE_ALGLIB_LIBRARY

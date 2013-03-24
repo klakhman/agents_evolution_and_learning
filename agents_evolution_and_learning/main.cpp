@@ -1,4 +1,4 @@
-﻿#include "TEvolutionaryProcess.h"
+#include "TEvolutionaryProcess.h"
 #include "TParallelEvolutionaryProcess.h"
 #include "service.h"
 #include "settings.h"
@@ -67,7 +67,7 @@ int main(int argc, char** argv){
 	if (programMode == "E"){ // Режим эволюции
 		TParallelEvolutionaryProcess* parallelProcess = new TParallelEvolutionaryProcess;
 		parallelProcess->start(argc, argv);
-		delete parallelProcess;	
+		delete parallelProcess;
 	}
 	else if (programMode == "BPA"){ // Режим анализа методом прогона лучшей популяции
 		TAnalysis* bestPopulationAnalysis = new TAnalysis;
@@ -82,7 +82,7 @@ int main(int argc, char** argv){
 		decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, randomSeed, extraPrint, argc, argv);
 		evolutionaryProcess->setExtraPrint(extraPrint);
 		evolutionaryProcess->start(randomSeed);
-			delete evolutionaryProcess;
+    delete evolutionaryProcess;
   }
   else if (programMode == "PROFILING"){ // Режим для различных тестов производительности
     string settingsFilename = settings::getSettingsFilename(argc, argv);
@@ -108,21 +108,18 @@ int main(int argc, char** argv){
       for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
         population.getPointertoAgent(currentAgent)->primarySystemogenesis();
         environment.setRandomEnvironmentState();
-        population.getPointertoAgent(currentAgent)->life(environment, population.evolutionSettings.agentLifetime); 
+        population.getPointertoAgent(currentAgent)->life(environment, population.evolutionSettings.agentLifetime);
       }
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
     srand(static_cast<unsigned int>(time(0)));
-    cout << TAnalysis::startBestPopulationCycleLengthAnalysis("C:/Test/SANDBOX/En51_linsys(2)_bestpopulation.txt", "C:/Test/SANDBOX/Environment51.txt", "C:/Test/SANDBOX/settings_LINSYS.ini");
-
-    //TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_En2001-2360_GDinvariant.txt", "C:/Test/SANDBOX/SummaryBestPopulation_random-agents.txt", 18, 20, 1);
-    //techanalysis::empiricalCheckGD("C:/Test/SANDBOX/8-dim Environments", 1, 100, "C:/Test/SANDBOX/envEmpiricalVsTheoryGD_8dim_rewardedGD.txt"); 
+    //techanalysis::empiricalCheckGD("C:/Test/SANDBOX/8-dim Environments", 1, 100, "C:/Test/SANDBOX/envEmpiricalVsTheoryGD_8dim_rewardedGD.txt");
     //THypercubeEnvironment::generateEnvironmentsPool("C:/Test//SANDBOX/8-dim_3mincomp_Environments_GDrewarded", 8, 500001, 0.1, 1, 0.1, 10, 6, 3, 4);
     //THypercubeEnvironment::generateEnvironmentsPool("C:/Test/NewEnvironments", 8, 2001, 0.005, 0.049, 0.005, 20, 5, 2, 3);
     //THypercubeEnvironment env("C:/Test/SANDBOX/Environment20071.txt");
     //env.printEnvironmentsGoalsHierarchy("C:/Test/SANDBOX/Envrionment20071Graph.jpg");
-    //TAnalysis::randomAgentAnalysis("C:/Test/SANDBOX/Environments GD_invariant/", 2001, 2360, "C:/Test/SANBDOX/settings_LINSYS.ini", "C:/Test/SANDBOX/random_agents_GDinvariant.txt");
+    TAnalysis::randomAgentAnalysis("C:/Test/SANDBOX/Environments GD_invariant/", 2001, 2360, "C:/Test/SANBDOX/settings_LINSYS.ini", "C:/Test/SANDBOX/random_agents_GDinvariant.txt");
     return 0;
     THypercubeEnvironment environment("C:/Test/Environment");
     settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/settings.ini");
@@ -138,16 +135,16 @@ int main(int argc, char** argv){
       reward += agent.getReward()/environment.getInitialStatesQuantity();
     }
     cout << reward << endl;
-        return 0;
-
+    return 0;
+    
     agent.getPointerToAgentGenome()->printGraphNetwork("C:/Test/net.jpg");
     vector<TBehaviorAnalysis::SCycle> cycles = TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment,true);
     TBehaviorAnalysis::uploadCycles(cycles, "C:/Test/aim_cycles.txt");
     TBehaviorAnalysis::drawCyclesListToDot(cycles, environment, "C:/Test/cycles.jpg");
     techanalysis::makeBehaviorConvergenceDiagram(agent, environment, "C:/Test/BehConv.jpg");
     for (int i =0; i<cycles.size(); ++i)
-      cout << TBehaviorAnalysis::calculateCycleReward(cycles[i], environment) << "\t" 
-        << TBehaviorAnalysis::calculateCycleLongestMemory(cycles[i], environment) << endl;
+      cout << TBehaviorAnalysis::calculateCycleReward(cycles[i], environment) << "\t"
+      << TBehaviorAnalysis::calculateCycleLongestMemory(cycles[i], environment) << endl;
   }
   else if(programMode == "NQ"){ // Режим подсчета количества нейронов
     TAnalysis::calculateOneEnvironmentAverageNeurons(argc, argv);
@@ -178,32 +175,23 @@ int main(int argc, char** argv){
   }
   else if (programMode == "TLA"){
 	  TAgent testAgent;
-	  std::fstream inputFile("agent1.txt");
-	  std::ofstream outputFile("out_file1.txt");
+	  std::fstream inputFile("pop.txt");
+	  std::ofstream outputFile("out_file.txt");
 	  cout << "we are here" << endl;
 	  testAgent.loadGenome(inputFile, true);
 	  testAgent.uploadGenome(outputFile, true);
-	  (testAgent.getPointerToAgentGenome())->printGraphNetworkGraal("grl1");
-	
+    
 	  TTopologyAnalysis *topologyAnalysis = new TTopologyAnalysis;
-	  topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
-
-	  std::fstream inputFile1("agent2.txt");
-	  std::ofstream outputFile1("out_file2.txt");
-	  testAgent.loadGenome(inputFile1, true);
-	  testAgent.uploadGenome(outputFile1, true);
-	  (testAgent.getPointerToAgentGenome())->printGraphNetworkGraal("grl2");
-
 	  topologyAnalysis->initializeIdArray(testAgent.getPointerToAgentGenome());
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
     srand(static_cast<unsigned int>(time(0)));
-    //techanalysis::analysisSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(1)_bestpopulation.txt", 
+    //techanalysis::analysisSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(1)_bestpopulation.txt",
     //                                        "C:/Test/Environments/Environment1001.txt", "C:/Test/An_SLengthVsConvSize_En1001_linsys(1).txt");
-    //techanalysis::evolutionSLengthVsConvSize("C:/Test/SANDBOX/settings_LINSYS.ini", "C:/Test/SANDBOX/En1113_linsys(2)_bestagents.txt", 5000, 
+    //techanalysis::evolutionSLengthVsConvSize("C:/Test/SANDBOX/settings_LINSYS.ini", "C:/Test/SANDBOX/En1113_linsys(2)_bestagents.txt", 5000,
     //                                       "C:/Test/SANDBOX/Environment1113.txt", "C:/Test/SANDBOX/An_evolutionSLengthVsConvSize_En1113_linsys(2).txt");
-    //techanalysis::conductBehaviorEvolutionAnalysis("D:/1/Test/SANDBOX/settings_LINSYS.ini","D:/1/Test/SANDBOX/Environment1120.txt",  "D:/1/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
+    //techanalysis::conductBehaviorEvolutionAnalysis("D:/1/Test/SANDBOX/settings_LINSYS.ini","D:/1/Test/SANDBOX/Environment1120.txt",  "D:/1/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000,
     //                                                "D:/1/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "D:/1/Test/SANDBOX/AimCyclesEvolution(CyclesData)_En1120_63(5).txt", true);
     TAgent agent;
     settings::fillAgentSettingsFromFile(agent, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
@@ -220,7 +208,7 @@ int main(int argc, char** argv){
     //agent.loadController(in);
     //in.close();
     //agent.setLearningMode(0);
-    //techanalysis::makeBehaviorConvergenceDiagram(agent, environment, "C:/Test/SANDBOX/BehConvergence_En1113_pc40anp40(18)_bestpop_179agent_goodNoAL.jpg"); 
+    //techanalysis::makeBehaviorConvergenceDiagram(agent, environment, "C:/Test/SANDBOX/BehConvergence_En1113_pc40anp40(18)_bestpop_179agent_goodNoAL.jpg");
     //return 0;
     //TNeuralNetwork initialController = *(agent.getPointerToAgentController());
     techanalysis::conductLearningVsNonLearningAnalysis(agent, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_42agent_learnVSnonlearn.txt", 500);
@@ -236,77 +224,77 @@ int main(int argc, char** argv){
     agent.life(environment, 30);
     cout << agent.getReward() << endl;
     vector<double> life;
-    const vector< vector<double> >& agentLife = agent.getPointerToAgentLife(); 
+    const vector< vector<double> >& agentLife = agent.getPointerToAgentLife();
     for (unsigned int i=0; i < agentLife.size(); ++i)
       life.push_back(agentLife[i][0]);
     TBehaviorAnalysis::drawActionSequenceToDot(life, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agent_poorNoAL_noL_state170.jpg", state);
   }
-
+  
   /*TAnalysis* analysis = new TAnalysis;
-	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");
-	delete analysis;*/
+   analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");
+   delete analysis;*/
 	/*int coefficientsQuantity = 18;
-	int environmentsQuantity = 20;
-	int initialStatesQuantity = 256;
-	int maxCycleLength = 100;
-	string runSign = "test";
-	string analysisDirectory = "C:/Advanced_Behavior/";
-	string outputDirectory = "C:/Advanced_Behavior/Summary_scaled/";
-	ofstream zeroConvergenceFile;
-	//zeroConvergenceFile.open (("C:/Advanced_Behavior/Summary/zero_convergence" + runSign + ".txt").c_str());
-
-	for (int coefficient = 1; coefficient <= 18; ++coefficient){
-		int* cyclesConvergence = new int[initialStatesQuantity];
-		memset(cyclesConvergence, 0, initialStatesQuantity * sizeof(int));
-		int* cyclesLength = new int[maxCycleLength];
-		memset(cyclesLength, 0, maxCycleLength * sizeof(int));
-		double averageZeroConvergence = 0;
-		for (int environment = 1; environment <= environmentsQuantity; ++environment){
-			int* tempCyclesConvergence = new int[initialStatesQuantity];
-			memset(tempCyclesConvergence, 0, initialStatesQuantity * sizeof(int));
-			int* tempCyclesLength = new int[maxCycleLength];
-			memset(tempCyclesLength, 0, maxCycleLength * sizeof(int));
-			double tempAverageZeroConvergence = 0;
-			
-			stringstream analysisFilename;
-			analysisFilename << analysisDirectory << "/ConvergenceAnalysisEn" << 1000 + environment + (coefficient-1) * environmentsQuantity << "_" << runSign << ".txt";
-			TAnalysis::advancedBehaviorFilesParsing(tempCyclesConvergence, initialStatesQuantity, tempAverageZeroConvergence, tempCyclesLength, maxCycleLength, analysisFilename.str());
-
-			for (int i=0; i<initialStatesQuantity; ++i)
-				cyclesConvergence[i] += tempCyclesConvergence[i];
-			for (int i=0; i<maxCycleLength; ++i)
-				cyclesLength[i] += tempCyclesLength[i];
-
-			averageZeroConvergence += tempAverageZeroConvergence;
-
-			delete []tempCyclesConvergence;
-			delete []tempCyclesLength;
-		}
-		stringstream outputFilename;
-		outputFilename << outputDirectory << "/AdvancedBehaviorCyclesConvergenceCoef" << coefficient << "_" << runSign << ".txt";
-		TAnalysis::scaleHistogram(cyclesConvergence, initialStatesQuantity, 10, outputFilename.str());
-		outputFilename.str("");
-		outputFilename << outputDirectory << "/AdvancedBehaviorCyclesLentghCoef" << coefficient << "_" << runSign << ".txt";
-		TAnalysis::scaleHistogram(cyclesLength, maxCycleLength, 10, outputFilename.str());
-		*/
-		/*ofstream outputFile;
-		outputFile.open(outputFilename.str().c_str());
-
-		for (int i=0; i<initialStatesQuantity; ++i)
-				outputFile << cyclesConvergence[i] << endl;
-		
-		outputFile << endl << endl << averageZeroConvergence / environmentsQuantity << endl << endl << endl;
-		zeroConvergenceFile << averageZeroConvergence / environmentsQuantity << endl;
-		for (int i=0; i<maxCycleLength; ++i)
-				outputFile << cyclesLength[i] << endl;
-
-		outputFile.close();*/
-//		delete []cyclesConvergence;
+   int environmentsQuantity = 20;
+   int initialStatesQuantity = 256;
+   int maxCycleLength = 100;
+   string runSign = "test";
+   string analysisDirectory = "C:/Advanced_Behavior/";
+   string outputDirectory = "C:/Advanced_Behavior/Summary_scaled/";
+   ofstream zeroConvergenceFile;
+   //zeroConvergenceFile.open (("C:/Advanced_Behavior/Summary/zero_convergence" + runSign + ".txt").c_str());
+   
+   for (int coefficient = 1; coefficient <= 18; ++coefficient){
+   int* cyclesConvergence = new int[initialStatesQuantity];
+   memset(cyclesConvergence, 0, initialStatesQuantity * sizeof(int));
+   int* cyclesLength = new int[maxCycleLength];
+   memset(cyclesLength, 0, maxCycleLength * sizeof(int));
+   double averageZeroConvergence = 0;
+   for (int environment = 1; environment <= environmentsQuantity; ++environment){
+   int* tempCyclesConvergence = new int[initialStatesQuantity];
+   memset(tempCyclesConvergence, 0, initialStatesQuantity * sizeof(int));
+   int* tempCyclesLength = new int[maxCycleLength];
+   memset(tempCyclesLength, 0, maxCycleLength * sizeof(int));
+   double tempAverageZeroConvergence = 0;
+   
+   stringstream analysisFilename;
+   analysisFilename << analysisDirectory << "/ConvergenceAnalysisEn" << 1000 + environment + (coefficient-1) * environmentsQuantity << "_" << runSign << ".txt";
+   TAnalysis::advancedBehaviorFilesParsing(tempCyclesConvergence, initialStatesQuantity, tempAverageZeroConvergence, tempCyclesLength, maxCycleLength, analysisFilename.str());
+   
+   for (int i=0; i<initialStatesQuantity; ++i)
+   cyclesConvergence[i] += tempCyclesConvergence[i];
+   for (int i=0; i<maxCycleLength; ++i)
+   cyclesLength[i] += tempCyclesLength[i];
+   
+   averageZeroConvergence += tempAverageZeroConvergence;
+   
+   delete []tempCyclesConvergence;
+   delete []tempCyclesLength;
+   }
+   stringstream outputFilename;
+   outputFilename << outputDirectory << "/AdvancedBehaviorCyclesConvergenceCoef" << coefficient << "_" << runSign << ".txt";
+   TAnalysis::scaleHistogram(cyclesConvergence, initialStatesQuantity, 10, outputFilename.str());
+   outputFilename.str("");
+   outputFilename << outputDirectory << "/AdvancedBehaviorCyclesLentghCoef" << coefficient << "_" << runSign << ".txt";
+   TAnalysis::scaleHistogram(cyclesLength, maxCycleLength, 10, outputFilename.str());
+   */
+  /*ofstream outputFile;
+   outputFile.open(outputFilename.str().c_str());
+   
+   for (int i=0; i<initialStatesQuantity; ++i)
+   outputFile << cyclesConvergence[i] << endl;
+   
+   outputFile << endl << endl << averageZeroConvergence / environmentsQuantity << endl << endl << endl;
+   zeroConvergenceFile << averageZeroConvergence / environmentsQuantity << endl;
+   for (int i=0; i<maxCycleLength; ++i)
+   outputFile << cyclesLength[i] << endl;
+   
+   outputFile.close();*/
+  //		delete []cyclesConvergence;
 	//	delete []cyclesLength;
 	//}
-
+  
 	//zeroConvergenceFile.close();
 	/*TAnalysis analysis;
-	analysis.makeBestPopulationAnalysisSummary("C:/Tests/RANDOM_agent_analysis.txt", "C:/Tests/summarydeterm.txt", 18, 20, 1);*/
+   analysis.makeBestPopulationAnalysisSummary("C:/Tests/RANDOM_agent_analysis.txt", "C:/Tests/summarydeterm.txt", 18, 20, 1);*/
 	//return 0;
 }

@@ -57,9 +57,6 @@ public:
 
   // Подсчет среднего кол-ва нейронов для запуска на одной среде
   static void calculateOneEnvironmentAverageNeurons(int argc, char**argv);
-
-  static double startBestPopulationCycleLengthAnalysis(std::string bestPopulationFilename, std::string environmentFilename, std::string settingsFilename);
-
 };
 
 #endif // TANALYSIS_H

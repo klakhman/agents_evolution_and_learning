@@ -270,7 +270,7 @@ std::vector<int> TEnkiEnvironment::testReachingAims(const std::vector< std::vect
 
 
 double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const {
-
+    
     return 0;
 }
 

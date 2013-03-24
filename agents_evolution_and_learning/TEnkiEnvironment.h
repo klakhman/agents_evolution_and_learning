@@ -173,7 +173,14 @@ public:
     cubeSize = 0;
   }
   
-  void printSettings(std::ostream& os) {};
+  void printSettings(std::ostream& os) {
+    os << "world-step" << std::endl;
+    os << worldStep << std::endl;
+    os << "cube-size" << std::endl;
+    os << cubeSize << std::endl;
+    os << "cube-radius" << std::endl;
+    os << cubeRadius << std::endl;
+  };
   
 };
 #endif

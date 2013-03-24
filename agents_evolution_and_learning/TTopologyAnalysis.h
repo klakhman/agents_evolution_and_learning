@@ -18,8 +18,6 @@ public:
 	// инициализация массива новых id для сети
 	static std::map< int, std::vector<int> > initializeIdArray(TPoolNetwork* network);
 
-	static void printGraphNetworkMGraal(TPoolNetwork *network, std::map< int, std::vector<int> > idArray, std::string graphFilename);
-	
 	~TTopologyAnalysis(void);
 };
 

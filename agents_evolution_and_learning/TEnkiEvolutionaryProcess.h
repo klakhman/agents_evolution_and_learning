@@ -21,6 +21,7 @@ class TEnkiEvolutionaryProcess:public TEvolutionaryProcess
   
     void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
     void start(unsigned int randomSeed = 0);
+  	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation<TEnkiAgent>* bestPopulation, int currentEvolutionStep /*=0*/);
 };
 
 #endif /* defined(__Agents_Evolution_And_Learning_ENKI__TEnkiEvolutionaryProcess__) */
