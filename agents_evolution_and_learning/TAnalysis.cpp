@@ -435,19 +435,17 @@ void TAnalysis::workProcess(int argc, char **argv){
           agentsPopulation->getPointertoAgent(currentAgent)->loadGenome(bestPopulationFile);
         // Выполняем свою часть работы
         double thisProcessReward = startBestPopulationAnalysis(*agentsPopulation, *environment, randomSeed);
-        // Ждем пока выполнятся все дочерние процессы
+       // Ждем пока выполнятся все дочерние процессы
         int processesToWait = processesPool.size() - 1;
         long double accumulatedSideReward = 0;
         while (processesToWait > 0){
           double currentReward = 0;
           MPI_Recv(&currentReward, 1, MPI_DOUBLE, MPI_ANY_SOURCE, messageType, MPI_COMM_WORLD, &status); 
-          accumulatedSideReward += currentReward;
+          accumulatedSideReward += currentReward * (fullPopulationSize/processesPool.size());
           --processesToWait;
         }
         //Подсчитываем полную награду (с учетом того, что у подрутового процесса больше агентов)
-        averageReward = static_cast<double>(((lastAgent - firstAgent + 1) * thisProcessReward + 
-                                            (fullPopulationSize/processesPool.size())*accumulatedSideReward/(processesPool.size() - 1)) 
-                                            / fullPopulationSize);
+        averageReward = static_cast<double>(((lastAgent - firstAgent + 1) * thisProcessReward + accumulatedSideReward) / fullPopulationSize);
       }
       else{ // Если это рабочий процесс
         int fullPopulationSize = agentsPopulation->getPopulationSize();
