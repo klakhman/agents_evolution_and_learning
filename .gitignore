@@ -108,6 +108,7 @@ stylecop.*
 *.dbmdl
 
 config.h
+doxygen_agents_evolution.txt
 
 Generated_Code #added for RIA/Silverlight projects
 
