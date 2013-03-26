@@ -228,6 +228,31 @@ void TPoolNetwork::printGraphNetwork(string graphFilename, bool printWeights /*=
 	system(("dot -Tjpg " + graphFilename + ".dot -o " + graphFilename).c_str());
 }
 
+// Вывод сети в файл как списка связей между вершинами для дальнейшего Network Alignment
+// Используемый алгоритм - GRAAL (http://bio-nets.doc.ic.ac.uk/GRAAL_suppl_inf/)
+// Реализация алгоритма с графической оболочкой: http://bio-nets.doc.ic.ac.uk/graphcrunch2/
+// Алгоритм требует формата LEDA для графов, поэтому полученные файлы необходимо обработать скриптом list2leda (он идет в архиве с GRAAL)
+void TPoolNetwork::printGraphNetworkGraal(string graphFilename) const{
+	ofstream hGraalGraphFile;
+	hGraalGraphFile.open((graphFilename + ".txt").c_str());
+	// Записываем связи
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= poolsStructure[currentPool - 1].getInputConnectionsQuantity(); ++currentConnection)
+			if (poolsStructure[currentPool - 1].getConnectionEnabled(currentConnection)){
+				hGraalGraphFile << "\t" << poolsStructure[currentPool - 1].getConnectionPrePoolID(currentConnection) << " " <<
+					poolsStructure[currentPool - 1].getConnectionPostPoolID(currentConnection) << "\n";
+			}
+	// Записываем предикторные связи
+	for (unsigned int currentPool = 1; currentPool <= poolsStructure.size(); ++currentPool)
+		for (int currentPredConnection = 1; currentPredConnection <= poolsStructure[currentPool - 1].getInputPredConnectionsQuantity(); ++currentPredConnection)
+			if (poolsStructure[currentPool - 1].getPredConnectionEnabled(currentPredConnection))
+				hGraalGraphFile << "\t\"" << poolsStructure[currentPool - 1].getPredConnectionPrePoolID(currentPredConnection) << " " <<
+					poolsStructure[currentPool - 1].getPredConnectionPostPoolID(currentPredConnection) << "\n";
+	hGraalGraphFile.close();
+//	system(("list2leda " + graphFilename + ".txt" + graphFilename + "leda.gw").c_str());
+}
+
+
 // Вывод сети в файл как супер-графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
 // Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH
 void TPoolNetwork::printGraphNetworkAlternative(string graphFilename, int scale, int genealogy) const{

@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <map>
+#include <cstdlib>
+#include <string>
+
 
 using namespace std;
 
@@ -55,6 +58,28 @@ map< int, vector<int> > TTopologyAnalysis::initializeIdArray(TPoolNetwork *netwo
 	return idArray;
 
 }
+
+void printGraphNetworkMGraal(TPoolNetwork *network, map< int, vector<int> > idArray, string graphFilename){
+	ofstream hGraalGraphFile;
+	hGraalGraphFile.open((graphFilename + ".txt").c_str());
+	// Записываем связи
+	for (int currentPool = 1; currentPool <= network->getPoolsQuantity(); ++currentPool)
+		for (int currentConnection = 1; currentConnection <= network->getPoolInputConnectionsQuantity(currentPool); ++currentConnection)
+			if (network->getConnectionEnabled(currentPool, currentConnection)){
+				// работает только если у кажого из нейронов менее 10 потомков (одноразрядное число)
+				for(unsigned int i = 0; i < idArray[network->getConnectionPrePoolID(currentPool, currentConnection)].size(); ++i){
+					hGraalGraphFile << idArray[network->getConnectionPrePoolID(currentPool, currentConnection)][i];
+				}
+				hGraalGraphFile << " ";
+				for(unsigned int i = 0; i < idArray[network->getConnectionPostPoolID(currentPool, currentConnection)].size(); ++i){
+					hGraalGraphFile << idArray[network->getConnectionPostPoolID(currentPool, currentConnection)][i];
+				}
+				hGraalGraphFile << "\n";
+			}
+	hGraalGraphFile.close();
+//	system(("list2leda " + graphFilename + ".txt" + graphFilename + "leda.gw").c_str());
+}
+
 
 TTopologyAnalysis::~TTopologyAnalysis(void){
 }

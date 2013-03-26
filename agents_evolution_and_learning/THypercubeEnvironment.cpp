@@ -135,9 +135,6 @@ int THypercubeEnvironment::forceEnvironment(const std::vector<double>& action){
 
 // Подсчет награды агента - при этом передается вся записанная жизнь агента - возвращает награду
 double THypercubeEnvironment::calculateReward(const vector< vector<double> >& actions, int actionsQuantity) const{
-  /*double* actionsIDs = new double[actionsQuantity];
-  for (int currentAction = 0; currentAction < actionsQuantity; ++currentAction)
-    actionsIDs[currentAction] = actions[currentAction][0];*/
 	double accumulatedReward = 0.0; // Награда агента
 	// Времена последнего достижения цели агентом
 	int* achievingTime = new int[aimsQuantity];
@@ -149,30 +146,31 @@ double THypercubeEnvironment::calculateReward(const vector< vector<double> >& ac
 		// Проверяем все цели относительно конкретного шага вермени
 		for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
 			if (aimsSet[currentAim-1].aimComplexity <= currentTimeStep){ // Проверяем успел ли бы вообще агент достичь эту цель в начале "жизни" (для экономии времени)
-				int achivedFlag = 1; // Признак того, что цель достигнута
+				bool achivedFlag = true; // Признак того, что цель достигнута
 				int currentAction = 1; // Текущее проверяемое действие
+        const TAim& curAim =  aimsSet[currentAim - 1];
+        int aimStart = currentTimeStep - 1 - curAim.aimComplexity;
 				// Пока не найдено нарушение последовательности цели или проверка цели закончена
-				while (achivedFlag && (currentAction <= aimsSet[currentAim - 1].aimComplexity)){
+				while (currentAction <= curAim.aimComplexity){
 					// Определение направления изменения и изменяемого бита (с откатыванием времени назад)
-					bool changedDirection = (actions[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0] > 0);
-					int changedBit = static_cast<int>(fabs(actions[currentTimeStep - 1 - aimsSet[currentAim - 1].aimComplexity + currentAction][0]));
 					/* Проверяем совпадает ли реальное действие с действием в цели на нужном месте 
 						Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
-					if ((changedBit != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].bitNumber) ||
-									(changedDirection != aimsSet[currentAim - 1].actionsSequence[currentAction - 1].desiredValue))
+          if ((curAim.actionsSequence[currentAction - 1].desiredValue ? 1 : -1)*curAim.actionsSequence[currentAction - 1].bitNumber != 
+                actions[aimStart + currentAction][0]){
 						achivedFlag = false;
+            break;
+          }
 					++currentAction;
 				}
 				// Если не было нарушения последовательности, то цель достигнута
 				if (achivedFlag){
 					// Награда линейно восстанавливается до максимального (исходного) уровня за фиксированное кол-во тактов
-					accumulatedReward += aimsSet[currentAim - 1].reward * min(1.0, (currentTimeStep - achievingTime[currentAim - 1])/static_cast<double>(max(1, rewardRecoveryTime)));
+					accumulatedReward += curAim.reward * min(1.0, (currentTimeStep - achievingTime[currentAim - 1])/static_cast<double>(max(1, rewardRecoveryTime)));
 					achievingTime[currentAim - 1] = currentTimeStep;
 				}
 			} // Конец проверки одной цели
 		} // Конец проверки всех целей относительно одного фронта времени
 	} // Конец проверки всей "жизни"
-  //delete []actionsIDs;
 	delete []achievingTime;
 	return accumulatedReward;
 }
@@ -275,7 +273,7 @@ double THypercubeEnvironment::generateEnvironment(int _environmentResolution, do
 	currentEnvironmentVector = new bool[environmentResolution];
 	memset(currentEnvironmentVector, 0, environmentResolution * sizeof(*currentEnvironmentVector));
   // !!!! Количество полных целей (которые потом будут разбиты на подцели) !!!
-	const int MAX_FULL_AIMS = 4000; //1000
+	const int MAX_FULL_AIMS = 5500; //1000
   // Чтобы избежать фрагментации мы инициализируем максимальным числом все сначала
   // Создаем среду, в которую будут записываться полные цели
   THypercubeEnvironment environmentWithFullAims;
@@ -408,4 +406,16 @@ void THypercubeEnvironment::printEnvironmentsGoalsHierarchy(string imageFilename
   dotFile.close();
   system(("dot -Tjpg " + imageFilename + ".dot -o " + imageFilename).c_str());
 }
+
+// Возвращает распределение длин целей в среде (нулевой элемент - цель длины два и т.д.) 
+vector<int> THypercubeEnvironment::getAimLengthDistr() const{
+  vector<int> aimLengthsDistr;
+  for (int currentAim = 0; currentAim  < aimsQuantity; ++currentAim){
+    if (aimsSet[currentAim].aimComplexity - 1 > aimLengthsDistr.size())
+      aimLengthsDistr.resize(aimsSet[currentAim].aimComplexity - 1, 0);
+    ++aimLengthsDistr[aimsSet[currentAim].aimComplexity - 2];
+  }
+  return aimLengthsDistr;
+}
+
 
