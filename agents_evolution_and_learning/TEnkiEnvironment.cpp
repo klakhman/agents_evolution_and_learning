@@ -85,10 +85,10 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   {
     Enki::PhysicalObject* o = new Enki::PhysicalObject;
     Enki::PhysicalObject::Hull hull(Enki::PhysicalObject::Part(p2, cubeSize));
-    o->setCustomHull(hull, -1); //the negative mass is the same as infinite mass, so the cubes are unmovable
+    o->setCustomHull(hull, -1); // Отрицательная масса - то же, что бесконечная, поэтому объекты сдвинуть с места будет невозможно
     o->setColor(Enki::Color(objectsArray.at(i).color[0], objectsArray.at(i).color[1], objectsArray.at(i).color[2]));
-    o->collisionElasticity = 0; //let all the heat from a collision absorb
-    o->pos = Enki::Point(objectsArray.at(i).x, objectsArray.at(i).y); //Point(UniformRand(20, 100)(), UniformRand(20, 100)());
+    o->collisionElasticity = 0; // Все тепло от столкновения поглощается
+    o->pos = Enki::Point(objectsArray.at(i).x, objectsArray.at(i).y);
     world.addObject(o);
   }
   
@@ -244,7 +244,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     for (int i=0; i<objectsNumber; i++) {
       if ((ePuckBot->pos.x>objectsArray[i].x-cubeRadius) && (ePuckBot->pos.x<objectsArray[i].x+cubeRadius)) {
         if ((ePuckBot->pos.y>objectsArray[i].y-cubeRadius) && (ePuckBot->pos.y<objectsArray[i].y+cubeRadius)) {
-          if (sqrt((ePuckBot->pos.x)*(ePuckBot->pos.x)+(ePuckBot->pos.y)*(ePuckBot->pos.y))) {
+          if (sqrt((ePuckBot->pos.x-objectsArray[i].x)*(ePuckBot->pos.x-objectsArray[i].x)+(ePuckBot->pos.y-objectsArray[i].y)*(ePuckBot->pos.y-objectsArray[i].y))) {
             // Нужно добавить в некий массив число (i+1), которое как раз и соответствует номеру объекта, в радиусе которого робот сейчас находится
             whatToReturn = i+1;
             break;

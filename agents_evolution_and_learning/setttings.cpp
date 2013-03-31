@@ -54,13 +54,13 @@ void settings::fillEnvironmentSettingsFromFile(TEnkiEnvironment& environment, st
   while (settingsFile >> optionString) {
     if (optionString == "world-step") {
       settingsFile >> optionString;
-      environment.worldStep = atof(optionString.c_str());
+      environment.setWorldStep(atof(optionString.c_str()));
     } else if (optionString == "cube-size") {
       settingsFile >> optionString;
-      environment.cubeSize = atof(optionString.c_str());
+      environment.setCubeSize(atof(optionString.c_str()));
     } else if (optionString == "cube-radius") {
       settingsFile >> optionString;
-      environment.cubeRadius = atof(optionString.c_str());
+      environment.setCubeRadius(atof(optionString.c_str()));
     } else if (optionString == "reward-recovery-time") {
       settingsFile >> optionString;
       environment.setRewardRecoveryTime(atof(optionString.c_str()));
