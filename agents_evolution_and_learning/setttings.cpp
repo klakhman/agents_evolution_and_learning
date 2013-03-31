@@ -61,6 +61,9 @@ void settings::fillEnvironmentSettingsFromFile(TEnkiEnvironment& environment, st
     } else if (optionString == "cube-radius") {
       settingsFile >> optionString;
       environment.cubeRadius = atof(optionString.c_str());
+    } else if (optionString == "reward-recovery-time") {
+      settingsFile >> optionString;
+      environment.setRewardRecoveryTime(atof(optionString.c_str()));
     }
   }
   settingsFile.close();

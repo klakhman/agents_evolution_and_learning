@@ -34,6 +34,8 @@
 class TEnkiEnvironment : public TEnvironment {
 private:
   
+  double rewardRecoveryTime;
+  
   class TEnkiAim{
   public:
     // Максимальное кол-во действий в цели
@@ -89,9 +91,10 @@ public:
     worldStep = 0;
     cubeRadius = 0;
     cubeSize = 0;
+    rewardRecoveryTime = 0;
   }
   
-  TEnkiEnvironment(std::string aimsFilename, double _worldStep=0, double _cubeSize=0, double _cubeRadius=0){
+  TEnkiEnvironment(std::string aimsFilename, double _worldStep=0, double _cubeSize=0, double _cubeRadius=0, double _rewardRecoveryTime = 0){
     xSize = 0;
     ySize = 0;
     objectsNumber = 0;
@@ -99,6 +102,7 @@ public:
 		worldStep = _worldStep;
     cubeSize = _cubeSize;
     cubeRadius = _cubeRadius;
+    rewardRecoveryTime = _rewardRecoveryTime;
 		loadEnvironment(aimsFilename);
 	}
   
@@ -130,7 +134,13 @@ public:
     os << cubeSize << std::endl;
     os << "cube-radius" << std::endl;
     os << cubeRadius << std::endl;
+    os << "reward-recovery-time" << std::endl;
+    os << rewardRecoveryTime << std::endl;
   };
+  
+  double getRewardRecoveryTime() const {return rewardRecoveryTime; }
+	void setRewardRecoveryTime(int _rewardRecoveryTime) {rewardRecoveryTime = _rewardRecoveryTime; }
+  
 };
 
 #else 
@@ -140,6 +150,7 @@ public:
 class TEnkiEnvironment : public TEnvironment {
 public:
   
+  double rewardRecoveryTime;
   double worldStep;
   double cubeRadius;
   double cubeSize;
@@ -187,7 +198,12 @@ public:
     os << cubeSize << std::endl;
     os << "cube-radius" << std::endl;
     os << cubeRadius << std::endl;
+    os << "reward-recovery-time" << std::endl;
+    os << rewardRecoveryTime << std::endl;
   };
+  
+  double getRewardRecoveryTime() const {return rewardRecoveryTime; }
+	void setRewardRecoveryTime(int _rewardRecoveryTime) {rewardRecoveryTime = _rewardRecoveryTime; }
   
 };
 #endif

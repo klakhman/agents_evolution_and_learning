@@ -24,20 +24,28 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
 	double* outputVector = new double[neuralController->getOutputResolution()];
   vector<double> actionVector(getActionResolution());
   
-	agentLife.resize(agentLifeTime);
+  agentLife.erase(agentLife.begin(), agentLife.end());
   
 	neuralController->reset();
-  environment.getCurrentEnvironmentVector(environmentVector);
-  neuralController->calculateNetwork(environmentVector);
-  neuralController->getOutputVector(outputVector);
-  actionVector = decodeAction(outputVector);
-  // Действуем на среду и проверяем успешно ли действие
-  int actionSuccess = environment.forceEnvironment(actionVector);
-  agentLife[agentLifeTime - 1][0] = actionSuccess;
-  // Проводим процедуру обучения (если такой режим)
-  if (1 == learningSettings.learningMode) learning();
-  // !!!! Случайное обучение - только для контроля качества обучения !!!!!
-  else if (2 == learningSettings.learningMode) randomLearning();
+  for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep) {
+    environment.getCurrentEnvironmentVector(environmentVector);
+    neuralController->calculateNetwork(environmentVector);
+    neuralController->getOutputVector(outputVector);
+    actionVector = decodeAction(outputVector);
+    // Действуем на среду, проверяем, успешно ли действие, а также проверяем, что это действие новое, так как в противном случае это действие не несет никакой новой информации
+    int actionSuccess = environment.forceEnvironment(actionVector);
+    double previousActionSuccess = agentLife.back()[0];
+    if (static_cast<int>(previousActionSuccess) != actionSuccess) {
+      agentLife.resize(agentLife.size()+1);
+      agentLife[agentLife.size()][0] = actionSuccess;
+      agentLife[agentLife.size()][1] = agentLifeStep;
+    }
+    //agentLife[agentLifeTime - 1][0] = actionSuccess;
+    // Проводим процедуру обучения (если такой режим)
+    if (1 == learningSettings.learningMode) learning();
+    // !!!! Случайное обучение - только для контроля качества обучения !!!!!
+    else if (2 == learningSettings.learningMode) randomLearning();
+  }
   
 	if (rewardCalculate)
 		reward = environment.calculateReward(agentLife, agentLifeTime);

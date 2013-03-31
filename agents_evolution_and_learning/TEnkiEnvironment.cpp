@@ -270,8 +270,54 @@ std::vector<int> TEnkiEnvironment::testReachingAims(const std::vector< std::vect
 
 
 double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const {
-    
-    return 0;
+  //Создаем новый вектор, который в целом будет являться копией старого actions, лишь только с тем изменением, что все нули мы вырежем, так как они определяют лишь границы достижения целей и в подсчете награды никак по сути не участвуют
+  std::vector< std::vector<double> > correctedActionsVector;
+  
+  for (int i = 0; i<actions.size(); i++) {
+    if (actions[i][0]!=0) {
+      correctedActionsVector.back().push_back(actions[i][0]);
+    }
+  }
+  
+	double accumulatedReward = 0.0; // Награда агента
+	// Времена последнего достижения цели агентом
+	int* achievingTime = new int[goalsNumber];
+	// Заполняем времена достижения целей так, чтобы вначале они все имели полную награду
+	for (int currentAim = 1; currentAim <= goalsNumber; ++currentAim)
+		achievingTime[currentAim - 1] = -rewardRecoveryTime/worldStep - 1;
+	// Проходимся по всем действиям агент
+	for (int currentActionStep = 1; currentActionStep <= actionsQuantity; ++currentActionStep){
+		// Проверяем все цели относительно конкретного шага вермени
+		for (int currentAim = 1; currentAim <= goalsNumber; ++currentAim){
+			if (goalsArray[currentAim-1].aimComplexity <= currentActionStep){ // Проверяем успел ли бы вообще агент достичь эту цель в начале "жизни" (для экономии времени)
+				int achivedFlag = 1; // Признак того, что цель достигнута
+				int currentAction = 1; // Текущее проверяемое действие
+				// Пока не найдено нарушение последовательности цели или проверка цели закончена
+				while (achivedFlag && (currentAction <= goalsArray[currentAim - 1].aimComplexity)){
+					// Определение направления изменения и изменяемого бита (с откатыванием времени назад)
+					//bool changedDirection = (actions[currentTimeStep - 1 - goalsArray[currentAim - 1].aimComplexity + currentAction][0] > 0);
+					//int changedBit = static_cast<int>(fabs(actions[currentTimeStep - 1 - goalsArray[currentAim - 1].aimComplexity + currentAction][0]));
+					// Проверяем совпадает ли реальное действие с действием в цели на нужном месте
+					//if ((changedBit != goalsArray[currentAim - 1].actionsSequence[currentAction - 1]) ||
+          //(changedDirection != goalsArray[currentAim - 1].actionsSequence[currentAction - 1]))
+          //achivedFlag = false;
+          int visitedObject = actions[currentActionStep - 1 - goalsArray[currentAim-1].aimComplexity + currentAction][0];
+          if (visitedObject != goalsArray[currentAim - 1].actionsSequence[currentAction - 1]) {
+            achivedFlag = false;
+          }
+					++currentAction;
+				}
+				// Если не было нарушения последовательности, то цель достигнута
+				if (achivedFlag){
+					// Награда линейно восстанавливается до максимального (исходного) уровня за фиксированное кол-во тактов
+					accumulatedReward += goalsArray[currentAim - 1].reward * min(1.0, (actions[currentActionStep-1][1] - achievingTime[currentAim - 1])/static_cast<double>(max(1.0, rewardRecoveryTime/worldStep)));
+					achievingTime[currentAim - 1] = actions[currentActionStep-1][1];
+				}
+			} // Конец проверки одной цели
+		} // Конец проверки всех целей относительно одного фронта времени
+	} // Конец проверки всей "жизни"
+	delete []achievingTime;
+	return accumulatedReward;
 }
 
 #endif
