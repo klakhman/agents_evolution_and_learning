@@ -67,13 +67,13 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   Enki::World world(xSize, ySize, Enki::Color(0.9, 0.9, 0.9));
 	
 	// Создаем E-PUCK и размещаем его в среде
-  Enki::EPuck *epuck = new Enki::EPuck;
-  epuck->pos = Enki::Point(20, 50);
-  epuck->angle = 0;
-  epuck->leftSpeed = 10;
-  epuck->rightSpeed = 10;
-  epuck->setColor(Enki::Color(1, 0, 0));
-  world.addObject(epuck);
+  ePuckBot = new Enki::EPuck;
+  ePuckBot->pos = Enki::Point(20, 50);
+  ePuckBot->angle = 0;
+  ePuckBot->leftSpeed = 10;
+  ePuckBot->rightSpeed = 10;
+  ePuckBot->setColor(Enki::Color(1, 0, 0));
+  world.addObject(ePuckBot);
   
   // Создаем объекты
   Enki::Polygone p2;
@@ -112,6 +112,9 @@ void TEnkiEnvironment::uploadEnvironment(std::string environmentFilename) const 
       environmentFile << goalsArray.at(currentAim).aimComplexity << "\t" << goalsArray.at(currentAim).reward << endl;
       for (int currentAction = 0; currentAction < goalsArray.at(currentAim).aimComplexity; currentAction++) {
         environmentFile << goalsArray.at(currentAim).actionsSequence[currentAction];
+        if (currentAction!=goalsArray.at(currentAim).aimComplexity-1) {
+          environmentFile << "\t";
+        }
       }
       environmentFile << endl;
     }
@@ -234,6 +237,8 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
       }
     }
   
+    ePuckBot->pos.x = xRandomValue;
+    ePuckBot->pos.y = yRandomValue;
     ePuckBot->angle = angleRandomValue;
 }
 
@@ -257,7 +262,11 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
   
     ePuckBot->leftSpeed = ePuckBot->leftSpeed + action.at(0);
     ePuckBot->rightSpeed = ePuckBot->rightSpeed + action.at(1);
-    world->step(worldStep);
+    world.step(worldStep);
+    currentTime = currentTime + worldStep;
+  
+    //printOutCurrentEnvironmentState("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/TEnkiEnvironmentLogs.txt");
+  
     return whatToReturn;
 }
 
@@ -318,6 +327,12 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
 	} // Конец проверки всей "жизни"
 	delete []achievingTime;
 	return accumulatedReward;
+}
+
+void TEnkiEnvironment::printOutCurrentEnvironmentState(std::string logsFilename) {
+  ofstream logsFile;
+  logsFile.open(logsFilename.c_str(), ios_base::app);
+  logsFile << "Current Time:" << currentTime << "Robot Position:(" << ePuckBot->pos.x << "," << ePuckBot->pos.y << ")" << std::endl;
 }
 
 #endif

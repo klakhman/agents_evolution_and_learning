@@ -78,13 +78,14 @@ private:
 public:
 
   double xSize, ySize; // Размеры квадратной арены, в которой находится агент
+  double currentTime; // Текущее время в среде
   int objectsNumber; // Количество объектов в среде
   std::vector<TEnkiObject> objectsArray; // Вектор объектов среды
   int goalsNumber; // Количество целей в среде
   std::vector<TEnkiAim> goalsArray; // Вектор целей среды
   
   Enki::EPuck * ePuckBot; // Робот E-Puck
-  Enki::World * world; // Симуляция среды, в которой он существует
+  Enki::World world; // Симуляция среды, в которой он существует
   
   // Конструктор среды по умолчанию
   TEnkiEnvironment() {
@@ -155,6 +156,9 @@ public:
     os << "reward-recovery-time" << std::endl;
     os << rewardRecoveryTime << std::endl;
   };
+  
+  // Временный метод, используемый для диагностики правильной работы среды, а также сенсоров робота
+  void printOutCurrentEnvironmentState(std::string logsFilename);
   
   // Геттеры и сеттеры параметров среды
   
