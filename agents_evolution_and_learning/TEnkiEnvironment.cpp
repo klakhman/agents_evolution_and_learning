@@ -64,16 +64,16 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   //Переходим к постройке мира исходя из параметров, полученных из файла
     
   // Создаем саму арену
-  Enki::World world(xSize, ySize, Enki::Color(0.9, 0.9, 0.9));
+  world = new Enki::World(xSize, ySize, Enki::Color(0.9, 0.9, 0.9));
 	
 	// Создаем E-PUCK и размещаем его в среде
-  ePuckBot = new Enki::EPuck;
+  ePuckBot = new Enki::EPuck();
   ePuckBot->pos = Enki::Point(20, 50);
   ePuckBot->angle = 0;
   ePuckBot->leftSpeed = 10;
   ePuckBot->rightSpeed = 10;
   ePuckBot->setColor(Enki::Color(1, 0, 0));
-  world.addObject(ePuckBot);
+  world->addObject(ePuckBot);
   
   // Создаем объекты
   Enki::Polygone p2;
@@ -89,7 +89,7 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
     o->setColor(Enki::Color(objectsArray.at(i).color[0], objectsArray.at(i).color[1], objectsArray.at(i).color[2]));
     o->collisionElasticity = 0; // Все тепло от столкновения поглощается
     o->pos = Enki::Point(objectsArray.at(i).x, objectsArray.at(i).y);
-    world.addObject(o);
+    world->addObject(o);
   }
   
 }
@@ -188,7 +188,7 @@ void TEnkiEnvironment::getCurrentEnvironmentVector(double environmentVector[]) c
     double leftSensorValue = ePuckBot->infraredSensor5.finalValue/4000.0;
     double frontFrontLeftSensorValue = ePuckBot->infraredSensor7.finalValue/4000.0;
     
-    //std::cout << "E-puck current state vector is (" << firstSection.components[0] << ";" << firstSection.components[1] << ";" << firstSection.components[2] << ";" << secondSection.components[0] << ";" << secondSection.components[1] << ";" << secondSection.components[2] << ";" <<thirdSection.components[0] << ";" << thirdSection.components[1] << ";" << thirdSection.components[2] << ";" << leftSpeed << ";" << rightSpeed << ";" << frontFrontRightSensorValue << ";" << rightSensorValue << ";" << leftSensorValue << ";" << frontFrontLeftSensorValue << ")" << std::endl;
+    std::cout << "E-puck current state vector is (" << firstSection.components[0] << ";" << firstSection.components[1] << ";" << firstSection.components[2] << ";" << secondSection.components[0] << ";" << secondSection.components[1] << ";" << secondSection.components[2] << ";" <<thirdSection.components[0] << ";" << thirdSection.components[1] << ";" << thirdSection.components[2] << ";" << leftSpeed << ";" << rightSpeed << ";" << frontFrontRightSensorValue << ";" << rightSensorValue << ";" << leftSensorValue << ";" << frontFrontLeftSensorValue << ")" << std::endl;
     
     environmentVector[0] = firstSection.components[0];
     environmentVector[1] = firstSection.components[1];
@@ -262,7 +262,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
   
     ePuckBot->leftSpeed = ePuckBot->leftSpeed + action.at(0);
     ePuckBot->rightSpeed = ePuckBot->rightSpeed + action.at(1);
-    world.step(worldStep);
+    world->step(worldStep);
     currentTime = currentTime + worldStep;
   
     //printOutCurrentEnvironmentState("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/TEnkiEnvironmentLogs.txt");
@@ -332,7 +332,18 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
 void TEnkiEnvironment::printOutCurrentEnvironmentState(std::string logsFilename) {
   ofstream logsFile;
   logsFile.open(logsFilename.c_str(), ios_base::app);
-  logsFile << "Current Time:" << currentTime << "Robot Position:(" << ePuckBot->pos.x << "," << ePuckBot->pos.y << ")" << std::endl;
+  logsFile << "Current Time:" << currentTime << "\tRobot Position:(" << ePuckBot->pos.x << "," << ePuckBot->pos.y << ")" << std::endl;
+  logsFile << "Sensoric information:" << std::endl;
+  double environmentVector[15];
+  this->getCurrentEnvironmentVector(environmentVector);
+  logsFile << "Left camera section color components:" << environmentVector[0]*255 << " " << environmentVector[1]*255 << " " << environmentVector[2]*255 << std::endl;
+  logsFile << "Center camera section color components:" << environmentVector[3]*255 << " " << environmentVector[4]*255 << " " << environmentVector[5]*255 << std::endl;
+  logsFile << "Right camera section color components:" << environmentVector[6]*255 << " " << environmentVector[7]*255 << " " << environmentVector[8]*255 << std::endl;
+  logsFile << "Infrared sensor values:" << std::endl;
+  logsFile << "Front left sensor value:" << environmentVector[9] << ", " << "Left sensor value:" << environmentVector[10] << ", " << "Right sensor value:" << environmentVector[11] << ", " << "Front right sensor value:" << environmentVector[12] << std::endl;
+  logsFile << "Left wheel speed:" << environmentVector[13] << " " << "Right wheel speed:" << environmentVector[14] << std::endl;
+  logsFile << "_____________________________" << std::endl;
+  logsFile << std::endl << std::endl;
 }
 
 #endif

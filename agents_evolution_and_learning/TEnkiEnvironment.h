@@ -85,7 +85,7 @@ public:
   std::vector<TEnkiAim> goalsArray; // Вектор целей среды
   
   Enki::EPuck * ePuckBot; // Робот E-Puck
-  Enki::World world; // Симуляция среды, в которой он существует
+  Enki::World * world; // Симуляция среды, в которой он существует
   
   // Конструктор среды по умолчанию
   TEnkiEnvironment() {
