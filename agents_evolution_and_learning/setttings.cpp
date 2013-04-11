@@ -2,6 +2,9 @@
 #include "THypercubeEnvironment.h"
 #include "TPopulation.h"
 #include "TAgent.h"
+
+#include "config.h"
+
 #include <string>
 #include <cstring>
 #include <fstream>
@@ -46,6 +49,7 @@ void settings::fillEnvironmentSettingsFromFile(THypercubeEnvironment& environmen
 	settingsFile.close();
 }
 
+#ifndef NOT_USE_ROBOT_LIB
 // Загрузка параметров среды ENKI из файла
 void settings::fillEnvironmentSettingsFromFile(TEnkiEnvironment& environment, string settingsFilename){
   string optionString;
@@ -68,7 +72,9 @@ void settings::fillEnvironmentSettingsFromFile(TEnkiEnvironment& environment, st
   }
   settingsFile.close();
 }
-
+#else
+void settings::fillEnvironmentSettingsFromFile(TEnkiEnvironment& environment, string settingsFilename){ }
+#endif
 
 // Загрузка параметров популяции из файла
 void settings::fillPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, string settingsFilename){

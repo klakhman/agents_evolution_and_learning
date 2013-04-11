@@ -219,7 +219,9 @@ int main(int argc, char** argv){
     for (unsigned int i=0; i < agentLife.size(); ++i)
       life.push_back(agentLife[i][0]);
     TBehaviorAnalysis::drawActionSequenceToDot(life, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agent_poorNoAL_noL_state170.jpg", state);
-  } else if (programMode == "ENKITEST") {
+  } 
+#ifndef NOT_USE_ROBOT_LIB
+  else if (programMode == "ENKITEST") {
     TEnkiEnvironment enkiEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt", 0.05, 10.0, 15.0, 1.0);
     enkiEnvironment.uploadEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment2.txt");
     enkiEnvironment.setRandomEnvironmentState();
@@ -231,6 +233,8 @@ int main(int argc, char** argv){
       enkiEnvironment.printOutCurrentEnvironmentState("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironmentLogs.txt");
     }
   }
+#endif NOT_USE_ROBOT_LIB
+
 
   /*TAnalysis* analysis = new TAnalysis;
 	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");
