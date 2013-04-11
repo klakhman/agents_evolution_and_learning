@@ -18,6 +18,11 @@ void THypercubeEnvironment::TAim::print(std::ostream& os) const{
   os << endl;
 }
 
+ostream& operator<<(ostream& os, const THypercubeEnvironment::TAim& aim){
+  for (int action = 0; action < aim.aimComplexity; ++action)
+    os << aim.actionsSequence[action].bitNumber * ((aim.actionsSequence[action].desiredValue) ? 1 : -1) << "\t";
+    return os;
+}
 
 // Загрузка структуры целей среды из файла
 void THypercubeEnvironment::loadEnvironment(std::string environmentFilename){
@@ -76,7 +81,6 @@ double THypercubeEnvironment::calculateOccupancyCoefficient() const{
 	// Массив вхождения какого-либо бита в цель
 	bool* bitsOccurrence = new bool[environmentResolution];
 	double occupancyCoefficient = 0;
-
 	for (int currentAim = 1; currentAim <= aimsQuantity; ++currentAim){
 		// Очищаем массив вхождений
 		memset(bitsOccurrence, 0, environmentResolution * sizeof(*bitsOccurrence));
@@ -91,7 +95,7 @@ double THypercubeEnvironment::calculateOccupancyCoefficient() const{
 		// Вероятность совершения k последовательных действий (с учетом что перевод из нуля в единицу и обратно - это разные действия)
 		double sequenceProbability = 1.0 / pow(2.0*environmentResolution, aimsSet[currentAim - 1].aimComplexity);
 		// Часть заполненности, которую вносит эта цель
-    double aimOccupancyPart = sequenceProbability / pow(2.0, differentBitsQuantity) * aimsSet[currentAim - 1].reward;  //* pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
+    double aimOccupancyPart = sequenceProbability / pow(2.0, differentBitsQuantity); //* pow(2.0, aimsSet[currentAim - 1].aimComplexity - differentBitsQuantity);
 		
 		occupancyCoefficient += aimOccupancyPart;
 	}
@@ -390,7 +394,7 @@ void THypercubeEnvironment::printEnvironmentsGoalsHierarchy(string imageFilename
   for (int currentAimNumber = 0; currentAimNumber < aimsQuantity; ++currentAimNumber){
     TAim& currentAim = aimsSet[currentAimNumber];
     TEnvironmentTree* currentLeaf = &initialTree;
-    for (int currentAction = 0; currentAction < currentAim.aimComplexity; ++currentAction){
+    for (int currentAction = currentAim.aimComplexity - 1; currentAction >= 0; --currentAction){
       int currentActionNumber = (currentAim.actionsSequence[currentAction].bitNumber - 1) * 2 + currentAim.actionsSequence[currentAction].desiredValue;
       if (!currentLeaf->subActions[currentActionNumber])
         currentLeaf->subActions[currentActionNumber] = new TEnvironmentTree(2*environmentResolution);

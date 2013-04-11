@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstdlib>
+#include <iostream>
 #include <cmath>
 #include <vector>
 #include "service.h"
@@ -16,7 +17,7 @@ public:
 	class TAim{	
 	public:
 		// Максимальное кол-во действий в цели
-		static const int MAX_AIM_COMPLEXITY = 10;
+		static const unsigned int MAX_AIM_COMPLEXITY = 10;
 		// Структура одного необходимого действия в цели
 		struct SAction{
 			int bitNumber; // Номер бита в векторе состояния среды
@@ -33,9 +34,11 @@ public:
 		}
     // Печать цели на экран
     void print(std::ostream& os) const;
+
     TAim(const TAim& sourceAim){
       *this = sourceAim; 
     }
+
     TAim& operator=(const TAim& sourceAim){
       aimComplexity = sourceAim.aimComplexity;
       reward = sourceAim.reward;
@@ -43,8 +46,18 @@ public:
         actionsSequence[currentAction] = sourceAim.actionsSequence[currentAction];
       return *this;
     }
+
+    void specifyAim(const std::vector<int>& _actionsSequence){
+      aimComplexity = _actionsSequence.size();
+      for (unsigned int action = 0; action < _actionsSequence.size(); ++action){
+        actionsSequence[action].bitNumber = abs(_actionsSequence.at(action));
+        actionsSequence[action].desiredValue = (_actionsSequence.at(action) > 0);
+      }
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const TAim& aim);
 	};
-private:
+protected:
 	// Массив целей в среде (включая все подцели)
 	std::vector<TAim> aimsSet;
 	// Кол-во целей в среде
@@ -103,6 +116,11 @@ public:
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			environmentVector[currentBit - 1] = static_cast<double>(currentEnvironmentVector[currentBit - 1]);
 	}
+  void setEnvResolution(unsigned int _envResolution){
+    if (currentEnvironmentVector)
+      delete []currentEnvironmentVector;
+    currentEnvironmentVector = new bool[_envResolution];
+  }
 
   // Получение константной ссылки на цель в среде (номер цели начинается с единица)
   const TAim& getAimReference(int aimNumber) const { return aimsSet[aimNumber-1]; }
@@ -112,12 +130,12 @@ public:
 		return static_cast<int>(pow(2, environmentResolution));
 	}
 	// Задание вектора среды (по значению целого вектора)
-	void setEnvironmentVector(double environmentVector[]) {
+	virtual void setEnvironmentVector(double environmentVector[]) {
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			currentEnvironmentVector[currentBit - 1] = (static_cast<int>(environmentVector[currentBit - 1] + 0.1) == 1);
 	}
 	// Задание вектора среды (по номеру - !!!начиная с нуля!!!!) 
-	void setEnvironmentState(double stateNumber){
+	virtual void setEnvironmentState(double stateNumber){
 		bool* requiredEnvironmentVector = new bool[environmentResolution];
 		service::decToBin(static_cast<int>(stateNumber + 0.1), requiredEnvironmentVector, environmentResolution);
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
@@ -133,7 +151,7 @@ public:
 			currentEnvironmentVector[currentBit - 1] = (rand() % 2 != 0);
 	}
 	// Загрузка структуры целей среды из файла
-	void loadEnvironment(std::string environmentFilename);
+	virtual void loadEnvironment(std::string environmentFilename);
 
 	// Выгрузка структуры целей в файл
 	void uploadEnvironment(std::string environmentFilename) const;
