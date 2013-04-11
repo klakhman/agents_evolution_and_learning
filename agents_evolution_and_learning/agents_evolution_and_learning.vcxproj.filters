@@ -93,6 +93,9 @@
     <ClInclude Include="TEnkiEvolutionaryProcess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RestrictedHypercubeEnv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TNeuralPool.cpp">
@@ -165,6 +168,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TEnkiEvolutionaryProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RestrictedHypercubeEnv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

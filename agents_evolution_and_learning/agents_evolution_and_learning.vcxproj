@@ -91,6 +91,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="RestrictedHypercubeEnv.h" />
     <ClInclude Include="service.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="TAgent.h" />
@@ -119,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RestrictedHypercubeEnv.cpp" />
     <ClCompile Include="service.cpp" />
     <ClCompile Include="setttings.cpp" />
     <ClCompile Include="TAgent.cpp" />

@@ -10,6 +10,8 @@
 #include "TSharedEvolutionaryProcess.h"
 #include "algorithm"
 #include "functional"
+#include <iterator>
+#include "RestrictedHypercubeEnv.h"
 
 #include <iostream>
 #include <fstream>
@@ -116,39 +118,15 @@ int main(int argc, char** argv){
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
     srand(static_cast<unsigned int>(time(0)));
-    
-    //TAnalysis::makeBestPopulationAnalysisSummary("C:/Test/SANDBOX/RandomAgents_En2001-2360_GDinvariant.txt", "C:/Test/SANDBOX/SummaryBestPopulation_random-agents.txt", 18, 20, 1);
-    //techanalysis::empiricalCheckGD("C:/Test/SANDBOX/8-dim Environments", 1, 100, "C:/Test/SANDBOX/envEmpiricalVsTheoryGD_8dim_rewardedGD.txt"); 
-    //THypercubeEnvironment::generateEnvironmentsPool("C:/Test//SANDBOX/8-dim_3mincomp_Environments_GDrewarded", 8, 500001, 0.1, 1, 0.1, 10, 6, 3, 4);
-    //THypercubeEnvironment::generateEnvironmentsPool("C:/Test/NewEnvironments", 8, 2001, 0.005, 0.049, 0.005, 20, 5, 2, 3);
-    THypercubeEnvironment env("C:/Test/SANDBOX/Environment1.txt");
-    env.printEnvironmentsGoalsHierarchy("C:/Test/SANDBOX/Envrionment1Graph.jpg");
-    //TAnalysis::randomAgentAnalysis("C:/Test/SANDBOX/Environments GD_invariant/", 2001, 2360, "C:/Test/SANBDOX/settings_LINSYS.ini", "C:/Test/SANDBOX/random_agents_GDinvariant.txt");
-    return 0;
-    THypercubeEnvironment environment("C:/Test/Environment");
-    settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/settings.ini");
-    environment.setStochasticityCoefficient(0.0);
-    TAgent agent;
-    settings::fillAgentSettingsFromFile(agent, "C:/Test/settings.ini");
-    agent.loadGenome("C:/Test/bestagent_lastGen.txt", 1);
-    agent.linearSystemogenesis();
-    double reward = 0;
-    for (int i=0; i<environment.getInitialStatesQuantity(); ++i){
-      environment.setEnvironmentState(i);
-      agent.life(environment, 250);
-      reward += agent.getReward()/environment.getInitialStatesQuantity();
+    RestrictedHypercubeEnv envi("C:/CurrentTest/test_env.txt", 22);
+    envi.setEnvironmentState(0);
+    const double actions[] = {5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3};
+    for (unsigned int action = 0; action < sizeof(actions) / sizeof(*actions); ++action){
+      vector<double> _action(1, actions[action]);
+      int success = envi.forceEnvironment(_action);
+      cout << actions[action] << "\t" << success << "\t" << envi.calculateReward(vector< vector<double> >(1, vector<double>(1, 0)), 1) << "\t" << envi.getEnvironmentState() << endl;
     }
-    cout << reward << endl;
-        return 0;
-
-    agent.getPointerToAgentGenome()->printGraphNetwork("C:/Test/net.jpg");
-    vector<TBehaviorAnalysis::SCycle> cycles = TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment,true);
-    TBehaviorAnalysis::uploadCycles(cycles, "C:/Test/aim_cycles.txt");
-    TBehaviorAnalysis::drawCyclesListToDot(cycles, environment, "C:/Test/cycles.jpg");
-    techanalysis::makeBehaviorConvergenceDiagram(agent, environment, "C:/Test/BehConv.jpg");
-    for (int i =0; i<cycles.size(); ++i)
-      cout << TBehaviorAnalysis::calculateCycleReward(cycles[i], environment) << "\t" 
-        << TBehaviorAnalysis::calculateCycleLongestMemory(cycles[i], environment) << endl;
+    return 0;
   }
   else if(programMode == "NQ"){ // Режим подсчета количества нейронов
     TAnalysis::calculateOneEnvironmentAverageNeurons(argc, argv);
