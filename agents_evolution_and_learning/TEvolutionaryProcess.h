@@ -18,7 +18,6 @@ protected:
 	double bestAverageReward;
 	// Признак того, что надо печатать расширенную информацию про пулы, когда мы записываем агентов
 	bool extraPrint;
-
 public:
 	// Настройки файлов процесса
 	struct SFilenameSettings{
@@ -30,6 +29,15 @@ public:
     // Название файла временной популяции (используется для временной записи популяции в режиме с "общей" памятью)
     std::string tmpPopulationFilename;
 	} filenameSettings;
+  /// Варианты типов сред, на которых может запускаться эволюционный процесс
+  enum EnvironmentType{
+    HYPERCUBE_ENV,
+    RESTRICTED_HYPERCUBE_ENV
+  };
+  /// Тип среды, на которой запускается эволюционный процесс
+  EnvironmentType environmentType;
+
+
 	// Конструктор по умолчанию
 	TEvolutionaryProcess(){
 		agentsPopulation = 0;
@@ -37,6 +45,7 @@ public:
 		bestAverageReward = -1.0; // Чтобы записывалась хоть какая-то популяции в случае, если на всех шагах эволюции награда 0
 
 		extraPrint = false;
+    environmentType = HYPERCUBE_ENV;
 	}
 	// Деструктор
 	virtual ~TEvolutionaryProcess(){
@@ -45,6 +54,8 @@ public:
 	}
 	// Установка скрытого признака необходимости печатать расширенную информацию
 	void setExtraPrint(bool _extraPrint) { extraPrint = _extraPrint; }
+  /// Установка типа среды, на которой запускается эволюционный процесс
+  void setEnvType(const EnvironmentType& type){ environmentType = type; }
 	
 	// Вывод логовых сообщений (прогресса) на консоль или в файл
 	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation<TAgent>* bestPopulation, int currentEvolutionStep /*=0*/);

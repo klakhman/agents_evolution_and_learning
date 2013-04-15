@@ -394,11 +394,14 @@ void THypercubeEnvironment::printEnvironmentsGoalsHierarchy(string imageFilename
   for (int currentAimNumber = 0; currentAimNumber < aimsQuantity; ++currentAimNumber){
     TAim& currentAim = aimsSet[currentAimNumber];
     TEnvironmentTree* currentLeaf = &initialTree;
+    //for (int currentAction = 0; currentAction < currentAim.aimComplexity; ++currentAction){
     for (int currentAction = currentAim.aimComplexity - 1; currentAction >= 0; --currentAction){
       int currentActionNumber = (currentAim.actionsSequence[currentAction].bitNumber - 1) * 2 + currentAim.actionsSequence[currentAction].desiredValue;
       if (!currentLeaf->subActions[currentActionNumber])
         currentLeaf->subActions[currentActionNumber] = new TEnvironmentTree(2*environmentResolution);
-      if (currentAction + 1 == currentAim.aimComplexity) currentLeaf->subActions[currentActionNumber]->aimTerminate = true;
+      //if (currentAction + 1 == currentAim.aimComplexity) 
+      if (0 == currentAction) 
+        currentLeaf->subActions[currentActionNumber]->aimTerminate = true;
       currentLeaf = currentLeaf->subActions[currentActionNumber];
     }
   }

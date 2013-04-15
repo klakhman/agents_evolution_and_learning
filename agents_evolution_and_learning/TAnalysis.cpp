@@ -9,6 +9,7 @@
 #include "settings.h"
 #include <vector>
 #include "techanalysis.h"
+#include "RestrictedHypercubeEnv.h"
 
 #include "mpi.h"
 #include <string>
@@ -62,8 +63,18 @@ double TAnalysis::startBestPopulationCycleLengthAnalysis(string bestPopulationFi
 
 // Запуск процедуры анализа путем прогона лучшей популяции (возвращает среднее значений награды по популяции после прогона всех агентов из всех состояний)
 // Если stochasticityCoefficient не равен -1, то он переписывает загруженный из файла настроек.
-double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, string environmentFilename, string settingsFilename, unsigned int randomSeed /*=0*/, double stochasticityCoefficient /*=-1*/){
-	THypercubeEnvironment* environment = new THypercubeEnvironment(environmentFilename);
+double TAnalysis::startBestPopulationAnalysis(string bestPopulationFilename, string environmentFilename, string settingsFilename, unsigned int randomSeed /*=0*/, double stochasticityCoefficient /*=-1*/, unsigned int envType/*=0*/){
+	THypercubeEnvironment* environment;
+   switch (envType){
+    case 0 :
+      environment = new THypercubeEnvironment(environmentFilename);
+      break;
+    case 1:
+      environment = new RestrictedHypercubeEnv(environmentFilename);
+      break;
+    default:
+      environment = new THypercubeEnvironment(environmentFilename);
+  }
 	settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
   if (stochasticityCoefficient != -1)
     environment->setStochasticityCoefficient(stochasticityCoefficient);
@@ -141,7 +152,7 @@ double TAnalysis::startBestPopulationAnalysis(TPopulation<TAgent>& population, T
 
 // Расшифровка парaметров командной строки
 void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, 
-                                   string& runSign, string& analysisRunSign, double& stochasticityCoefficient, unsigned int& sharedCoef){
+                                   string& runSign, string& analysisRunSign, double& stochasticityCoefficient, unsigned int& sharedCoef, unsigned int& envType){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
@@ -151,19 +162,20 @@ void TAnalysis::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentN
       else if (!strcmp("-ansign", argv[currentArgNumber])) { analysisRunSign = argv[++currentArgNumber]; }
       else if (!strcmp("-stoch", argv[currentArgNumber])) { stochasticityCoefficient = atof(argv[++currentArgNumber]); }
       else if (!strcmp("-shared", argv[currentArgNumber])) { sharedCoef = atoi(argv[++currentArgNumber]); }
+      else if (!strcmp("-envtype", argv[currentArgNumber])) { envType = strtoul(argv[++currentArgNumber], 0, 0); }
 		}
 		++currentArgNumber;
 	}
 }
 
 // Составление сообщения для рабочего процесса
-string TAnalysis::composeMessageForWorkProcess(int currentEnvironment, int currentTry, string runSign, double stochasticityCoefficient, const vector<int>& runPool){
+string TAnalysis::composeMessageForWorkProcess(int currentEnvironment, int currentTry, string runSign, double stochasticityCoefficient, const vector<int>& runPool, unsigned int envType){
   stringstream outStream;
   // Составляем сообщение для рабочих процессов в данном запуске (с полным списком процессов)
   outStream << "$PROCQ$" << runPool.size();
   for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
     outStream << "$PROC" << currentProcess + 1 << "$" << runPool[currentProcess];
-  outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign << "$STOCH$" << stochasticityCoefficient;
+  outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign << "$STOCH$" << stochasticityCoefficient << "$ENVTYPE$" << envType;
   return outStream.str();
 }
 
@@ -219,7 +231,8 @@ void TAnalysis::rootProcess(int argc, char **argv){
   string analysisRunSign; // Некоторый отличительный признак данного конкретного анализа (может быть нулевым, тогда рабочие процессы используют runSign)
   double stochasticityCoefficient = -1; // Коэффициент стохастичности который переписывает для рабочего процесса указанный в файле настроек (только если указывается)
   unsigned int sharedCoef = 1; // Количество процессов на один эволюционный запуск
-  decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, analysisRunSign, stochasticityCoefficient, sharedCoef);
+  unsigned int envType = 0;
+  decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, analysisRunSign, stochasticityCoefficient, sharedCoef, envType);
   // Если кол-во процессов на запуск больше, чем кол-во доступных рабочих процессов, то выходим
   if (sharedCoef > processesQuantity - 1) exit(-1);
   if (sharedCoef < 1) sharedCoef = 1;
@@ -250,7 +263,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 				// Составляем сообщение для рабочего процесса
 				char outMessage[messageLength];
         stringstream out;
-				out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient, runPool);
+				out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient, runPool, envType);
         out >> outMessage; 
         for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess) 
           MPI_Send(outMessage, messageLength - 1, MPI_CHAR, runPool[currentProcess], messageType, MPI_COMM_WORLD);
@@ -288,7 +301,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 				// Составляем сообщение и высылаем задание пулу рабочих процессов
         char outMessage[messageLength];
         stringstream out;
-        out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient, runPool);
+        out << composeMessageForWorkProcess(currentEnvironment, currentTry, runSign, stochasticityCoefficient, runPool, envType);
         out >> outMessage;         
         for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess) 
           MPI_Send(outMessage, messageLength - 1, MPI_CHAR, runPool[currentProcess], messageType, MPI_COMM_WORLD);
@@ -353,7 +366,7 @@ void TAnalysis::rootProcess(int argc, char **argv){
 }
 
 // Расшифровка сообщения от рутового процесса 
-void TAnalysis::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign, double& stochasticityCoefficient, vector<int>& processesPool){
+void TAnalysis::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign, double& stochasticityCoefficient, vector<int>& processesPool, unsigned int& envType){
   string featureNote;
    // Определяем кол-во процессов в пуле и их структуру
   int processPoolCapacity = 0;
@@ -379,6 +392,9 @@ void TAnalysis::decodeTaskMessage(string inputMessage, int& currentEnvironment, 
   // Определяем степень стохастичности
   featureNote = findParameterNote(inputMessage, "$STOCH$");
   if (featureNote != "") stochasticityCoefficient = atof(featureNote.c_str());
+  // Определяем тип среды
+  featureNote = findParameterNote(inputMessage, "$ENVTYPE$");
+  if (featureNote != "") envType = strtoul(featureNote.c_str(), 0, 0);
 }
 
 // Выполнение рабочего процесса
@@ -403,7 +419,8 @@ void TAnalysis::workProcess(int argc, char **argv){
 		string runSign;
     double stochasticityCoefficient = -1; // Рабочий процесс в случае, если коэффицент стохастичности не был передан в командной строке, передает рабочему процессу -1
     vector<int> processesPool;
-    decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign, stochasticityCoefficient, processesPool);
+    unsigned int envType = 0;
+    decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign, stochasticityCoefficient, processesPool, envType);
 		// Определяем уникальное ядро рандомизации
 		// К ядру инициализации случайных чисел добавляется номер процесса, чтобы развести изначально инициализируемые процессы
 		unsigned int randomSeed = static_cast<unsigned int>(time(0)) + processRank;
@@ -416,7 +433,17 @@ void TAnalysis::workProcess(int argc, char **argv){
 		string bestPopulationFilename = tmpStream.str();
     double averageReward = 0;
     if (processesPool.size() > 1){ // Если надо расшарить задание
-      THypercubeEnvironment* environment = new THypercubeEnvironment(environmentFilename);
+      THypercubeEnvironment* environment;
+      switch (envType){
+        case 0 :
+          environment = new THypercubeEnvironment(environmentFilename);
+          break;
+        case 1:
+          environment = new RestrictedHypercubeEnv(environmentFilename);
+          break;
+        default:
+          environment = new THypercubeEnvironment(environmentFilename);
+      }
 	    settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
       if (stochasticityCoefficient != -1)
         environment->setStochasticityCoefficient(stochasticityCoefficient);
@@ -474,7 +501,7 @@ void TAnalysis::workProcess(int argc, char **argv){
       delete environment;
     }
     else
-      averageReward = startBestPopulationAnalysis(bestPopulationFilename, environmentFilename, settingsFilename, randomSeed, stochasticityCoefficient);
+      averageReward = startBestPopulationAnalysis(bestPopulationFilename, environmentFilename, settingsFilename, randomSeed, stochasticityCoefficient, envType);
 		// Посылаем ответ о завершении работы над заданием
 		tmpStream.str(""); // Очищаем поток
     if (processRank == processesPool[0])

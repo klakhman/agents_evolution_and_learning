@@ -17,7 +17,8 @@
 using namespace std;
 
 // Расишифровка парметров командной строки
-void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, string& runSign, unsigned int& sharedCoef){
+void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int& firstEnvironmentNumber, int& lastEnvironmentNumber, int& firstTryNumber, int& lastTryNumber, 
+                                                      string& runSign, unsigned int& sharedCoef, unsigned int& envType){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
 		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
@@ -25,6 +26,7 @@ void TParallelEvolutionaryProcess::decodeCommandPromt(int argc, char **argv, int
 			else if (!strcmp("-try", argv[currentArgNumber])) { firstTryNumber = atoi(argv[++currentArgNumber]); lastTryNumber = atoi(argv[++currentArgNumber]);}
 			else if (!strcmp("-sign", argv[currentArgNumber])) { runSign = argv[++currentArgNumber]; }
       else if (!strcmp("-shared", argv[currentArgNumber])) { sharedCoef = atoi(argv[++currentArgNumber]); }
+      else if (!strcmp("-envtype", argv[currentArgNumber])) { envType = strtoul(argv[++currentArgNumber], 0, 0); }
 		}
 		++currentArgNumber;
 	}
@@ -89,7 +91,8 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 	string runSign; // Некоторый отличительный признак данного конкретного набора параметров или версии алгоритма
 	unsigned long startTime = static_cast<unsigned long>(time(0)); // Время старта процесса эволюции
   unsigned int sharedCoef = 1; // Количество процессов на один эволюционный запуск
-  decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, sharedCoef);
+  unsigned int envType = 0;
+  decodeCommandPromt(argc, argv, firstEnvironmentNumber, lastEnvironmentNumber, firstTryNumber, lastTryNumber, runSign, sharedCoef, envType);
   // Если кол-во процессов на запуск больше, чем кол-во доступных рабочих процессов, то выходим
   if (sharedCoef > processesQuantity - 1) exit(-1);
   if (sharedCoef < 1) sharedCoef = 1;
@@ -118,7 +121,7 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
         outStream << "$PROCQ$" << runPool.size();
         for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
           outStream << "$PROC" << currentProcess + 1 << "$" << runPool[currentProcess];
-        outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign;
+        outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign << "$ENVTYPE$" << envType;
 				char outMessage[messageLength];
 				outStream >> outMessage;
         // Посылаем команду на выполнение всем процессам 
@@ -158,7 +161,7 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
         outStream << "$PROCQ$" << runPool.size();
         for (unsigned int currentProcess = 0; currentProcess < runPool.size(); ++currentProcess)
           outStream << "$PROC" << currentProcess + 1 << "$" << runPool[currentProcess];
-        outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign;
+        outStream << "$ENV$" << currentEnvironment << "$TRY$" << currentTry << "$SIGN$" << runSign << "$ENVTYPE$" << envType;
 				char outMessage[messageLength];
 				outStream >> outMessage;
 				// Посылаем команду на выполнение всем процессам 
@@ -222,7 +225,7 @@ void TParallelEvolutionaryProcess::rootProcess(int argc, char **argv){
 //}
 
 // Расшифровка сообщения от рутового процесса 
-void TParallelEvolutionaryProcess::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign, vector<int>& processesPool){
+void TParallelEvolutionaryProcess::decodeTaskMessage(string inputMessage, int& currentEnvironment, int& currentTry, string& runSign, vector<int>& processesPool, unsigned int& envType){
   string featureNote;
   // Определяем кол-во процессов в пуле и их структуру
   int processPoolCapacity = 0;
@@ -245,6 +248,9 @@ void TParallelEvolutionaryProcess::decodeTaskMessage(string inputMessage, int& c
   // Определяем признак запуска
   featureNote = findParameterNote(inputMessage, "$SIGN$");
   runSign = featureNote;
+  // Определяем тип среды для запуска
+  featureNote = findParameterNote(inputMessage, "$ENVTYPE$");
+  if (featureNote != "") envType = strtoul(featureNote.c_str(), 0, 0);
 }
 
 // Выполнение рабочего процесса
@@ -257,7 +263,8 @@ void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 		int currentEnvironment, currentTry;
 		string runSign;
     vector<int> processesPool;
-		decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign, processesPool);
+    unsigned int envType = 0;
+		decodeTaskMessage(inputMessage, currentEnvironment, currentTry, runSign, processesPool, envType);
 		// Определяем уникальное ядро рандомизации
 		// К ядру инициализации случайных чисел добавляется номер процесса, чтобы развести изначально инициализируемые процессы
 		unsigned int randomSeed = static_cast<unsigned int>(time(0)) + processRank;
@@ -277,6 +284,18 @@ void TParallelEvolutionaryProcess::workProcess(int argc, char **argv){
 		tmpStream << directoriesSettings.resultsDirectory << "/En" << currentEnvironment << "/En" << currentEnvironment << "_" << runSign << "(" << currentTry << ")_bestagents.txt";
 		evolutionaryProcess->filenameSettings.bestAgentsFilename = tmpStream.str();
 		evolutionaryProcess->filenameSettings.settingsFilename = settingsFilename;
+    TEvolutionaryProcess::EnvironmentType _envType;
+    switch (envType){
+      case 0 :
+        _envType = TEvolutionaryProcess::HYPERCUBE_ENV;
+        break;
+      case 1:
+        _envType = TEvolutionaryProcess::RESTRICTED_HYPERCUBE_ENV;
+        break;
+      default:
+        _envType = TEvolutionaryProcess::HYPERCUBE_ENV;
+    }
+    evolutionaryProcess->setEnvType(_envType);
     if (processesPool.size() > 1)
       (dynamic_cast<TSharedEvolutionaryProcess*>(evolutionaryProcess))->processesLocalPool = processesPool;
 		evolutionaryProcess->start(randomSeed);

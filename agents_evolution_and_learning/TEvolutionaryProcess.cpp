@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <string>
 #include <fstream>
-
+#include "RestrictedHypercubeEnv.h"
 #include <sstream>
 #include "mpi.h"
 
@@ -101,7 +101,14 @@ void TEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Загружаем среду
 	if (environment)
 		delete environment;
-	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
+  switch (environmentType){
+    case HYPERCUBE_ENV:
+      environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
+      break;
+    case RESTRICTED_HYPERCUBE_ENV:
+      environment = new RestrictedHypercubeEnv(filenameSettings.environmentFilename);
+      break;
+  }
 	settings::fillEnvironmentSettingsFromFile(*dynamic_cast<THypercubeEnvironment*>(environment), filenameSettings.settingsFilename);
 	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
 	if (agentsPopulation)

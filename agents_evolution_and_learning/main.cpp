@@ -49,6 +49,15 @@ string decodeProgramMode(int argc, char** argv){
 	return "";
 }
 
+double irFunc(double dist){
+  double res = .0;
+  if (dist<0.5)
+    res = -440*dist+2965.98144;
+  else
+    res = 4526*exp(-0.9994*dist);
+  return res;
+}
+
 void decodeCommandPromt(string& environmentFilename, string& resultsFilename, string& bestPopulationFilename, string& bestAgentsFilename, long& randomSeed, bool& extraPrint, int argc, char** argv){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
@@ -117,15 +126,30 @@ int main(int argc, char** argv){
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
+    unsigned int scale = 100;
+    ofstream ofs ("C:/Test/e-puckIRfunc.txt");
+    for (unsigned int i = 0; i < 1000; ++i)
+      ofs << (i + 1)/static_cast<double>(scale) << "\t"<< irFunc((i + 1)/static_cast<double>(scale)) << endl;
+    ofs.close();
+    return 0;
     srand(static_cast<unsigned int>(time(0)));
-    RestrictedHypercubeEnv envi("C:/CurrentTest/test_env.txt", 22);
-    envi.setEnvironmentState(0);
-    const double actions[] = {5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3};
-    for (unsigned int action = 0; action < sizeof(actions) / sizeof(*actions); ++action){
-      vector<double> _action(1, actions[action]);
-      int success = envi.forceEnvironment(_action);
-      cout << actions[action] << "\t" << success << "\t" << envi.calculateReward(vector< vector<double> >(1, vector<double>(1, 0)), 1) << "\t" << envi.getEnvironmentState() << endl;
+    for (unsigned int envN = 1; envN <= 20; ++envN){
+      RestrictedHypercubeEnv* env = RestrictedHypercubeEnv::generateEnvironment(8, 1);
+      cout << env->calculateOccupancyCoefficient() << endl;
+      stringstream tmp;
+      tmp << "C:/CurrentTest/Environment" << 10000 + envN << ".txt";
+      env->uploadEnvironment(tmp.str());
+      delete env;
     }
+    //env->printEnvironmentsGoalsHierarchy("C:/CurrentTest/generated_env.jpg");
+    //RestrictedHypercubeEnv envi("C:/CurrentTest/test_env.txt", 22);
+    //envi.setEnvironmentState(0);
+    //const double actions[] = {5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3, -5, -4, -1, -3, 5, 4, 1, 3};
+    //for (unsigned int action = 0; action < sizeof(actions) / sizeof(*actions); ++action){
+    //  vector<double> _action(1, actions[action]);
+    //  int success = envi.forceEnvironment(_action);
+    //  cout << actions[action] << "\t" << success << "\t" << envi.calculateReward(vector< vector<double> >(1, vector<double>(1, 0)), 1) << "\t" << envi.getEnvironmentState() << endl;
+    //}
     return 0;
   }
   else if(programMode == "NQ"){ // Режим подсчета количества нейронов

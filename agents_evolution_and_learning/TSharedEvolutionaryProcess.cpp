@@ -11,6 +11,7 @@
 #include <sstream>
 #include "TPopulation.h"
 #include "TAgent.h"
+#include "RestrictedHypercubeEnv.h"
 
 using namespace std;
 
@@ -35,7 +36,14 @@ void TSharedEvolutionaryProcess::rootProcess(unsigned int randomSeed){
   // Загружаем среду
 	if (environment)
 		delete environment;
-	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
+  switch (environmentType){
+    case HYPERCUBE_ENV:
+      environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
+      break;
+    case RESTRICTED_HYPERCUBE_ENV:
+      environment = new RestrictedHypercubeEnv(filenameSettings.environmentFilename);
+      break;
+  }
 	settings::fillEnvironmentSettingsFromFile(*dynamic_cast<THypercubeEnvironment*>(environment), filenameSettings.settingsFilename);
   // Создаем популяцию
   if (agentsPopulation)
@@ -130,7 +138,14 @@ void TSharedEvolutionaryProcess::workProcess(){
   // Загружаем среду
 	if (environment)
 		delete environment;
-	environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
+  switch (environmentType){
+    case HYPERCUBE_ENV:
+      environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
+      break;
+    case RESTRICTED_HYPERCUBE_ENV:
+      environment = new RestrictedHypercubeEnv(filenameSettings.environmentFilename);
+      break;
+  }
 	settings::fillEnvironmentSettingsFromFile(*dynamic_cast<THypercubeEnvironment*>(environment), filenameSettings.settingsFilename);
   // Создаем популяцию
   agentsPopulation = new TPopulation<TAgent>;
