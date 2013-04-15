@@ -222,18 +222,24 @@ int main(int argc, char** argv){
   } 
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {
-    TEnkiEnvironment enkiEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt", 0.05, 10.0, 15.0, 1.0);
+    TEnkiEnvironment enkiEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt", 0.01, 10.0, 15.0, 1.0);
     enkiEnvironment.uploadEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment2.txt");
-    enkiEnvironment.setRandomEnvironmentState();
+    //enkiEnvironment.setRandomEnvironmentState();
+    enkiEnvironment.ePuckBot->pos.x = 100.0;
+    enkiEnvironment.ePuckBot->pos.y = 50.0+5.0+3.7;
+    enkiEnvironment.ePuckBot->angle = -M_PI; //-M_PI/2.0;
     std::vector<double> action;
-    action.push_back(1.0);
-    action.push_back(1.0);
-    for (int i=0; i<400; i++) {
+    action.push_back(0.0);
+    action.push_back(0.0);
+    for (int i=0; i<3000; i++) {
+      enkiEnvironment.ePuckBot->pos.y = enkiEnvironment.ePuckBot->pos.y+0.01;
       enkiEnvironment.forceEnvironment(action);
-      enkiEnvironment.printOutCurrentEnvironmentState("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironmentLogs.txt");
+      //enkiEnvironment.ePuckBot->pos.y = enkiEnvironment.ePuckBot->pos.y+0.01;
+      //enkiEnvironment.printOutCurrentEnvironmentState("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironmentLogs.txt");
+      enkiEnvironment.printOutCurrentIRSensorResponse("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/IRLeftSensorValue.txt");
     }
   }
-#endif NOT_USE_ROBOT_LIB
+#endif //NOT_USE_ROBOT_LIB
 
 
   /*TAnalysis* analysis = new TAnalysis;

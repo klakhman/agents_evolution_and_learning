@@ -267,8 +267,6 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     world->step(worldStep);
     currentTime = currentTime + worldStep;
   
-    //printOutCurrentEnvironmentState("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/TEnkiEnvironmentLogs.txt");
-  
     return whatToReturn;
 }
 
@@ -346,6 +344,15 @@ void TEnkiEnvironment::printOutCurrentEnvironmentState(std::string logsFilename)
   logsFile << "Left wheel speed:" << environmentVector[13] << " " << "Right wheel speed:" << environmentVector[14] << std::endl;
   logsFile << "_____________________________" << std::endl;
   logsFile << std::endl << std::endl;
+}
+
+void TEnkiEnvironment::printOutCurrentIRSensorResponse(std::string IRSensorResponseFilename) {
+  ofstream IRFile;
+  IRFile.open(IRSensorResponseFilename.c_str(), ios_base::app);
+  IRFile.precision(5);
+  double environmentVector[15];
+  this->getCurrentEnvironmentVector(environmentVector);
+  IRFile << environmentVector[10]*4000.0 << "\t" << this->ePuckBot->pos.y-58.7 << std::endl;
 }
 
 #endif

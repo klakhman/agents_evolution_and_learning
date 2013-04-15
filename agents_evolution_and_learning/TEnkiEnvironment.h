@@ -160,6 +160,9 @@ public:
   // Временный метод, используемый для диагностики правильной работы среды, а также сенсоров робота
   void printOutCurrentEnvironmentState(std::string logsFilename);
   
+  // Временный метод, используемый для построения графика, показывающего зависимость ответа инфракрасного сенсора от расстояния до объекта
+  void printOutCurrentIRSensorResponse(std::string IRSensorFilename);
+  
   // Геттеры и сеттеры параметров среды
   
   double getRewardRecoveryTime() const { return rewardRecoveryTime; }
