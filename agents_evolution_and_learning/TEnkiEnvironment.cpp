@@ -359,7 +359,7 @@ void TEnkiEnvironment::printOutObjectsForGnuplot(std::string objectsPositionFile
   ofstream objectsFile;
   objectsFile.open(objectsPositionFile.c_str(), ios_base::app);
   for (int currentObject = 0; currentObject < objectsNumber; currentObject++){
-    objectsFile << objectsArray.at(currentObject).x << "\t" << objectsArray.at(currentObject).y << std::endl;
+    //objectsFile << objectsArray.at(currentObject).x << "\t" << objectsArray.at(currentObject).y << std::endl;
     objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y-cubeSize/2.0 << std::endl;
     objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y+cubeSize/2.0 << std::endl;
     objectsFile << objectsArray.at(currentObject).x+cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y+cubeSize/2.0 << std::endl;
