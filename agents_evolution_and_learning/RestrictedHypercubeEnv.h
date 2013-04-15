@@ -1,5 +1,5 @@
-﻿#ifndef RESTRICTED_HYPERCUBE_ENV
-#define RESTRICTED_HYPERCUBE_ENV
+﻿#ifndef RESTRICTED_HYPERCUBE_ENV_H
+#define RESTRICTED_HYPERCUBE_ENV_H
 
 #include "THypercubeEnvironment.h"
 
@@ -88,4 +88,4 @@ inline void RestrictedHypercubeEnv::addAim(const TAim& aim){
   ++aimsQuantity;
 }
 
-#endif // RESTRICTED_HYPERCUBE_ENV
+#endif // RESTRICTED_HYPERCUBE_ENV_H

@@ -1,6 +1,8 @@
 ﻿#include "RestrictedHypercubeEnv.h"
 
 #include <algorithm>
+#include <vector>
+#include <string>
 
 using namespace std;
 
@@ -15,15 +17,18 @@ void RestrictedHypercubeEnv::setRandomEnvironmentState(){
 }
 
 // Вспомогательная процедура для сортировке в методе воздействия на среду (при определении досигнутых целей)
-struct AimsNumViaCompl{
+class AimsNumViaCompl{
+public:
   unsigned int aimNumber;
   unsigned int aimComplexity;
   AimsNumViaCompl(unsigned int _aimNumber, unsigned int _aimComplexity):
     aimNumber(_aimNumber), aimComplexity(_aimComplexity) {}
-  bool operator<(const AimsNumViaCompl& left) {
-    return (aimComplexity < left.aimComplexity);
-  }
+  friend bool operator<(const AimsNumViaCompl& left, const AimsNumViaCompl& right);
 };
+
+bool operator<(const AimsNumViaCompl& left, const AimsNumViaCompl& right) {
+  return (left.aimComplexity < right.aimComplexity);
+}
 
 /// Метод воздействия на среду 
 /**
@@ -61,7 +66,6 @@ int RestrictedHypercubeEnv::forceEnvironment(const vector<double>& action){
         if (agentLifeRecord.size() - reachedAimsTimes.at((*aim).aimNumber - 1) >= static_cast<unsigned int>(rewardRecoveryTime)){
           actionSuccess = true;
           reachedAimsTimes.at((*aim).aimNumber - 1) = agentLifeRecord.size();
-          cout << (*aim).aimNumber << endl;
           currentAgentReward += aimsSet.at((*aim).aimNumber - 1).reward;
           break;
         }
@@ -126,10 +130,8 @@ void generateComplexityLevelAims(vector<RestrictedHypercubeEnv::TAim>& desiredCo
           aimUnique = false;
           break;
         }
-      if (aimUnique){
-        cout << aimN << endl;
+      if (aimUnique)
         desiredComplexityAims.push_back(aim);
-      }
     } while (!aimUnique);
   }
 }
@@ -137,101 +139,63 @@ void generateComplexityLevelAims(vector<RestrictedHypercubeEnv::TAim>& desiredCo
 /// Статический метод генерации среды по заданным параметрам
 /**
 * "Фабричный" метод генерации среды. 
-* В отличие от генерации обычной среды-гиперкуба здесь происходит генерация по заданному количеству целей (вычисляемому по необходимому коэффициенту заполненности).
-* Распределение количества целей по длинам происходит пропорционально - кол-во целей длины k' пропорционально кол-ву возможных целей данной длины.  
-* Сначала происходит генерация целей длины minAimComplexity и minAimComplexity + 1, за тем к ним в начало (т.е. слева) добавляются действия, чтобы сделать иерархию.
+* В отличие от генерации обычной среды-гиперкуба здесь происходит генерация по заданному количеству целей 
+* (вычисляемому по необходимому коэффициенту заполненности). Распределение количества целей по длинам происходит 
+* пропорционально - кол-во целей длины k' пропорционально кол-ву целей длины k'-1 в соответствии с некоторым 
+* коэффициентом. Сначала происходит генерация целей длины minAimComplexity, за тем к ним в начало (т.е. слева) 
+* добавляются действия, чтобы сделать иерархию.
 * \param [in] _environmentResolution - размерность среды.
 * \param [in] requiredOccupancyCoef - требуемая плотность целей в среде.
 * \param [in] maxAimComplexity - максимальная сложность целей в среде.
 * \param [in] minAimComplexity - минимальная сложность целей в среде.
-* \param [in] eps - точность генерации среды в соответствии с заданной плотностью целей (в данной реализации среды это значение не релеватно).
+* \param [in] eps - точность генерации среды в соответствии с заданной 
+* плотностью целей (в данной реализации среды это значение не релеватно).
 * \return Указатель на созданную среду с иерархией целей.
 */
 RestrictedHypercubeEnv* RestrictedHypercubeEnv::generateEnvironment(unsigned int _environmentResolution, double requiredOccupancyCoef, 
                                                                     unsigned int maxAimComplexity/*=5*/, unsigned int minAimComplexity/*=2*/, 
-                                                                    double eps/*=0.0005*/){
-  RestrictedHypercubeEnv* environment = new RestrictedHypercubeEnv;
-  environment->environmentResolution = _environmentResolution;
-  const unsigned int maxComplAimsQ = 500;
-  vector<TAim> fullAims;
-  fullAims.reserve(maxComplAimsQ);
-  // Генерируем необходимое количество целей верхнего уровня
-  for (int aimN = 0; aimN < maxComplAimsQ; ++aimN){
-    bool uniqueAim;
-    do{
-      uniqueAim = true;
-      TAim aim = generateSelfConsistentAim(_environmentResolution, maxAimComplexity);
-      if (uniqueAim = !environment->checkAimExistence(aim)){
-        environment->addAim(aim);
-        fullAims.push_back(aim);
-      }
-    }while(!uniqueAim);
-  }
-  // Разбиваем цели по уровням
-  for (unsigned int curComplexity = maxAimComplexity - 1; curComplexity >= minAimComplexity; --curComplexity)
-    for (vector<TAim>::const_iterator curFullAim = fullAims.begin(); curFullAim != fullAims.end(); ++curFullAim){
-      TAim curSuperAim;
-      curSuperAim.aimComplexity = curComplexity;
-      curSuperAim.reward = 20 + 10 * (curComplexity - 2);
-      copy(curFullAim->actionsSequence + curFullAim->aimComplexity - curComplexity, curFullAim->actionsSequence + curFullAim->aimComplexity, 
-            curSuperAim.actionsSequence);
-      if (!environment->checkAimExistence(curSuperAim))
-        environment->addAim(curSuperAim);
-    }
-  return environment;
-
-                                                                      
-  //// Желамое распределение целей по длинам
-  //vector<unsigned int> desiredAimsDistr(maxAimComplexity - minAimComplexity + 1, 0);
-  ////  !!! Как-то заполняем желаемое распределение !!!
+                                                                    double eps/*=0.0005*/){                                                                     
+  // Желамое распределение целей по длинам
+  vector<unsigned int> desiredAimsDistr(maxAimComplexity - minAimComplexity + 1, 0);
+  //  !!! Как-то заполняем желаемое распределение !!!
+  const unsigned int increaseCoef = 5;
+  const unsigned int firstComplAimsQ = 25;
+  desiredAimsDistr.at(0) = firstComplAimsQ;
+  for (vector<unsigned int>::iterator complexity = desiredAimsDistr.begin() + 1; complexity != desiredAimsDistr.end(); ++complexity)
+    *complexity = (*(complexity - 1)) * increaseCoef;
   //const unsigned int _desiredAimsDistr[] = {1, 5, 25, 125};
   //copy(_desiredAimsDistr, _desiredAimsDistr + sizeof(_desiredAimsDistr)/sizeof(*_desiredAimsDistr), desiredAimsDistr.begin()); 
-  //// Для оптимизации вычислений (за счет пространства) необходимо хранить сгрупированные по сложности цели
-  //vector< vector<TAim> > aimsViaComplexity(maxAimComplexity - minAimComplexity + 1);
-  //const unsigned int startAimsMaxCompl = 3; // Максимальная сложность изначально генерируемых целей
-  //// Генерируем необходимое кол-во целей длины до startAimsMaxCompl (так называемые цели, инициализирующие дерево иерархии)
-  //unsigned int currentComplexity = minAimComplexity;
-  //while (currentComplexity <= startAimsMaxCompl){
-  //  vector<TAim>& currentComplexityAims = aimsViaComplexity.at(currentComplexity-minAimComplexity);
-  //  while (currentComplexityAims.size() < desiredAimsDistr.at(currentComplexity-minAimComplexity)){
-  //    TAim aim = generateSelfConsistentAim(_environmentResolution, currentComplexity);
-  //    bool aimUnique = true;
-  //    for (vector<TAim>::const_iterator compareAim = currentComplexityAims.begin(); compareAim != currentComplexityAims.end(); ++compareAim)
-  //      if (equalAims(*compareAim, aim)){
-  //        aimUnique = false;
-  //        break;
-  //      }
-  //    if (aimUnique)
-  //      currentComplexityAims.push_back(aim);
-  //  }
-  //  ++currentComplexity;
-  //}
-  //// Теперь необходимо сгенерировать продолжения целей (идем по уровням)
-  //while (currentComplexity <= maxAimComplexity){
-  //  vector<TAim>& currentComplexityAims = aimsViaComplexity.at(currentComplexity - minAimComplexity);
-  //  // Так как генерация целей для первого уровня после изначальных целей проходит нестандратно, то генирируем его отдельно
-  //  if (currentComplexity == startAimsMaxCompl + 1)
-  //    for (unsigned int parentComplexity = minAimComplexity; parentComplexity <= startAimsMaxCompl; ++parentComplexity){
-  //      // Определяем долю целей, которая приходится на текущую сложность родительских целей (весь остаток относим к минимальной сложности)
-  //      unsigned int aimQ = desiredAimsDistr.at(currentComplexity - minAimComplexity) / (startAimsMaxCompl - minAimComplexity + 1) + 
-  //        ((parentComplexity == minAimComplexity) ? (desiredAimsDistr.at(currentComplexity - minAimComplexity) % (startAimsMaxCompl - minAimComplexity + 1)) : 0);
-  //      const vector<TAim>& parentComplexityAims = aimsViaComplexity.at(parentComplexity-minAimComplexity);
-  //      generateComplexityLevelAims(currentComplexityAims, parentComplexityAims, _environmentResolution, currentComplexity, aimQ);
-  //    }
-  //  else {
-  //    const vector<TAim>& parentComplexityAims = aimsViaComplexity.at(currentComplexity - 1 - minAimComplexity);
-  //    generateComplexityLevelAims(currentComplexityAims, parentComplexityAims, _environmentResolution, 
-  //                                currentComplexity, desiredAimsDistr.at(currentComplexity - minAimComplexity));
-  //  }
-  //  ++currentComplexity;
-  //}
-  //// Необходимо создать среду и записать все цели
-  //RestrictedHypercubeEnv* environment = new RestrictedHypercubeEnv;
-  //environment->environmentResolution = _environmentResolution;
-  //for (vector< vector<TAim> >::const_iterator level = aimsViaComplexity.begin(); level != aimsViaComplexity.end(); ++level)
-  //  for (vector<TAim>::const_iterator aim = level->begin(); aim != level->end(); ++aim)
-  //    environment->addAim(*aim);
-  //return environment;
+  // Для оптимизации вычислений (за счет пространства) необходимо хранить сгрупированные по сложности цели
+  vector< vector<TAim> > aimsViaComplexity(maxAimComplexity - minAimComplexity + 1);
+  // Генерируем необходимое кол-во целей первой длины
+  vector<TAim>& currentComplexityAims = aimsViaComplexity.at(0);
+  while (currentComplexityAims.size() < desiredAimsDistr.at(0)){
+    TAim aim = generateSelfConsistentAim(_environmentResolution, minAimComplexity);
+    bool aimUnique = true;
+    for (vector<TAim>::const_iterator compareAim = currentComplexityAims.begin(); compareAim != currentComplexityAims.end(); ++compareAim)
+      if (equalAims(*compareAim, aim)){
+        aimUnique = false;
+        break;
+      }
+    if (aimUnique)
+      currentComplexityAims.push_back(aim);
+  }
+  unsigned int currentComplexity = minAimComplexity + 1;
+  // Теперь необходимо сгенерировать продолжения целей (идем по уровням)
+  while (currentComplexity <= maxAimComplexity){
+    vector<TAim>& currentComplexityAims = aimsViaComplexity.at(currentComplexity - minAimComplexity);
+    const vector<TAim>& parentComplexityAims = aimsViaComplexity.at(currentComplexity - 1 - minAimComplexity);
+    generateComplexityLevelAims(currentComplexityAims, parentComplexityAims, _environmentResolution, 
+                                currentComplexity, desiredAimsDistr.at(currentComplexity - minAimComplexity));
+    ++currentComplexity;
+  }
+  // Необходимо создать среду и записать все цели
+  RestrictedHypercubeEnv* environment = new RestrictedHypercubeEnv;
+  environment->environmentResolution = _environmentResolution;
+  for (vector< vector<TAim> >::const_iterator level = aimsViaComplexity.begin(); level != aimsViaComplexity.end(); ++level)
+    for (vector<TAim>::const_iterator aim = level->begin(); aim != level->end(); ++aim)
+      environment->addAim(*aim);
+  return environment;
 }
 
 /// Метод генерации или продолжения непротиворечивой цели
@@ -274,7 +238,8 @@ RestrictedHypercubeEnv::TAim RestrictedHypercubeEnv::generateSelfConsistentAim(u
 		desiredAim.actionsSequence[currentAction - 1].bitNumber = currentBit;
 		desiredAim.actionsSequence[currentAction - 1].desiredValue = currentDirection;
 	}
-  desiredAim.reward = 20 + 10*(desiredAim.aimComplexity - 2);
+  //desiredAim.reward = 20 + 10*(desiredAim.aimComplexity - 2);
+  desiredAim.reward = 20;
   return desiredAim;
 }
 
