@@ -160,8 +160,11 @@ public:
   // Временный метод, используемый для диагностики правильной работы среды, а также сенсоров робота
   void printOutCurrentEnvironmentState(std::string logsFilename);
   
-  // Временный метод, используемый для построения графика, показывающего зависимость ответа инфракрасного сенсора от расстояния до объекта
-  void printOutCurrentIRSensorResponse(std::string IRSensorFilename);
+  void printOutObjectsForGnuplot(std::string objectsPositionFile);
+  
+  void printOutPositionForGnuplot(std::string robotPositionFile);
+  
+  void printOutCurrentIRSensorResponse(std::string IRSensorResponseFilename);
   
   // Геттеры и сеттеры параметров среды
   
