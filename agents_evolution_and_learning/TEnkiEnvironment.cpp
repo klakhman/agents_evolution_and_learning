@@ -6,6 +6,8 @@
 //
 //
 #include "config.h"
+#include <time.h>
+
 #ifndef NOT_USE_ROBOT_LIB
 
 #include "TEnkiEnvironment.h"
