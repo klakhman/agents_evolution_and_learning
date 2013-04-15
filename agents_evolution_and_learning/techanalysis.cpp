@@ -578,6 +578,22 @@ void statisticsOnAgents(int argc, char** argv, vector<double> (*statFunc)(TAgent
   }
 }
 
+/// Конструирование среды с "перевернутыми" целями, относительно исходной
+void reverseEnvironment(const THypercubeEnvironment& environment, string outputFilename){
+  unsigned int aimsQuantity = environment.getAimsQuantity();
+  ofstream outputFile(outputFilename.c_str());
+  outputFile << environment.getEnvironmentResolution() << "\t" << aimsQuantity << endl;
+  for (unsigned int aimN = 0; aimN < aimsQuantity; ++aimN){
+    const THypercubeEnvironment::TAim& aim = environment.getAimReference(aimN + 1);
+    outputFile << aim.aimComplexity << "\t" << aim.reward << endl;
+    for (unsigned int action = 0; action < aim.aimComplexity; ++action)
+      outputFile << (aim.actionsSequence[aim.aimComplexity - 1 - action].desiredValue ? 1 : -1) *  
+                    aim.actionsSequence[aim.aimComplexity - 1 - action].bitNumber << "\t";
+    outputFile << endl;
+  }
+  outputFile.close();
+}
+
 #ifndef NOT_USE_ALGLIB_LIBRARY
   #include "statistics.h"
 
