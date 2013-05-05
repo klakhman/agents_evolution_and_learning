@@ -13,6 +13,9 @@
 #include <iterator>
 #include "RestrictedHypercubeEnv.h"
 
+#include "TEnkiEnvironment.h"
+#include "TEnkiAgent.h"
+
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -246,23 +249,33 @@ int main(int argc, char** argv){
   } 
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {
-    TEnkiEnvironment enkiEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt", 0.01, 10.0, 15.0, 1.0);
-    enkiEnvironment.uploadEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment2.txt");
+    // Формирование среды
+    TEnkiEnvironment enkiEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt");
+    settings::fillEnvironmentSettingsFromFile(enkiEnvironment, "/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/enkiEnvironmentSettings.txt");
+    
+    // Установка начальных параметров робота (положения, угла (отсчитывается против часовой стрелки от оси, направленной вправо) и начальных скоростей)
     enkiEnvironment.ePuckBot->pos.x = 100.0;
     enkiEnvironment.ePuckBot->pos.y = 50.0+5.0+3.7;
     enkiEnvironment.ePuckBot->angle = M_PI/2.0;
-    std::vector<double> action;
-    action.push_back(1.0);
-    action.push_back(1.0);
-    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironmentLogs.txt");
+    enkiEnvironment.ePuckBot->leftSpeed = 1;
+    enkiEnvironment.ePuckBot->rightSpeed = 1;
+    
+    // Формирование агента
+    TEnkiAgent enkiAgent;
+    settings::fillAgentSettingsFromFile(enkiAgent, "/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/settings_LINSYS.ini");
+    
+    // Формирование нейронной сети агента
+    std::fstream inputFileForGenome("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/Line_agent.txt");
+    enkiAgent.loadGenome(inputFileForGenome);
+    enkiAgent.linearSystemogenesis();
+    
+    // Формирование файла, заключающего информацию о объектах среды (необходим для построения графика в гнуплоте)
     std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects.txt");
     std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotRobot.txt");
     enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects.txt");
-    for (int i=0; i<3000; i++) {
-      enkiEnvironment.forceEnvironment(action);
-      enkiEnvironment.printOutCurrentEnvironmentState("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironmentLogs.txt");
-      enkiEnvironment.printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotRobot.txt");
-    }
+    
+    // Запуск агента
+    enkiAgent.life(enkiEnvironment, 3000);
   }
 #endif //NOT_USE_ROBOT_LIB
 

@@ -265,6 +265,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     ePuckBot->leftSpeed = ePuckBot->leftSpeed + action.at(0);
     ePuckBot->rightSpeed = ePuckBot->rightSpeed + action.at(1);
     world->step(worldStep);
+    this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotRobot.txt");
     currentTime = currentTime + worldStep;
   
     return whatToReturn;
@@ -281,10 +282,10 @@ std::vector<int> TEnkiEnvironment::testReachingAims(const std::vector< std::vect
 double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> >& actions, int actionsQuantity) const {
   //Создаем новый вектор, который в целом будет являться копией старого actions, лишь только с тем изменением, что все нули мы вырежем, так как они определяют лишь границы достижения целей и в подсчете награды никак по сути не участвуют
   std::vector< std::vector<double> > correctedActionsVector;
-  
+    
   for (int i = 0; i<actions.size(); i++) {
     if (actions[i][0]!=0) {
-      correctedActionsVector.back().push_back(actions[i][0]);
+      correctedActionsVector.push_back(actions[i]);
     }
   }
   
@@ -359,11 +360,11 @@ void TEnkiEnvironment::printOutObjectsForGnuplot(std::string objectsPositionFile
   ofstream objectsFile;
   objectsFile.open(objectsPositionFile.c_str(), ios_base::app);
   for (int currentObject = 0; currentObject < objectsNumber; currentObject++){
-    //objectsFile << objectsArray.at(currentObject).x << "\t" << objectsArray.at(currentObject).y << std::endl;
     objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y-cubeSize/2.0 << std::endl;
     objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y+cubeSize/2.0 << std::endl;
     objectsFile << objectsArray.at(currentObject).x+cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y+cubeSize/2.0 << std::endl;
     objectsFile << objectsArray.at(currentObject).x+cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y-cubeSize/2.0 << std::endl;
+    objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y-cubeSize/2.0 << std::endl; // Чтобы замкнуть линии в гнуплоте
   }
 }
 

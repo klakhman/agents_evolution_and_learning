@@ -13,7 +13,7 @@ using namespace std;
 static const double deltaSpeedForWheels = 1.0;
 
 vector<double> TEnkiAgent::decodeAction(double outputVector[]) {
-  vector<double> actionVector(getActionResolution());
+  vector<double> actionVector;
   actionVector.push_back((outputVector[0]-outputVector[1])*deltaSpeedForWheels);
   actionVector.push_back((outputVector[2]-outputVector[3])*deltaSpeedForWheels);
   return actionVector;
@@ -25,6 +25,10 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
   vector<double> actionVector(getActionResolution());
   
   agentLife.erase(agentLife.begin(), agentLife.end());
+  vector<double> firstVector;
+  firstVector.push_back(0);
+  firstVector.push_back(0);
+  agentLife.push_back(firstVector);
   
 	neuralController->reset();
   for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep) {
@@ -34,11 +38,13 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
     actionVector = decodeAction(outputVector);
     // Действуем на среду, проверяем, успешно ли действие, а также проверяем, что это действие новое, так как в противном случае это действие не несет никакой новой информации
     int actionSuccess = environment.forceEnvironment(actionVector);
-    double previousActionSuccess = agentLife.back()[0];
-    if (static_cast<int>(previousActionSuccess) != actionSuccess) {
-      agentLife.resize(agentLife.size()+1);
-      agentLife[agentLife.size()][0] = actionSuccess;
-      agentLife[agentLife.size()][1] = agentLifeStep;
+    double previousActionSuccess = agentLife[agentLife.size()-1][0];
+
+    if (static_cast<int>(previousActionSuccess) != actionSuccess) {      
+      vector<double> vectorWithSuccessAndTime;
+      vectorWithSuccessAndTime.push_back(actionSuccess);
+      vectorWithSuccessAndTime.push_back(agentLifeStep);
+      agentLife.push_back(vectorWithSuccessAndTime);
     }
     //agentLife[agentLifeTime - 1][0] = actionSuccess;
     // Проводим процедуру обучения (если такой режим)
@@ -48,7 +54,7 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
   }
   
 	if (rewardCalculate)
-		reward = environment.calculateReward(agentLife, agentLifeTime);
+		reward = environment.calculateReward(agentLife, static_cast<int>(agentLife.size()));
 	else
 		reward = 0;
 	delete []outputVector;
