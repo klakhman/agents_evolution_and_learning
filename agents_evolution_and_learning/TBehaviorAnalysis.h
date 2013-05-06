@@ -129,6 +129,8 @@ public:
   // Преобразование последовательности действий (вероятно жизни агента) в последовательность достигнутых целей
   // Возвращает массив последовательности целей (вызывающая сторона должна обеспечить достаточный размер - одинаковый размер с массивом действий является достаточным) и длину последовательности
   static void actionsSequence2aimSequence(double* actionsSequence, int actionsQuantity, const THypercubeEnvironment& environment, double* aimsSequence, int& aimsQuantity);
+  
+  static void drawSequenceWithAims(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputImageFilename, double initialState = -1);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */
