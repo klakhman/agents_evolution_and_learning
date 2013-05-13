@@ -67,15 +67,6 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
     
   // Создаем саму арену
   world = new Enki::World(xSize, ySize, Enki::Color(0.9, 0.9, 0.9));
-	
-	// Создаем E-PUCK и размещаем его в среде
-  ePuckBot = new Enki::EPuck();
-  ePuckBot->pos = Enki::Point(20, 50);
-  ePuckBot->angle = 0;
-  ePuckBot->leftSpeed = 10;
-  ePuckBot->rightSpeed = 10;
-  ePuckBot->setColor(Enki::Color(1, 0, 0));
-  world->addObject(ePuckBot);
   
   // Создаем объекты
   Enki::Polygone p2;
@@ -83,16 +74,28 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   p2.push_back(Enki::Point(-cubeSize/2.0,cubeSize/2.0));
   p2.push_back(Enki::Point(-cubeSize/2.0,-cubeSize/2.0));
   p2.push_back(Enki::Point(cubeSize/2.0,-cubeSize/2.0));
+  
   for (int i = 0; i < objectsNumber; i++)
   {
     Enki::PhysicalObject* o = new Enki::PhysicalObject;
     Enki::PhysicalObject::Hull hull(Enki::PhysicalObject::Part(p2, cubeSize));
-    o->setCustomHull(hull, -1); // Отрицательная масса - то же, что бесконечная, поэтому объекты сдвинуть с места будет невозможно
+    o->setCustomHull(hull, -100000); // Отрицательная масса - то же, что бесконечная, поэтому объекты сдвинуть с места будет невозможно
     o->setColor(Enki::Color(objectsArray.at(i).color[0], objectsArray.at(i).color[1], objectsArray.at(i).color[2]));
     o->collisionElasticity = 0; // Все тепло от столкновения поглощается
     o->pos = Enki::Point(objectsArray.at(i).x, objectsArray.at(i).y);
     world->addObject(o);
+    objectsInTheWorld.push_back(o);
   }
+  
+  // Создаем E-PUCK и размещаем его в среде
+  ePuckBot = new Enki::EPuck();
+  ePuckBot->pos = Enki::Point(20, 50);
+  ePuckBot->angle = 0;
+  ePuckBot->leftSpeed = 10;
+  ePuckBot->rightSpeed = 10;
+  ePuckBot->setColor(Enki::Color(1, 0, 0));
+  world->addObject(ePuckBot);
+  objectsInTheWorld.push_back(ePuckBot);
   
 }
 
@@ -268,6 +271,11 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotRobot.txt");
     currentTime = currentTime + worldStep;
   
+    /*for (int i=0; i<objectsInTheWorld.size(); i++) {
+      Enki::PhysicalObject * someObject = *world->objects.find(objectsInTheWorld[i]);
+      cout << "Position of the object is:" << someObject->pos.x << "\t" << someObject->pos.y << "\t" << someObject->getHeight() << std::endl;
+    }*/
+  
     return whatToReturn;
 }
 
@@ -289,6 +297,8 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
     }
   }
   
+  int newActionsQuantity = static_cast<int>(correctedActionsVector.size());
+  
 	double accumulatedReward = 0.0; // Награда агента
 	// Времена последнего достижения цели агентом
 	int* achievingTime = new int[goalsNumber];
@@ -296,7 +306,7 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
 	for (int currentAim = 1; currentAim <= goalsNumber; ++currentAim)
 		achievingTime[currentAim - 1] = -rewardRecoveryTime/worldStep - 1;
 	// Проходимся по всем действиям агент
-	for (int currentActionStep = 1; currentActionStep <= actionsQuantity; ++currentActionStep){
+	for (int currentActionStep = 1; currentActionStep <= newActionsQuantity; ++currentActionStep){
 		// Проверяем все цели относительно конкретного шага вермени
 		for (int currentAim = 1; currentAim <= goalsNumber; ++currentAim){
 			if (goalsArray[currentAim-1].aimComplexity <= currentActionStep){ // Проверяем успел ли бы вообще агент достичь эту цель в начале "жизни" (для экономии времени)
@@ -311,7 +321,7 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
 					//if ((changedBit != goalsArray[currentAim - 1].actionsSequence[currentAction - 1]) ||
           //(changedDirection != goalsArray[currentAim - 1].actionsSequence[currentAction - 1]))
           //achivedFlag = false;
-          int visitedObject = actions[currentActionStep - 1 - goalsArray[currentAim-1].aimComplexity + currentAction][0];
+          int visitedObject = correctedActionsVector[currentActionStep - 1 - goalsArray[currentAim-1].aimComplexity + currentAction][0];
           if (visitedObject != goalsArray[currentAim - 1].actionsSequence[currentAction - 1]) {
             achivedFlag = false;
           }
@@ -320,13 +330,13 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
 				// Если не было нарушения последовательности, то цель достигнута
 				if (achivedFlag){
 					// Награда линейно восстанавливается до максимального (исходного) уровня за фиксированное кол-во тактов
-					accumulatedReward += goalsArray[currentAim - 1].reward * min(1.0, (actions[currentActionStep-1][1] - achievingTime[currentAim - 1])/static_cast<double>(max(1.0, rewardRecoveryTime/worldStep)));
-					achievingTime[currentAim - 1] = actions[currentActionStep-1][1];
+					accumulatedReward += goalsArray[currentAim - 1].reward * min(1.0, (correctedActionsVector[currentActionStep-1][1] - achievingTime[currentAim - 1])/static_cast<double>(max(1.0, rewardRecoveryTime/worldStep)));
+          achievingTime[currentAim - 1] = correctedActionsVector[currentActionStep - 1][1];
 				}
 			} // Конец проверки одной цели
 		} // Конец проверки всех целей относительно одного фронта времени
 	} // Конец проверки всей "жизни"
-	delete []achievingTime;
+	delete []achievingTime;  
 	return accumulatedReward;
 }
 
@@ -356,22 +366,24 @@ void TEnkiEnvironment::printOutCurrentIRSensorResponse(std::string IRSensorRespo
   IRFile << environmentVector[10]*4000.0 << "\t" << this->ePuckBot->pos.y-58.7 << std::endl;
 }
 
-void TEnkiEnvironment::printOutObjectsForGnuplot(std::string objectsPositionFile) {
+void TEnkiEnvironment::printOutObjectsForGnuplot(std::string objectsPositionFile, int objectNumber) {
   ofstream objectsFile;
   objectsFile.open(objectsPositionFile.c_str(), ios_base::app);
-  for (int currentObject = 0; currentObject < objectsNumber; currentObject++){
-    objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y-cubeSize/2.0 << std::endl;
-    objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y+cubeSize/2.0 << std::endl;
-    objectsFile << objectsArray.at(currentObject).x+cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y+cubeSize/2.0 << std::endl;
-    objectsFile << objectsArray.at(currentObject).x+cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y-cubeSize/2.0 << std::endl;
-    objectsFile << objectsArray.at(currentObject).x-cubeSize/2.0 << "\t" << objectsArray.at(currentObject).y-cubeSize/2.0 << std::endl; // Чтобы замкнуть линии в гнуплоте
-  }
+  objectsFile << objectsArray.at(objectNumber).x-cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y-cubeSize/2.0 << std::endl;
+  objectsFile << objectsArray.at(objectNumber).x-cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y+cubeSize/2.0 << std::endl;
+  objectsFile << objectsArray.at(objectNumber).x+cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y+cubeSize/2.0 << std::endl;
+  objectsFile << objectsArray.at(objectNumber).x+cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y-cubeSize/2.0 << std::endl;
+  objectsFile << objectsArray.at(objectNumber).x-cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y-cubeSize/2.0 << std::endl; // Чтобы замкнуть линии в гнуплоте
 }
 
 void TEnkiEnvironment::printOutPositionForGnuplot(std::string robotPositionFile) {
   ofstream robotFile;
   robotFile.open(robotPositionFile.c_str(), ios_base::app);
-  robotFile << ePuckBot->pos.x << "\t" << ePuckBot->pos.y << std::endl;
+  robotFile << ePuckBot->pos.x << "\t" << ePuckBot->pos.y << "\t" << countColorValueBasedOnVelocity() << std::endl;
+}
+
+double TEnkiEnvironment::countColorValueBasedOnVelocity() {
+  return sqrt((ePuckBot->speed.x)*(ePuckBot->speed.x)+(ePuckBot->speed.y)*(ePuckBot->speed.y))/13.5;
 }
 
 #endif

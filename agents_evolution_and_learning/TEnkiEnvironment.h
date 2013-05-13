@@ -83,6 +83,7 @@ public:
   std::vector<TEnkiObject> objectsArray; // Вектор объектов среды
   int goalsNumber; // Количество целей в среде
   std::vector<TEnkiAim> goalsArray; // Вектор целей среды
+  std::vector<Enki::PhysicalObject *> objectsInTheWorld;
   
   Enki::EPuck * ePuckBot; // Робот E-Puck
   Enki::World * world; // Симуляция среды, в которой он существует
@@ -105,10 +106,6 @@ public:
     ySize = 0;
     objectsNumber = 0;
     goalsNumber = 0;
-		worldStep = _worldStep;
-    cubeSize = _cubeSize;
-    cubeRadius = _cubeRadius;
-    rewardRecoveryTime = _rewardRecoveryTime;
 		loadEnvironment(aimsFilename);
 	}
   
@@ -145,6 +142,8 @@ public:
   // Метод, который описан здесь для соблюдения протокола, в данной модели не используется
   std::vector<int> testReachingAims(const std::vector< std::vector<double> >& actions, int actionsQuantity) const;
   
+  double countColorValueBasedOnVelocity();
+  
   // Вывод настроек среды на печать
   void printSettings(std::ostream& os) {
     os << "world-step" << std::endl;
@@ -160,7 +159,7 @@ public:
   // Временный метод, используемый для диагностики правильной работы среды, а также сенсоров робота
   void printOutCurrentEnvironmentState(std::string logsFilename);
   
-  void printOutObjectsForGnuplot(std::string objectsPositionFile);
+  void printOutObjectsForGnuplot(std::string objectsPositionFile, int objectNumber);
   
   void printOutPositionForGnuplot(std::string robotPositionFile);
   

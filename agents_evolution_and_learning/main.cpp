@@ -250,13 +250,14 @@ int main(int argc, char** argv){
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {
     // Формирование среды
-    TEnkiEnvironment enkiEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt");
+    TEnkiEnvironment enkiEnvironment;
     settings::fillEnvironmentSettingsFromFile(enkiEnvironment, "/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/enkiEnvironmentSettings.txt");
+    enkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt");
     
     // Установка начальных параметров робота (положения, угла (отсчитывается против часовой стрелки от оси, направленной вправо) и начальных скоростей)
-    enkiEnvironment.ePuckBot->pos.x = 100.0;
+    enkiEnvironment.ePuckBot->pos.x = 50.0;
     enkiEnvironment.ePuckBot->pos.y = 50.0+5.0+3.7;
-    enkiEnvironment.ePuckBot->angle = M_PI/2.0;
+    enkiEnvironment.ePuckBot->angle = 0;
     enkiEnvironment.ePuckBot->leftSpeed = 1;
     enkiEnvironment.ePuckBot->rightSpeed = 1;
     
@@ -270,12 +271,16 @@ int main(int argc, char** argv){
     enkiAgent.linearSystemogenesis();
     
     // Формирование файла, заключающего информацию о объектах среды (необходим для построения графика в гнуплоте)
-    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects.txt");
+    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects1.txt");
+    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects2.txt");
+    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects3.txt");
     std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotRobot.txt");
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects.txt");
+    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects1.txt", 0);
+    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects2.txt", 1);
+    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects3.txt", 2);
     
     // Запуск агента
-    enkiAgent.life(enkiEnvironment, 3000);
+    enkiAgent.life(enkiEnvironment, 10000);
   }
 #endif //NOT_USE_ROBOT_LIB
 

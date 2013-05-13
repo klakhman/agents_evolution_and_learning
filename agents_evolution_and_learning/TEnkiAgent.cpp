@@ -10,7 +10,7 @@
 
 using namespace std;
 
-static const double deltaSpeedForWheels = 1.0;
+static const double deltaSpeedForWheels = 0.1;
 
 vector<double> TEnkiAgent::decodeAction(double outputVector[]) {
   vector<double> actionVector;
@@ -39,7 +39,6 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
     // Действуем на среду, проверяем, успешно ли действие, а также проверяем, что это действие новое, так как в противном случае это действие не несет никакой новой информации
     int actionSuccess = environment.forceEnvironment(actionVector);
     double previousActionSuccess = agentLife[agentLife.size()-1][0];
-
     if (static_cast<int>(previousActionSuccess) != actionSuccess) {      
       vector<double> vectorWithSuccessAndTime;
       vectorWithSuccessAndTime.push_back(actionSuccess);
@@ -53,10 +52,12 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
     else if (2 == learningSettings.learningMode) randomLearning();
   }
   
-	if (rewardCalculate)
+	if (rewardCalculate) {
 		reward = environment.calculateReward(agentLife, static_cast<int>(agentLife.size()));
-	else
+    std::cout << "Reward equals " << reward << " after the life is completed" << std::endl;
+	} else {
 		reward = 0;
+  }
 	delete []outputVector;
 	delete []environmentVector;
 }
