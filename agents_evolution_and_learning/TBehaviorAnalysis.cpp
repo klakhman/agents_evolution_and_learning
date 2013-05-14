@@ -13,6 +13,7 @@
 #include <fstream>
 #include <cstring>
 #include <iostream>
+#include <map>
 #include "settings.h"
 
 using namespace std;
@@ -666,48 +667,30 @@ void TBehaviorAnalysis::actionsSequence2aimSequence(double* actionsSequence, int
 
 void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputImageFilename, double initialState)
 {
+  std::vector<std::vector<double>> sequenceOnVectors;
+  for (vector<double>::iterator action = sequence.begin(); action!=sequence.end();++action) {
+    std::vector<double> currentAction;
+    currentAction.push_back(*action);
+    sequenceOnVectors.push_back(currentAction);
+  }
   
-  double aims[(int)sequence.size()];
-  int aimsQ;
-  const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
-  //Определяем количество и номера достигнутых целей
-  actionsSequence2aimSequence(&sequence[0],  static_cast<int>(sequence.size()), environment, aims,aimsQ);
-  //Для каждой из целей рисуем отдельную последовательность с помеченымим на них цветом целями
-  for (int aimNumber = 0; aimNumber<aimsQ; aimNumber++) {
-    std::vector<int> aimEntrances;
-    const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(aims[aimNumber]);
-    
-    for (int currentTimeStep = 0; currentTimeStep < sequence.size(); ++currentTimeStep) {
-      int achivedFlag = 1; // Признак того, что цель достигнута
-      int currentAction = 1; // Текущее проверяемое действие
-      // Пока не найдено нарушение последовательности цели или проверка цели закончена
-      while (achivedFlag && (currentAction <= sequence.size())){
-        // Определение направления изменения и изменяемого бита (с откатыванием времени назад)
-        bool changedDirection = (sequence[currentTimeStep - currentAim.aimComplexity + currentAction] > 0);
-        int changedBit = static_cast<int>(fabs(sequence[currentTimeStep  - currentAim.aimComplexity + currentAction]));
-        /* Проверяем совпадает ли реальное действие с действием в цели на нужном месте
-         Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
-        if ((changedBit != currentAim.actionsSequence[currentAction - 1].bitNumber) ||
-            (changedDirection != currentAim.actionsSequence[currentAction - 1].desiredValue))
-          achivedFlag = false;
-        
-        //Если мы достигли цели, сохраняем место ее вхождения в цикл и перемещаемся в основном цикле на следущую клетку
-        if (currentAction == currentAim.aimComplexity && achivedFlag) {
-          aimEntrances.push_back(currentTimeStep - currentAim.aimComplexity+1);
-          currentTimeStep+=(currentAction-1);
-          achivedFlag = false;
-        } else {
-          ++currentAction;
-        }
-       
-      }
+  std::map<int, std::vector<int>> aimsReachingpoints;
+  for (int currentTimeStep = 0; currentTimeStep < sequence.size(); ++currentTimeStep) {
+    std::vector<int>currentStepAims = environment.testReachingAims(sequenceOnVectors, currentTimeStep);
+    for (vector<int>::iterator aim = currentStepAims.begin(); aim!=currentStepAims.end();++aim) {
+      aimsReachingpoints[*aim].push_back(currentTimeStep);
     }
-    
+  }
+  
+  const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
+  
+  for (map<int,std::vector<int>>::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
+    const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
     //Рисуем данную цель в dot файл
     ofstream dotFile;
     //!С++ 11 only! Need to find a better solution
     //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".dot").c_str());
-    dotFile.open((outputImageFilename+std::to_string(aimNumber)+".gv").c_str());
+    dotFile.open((outputImageFilename+std::to_string(it->first)+".gv").c_str());
     dotFile<<"digraph G {"<<endl;
     
     int cycleNumber = 0;
@@ -732,9 +715,9 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
         dotFile<<currentStateVector[currentBit];
       dotFile<<"\"";
       //Проверяем, входит ли данный узел в данную цель
-      for (int aimEntr = 0; aimEntr<aimEntrances.size();aimEntr++)
-        if (currentStep>=aimEntrances.at(aimEntr)&& currentStep<aimEntrances.at(aimEntr)+currentAim.aimComplexity)
-          dotFile<<",style=filled,fillcolor="<<colorsArray[aimNumber%8];//Dynamic color picking, 8 is the size of array
+      for (vector<int>::iterator action = aimsReachingpoints[it->first].begin(); action!=aimsReachingpoints[it->first].end();++action)
+        if (currentStep>*action-currentAim.aimComplexity && currentStep<=*action)
+          dotFile<<",style=filled,fillcolor="<<colorsArray[it->first%8];//Dynamic color picking, 8 is the size of array
       dotFile<<"]"<<endl;
       // Записываем переход
       dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<sequence[currentStep-1]<<")"<<"\"]"<<endl;
@@ -745,11 +728,87 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
     dotFile<<"}"<<endl;
     dotFile.close();
     system(("dot -Tpng " + outputImageFilename + ".dot -o " + outputImageFilename).c_str());
-    
-    
-    for (int ai = 0;ai<aimEntrances.size();ai++)
-      std::cout<<aimEntrances.at(ai);
-    std::cout<<"\n";
+    cout << aimsReachingpoints[it->first].size() << "\n";
   }
-
+//  double aims[(int)sequence.size()];
+//  int aimsQ;
+//  const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
+//  //Определяем количество и номера достигнутых целей
+//  actionsSequence2aimSequence(&sequence[0],  static_cast<int>(sequence.size()), environment, aims,aimsQ);
+//  //Для каждой из целей рисуем отдельную последовательность с помеченымим на них цветом целями
+//  for (int aimNumber = 0; aimNumber<aimsQ; aimNumber++) {
+//    std::vector<int> aimEntrances;
+//    const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(aims[aimNumber]);
+//    
+//    for (int currentTimeStep = 0; currentTimeStep < sequence.size(); ++currentTimeStep) {
+//      int achivedFlag = 1; // Признак того, что цель достигнута
+//      int currentAction = 1; // Текущее проверяемое действие
+//      // Пока не найдено нарушение последовательности цели или проверка цели закончена
+//      while (achivedFlag && (currentAction <= sequence.size())){
+//        // Определение направления изменения и изменяемого бита (с откатыванием времени назад)
+//        bool changedDirection = (sequence[currentTimeStep - currentAim.aimComplexity + currentAction] > 0);
+//        int changedBit = static_cast<int>(fabs(sequence[currentTimeStep  - currentAim.aimComplexity + currentAction]));
+//        /* Проверяем совпадает ли реальное действие с действием в цели на нужном месте
+//         Ожидается, что бездействие агента будет закодировано с помощью бита 0 и поэтому не совпадет ни с одним действием в цели*/
+//        if ((changedBit != currentAim.actionsSequence[currentAction - 1].bitNumber) ||
+//            (changedDirection != currentAim.actionsSequence[currentAction - 1].desiredValue))
+//          achivedFlag = false;
+//        
+//        //Если мы достигли цели, сохраняем место ее вхождения в цикл и перемещаемся в основном цикле на следущую клетку
+//        if (currentAction == currentAim.aimComplexity && achivedFlag) {
+//          aimEntrances.push_back(currentTimeStep - currentAim.aimComplexity+1);
+//          currentTimeStep+=(currentAction-1);
+//          achivedFlag = false;
+//        } else {
+//          ++currentAction;
+//        }
+//       
+//      }
+//    }
+//    
+//    //Рисуем данную цель в dot файл
+//    ofstream dotFile;
+//    //!С++ 11 only! Need to find a better solution
+//    //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".dot").c_str());
+//    dotFile.open((outputImageFilename+std::to_string(aims[aimNumber])+".gv").c_str());
+//    dotFile<<"digraph G {"<<endl;
+//    
+//    int cycleNumber = 0;
+//    environment.setStochasticityCoefficient(0.0);
+//    vector<double> states = transformActionsSequenceToStatesSequence(sequence, environment, -1);
+//    //Надо как-то динамически инициализировать
+//    bool* currentStateVector = new bool[environment.getEnvironmentResolution()];
+//    
+//    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[0]<<" [label=\"";
+//    service::decToBin(static_cast<int>(states[0] + 0.1), currentStateVector, environment.getEnvironmentResolution());
+//    
+//    for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
+//      dotFile<<currentStateVector[currentBit];
+//    dotFile<<"\"]"<<endl;
+//    
+//    for (unsigned int currentStep=1; currentStep<states.size(); ++currentStep) {
+//      // Записываем очередную вершину
+//      dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\"";
+//      service::decToBin(static_cast<int>(states[currentStep]), currentStateVector, environment.getEnvironmentResolution());
+//      
+//      for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
+//        dotFile<<currentStateVector[currentBit];
+//      dotFile<<"\"";
+//      //Проверяем, входит ли данный узел в данную цель
+//      for (int aimEntr = 0; aimEntr<aimEntrances.size();aimEntr++)
+//        if (currentStep>=aimEntrances.at(aimEntr)&& currentStep<aimEntrances.at(aimEntr)+currentAim.aimComplexity)
+//          dotFile<<",style=filled,fillcolor="<<colorsArray[aimNumber%8];//Dynamic color picking, 8 is the size of array
+//      dotFile<<"]"<<endl;
+//      // Записываем переход
+//      dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<sequence[currentStep-1]<<")"<<"\"]"<<endl;
+//    }
+//    delete []currentStateVector;
+//    
+//    
+//    dotFile<<"}"<<endl;
+//    dotFile.close();
+//    system(("dot -Tpng " + outputImageFilename + ".dot -o " + outputImageFilename).c_str());
+//    
+//  }
+//
 }
