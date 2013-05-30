@@ -129,6 +129,14 @@ int main(int argc, char** argv){
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
+    TAgent agent;
+    settings::fillAgentSettingsFromFile(agent, "C:/CodeJam/enkiEnvironmentSettings.txt");
+    agent.loadGenome("C:/CodeJam/enkiBestAgent.txt", 480);
+    agent.linearSystemogenesis();
+    agent.getPointerToAgentController()->printGraphNetwork("C:/CodeJam/net.jpg", false);
+    return 0;
+
+
     unsigned int scale = 100;
     ofstream ofs ("C:/Test/e-puckIRfunc.txt");
     for (unsigned int i = 0; i < 1000; ++i)

@@ -26,7 +26,7 @@ public:
   friend bool operator<(const AimsNumViaCompl& left, const AimsNumViaCompl& right);
 };
 
-bool operator<(const AimsNumViaCompl& left, const AimsNumViaCompl& right) {
+bool operator<(const AimsNumViaCompl& left, const AimsNumViaCompl& right){
   return (left.aimComplexity < right.aimComplexity);
 }
 
