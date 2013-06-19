@@ -10,10 +10,25 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <ctime>
 //#include <string>
 
 using namespace std;
+
+void tests::lifeViz(TAgent& agent, std::vector< std::vector<double> >&  inputs, 
+                    const std::string& outputDirectory){
+  TNeuralNetwork* controller = agent.getPointerToAgentController();
+  controller->reset();
+  const unsigned int lifetime = inputs.size();
+  for (int step = 1; step <= lifetime; ++step){
+    controller->calculateNetwork(&(inputs.at(step - 1).at(0)));
+    if ((step > 1) && agent.getLearningMode()) agent.learning();
+    stringstream out;
+    out << outputDirectory << "agentLife" << step << ".jpg";
+    controller->printGraphNetwork(out.str(), true, false, true);
+  }
+}
 
 /*int tests::testPoolNetwork(string outputFilename){
 	TPoolNetwork PoolNetwork;

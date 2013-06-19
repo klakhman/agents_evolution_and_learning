@@ -52,15 +52,6 @@ string decodeProgramMode(int argc, char** argv){
 	return "";
 }
 
-double irFunc(double dist){
-  double res = .0;
-  if (dist<0.5)
-    res = -440*dist+2965.98144;
-  else
-    res = 4526*exp(-0.9994*dist);
-  return res;
-}
-
 void decodeCommandPromt(string& environmentFilename, string& resultsFilename, string& bestPopulationFilename, string& bestAgentsFilename, long& randomSeed, bool& extraPrint, int argc, char** argv){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
@@ -75,6 +66,9 @@ void decodeCommandPromt(string& environmentFilename, string& resultsFilename, st
 		++currentArgNumber;
 	}
 }
+
+void testFunc();
+void currentAnalysis();
 
 int main(int argc, char** argv){
 	// Устанавливаем обработчик нехватки памяти
@@ -129,20 +123,29 @@ int main(int argc, char** argv){
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
+    //testFunc();
+    //currentAnalysis();
+    srand(static_cast<unsigned int>(time(0)));
     TAgent agent;
-    settings::fillAgentSettingsFromFile(agent, "C:/CodeJam/enkiEnvironmentSettings.txt");
-    agent.loadGenome("C:/CodeJam/enkiBestAgent.txt", 480);
-    agent.linearSystemogenesis();
-    agent.getPointerToAgentController()->printGraphNetwork("C:/CodeJam/net.jpg", false);
+    const string directory = "C:/SANDBOX/";
+    //agent.loadGenome(directory + "testPoolNet.txt", 1);
+    settings::fillAgentSettingsFromFile(agent, directory + "settings_PC40ANP40.ini");
+    //agent.setSystemogenesisMode(2);
+    //agent.systemogenesis();
+    ifstream ifs((directory + "testLearnNet.txt").c_str());
+    agent.loadController(ifs);
+    ifs.close();
+    //agent.getPointerToAgentGenome()->printGraphNetwork(directory + "testPoolNet.jpg", true);
+    //double input[] = {1, 0};
+    //agent.getPointerToAgentController()->calculateNetwork(input);
+    agent.getPointerToAgentController()->printGraphNetwork(directory + "testController.jpg", true, true, true);
+    double input[] = {1.0, 1.0};
+    vector< vector<double> > inputs;
+    for (unsigned int i = 0; i < 6; ++i)
+      inputs.push_back(vector<double>(input, input + 2));
+    tests::lifeViz(agent, inputs, directory);
     return 0;
 
-
-    unsigned int scale = 100;
-    ofstream ofs ("C:/Test/e-puckIRfunc.txt");
-    for (unsigned int i = 0; i < 1000; ++i)
-      ofs << (i + 1)/static_cast<double>(scale) << "\t"<< irFunc((i + 1)/static_cast<double>(scale)) << endl;
-    ofs.close();
-    return 0;
     srand(static_cast<unsigned int>(time(0)));
     for (unsigned int envN = 1; envN <= 20; ++envN){
       RestrictedHypercubeEnv* env = RestrictedHypercubeEnv::generateEnvironment(8, 1);
@@ -292,7 +295,6 @@ int main(int argc, char** argv){
   }
 #endif //NOT_USE_ROBOT_LIB
 
-
   /*TAnalysis* analysis = new TAnalysis;
 	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");
 	delete analysis;*/
@@ -360,4 +362,113 @@ int main(int argc, char** argv){
 	/*TAnalysis analysis;
 	analysis.makeBestPopulationAnalysisSummary("C:/Tests/RANDOM_agent_analysis.txt", "C:/Tests/summarydeterm.txt", 18, 20, 1);*/
 	//return 0;
+}
+
+void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime, const string& imageFilename);
+
+void testFunc(){
+  const string folder = "C:/Test/(2013-05-31)_Learning_Test/";
+  const string agentFilename = folder + "En10001_linsys(2)_bestpopulation.txt";
+  const unsigned int agentNumber = 2;
+  const string environmentFilename = folder + "Environments/Environment10001.txt";
+  const string settingsFilename = folder + "settings_LINSYS.ini";
+  const string imageFilename = folder + "agent-1_state-0.jpg";
+  const unsigned int initState = 0;
+  const unsigned int lifetime = 50;
+  RestrictedHypercubeEnv environment(environmentFilename);
+  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  environment.setEnvironmentState(initState);
+  environment.setStochasticityCoefficient(0.0);
+  TAgent agent;
+  agent.loadGenome(agentFilename, agentNumber);
+  settings::fillAgentSettingsFromFile(agent, settingsFilename);
+  agent.linearSystemogenesis();
+  //drawAgentLife(agent, environment, lifetime, imageFilename);
+  auto cycle = TBehaviorAnalysis::findCycleInAgentLife(agent, environment);
+  RestrictedHypercubeEnv emptyEnv;
+  emptyEnv.setEnvResolution(environment.getEnvironmentResolution());
+  TBehaviorAnalysis::drawCycleToDot(cycle, emptyEnv, imageFilename);
+  //auto cycles = TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment);
+  //copy(begin(cycles.at(0).cycleSequence), end(cycles.at(0).cycleSequence), ostream_iterator<double>(cout, "\t"));
+  //cout << endl << endl;
+  //TBehaviorAnalysis::drawCyclesListToDot(TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment), environment, imageFilename);
+
+}
+
+void currentAnalysis(){
+  const string folder = "C:/Test/SANDBOX/";
+  const string agentFilename = folder + "En1113_pc40anp40(18)_bestpopulation.txt";
+  const string bestAgentsFilename = folder + "En1113_pc40anp40(18)_bestagents.txt";
+  const string environmentFilename = folder + "Environment1113.txt";
+  const string settingsFilename = folder + "settings_PC40ANP40.ini";
+  const unsigned int agentNumber = 179;
+  const unsigned int lifetime = 100;
+  TAgent agent;
+  ofstream res((folder + "devPredConHist.txt").c_str());
+  ifstream rew((folder + "bestPopRewards.txt").c_str());
+  for (int pop = 1; pop <= 100; ++pop){
+    double curRew;
+    rew >> curRew;
+    if (curRew < 700) continue;
+    stringstream some;
+    some << folder << "/bestpopulations/En1113_pc40anp40(" << pop << ")_bestpopulation.txt";
+    ifstream agentsFile(some.str().c_str());
+    cout << pop << endl;
+    for (int agentN = 1; agentN <= 250; ++agentN){
+      agent.loadGenome(agentsFile);
+      TPoolNetwork* genome = agent.getPointerToAgentGenome();
+      for (int pool = 16; pool <= genome->getPoolsQuantity(); ++pool)
+        for (int con = 1; con <= genome->getPoolInputPredConnectionsQuantity(pool); ++con)
+          res << genome->getDevelopPredConnectionProb(pool, con) << endl;
+    }
+    agentsFile.close();
+  }
+  res.close();
+  return;
+  //THypercubeEnvironment environment(environmentFilename);
+  //settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  //environment.setStochasticityCoefficient(0.0);
+  //TAgent agent;
+  //settings::fillAgentSettingsFromFile(agent, settingsFilename);
+  //agent.loadGenome(agentFilename, agentNumber);
+  //ofstream outRes((folder + "results.txt").c_str());
+  //for (unsigned int run = 0; run < 20; ++run){
+  //  agent.systemogenesis();
+
+  //  stringstream str;
+  //  str << folder << "agent" << run << ".txt";
+  //  ofstream out(str.str().c_str());
+  //  agent.uploadController(out);
+  //  out.close();
+
+  //  agent.setLearningMode(0);
+  //  vector<double> rewardsWithoutLearning = techanalysis::totalRun(agent, environment, lifetime);
+  //  double rewardWithoutLearning = techanalysis::sum(rewardsWithoutLearning) / rewardsWithoutLearning.size();
+  //  agent.setLearningMode(1);
+  //  vector<double> rewardsWithLearning = techanalysis::totalRun(agent, environment, lifetime);
+  //  double rewardWithLearning = techanalysis::sum(rewardsWithLearning) / rewardsWithLearning.size();
+  //  outRes << run << "\t" << rewardWithoutLearning << "\t" << rewardWithLearning << endl;
+  //  cout << run << "\t" << rewardWithoutLearning << "\t" << rewardWithLearning << endl;
+  //}
+  //outRes.close();
+  techanalysis::difEvolutionAnalysis(bestAgentsFilename, 5000, environmentFilename, settingsFilename, folder + "evolutionDiffResults.txt", 25, 5, 100);
+}
+
+/**
+* Отрисовка жизни агента в формате .jpg с помощью утилиты dot (путь к утилите должен находиться в переменной $PATH$).
+* В среде должно быть установлено начальное состояние, из которого запускается агент.
+* \param [in] agent - нейросетевой агент.
+* \param [in] environment - среда с установленным начальным состоянием.
+* \param [in] lifetime - время жизни агента.
+* \param [in] imageFilename - путь к генерируемому файлу .jpg жизни агента.
+*/
+void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime, const string& imageFilename){
+  const int initState = environment.getEnvironmentState();
+  environment.setStochasticityCoefficient(0.0);
+  agent.life(environment, lifetime, false);
+  const auto& life = agent.getPointerToAgentLife();
+  vector<double> _life;
+  _life.reserve(life.size());
+  transform(life.cbegin(), life.cend(), back_inserter(_life), [](const vector<double>& v){ return v.at(0); });  
+  TBehaviorAnalysis::drawActionSequenceToDot(_life, environment, imageFilename, initState);
 }
