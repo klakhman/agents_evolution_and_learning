@@ -146,7 +146,7 @@ public:
 
 	// Вывод сети в файл как графа (с использованием сторонней утилиты dot.exe из пакета GraphViz) 
 	// Для корректной работы необходимо чтобы путь к dot.exe был прописан в $PATH	
-	void printGraphNetwork(std::string graphFilename, bool printWeights = false) const;
+	void printGraphNetwork(std::string graphFilename, bool printWeights = false, bool printSilentNeurons = false, bool printActivities = false) const;
 
 	//Печать сети в файл или на экран
 	friend std::ostream& operator<<(std::ostream& os, const TNeuralNetwork& NeuralNetwork);
