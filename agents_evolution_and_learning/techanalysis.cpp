@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <functional>
+#include <numeric>
 #include <limits>
 #include <sstream>
 #include <ctime>
@@ -592,6 +594,56 @@ void reverseEnvironment(const THypercubeEnvironment& environment, string outputF
     outputFile << endl;
   }
   outputFile.close();
+}
+
+inline double sum(const vector<double>& vec){
+  return accumulate(vec.begin(), vec.end(), 0.0, plus<double>());
+}
+
+vector<double> techanalysis::totalRun(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime /*=250*/){
+  const unsigned int statesQ = environment.getInitialStatesQuantity();
+  vector<double> runs(statesQ);
+  TNeuralNetwork controller;
+  if (agent.getLearningMode())
+    controller = *agent.getPointerToAgentController();
+  for (unsigned int state = 0; state < statesQ; ++state){
+    if (agent.getLearningMode())
+      *agent.getPointerToAgentController() = controller;
+    environment.setEnvironmentState(state);
+    agent.life(environment, lifetime);
+    runs.at(state) = agent.getReward();
+  }
+  return runs;
+}
+
+// Анализ на эволюцию разницы награды с обучением и без (с дискретизацией)
+void techanalysis::difEvolutionAnalysis(const string& bestAgentsFilename, unsigned int evolTime, const string& environmentFilename, 
+                                        const string& settingsFilename, const string& resultsFilename, unsigned int evolDiscr /*=50*/,
+                                        unsigned int sysNumber /*=5*/, unsigned int lifetime /*=100*/){
+  THypercubeEnvironment environment(environmentFilename);
+  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  environment.setStochasticityCoefficient(0.0);
+  TAgent agent;
+  settings::fillAgentSettingsFromFile(agent, settingsFilename);
+  const unsigned int bins = evolTime / evolDiscr;
+  ofstream results(resultsFilename.c_str());
+  for (unsigned int bin = 0; bin < bins; ++bin){
+    agent.loadGenome(bestAgentsFilename, bin * evolDiscr + 1);
+    double rewardWithLearning = 0;
+    double rewardWithoutLearning = 0;
+    for (unsigned int run = 0; run < sysNumber; ++run){
+      agent.systemogenesis();
+      agent.setLearningMode(0);
+      vector<double> rewardsWithoutLearning = totalRun(agent, environment, lifetime);
+      rewardWithoutLearning += sum(rewardsWithoutLearning) / (sysNumber * rewardsWithoutLearning.size());
+      agent.setLearningMode(1);      
+      vector<double> rewardsWithLearning = totalRun(agent, environment, lifetime);
+      rewardWithLearning += sum(rewardsWithLearning) / (sysNumber * rewardsWithLearning.size());
+    }
+    results << bin * evolDiscr + 1 << "\t" << rewardWithLearning << "\t" << rewardWithoutLearning << endl;
+    cout << bin * evolDiscr + 1 << "\t" << rewardWithLearning << "\t" << rewardWithoutLearning << endl;
+  }
+  results.close();
 }
 
 #ifndef NOT_USE_ALGLIB_LIBRARY

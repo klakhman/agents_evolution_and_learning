@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <numeric>
+#include <functional>
 #include "config.h"
 #include "TAgent.h"
 #include "TPopulation.h"
@@ -67,6 +69,16 @@ namespace techanalysis{
   // Проверка проводится путем запуска случайного агента в среду на фиксированное время (все действия агента равновероятны) и подсчета количества достигнутых целей
   void empiricalCheckGD(std::string environmentDirectory, int firstEnvNumber, int lastEnvNumber, std::string resultsFile);
 
+  std::vector<double> totalRun(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime = 250);
+  
+  // Анализ на эволюцию разницы награды с обучением и без (с дискретизацией)
+  void difEvolutionAnalysis(const std::string& bestAgentsFilename, unsigned int evolTime, const std::string& environmentFilename, 
+                            const std::string& settingsFilename, const std::string& resultsFilename, unsigned int evolDiscr = 50, 
+                            unsigned int sysNumber = 5, unsigned int lifetime = 100);
+
+  inline double sum(const std::vector<double>& vec){
+    return std::accumulate(vec.begin(), vec.end(), 0.0, std::plus<double>());
+  }
 
   #ifndef NOT_USE_ALGLIB_LIBRARY
     // Обертка над функцией из ALGLIB - тестирование нормальности выборки по методу Харки — Бера.
