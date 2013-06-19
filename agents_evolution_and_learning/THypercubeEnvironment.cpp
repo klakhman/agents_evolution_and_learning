@@ -26,10 +26,14 @@ ostream& operator<<(ostream& os, const THypercubeEnvironment::TAim& aim){
 
 // Загрузка структуры целей среды из файла
 void THypercubeEnvironment::loadEnvironment(std::string environmentFilename){
-	// Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
-	if (environmentResolution) delete []currentEnvironmentVector;
 	ifstream environmentFile;
 	environmentFile.open(environmentFilename.c_str());
+  if (!environmentFile.is_open()){
+    cout << "Error: Can not open environment file " << environmentFilename << endl;
+    abort();
+  }
+  // Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
+	if (environmentResolution) delete []currentEnvironmentVector;
 	string tmp_str;
 	environmentFile >> tmp_str; // Считываем размерность среды
 	environmentResolution = atoi(tmp_str.c_str());
