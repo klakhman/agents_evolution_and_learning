@@ -350,7 +350,7 @@ std::vector<double> TBehaviorAnalysis::transformActionsSequenceToStatesSequence(
   states.push_back(environment.getEnvironmentState()); // Сначала записываем начальное состояние
   //Заполняем
   for (vector<double>::iterator action = actionsSequence.begin(); action!=actionsSequence.end();++action) {
-		actionVector[0] = *action;
+		actionVector[0] = *action;  
 		bool success = (environment.forceEnvironment(actionVector) != 0);
     if (!success){ cout << "Critical error: initial state was defined improperly." << endl; exit(-1); }
 		states.push_back(environment.getEnvironmentState());
@@ -498,7 +498,7 @@ void TBehaviorAnalysis::addActionSequenceToDotStream(std::vector<double> &sequen
     // Записываем очередную вершину
     dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\"";
     service::decToBin(static_cast<int>(states[currentStep]), currentStateVector, environment.getEnvironmentResolution());
-    
+
     for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
       dotFile<<currentStateVector[currentBit];
     dotFile<<"\"]"<<endl;

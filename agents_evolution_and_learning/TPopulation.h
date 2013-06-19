@@ -205,13 +205,7 @@ void TPopulation<TemplateNeuralAgent>::evolutionaryStep(TEnvironment& environmen
 	// Прогоняем всех агентов
 	for (int currentAgent = 1; currentAgent <= populationSize; ++currentAgent){
 		// Проводим первичный системогенез (если нужно)
-		if (1 == agents[currentAgent - 1]->getSystemogenesisMode())
-			agents[currentAgent - 1]->primarySystemogenesis();
-		else if (0 == agents[currentAgent - 1]->getSystemogenesisMode())
-			agents[currentAgent - 1]->linearSystemogenesis();
-    else if (2 == agents[currentAgent - 1]->getSystemogenesisMode())
-      agents[currentAgent - 1]->alternativeSystemogenesis();
-
+    agents[currentAgent - 1]->systemogenesis();
 		environment.setRandomEnvironmentState();
 		agents[currentAgent - 1]->life(environment, evolutionSettings.agentLifetime);
 	}
