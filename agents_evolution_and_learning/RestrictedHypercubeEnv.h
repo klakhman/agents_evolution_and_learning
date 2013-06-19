@@ -17,7 +17,6 @@ public:
   /// Конструктор по умолчанию
   RestrictedHypercubeEnv(){
     currentAgentReward = 0;
-    
   }
   /// Конструктор с заполнением иерархии целей из файла
   RestrictedHypercubeEnv(std::string aimsFilename, int _rewardRecoveryTime = 0, double _nonstaionarityCoefficient = 0){
@@ -53,6 +52,8 @@ public:
   static bool equalAims(const TAim& firstAim, const TAim& secondAim);
   /// Проверка является ли одна цель родительской для другой цели
   static bool isParentAim(const TAim& potentialParentAim, const TAim& subAim);
+  /// Изменение размерности среды
+  void setEnvResolution(unsigned int _envResolution);
 
 private:
   /// Начальный вектор среды, из которого запускается текущая жизнь агента

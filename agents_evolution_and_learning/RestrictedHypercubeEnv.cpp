@@ -291,6 +291,17 @@ bool RestrictedHypercubeEnv::isParentAim(const TAim& potentialParentAim, const T
   return true;
 }
 
+/// Изменение размерности среды
+/**
+* \param [in] _envResolution - требуемая размерность среды.
+*/
+void RestrictedHypercubeEnv::setEnvResolution(unsigned int _envResolution){
+  THypercubeEnvironment::setEnvResolution(_envResolution);
+  startEnvironmentVector.clear();
+  startEnvironmentVector.resize(_envResolution, false);
+  resetEnvironment();
+}
+
 /// Метод перезагрузки среды (обнуление жизни агента и времен восстановления награды)
 void RestrictedHypercubeEnv::resetEnvironment(){
   agentLifeRecord.clear();

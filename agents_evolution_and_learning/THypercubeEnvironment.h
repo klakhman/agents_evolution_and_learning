@@ -116,10 +116,12 @@ public:
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			environmentVector[currentBit - 1] = static_cast<double>(currentEnvironmentVector[currentBit - 1]);
 	}
-  void setEnvResolution(unsigned int _envResolution){
+  virtual void setEnvResolution(unsigned int _envResolution){
     if (currentEnvironmentVector)
       delete []currentEnvironmentVector;
+    environmentResolution = _envResolution;
     currentEnvironmentVector = new bool[_envResolution];
+    memset(currentEnvironmentVector, 0, environmentResolution * sizeof(*currentEnvironmentVector));
   }
 
   // Получение константной ссылки на цель в среде (номер цели начинается с единица)
