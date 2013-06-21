@@ -117,7 +117,6 @@ double TAnalysis::startBestPopulationAnalysis(TPopulation<TAgent>& population, T
       if (0 != population.getPointertoAgent(currentAgent)->getLearningMode())
         initialController = *(agent->getPointerToAgentController());
 		  for (int currentInitialState = 0; currentInitialState < initialStatesQuantity; ++currentInitialState){
-        cout << currentAgent << "\t" << currentRun << "\t" << currentInitialState;
         if (0 != agent->getLearningMode())
           *(agent->getPointerToAgentController()) = initialController;
 			  environment.setEnvironmentState(currentInitialState);
@@ -127,7 +126,6 @@ double TAnalysis::startBestPopulationAnalysis(TPopulation<TAgent>& population, T
 			  averageReward += reward / (population.getPopulationSize() *  initialStatesQuantity);
 			  if (reward > maxReward)
 				  maxReward = reward;
-        cout << " END" << endl;
 		  }
     }
 	}
