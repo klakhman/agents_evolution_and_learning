@@ -102,7 +102,7 @@ void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool n
 	// Смотрим на слой нейрона
 	if (newLayer > layersQuantity) layersQuantity = newLayer;
 
-  // Если capacity изменилась, то есть осуществлялась реаллокация, то надо править ссылки в синапсах
+  // Если capacity изменилась, то есть осуществлялась реаллокация, то надо править ссылки в синапсах и в предикторных связях
   if ((previousCapacity != neuronsStructure.capacity()) && ((synapsesQuantity != 0) || (predConnectionsQuantity != 0))){
     int synapseNumber = 0;
     int predConnectionNumber = 0;
@@ -112,8 +112,8 @@ void TNeuralNetwork::addNeuron(int newType, int newLayer, double newBias, bool n
         setSynapsePostNeuronID(currentNeuron, currentSynapse, currentNeuron);
       }
       for (int currentPredConnection = 1; currentPredConnection <= neuronsStructure[currentNeuron-1].getInputPredConnectionsQuantity(); ++currentPredConnection){
-        setSynapsePreNeuronID(currentNeuron, currentPredConnection, preNeuronsIDsPredConnections[predConnectionNumber++]);
-        setSynapsePostNeuronID(currentNeuron, currentPredConnection, currentNeuron);
+        setPredConnectionPreNeuronID(currentNeuron, currentPredConnection, preNeuronsIDsPredConnections[predConnectionNumber++]);
+        setPredConnectionPostNeuronID(currentNeuron, currentPredConnection, currentNeuron);
       }
     }
   }
