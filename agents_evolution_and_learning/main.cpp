@@ -123,6 +123,13 @@ int main(int argc, char** argv){
     return 0;
   }
   else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
+    const string root = "C:/AlternativeSystemogenesis/";
+    const string resultsDirectory = root + "/Results";  
+    const string runSign = "pc40alsys";
+    TAnalysis analysis;
+    cout << analysis.startBestPopulationAnalysis(service::bestPopCaption(resultsDirectory, 1113, 14, runSign), root + "/Environments/Environment1113.txt",
+                                                  root + "/settings_PC40ALSYS.ini");
+
     //testFunc();
     //currentAnalysis();
     srand(static_cast<unsigned int>(time(0)));

@@ -44,11 +44,11 @@ protected:
 	// Построение первичного контроллера агента
 	void buildPrimaryNeuralController();
 	// Функция отбора активирующихся нейронов
-	void neuronsSelection(double neuronsSummaryPotential[]);
+	void neuronsSelection(std::vector<double>& neuronsSummaryPotential);
 	// Функция отбора наиболее активных синапсов
-	void synapsesSelection(double synapsesSummaryPotential[]);
+	void synapsesSelection(const std::vector<double>& synapsesSummaryPotential);
 	// Функция отбора предикторных связей
-	void predConnectionsSelection(double predictorSignificance[]);
+	void predConnectionsSelection(const std::vector<double>& predictorSignificance);
 
 	// Детекция рассогласования на нейроне
 	// 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"

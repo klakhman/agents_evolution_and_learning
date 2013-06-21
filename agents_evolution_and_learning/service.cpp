@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <ctime>
+#include <sstream>
 #include "config.h"
 
 using namespace std;
@@ -146,4 +147,11 @@ void service::HSVtoRGB(int& R, int& G, int& B, double H, double S, double V)
   R = static_cast<int>(255*_R);
   G = static_cast<int>(255*_G);
   B = static_cast<int>(255*_B);
+}
+
+/// Формирование пути к файлу с лучшей популяцией по аттрибутам запуска 
+string service::bestPopCaption(const string& resultsDirectory, unsigned int envNumber, unsigned int tryNumber, const string& runSign){
+  stringstream tmpStream;
+  tmpStream << resultsDirectory << "/En" << envNumber << "/En" << envNumber << "_" << runSign << "(" << tryNumber << ")_bestpopulation.txt";
+  return tmpStream.str();
 }

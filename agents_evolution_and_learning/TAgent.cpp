@@ -354,7 +354,7 @@ void TAgent::buildPrimaryNeuralController(){
 }
 
 // Функция отбора активирующихся нейронов
-void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
+void TAgent::neuronsSelection(vector<double>& neuronsSummaryPotential){
 	// Считаем кол-во активирующихся нейронов
 	int neededActiveNeurons = static_cast<int>(primarySystemogenesisSettings.activeNeuronsPercent / 100.0 * (neuralController->getNeuronsQuantity() - neuralController->getInputResolution() - neuralController->getOutputResolution()) + 0.5);
 	// Для отбора нейронов используем рулеточный алгоритм (работаем только с той частью списка в которой записаны интернейроны)
@@ -398,6 +398,8 @@ void TAgent::neuronsSelection(double neuronsSummaryPotential[]){
 struct SSelectionSynapse{
 	int synapseID;
 	double synapseSummaryPotential;
+  SSelectionSynapse(int _synapseID, double _synapseSummaryPotential):
+    synapseID(_synapseID), synapseSummaryPotential(_synapseSummaryPotential) {};
   // Функция сравнения структур (для функции qsort())
   /*static int compare(const void* first, const void* second){
       double compare = reinterpret_cast<const SSelectionSynapse*>(first)->synapseSummaryPotential - reinterpret_cast<const SSelectionSynapse*>(second)->synapseSummaryPotential;
@@ -412,27 +414,12 @@ struct SSelectionSynapse{
 };
 
 // Функция отбора наиболее активных синапсов
-void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
-  // Массив связей вместе с их суммарными потенциалами
-	SSelectionSynapse* selectionSynapses = new SSelectionSynapse[neuralController->getSynapsesQuantity()];
-	// Проходимся по всем синапсам
-	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
-		for (int currentSynapse = 1; currentSynapse <= neuralController->getNeuronInputSynapsesQuantity(currentNeuron); ++currentSynapse){
-			selectionSynapses[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1].synapseID = neuralController->getSynapseID(currentNeuron, currentSynapse) - 1;
-			selectionSynapses[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1].synapseSummaryPotential = synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1];
-		}
-	// Сортируем связи по значению суммарного потенциала
-	/*for (int i = 0; i < neuralController->getSynapsesQuantity(); ++i)
-		for (int j = 0; j < neuralController->getSynapsesQuantity() - i - 1; ++j)
-			if (selectionSynapses[j].synapseSummaryPotential > selectionSynapses[j+1].synapseSummaryPotential){
-				SSelectionSynapse tmp = selectionSynapses[j+1];
-				selectionSynapses[j+1] = selectionSynapses[j];
-				selectionSynapses[j] = tmp;
-			}*/
-  //qsort(selectionSynapses, neuralController->getSynapsesQuantity(), sizeof(*selectionSynapses), SSelectionSynapse::compare);
-  sort(selectionSynapses, selectionSynapses + neuralController->getSynapsesQuantity());
+void TAgent::synapsesSelection(const vector<double>& synapsesSummaryPotential){
+  vector<double> selectionSynapses(synapsesSummaryPotential.begin(), synapsesSummaryPotential.end());
 	// Находим порог среднего потенциала по синапсу (через персентиль общего дискретного распределения среднего потенциала через синапсы)
-	double percentileValue = selectionSynapses[static_cast<int>((100 - primarySystemogenesisSettings.synapsesActivityTreshold)/100.0*neuralController->getSynapsesQuantity())].synapseSummaryPotential;
+  unsigned int percentilePosition = static_cast<unsigned int>((100 - primarySystemogenesisSettings.synapsesActivityTreshold)/100.0 * neuralController->getSynapsesQuantity());
+  nth_element(selectionSynapses.begin(), selectionSynapses.begin() + percentilePosition, selectionSynapses.end());
+  double percentileValue = selectionSynapses[percentilePosition];
 	// Проходимся через все синапсы и удаляем те, у которых суммарный потенциал меньше порога (с определенными условиями - смотри далее)
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
 		// Связь не подлежит проверке на отбор если один из неронов не является активным !!! или если пресинаптический нейрон входной или постсинаптический нейрон выходной !!!
@@ -449,11 +436,10 @@ void TAgent::synapsesSelection(double synapsesSummaryPotential[]){
 			}
 
 	neuralController->fixSynapsesIDs();
-	delete []selectionSynapses;
 }
 
 // Функция отбора предикторных связей
-void TAgent::predConnectionsSelection(double predictorSignificance[]){
+void TAgent::predConnectionsSelection(const vector<double>& predictorSignificance){
 	// Проходимся по всем связям, которые подлежат отбору (только между активными нейронами)
 	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
 		if (neuralController->getNeuronActive(currentNeuron)) // Если нейрон активен
@@ -474,12 +460,9 @@ void TAgent::primarySystemogenesis(){
 	// Строим полную первичную сеть агента
 	buildPrimaryNeuralController();
 	// Сначала создаем все необходимые структуры для записи статистики
-	double* neuronsSummaryPotential = new double[neuralController->getNeuronsQuantity()];
-	memset(neuronsSummaryPotential, 0, neuralController->getNeuronsQuantity() * sizeof(*neuronsSummaryPotential));
-	double* synapsesSummaryPotential = new double[neuralController->getSynapsesQuantity()];
-	memset(synapsesSummaryPotential, 0, neuralController->getSynapsesQuantity() * sizeof(*synapsesSummaryPotential));
-	double* predictorSignificance = new double[neuralController->getPredConnectionsQuantity()];
-	memset(predictorSignificance, 0, neuralController->getPredConnectionsQuantity()*sizeof(*predictorSignificance));
+  vector<double> neuronsSummaryPotential(neuralController->getNeuronsQuantity(), 0.0);
+	vector<double> synapsesSummaryPotential(neuralController->getSynapsesQuantity(), 0.0);
+	vector<double> predictorSignificance(neuralController->getPredConnectionsQuantity(), 0.0);
 	neuralController->reset();
 	// Проводим прогон первичного системогенеза и подсчет суммарных характеристик
 	for (int systemogenesisTime = 1; systemogenesisTime <= primarySystemogenesisSettings.primarySystemogenesisTime; ++systemogenesisTime){
@@ -514,15 +497,11 @@ void TAgent::primarySystemogenesis(){
 	neuronsSelection(neuronsSummaryPotential);
 	synapsesSelection(synapsesSummaryPotential);
 	predConnectionsSelection(predictorSignificance);
-
-	// Производим очистку
-	delete []neuronsSummaryPotential;
-	delete []synapsesSummaryPotential;
-	delete []predictorSignificance;
 }
 
 // Альтернативный системогенез (активным становится только один нейрон в пуле с детерминированной структурой связей)
 void TAgent::alternativeSystemogenesis(){
+  neuralController->eraseNeuralNetwork();
   const unsigned int poolsQuantity = genome->getPoolsQuantity();
   // Создаем двумерный массив принадлежности различных нейронов пулам (по идентификатору), чтобы потом не проходить несколько раз по сети из пулов или нейросети
   vector< vector<unsigned int> > neuronsInPools(poolsQuantity);

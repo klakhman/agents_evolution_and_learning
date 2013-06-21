@@ -48,6 +48,9 @@ namespace service{
 
   // Перевод окраски из формата HSV в RGB (ссылка http://www.cs.rit.edu/~ncs/color/t_convert.html)
   void HSVtoRGB(int& R, int& G, int& B, double H, double S, double V);
+  
+  /// Формирование пути к файлу с лучшей популяцией по аттрибутам запуска 
+  std::string bestPopCaption(const std::string& resultsDirectory, unsigned int envNumber, unsigned int tryNumber, const std::string& runSign);
 
   // Печать вектора в файл (шаблонная функция)
   template<class T>

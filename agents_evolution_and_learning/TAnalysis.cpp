@@ -100,50 +100,38 @@ double TAnalysis::startBestPopulationAnalysis(TPopulation<TAgent>& population, T
 	rand();
   // Создаем массив наград всех агентов при запуске из всех начальных состояний (чтобы если что, то можно было проводить более сложный анализ)
 	int initialStatesQuantity = environment.getInitialStatesQuantity();
-	double** agentsRewards = new double*[population.getPopulationSize()];
-	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
-		agentsRewards[currentAgent - 1] = new double[initialStatesQuantity];
-    memset(agentsRewards[currentAgent - 1], 0, sizeof(*(agentsRewards[currentAgent - 1])) * initialStatesQuantity);
-  }
+  vector< vector<double> > agentsRewards(population.getPopulationSize());
+	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent)
+		agentsRewards[currentAgent - 1].resize(initialStatesQuantity, 0);
 	double maxReward = 0.0;
 	long double averageReward = 0.0;
   // Для корректного анализа агентов, которые проходят процедуру первичного системогенеза (и возможно обучения) нужно проводить их построение несколько раз
-  int runsQuantity;
-  if (0 != population.getPointertoAgent(1)->getSystemogenesisMode())
-    runsQuantity = 10;
-  else 
-    runsQuantity = 1;
+  const int runsQuantity = (0 != population.getPointertoAgent(1)->getSystemogenesisMode()) ? 10 : 1;
 	// Прогоняем всех агентов и записываем награды в массив
 	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent){
+    TAgent* agent = population.getPointertoAgent(currentAgent);
     for (int currentRun = 1; currentRun <= runsQuantity; ++currentRun){
-      if (1 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
-        population.getPointertoAgent(currentAgent)->primarySystemogenesis();
-      else if (0 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
-		    population.getPointertoAgent(currentAgent)->linearSystemogenesis();
-      else if (2 == population.getPointertoAgent(currentAgent)->getSystemogenesisMode())
-        population.getPointertoAgent(currentAgent)->alternativeSystemogenesis();
+      agent->systemogenesis();
       // Необходимо сохранять первичную нейронную сеть, так как запуск проходит из всех состояний и возможно обучение
       TNeuralNetwork initialController;
       if (0 != population.getPointertoAgent(currentAgent)->getLearningMode())
-        initialController = *(population.getPointertoAgent(currentAgent)->getPointerToAgentController());
+        initialController = *(agent->getPointerToAgentController());
 		  for (int currentInitialState = 0; currentInitialState < initialStatesQuantity; ++currentInitialState){
-        if (0 != population.getPointertoAgent(currentAgent)->getLearningMode())
-          *(population.getPointertoAgent(currentAgent)->getPointerToAgentController()) = initialController;
+        cout << currentAgent << "\t" << currentRun << "\t" << currentInitialState;
+        if (0 != agent->getLearningMode())
+          *(agent->getPointerToAgentController()) = initialController;
 			  environment.setEnvironmentState(currentInitialState);
-			  population.getPointertoAgent(currentAgent)->life(environment, population.evolutionSettings.agentLifetime);
-			  double reward = population.getPointertoAgent(currentAgent)->getReward();
+			  agent->life(environment, population.evolutionSettings.agentLifetime);
+			  double reward = agent->getReward();
         agentsRewards[currentAgent - 1][currentInitialState] += reward/runsQuantity;			
 			  averageReward += reward / (population.getPopulationSize() *  initialStatesQuantity);
 			  if (reward > maxReward)
 				  maxReward = reward;
+        cout << " END" << endl;
 		  }
     }
 	}
   averageReward /= runsQuantity;
-	// Удаляем все переменные
-	for (int currentAgent = 1; currentAgent <= population.getPopulationSize(); ++currentAgent)
-		delete []agentsRewards[currentAgent - 1];
-	delete []agentsRewards;
 	return static_cast<double>(averageReward);
 }
 
