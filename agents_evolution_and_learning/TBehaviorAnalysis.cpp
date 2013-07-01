@@ -14,6 +14,7 @@
 #include <cstring>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include "settings.h"
 
 using namespace std;
@@ -667,14 +668,14 @@ void TBehaviorAnalysis::actionsSequence2aimSequence(double* actionsSequence, int
 
 void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputImageFilename, double initialState)
 {
-  std::vector<std::vector<double>> sequenceOnVectors;
+  std::vector< std::vector<double> > sequenceOnVectors;
   for (vector<double>::iterator action = sequence.begin(); action!=sequence.end();++action) {
     std::vector<double> currentAction;
     currentAction.push_back(*action);
     sequenceOnVectors.push_back(currentAction);
   }
   
-  std::map<int, std::vector<int>> aimsReachingpoints;
+  std::map< int, std::vector<int> > aimsReachingpoints;
   for (int currentTimeStep = 0; currentTimeStep < sequence.size(); ++currentTimeStep) {
     std::vector<int>currentStepAims = environment.testReachingAims(sequenceOnVectors, currentTimeStep);
     for (vector<int>::iterator aim = currentStepAims.begin(); aim!=currentStepAims.end();++aim) {
@@ -684,13 +685,15 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
   
   const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
   
-  for (map<int,std::vector<int>>::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
+  for (map< int,std::vector<int> >::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
     const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
     //Рисуем данную цель в dot файл
     ofstream dotFile;
     //!С++ 11 only! Need to find a better solution
     //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".dot").c_str());
-    dotFile.open((outputImageFilename+std::to_string(it->first)+".gv").c_str());
+    stringstream tmpBuf;
+    tmpBuf << it->first;
+    dotFile.open((outputImageFilename+tmpBuf.str()+".gv").c_str());
     dotFile<<"digraph G {"<<endl;
     
     int cycleNumber = 0;

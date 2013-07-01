@@ -374,27 +374,27 @@ int main(int argc, char** argv){
 void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime, const string& imageFilename);
 
 void testFunc(){
-  const string folder = "C:/Test/(2013-05-31)_Learning_Test/";
-  const string agentFilename = folder + "En10001_linsys(2)_bestpopulation.txt";
-  const unsigned int agentNumber = 2;
-  const string environmentFilename = folder + "Environments/Environment10001.txt";
-  const string settingsFilename = folder + "settings_LINSYS.ini";
-  const string imageFilename = folder + "agent-1_state-0.jpg";
-  const unsigned int initState = 0;
-  const unsigned int lifetime = 50;
-  RestrictedHypercubeEnv environment(environmentFilename);
-  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
-  environment.setEnvironmentState(initState);
-  environment.setStochasticityCoefficient(0.0);
-  TAgent agent;
-  agent.loadGenome(agentFilename, agentNumber);
-  settings::fillAgentSettingsFromFile(agent, settingsFilename);
-  agent.linearSystemogenesis();
-  //drawAgentLife(agent, environment, lifetime, imageFilename);
-  auto cycle = TBehaviorAnalysis::findCycleInAgentLife(agent, environment);
-  RestrictedHypercubeEnv emptyEnv;
-  emptyEnv.setEnvResolution(environment.getEnvironmentResolution());
-  TBehaviorAnalysis::drawCycleToDot(cycle, emptyEnv, imageFilename);
+  //const string folder = "C:/Test/(2013-05-31)_Learning_Test/";
+  //const string agentFilename = folder + "En10001_linsys(2)_bestpopulation.txt";
+  //const unsigned int agentNumber = 2;
+  //const string environmentFilename = folder + "Environments/Environment10001.txt";
+  //const string settingsFilename = folder + "settings_LINSYS.ini";
+  //const string imageFilename = folder + "agent-1_state-0.jpg";
+  //const unsigned int initState = 0;
+  //const unsigned int lifetime = 50;
+  //RestrictedHypercubeEnv environment(environmentFilename);
+  //settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  //environment.setEnvironmentState(initState);
+  //environment.setStochasticityCoefficient(0.0);
+  //TAgent agent;
+  //agent.loadGenome(agentFilename, agentNumber);
+  //settings::fillAgentSettingsFromFile(agent, settingsFilename);
+  //agent.linearSystemogenesis();
+  ////drawAgentLife(agent, environment, lifetime, imageFilename);
+  //auto cycle = TBehaviorAnalysis::findCycleInAgentLife(agent, environment);
+  //RestrictedHypercubeEnv emptyEnv;
+  //emptyEnv.setEnvResolution(environment.getEnvironmentResolution());
+  //TBehaviorAnalysis::drawCycleToDot(cycle, emptyEnv, imageFilename);
   //auto cycles = TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment);
   //copy(begin(cycles.at(0).cycleSequence), end(cycles.at(0).cycleSequence), ostream_iterator<double>(cout, "\t"));
   //cout << endl << endl;
@@ -458,7 +458,7 @@ void currentAnalysis(){
   //  cout << run << "\t" << rewardWithoutLearning << "\t" << rewardWithLearning << endl;
   //}
   //outRes.close();
-  techanalysis::difEvolutionAnalysis(bestAgentsFilename, 5000, environmentFilename, settingsFilename, folder + "evolutionDiffResults.txt", 25, 5, 100);
+  //techanalysis::difEvolutionAnalysis(bestAgentsFilename, 5000, environmentFilename, settingsFilename, folder + "evolutionDiffResults.txt", 25, 5, 100);
 }
 
 /**
@@ -470,12 +470,12 @@ void currentAnalysis(){
 * \param [in] imageFilename - путь к генерируемому файлу .jpg жизни агента.
 */
 void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime, const string& imageFilename){
-  const int initState = environment.getEnvironmentState();
-  environment.setStochasticityCoefficient(0.0);
-  agent.life(environment, lifetime, false);
-  const auto& life = agent.getPointerToAgentLife();
-  vector<double> _life;
-  _life.reserve(life.size());
-  transform(life.cbegin(), life.cend(), back_inserter(_life), [](const vector<double>& v){ return v.at(0); });  
-  TBehaviorAnalysis::drawActionSequenceToDot(_life, environment, imageFilename, initState);
+  //const int initState = environment.getEnvironmentState();
+  //environment.setStochasticityCoefficient(0.0);
+  //agent.life(environment, lifetime, false);
+  //const auto& life = agent.getPointerToAgentLife();
+  //vector<double> _life;
+  //_life.reserve(life.size());
+  //transform(life.cbegin(), life.cend(), back_inserter(_life), [](const vector<double>& v){ return v.at(0); });  
+  //TBehaviorAnalysis::drawActionSequenceToDot(_life, environment, imageFilename, initState);
 }

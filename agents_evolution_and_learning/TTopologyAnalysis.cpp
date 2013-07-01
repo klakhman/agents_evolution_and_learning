@@ -8,7 +8,7 @@
 
 using namespace std;
 
-TTopologyAnalysis::TTopologyAnalysis(void){
+TTopologyAnalysis::TTopologyAnalysis(){
 }
 
 /*std::vector<int> TTopologyAnalysis::getPoolId(int id){
@@ -81,5 +81,5 @@ void printGraphNetworkMGraal(TPoolNetwork *network, map< int, vector<int> > idAr
 }
 
 
-TTopologyAnalysis::~TTopologyAnalysis(void){
+TTopologyAnalysis::~TTopologyAnalysis(){
 }

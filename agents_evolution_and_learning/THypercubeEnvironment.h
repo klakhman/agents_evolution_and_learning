@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <cstring>
 #include "service.h"
 #include "TEnvironment.h"
 /*
