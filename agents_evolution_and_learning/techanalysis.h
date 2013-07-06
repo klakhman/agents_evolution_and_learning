@@ -5,6 +5,8 @@
 #include <string>
 #include <numeric>
 #include <functional>
+#include <utility>
+#include "settings.h"
 #include "config.h"
 #include "TAgent.h"
 #include "TPopulation.h"
@@ -80,6 +82,29 @@ namespace techanalysis{
     return std::accumulate(vec.begin(), vec.end(), 0.0, std::plus<double>());
   }
 
+  struct AnalysisRange{
+  public:
+    AnalysisRange(): _envRange(std::make_pair(0,0)), _trialRange(std::make_pair(0,0)){};
+    void setEnvRange(unsigned int firstEnv, unsigned int lastEnv){ _envRange = std::make_pair(firstEnv, lastEnv); }
+    void setTrialRange(unsigned int firstTry, unsigned int lastTry){ _trialRange = std::make_pair(firstTry, lastTry); }
+    unsigned int firstEnv() const { return _envRange.first; }
+    unsigned int lastEnv() const { return _envRange.second; }
+    unsigned int firstTry() const { return _trialRange.first; }
+    unsigned int lastTry() const { return _trialRange.second; }
+  private:
+    std::pair<unsigned int, unsigned int> _envRange;
+    std::pair<unsigned int, unsigned int> _trialRange;
+  };
+
+  template<class AnalyseFunc>
+  std::vector<double> analyseBestPopStruct(const AnalysisRange& range, AnalyseFunc func, const std::string& settingsFilename, const std::string& runSign);
+
+  struct agentPredCon{
+    double operator()(const TAgent& agent){
+      return agent.getPointerToAgentGenome()->getPredConnectionsQuantity();
+    }
+  };
+
   #ifndef NOT_USE_ALGLIB_LIBRARY
     // Обертка над функцией из ALGLIB - тестирование нормальности выборки по методу Харки — Бера.
     // Возвращает p-value. Чем оно больше - тем лучше, как минимум должно быть выше 0.05.  
@@ -92,5 +117,26 @@ namespace techanalysis{
     double mann_whitneyMeanDifference_ALGLIB(const std::vector<double>& firstSample, const std::vector<double>& secondSample);
   #endif
 }
+
+template<class AnalyseFunc>
+std::vector<double> techanalysis::analyseBestPopStruct(const AnalysisRange& range, AnalyseFunc func, const std::string& settingsFilename, const std::string& runSign){
+  std::string workDir;
+  std::string envDir;
+  std::string resultsDir;
+  settings::fillDirectoriesSettings(workDir, envDir, resultsDir, settingsFilename);
+  std::vector<double> analysisResults;
+  for (unsigned int envN = range.firstEnv(); envN <= range.lastEnv(); ++envN)
+    for (unsigned int tryN = range.firstTry(); tryN <= range.lastTry(); ++ tryN){
+      TPopulation<TAgent> population;
+      settings::fillPopulationSettingsFromFile(population, settingsFilename);
+      population.loadPopulation(service::bestPopPath(resultsDir, envN, tryN, runSign));
+      double average = 0;
+      for (unsigned int agentN = 1; agentN <= population.getPopulationSize(); ++agentN)
+        average += func(*population.getPointertoAgent(agentN)) / population.getPopulationSize();
+      analysisResults.push_back(average);
+    } 
+  return analysisResults;
+}
+
 
 #endif // TECHANALYSIS_H
