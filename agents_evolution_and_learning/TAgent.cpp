@@ -635,6 +635,15 @@ void TAgent::modifySynapsesStructure(int mismatchedNeuron, int activatedNeuron, 
 		neuralController->setSynapseWeight(mismatchedNeuron, addSynapseNumber, interSynapseWeight);
 	else
 		neuralController->addSynapse(activatedNeuron, mismatchedNeuron, interSynapseWeight, true);
+
+  // Необходимо перенести в следующий слой постсинаптический нейрон (для корректности работы добавляемой интер-связи)
+  const unsigned int preSynapticLayer = neuralController->getNeuronLayer(activatedNeuron);
+  if (neuralController->getNeuronLayer(activatedNeuron) == neuralController->getNeuronLayer(mismatchedNeuron)){
+    for (unsigned int neuronN = 1; neuronN <= neuralController->getNeuronsQuantity(); ++neuronN)
+      if ((neuralController->getNeuronLayer(neuronN) > preSynapticLayer) ||
+          (neuronN == mismatchedNeuron))
+          neuralController->setNeuronLayer(neuronN, neuralController->getNeuronLayer(neuronN) + 1);
+  }
 }
 
 // Процедура модификации структуры предикторных связей (переносим связи, которые предсказали активацию с рассогласованного нейрона на включающийся)
