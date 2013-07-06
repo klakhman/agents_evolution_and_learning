@@ -58,7 +58,10 @@ public:
 	double getNeuronBias(int neuronNumber) const { return neuronsStructure[neuronNumber-1].bias; }
 	void setNeuronBias(int neuronNumber, double newBias) { neuronsStructure[neuronNumber-1].bias = newBias; }
 	int getNeuronLayer(int neuronNumber) const { return neuronsStructure[neuronNumber-1].layer; }
-	void setNeuronLayer(int neuronNumber, int newLayer) { neuronsStructure[neuronNumber-1].layer = newLayer; }
+	void setNeuronLayer(int neuronNumber, int newLayer) {
+    neuronsStructure[neuronNumber-1].layer = newLayer; 
+    layersQuantity = std::max(layersQuantity, newLayer);
+  }
 	bool getNeuronActive(int neuronNumber) const { return neuronsStructure[neuronNumber-1].active; }
 	void setNeuronActive(int neuronNumber, bool newActive) { neuronsStructure[neuronNumber - 1].active = newActive; }
 	int getNeuronParentPoolID(int neuronNumber) const { return neuronsStructure[neuronNumber-1].parentPoolID; }

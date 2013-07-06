@@ -26,7 +26,7 @@ void tests::lifeViz(TAgent& agent, std::vector< std::vector<double> >&  inputs,
     if ((step > 1) && agent.getLearningMode()) agent.learning();
     stringstream out;
     out << outputDirectory << "agentLife" << step << ".jpg";
-    controller->printGraphNetwork(out.str(), true, false, true);
+    controller->printGraphNetwork(out.str(), true, true, true);
   }
 }
 

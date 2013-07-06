@@ -12,6 +12,7 @@
 #include "functional"
 #include <iterator>
 #include "RestrictedHypercubeEnv.h"
+#include "params.h"
 
 #include "TEnkiEnvironment.h"
 #include "TEnkiAgent.h"
@@ -122,17 +123,17 @@ int main(int argc, char** argv){
       }
     return 0;
   }
-  else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
-    const string root = "C:/AlternativeSystemogenesis/";
-    const string resultsDirectory = root + "/Results";  
-    const string runSign = "pc40alsys";
-    TAnalysis analysis;
-    cout << analysis.startBestPopulationAnalysis(service::bestPopCaption(resultsDirectory, 1113, 14, runSign), root + "/Environments/Environment1113.txt",
-                                                  root + "/settings_PC40ALSYS.ini");
+  else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски    
+    srand(static_cast<unsigned int>(time(0)));
+    //const string root = "C:/AlternativeSystemogenesis/";
+    //const string resultsDirectory = root + "/Results";  
+    //const string runSign = "pc40alsys";
+    //TAnalysis analysis;
+    //cout << analysis.startBestPopulationAnalysis(service::bestPopPath(resultsDirectory, 1113, 14, runSign), root + "/Environments/Environment1113.txt",
+    //                                              root + "/settings_PC40ALSYS.ini");
 
     //testFunc();
     //currentAnalysis();
-    srand(static_cast<unsigned int>(time(0)));
     TAgent agent;
     const string directory = "C:/SANDBOX/";
     //agent.loadGenome(directory + "testPoolNet.txt", 1);
@@ -265,6 +266,29 @@ int main(int argc, char** argv){
       life.push_back(agentLife[i][0]);
     TBehaviorAnalysis::drawActionSequenceToDot(life, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agent_poorNoAL_noL_state170.jpg", state);
   } 
+  else if (programMode == "AVANALYSIS"){
+    settings::PromtParams params;
+    unsigned int firstEnv = 0;
+    unsigned int lastEnv = 0;
+    unsigned int firstTry = 0;
+    unsigned int lastTry = 0;
+    string settingsFilename;
+    string runSign;
+    string outFilename;
+    params << settings::DoubleParam("env", firstEnv, lastEnv) 
+            << settings::DoubleParam("try", firstTry , lastTry)
+            << settings::SingleParam("settings", settingsFilename)
+            << settings::SingleParam("sign", runSign)
+            << settings::SingleParam("out", outFilename);
+    params.fillSettings(argc, argv);
+    techanalysis::AnalysisRange range;
+    range.setEnvRange(firstEnv, lastEnv);
+    range.setTrialRange(firstTry, lastTry);
+    vector<double> results = techanalysis::analyseBestPopStruct(range, techanalysis::agentPredCon(), settingsFilename, runSign);
+    ofstream ofs(outFilename.c_str());
+    copy(results.begin(), results.end(), ostream_iterator<double>(ofs, "\n"));
+    ofs.close();
+  }
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {
     // Формирование среды

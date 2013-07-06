@@ -152,7 +152,7 @@ void service::HSVtoRGB(int& R, int& G, int& B, double H, double S, double V)
 /// Формирование имени файла среды
 string service::envName(unsigned int envNumber){
   stringstream tmpStream;
-  tmpStream << "Environment" << envNumber;
+  tmpStream << "Environment" << envNumber << ".txt";
   return tmpStream.str();
 }
 
