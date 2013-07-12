@@ -134,24 +134,7 @@ int main(int argc, char** argv){
 
     //testFunc();
     //currentAnalysis();
-    TAgent agent;
-    const string directory = "C:/SANDBOX/";
-    //agent.loadGenome(directory + "testPoolNet.txt", 1);
-    settings::fillAgentSettingsFromFile(agent, directory + "settings_PC40ANP40.ini");
-    //agent.setSystemogenesisMode(2);
-    //agent.systemogenesis();
-    ifstream ifs((directory + "testLearnNet.txt").c_str());
-    agent.loadController(ifs);
-    ifs.close();
-    //agent.getPointerToAgentGenome()->printGraphNetwork(directory + "testPoolNet.jpg", true);
-    //double input[] = {1, 0};
-    //agent.getPointerToAgentController()->calculateNetwork(input);
-    agent.getPointerToAgentController()->printGraphNetwork(directory + "testController.jpg", true, true, true);
-    double input[] = {1.0, 1.0};
-    vector< vector<double> > inputs;
-    for (unsigned int i = 0; i < 6; ++i)
-      inputs.push_back(vector<double>(input, input + 2));
-    tests::lifeViz(agent, inputs, directory);
+    tests::testLearning("C:/SANDBOX/Tests/");
     return 0;
 
     srand(static_cast<unsigned int>(time(0)));
@@ -274,18 +257,18 @@ int main(int argc, char** argv){
     unsigned int lastTry = 0;
     string settingsFilename;
     string runSign;
-    string outFilename;
     params << settings::DoubleParam("env", firstEnv, lastEnv) 
             << settings::DoubleParam("try", firstTry , lastTry)
             << settings::SingleParam("settings", settingsFilename)
-            << settings::SingleParam("sign", runSign)
-            << settings::SingleParam("out", outFilename);
+            << settings::SingleParam("sign", runSign);
     params.fillSettings(argc, argv);
     techanalysis::AnalysisRange range;
     range.setEnvRange(firstEnv, lastEnv);
     range.setTrialRange(firstTry, lastTry);
     vector<double> results = techanalysis::analyseBestPopStruct(range, techanalysis::agentPredCon(), settingsFilename, runSign);
-    ofstream ofs(outFilename.c_str());
+    stringstream outFilename;
+    outFilename << "AveragePredConQuantity_En" << firstEnv << "-" << lastEnv << "_" << runSign << ".txt";
+    ofstream ofs(outFilename.str().c_str());
     copy(results.begin(), results.end(), ostream_iterator<double>(ofs, "\n"));
     ofs.close();
   }

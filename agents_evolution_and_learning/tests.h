@@ -48,7 +48,7 @@ public:
 	static void testPrimarySystemogenesis(std::string testDirectory);
   static void lifeViz(TAgent& agent, std::vector< std::vector<double> >&  inputs, 
                       const std::string& outputDirectory);
-
+  static void testLearning(const std::string& directory);
 };
 
 #endif // TESTS_H

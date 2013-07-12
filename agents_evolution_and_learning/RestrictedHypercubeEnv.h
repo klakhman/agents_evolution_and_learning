@@ -54,6 +54,14 @@ public:
   static bool isParentAim(const TAim& potentialParentAim, const TAim& subAim);
   /// Изменение размерности среды
   void setEnvResolution(unsigned int _envResolution);
+  /// Печать параметров среды в рамках запуска в файл
+  virtual void printSettings(std::ostream& os) {
+    os << "Environment_parameters:" << 
+        "\tstochasticity-coefficient=" << getStochasticityCoefficient() << 
+        "\treward-recovery-time=" << getRewardRecoveryTime() << 
+        "\tenv-type=restrhypercube" <<
+        std::endl << std::endl;
+  }
 
 private:
   /// Начальный вектор среды, из которого запускается текущая жизнь агента

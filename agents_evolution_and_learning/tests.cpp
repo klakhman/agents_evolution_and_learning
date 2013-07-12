@@ -26,8 +26,42 @@ void tests::lifeViz(TAgent& agent, std::vector< std::vector<double> >&  inputs,
     if ((step > 1) && agent.getLearningMode()) agent.learning();
     stringstream out;
     out << outputDirectory << "agentLife" << step << ".jpg";
-    controller->printGraphNetwork(out.str(), true, true, true);
+    controller->printGraphNetwork(out.str(), true, false, true);
   }
+}
+
+void tests::testLearning(const string& directory){
+  TAgent agent;
+  TNeuralNetwork* controller = agent.getPointerToAgentController();
+  //---------------- Creating test controller -----------------------
+  controller->addNeuron(TNeuralNetwork::INPUT_NEURON, 1, 0, true, 1);
+  controller->addNeuron(TNeuralNetwork::INPUT_NEURON, 1, 0, true, 2);
+  controller->addNeuron(TNeuralNetwork::OUTPUT_NEURON, 3, 0, true, 3);
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, true, 4);
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4);
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4);
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4);
+  controller->addSynapse(4, 3, 0.1);
+  controller->addSynapse(5, 3, 0.4);
+  controller->addSynapse(6, 3, 0.3);
+  controller->addSynapse(7, 3, 0.5);
+  controller->addSynapse(1, 4, -1.8); // -0.3
+  controller->addSynapse(2, 4, 0.2);
+  controller->addSynapse(1, 5, 0.3); // 0.5
+  controller->addSynapse(2, 5, -0.4);
+  controller->addSynapse(1, 6, 0.2);
+  controller->addSynapse(1, 7, -0.35);
+  controller->addSynapse(2, 7, 0.5);
+  controller->addPredConnection(1, 4);
+  controller->addPredConnection(2, 6);
+  agent.setLearningMode(1);
+  //-------------------------------------------------------------------
+  agent.getPointerToAgentController()->printGraphNetwork(directory + "testLearnController.jpg", true, true, true);
+  double input[] = {1.0, 1.0};
+  vector< vector<double> > inputs;
+  for (unsigned int i = 0; i < 8; ++i)
+    inputs.push_back(vector<double>(input, input + 2));
+   lifeViz(agent, inputs, directory);
 }
 
 /*int tests::testPoolNetwork(string outputFilename){
