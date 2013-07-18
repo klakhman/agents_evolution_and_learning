@@ -32,7 +32,7 @@ void TAgent::loadGenome(istream& is, bool extra /*=false*/){
 }
 
 // Загрузка генома нейроконтроллера по номеру из файла (номер начинается с 1) 
-void TAgent::loadGenome(string filename, int genomeNumber){
+void TAgent::loadGenome(string filename, int genomeNumber, bool extra/*=false*/){
   // Так как скорость здесь пока не критична, то не делаем отдельную процедуру для пропуска агента, а просто загружаем всех агентов до нужного
   ifstream genomeFile;
   genomeFile.open(filename.c_str());
@@ -41,7 +41,7 @@ void TAgent::loadGenome(string filename, int genomeNumber){
     abort();
   }
   for (int currentAgent = 1; currentAgent <= genomeNumber; ++currentAgent)
-    loadGenome(genomeFile);
+    loadGenome(genomeFile,extra);
 }
 
 void TAgent::loadOldFormatGenome(istream& is, int inputResolution, int outputResolution){
