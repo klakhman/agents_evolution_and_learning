@@ -43,12 +43,18 @@ protected:
 
 	// Построение первичного контроллера агента
 	void buildPrimaryNeuralController();
+  void primarySystemogenesisProcess(std::vector<double>& neuronsSummaryPotential, std::vector<double>& synapsesSummaryPotential,
+                                    std::vector<double>& predictorSignificance);
 	// Функция отбора активирующихся нейронов
 	void neuronsSelection(std::vector<double>& neuronsSummaryPotential);
+  // Отбор активирующихся нейронов равномерно по пулам
+  void neuronsUnifSelection(std::vector<double>& neuronsSummaryPotential);
 	// Функция отбора наиболее активных синапсов
 	void synapsesSelection(const std::vector<double>& synapsesSummaryPotential);
 	// Функция отбора предикторных связей
 	void predConnectionsSelection(const std::vector<double>& predictorSignificance);
+  // Функция отбора применяемая ко всем предикторным связям (не только между активными нейронами)
+  void predConnectionsFullSelection(const std::vector<double>& predictorSignificance);
 
 	// Детекция рассогласования на нейроне
 	// 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"
@@ -154,6 +160,7 @@ public:
   void printLife(TEnvironment& environment, int agentLifeTime);
 
   void systemogenesis();
+  void learn();
 
 	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
 	void linearSystemogenesis();

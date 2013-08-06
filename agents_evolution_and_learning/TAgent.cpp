@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 
@@ -194,10 +195,7 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 		bool actionSuccess = (environment.forceEnvironment(agentLife[agentLifeStep - 1]) != 0);
 		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
     if (agentLifeStep > 1) // На первом шаге обучение не имеет смысла (еще не было предсказания)
-      // Проводим процедуру обучения (если такой режим)
-		  if (1 == learningSettings.learningMode) learning();
-      // !!!! Случайное обучение - только для контроля качества обучения !!!!!
-      else if (2 == learningSettings.learningMode) randomLearning();
+      learn();
 	}
 	if (rewardCalculate) 
 		reward = environment.calculateReward(agentLife, agentLifeTime);
@@ -214,6 +212,13 @@ void TAgent::systemogenesis(){
     primarySystemogenesis();
   else if (2 == getSystemogenesisMode())
     alternativeSystemogenesis();
+}
+
+void TAgent::learn(){
+  // Проводим процедуру обучения (если такой режим)
+	if (1 == learningSettings.learningMode) learning();
+  // !!!! Случайное обучение - только для контроля качества обучения !!!!!
+  else if (2 == learningSettings.learningMode) randomLearning();
 }
 
 // Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
@@ -353,6 +358,43 @@ void TAgent::buildPrimaryNeuralController(){
 	delete []poolsAndNeurons;
 }
 
+void TAgent::primarySystemogenesisProcess(vector<double>& neuronsSummaryPotential, vector<double>& synapsesSummaryPotential,
+                                          vector<double>& predictorSignificance){
+  neuronsSummaryPotential.clear(); neuronsSummaryPotential.resize(neuralController->getNeuronsQuantity(), 0.0);
+  synapsesSummaryPotential.clear(); synapsesSummaryPotential.resize(neuralController->getSynapsesQuantity(), 0.0);
+  predictorSignificance.clear(); predictorSignificance.resize(neuralController->getPredConnectionsQuantity(), 0.0);
+	neuralController->reset();
+	// Проводим прогон первичного системогенеза и подсчет суммарных характеристик
+	for (int systemogenesisTime = 1; systemogenesisTime <= primarySystemogenesisSettings.primarySystemogenesisTime; ++systemogenesisTime){
+		neuralController->calculateSpontaneousNetwork(primarySystemogenesisSettings.spontaneousActivityProb);
+		// Проходимся по всем нейронам и обновляем суммарные характеристики
+		for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron){
+			neuronsSummaryPotential[currentNeuron - 1] += neuralController->getNeuronPotential(currentNeuron);
+			int inputSynapsesQuantity = neuralController->getNeuronInputSynapsesQuantity(currentNeuron);
+			for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
+				// Если связь прямая
+				if (neuralController->getNeuronLayer(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)) < neuralController->getNeuronLayer(currentNeuron))
+					synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] += 
+						fabs(neuralController->getSynapseWeight(currentNeuron, currentSynapse) * neuralController->getNeuronCurrentOut(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)));
+				// Если связь обратная
+				else
+					synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] += 
+							fabs(neuralController->getSynapseWeight(currentNeuron, currentSynapse) * neuralController->getNeuronPreviousOut(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)));
+			int inputPredConnectionsQuantity = neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron);
+			for (int currentPredConnection = 1; currentPredConnection <= inputPredConnectionsQuantity; ++currentPredConnection){
+				int preNeuronID = neuralController->getPredConnectionPreNeuronID(currentNeuron, currentPredConnection);
+        // Если пресинаптический нейрон правильно предсказал активацию / молчание постсинаптического
+				if (((neuralController->getNeuronCurrentOut(currentNeuron) > TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(preNeuronID) > TNeuron::ACTIVITY_TRESHOLD)) ||
+            ((neuralController->getNeuronCurrentOut(currentNeuron) <= TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(preNeuronID) <= TNeuron::ACTIVITY_TRESHOLD)))
+					predictorSignificance[neuralController->getPredConnectionID(currentNeuron, currentPredConnection) - 1] += 1;
+      }
+		}
+	}
+	// Нормировка показателей статистической значимости предикторных связей
+	for (int currentPredConnection = 1; currentPredConnection <= neuralController->getPredConnectionsQuantity(); ++currentPredConnection)
+		predictorSignificance[currentPredConnection - 1] /= (primarySystemogenesisSettings.primarySystemogenesisTime - 1);
+}
+
 // Функция отбора активирующихся нейронов
 void TAgent::neuronsSelection(vector<double>& neuronsSummaryPotential){
 	// Считаем кол-во активирующихся нейронов
@@ -392,6 +434,47 @@ void TAgent::neuronsSelection(vector<double>& neuronsSummaryPotential){
 				neuralController->setNeuronActive(currentNeuron, false);
 		else
 			neuralController->setNeuronActive(currentNeuron, true);
+}
+
+// Отбор активирующихся нейронов равномерно по пулам
+void TAgent::neuronsUnifSelection(vector<double>& neuronsSummaryPotential){
+  vector< vector<unsigned int> > neuronsInPools(genome->getPoolsQuantity()); // Распределение нейронов по пулам
+  for (unsigned int neuron = 1; neuron <= neuralController->getNeuronsQuantity(); ++neuron)
+    neuronsInPools[neuralController->getNeuronParentPoolID(neuron) - 1].push_back(neuralController->getNeuronID(neuron));
+  // Проходим по всем внутренним пулам
+  for (unsigned int pool = genome->getInputResolution() + genome->getOutputResolution() + 1; pool <= genome->getPoolsQuantity(); ++pool){
+    // Вектор пар (ID нейрона; суммарный потенциал) в рамках текущего пула
+    vector< pair<unsigned int, double> > neuronsIDsVsPotential;
+    // Заполняем вектор пар, а также вычисляем минимально возможный потенциал нейрона
+    double minPotential = numeric_limits<double>::max();
+    const unsigned int neuronsQ = genome->getPoolCapacity(pool);
+    for (unsigned int neuron = 1; neuron <= neuronsQ; ++neuron){
+      neuronsIDsVsPotential.push_back(make_pair(neuronsInPools[pool - 1][neuron - 1], neuronsSummaryPotential[neuronsInPools[pool - 1][neuron - 1] - 1]));
+      minPotential = min(minPotential, neuronsSummaryPotential[neuronsInPools[pool - 1][neuron - 1] - 1]);
+    }
+    // Нормируем потенциал, так как у некоторых нейронов он может быть отрицательным (или нулевым)
+    for (unsigned int neuron = 1; neuron <= neuronsQ; ++neuron)
+      neuronsIDsVsPotential[neuron - 1].second -= minPotential - 1;
+    // Всегда должен активироваться по крайней мере один нейрон
+    const unsigned int activeNeuronsN = max(1U, static_cast<unsigned int>(neuronsQ * primarySystemogenesisSettings.activeNeuronsPercent / 100.0 + 0.5));
+    // Запускаем рулеточный алгоритм
+    double totalPotential = 0;
+    for (unsigned int neuron = 1; neuron <= neuronsQ; ++neuron)
+      totalPotential += neuronsIDsVsPotential[neuron - 1].second;
+    for (unsigned int active = 1; active <= activeNeuronsN; ++active){
+      double randomPotential = service::uniformDistribution(0.0001, totalPotential);
+      double currentPotential = 0;
+      unsigned int curNeuronN = 0;
+      while (randomPotential > currentPotential)
+        currentPotential += neuronsIDsVsPotential[curNeuronN++].second;
+      neuralController->setNeuronActive(neuronsIDsVsPotential[curNeuronN - 1].first, true);
+      totalPotential -= neuronsIDsVsPotential[curNeuronN - 1].second;
+      neuronsIDsVsPotential.erase(neuronsIDsVsPotential.begin() + curNeuronN - 1);
+    }
+    // Выключаем оставшиеся нейроны (невыбранные)
+    for (unsigned int neuron = 1; neuron <= neuronsIDsVsPotential.size(); ++neuron)
+      neuralController->setNeuronActive(neuronsIDsVsPotential[neuron - 1].first, false);
+  }
 }
 
 //Техническая структура, используемая в методе отбора синапсов (не может быть локальной, так как стандарт 2003 не позволяет)
@@ -454,49 +537,36 @@ void TAgent::predConnectionsSelection(const vector<double>& predictorSignificanc
 	neuralController->fixPredConnectionsIDs();
 }
 
+// Функция отбора применяемая ко всем предикторным связям (не только между активными нейронами)
+void TAgent::predConnectionsFullSelection(const vector<double>& predictorSignificance){
+	// Проходимся по всем связям
+	for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron)
+			for (int currentPredConnection = 1; currentPredConnection <= neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron); ++currentPredConnection)
+					// Если значимость предсказания ниже порога, то удаляем связь
+					if (predictorSignificance[neuralController->getPredConnectionID(currentNeuron, currentPredConnection) - 1] <= primarySystemogenesisSettings.significanceTreshold){
+						neuralController->deletePredConnection(currentNeuron, currentPredConnection, false);
+						--currentPredConnection; // Остаемся на том же номере связи
+					}
+	neuralController->fixPredConnectionsIDs();
+}
+
 // Основной метод первичного системогенеза 
 void TAgent::primarySystemogenesis(){
 	neuralController->eraseNeuralNetwork();
 	// Строим полную первичную сеть агента
 	buildPrimaryNeuralController();
 	// Сначала создаем все необходимые структуры для записи статистики
-  vector<double> neuronsSummaryPotential(neuralController->getNeuronsQuantity(), 0.0);
-	vector<double> synapsesSummaryPotential(neuralController->getSynapsesQuantity(), 0.0);
-	vector<double> predictorSignificance(neuralController->getPredConnectionsQuantity(), 0.0);
-	neuralController->reset();
-	// Проводим прогон первичного системогенеза и подсчет суммарных характеристик
-	for (int systemogenesisTime = 1; systemogenesisTime <= primarySystemogenesisSettings.primarySystemogenesisTime; ++systemogenesisTime){
-		neuralController->calculateSpontaneousNetwork(primarySystemogenesisSettings.spontaneousActivityProb);
-		// Проходимся по всем нейронам и обновляем суммарные характеристики
-		for (int currentNeuron = 1; currentNeuron <= neuralController->getNeuronsQuantity(); ++currentNeuron){
-			neuronsSummaryPotential[currentNeuron - 1] += neuralController->getNeuronPotential(currentNeuron);
-			int inputSynapsesQuantity = neuralController->getNeuronInputSynapsesQuantity(currentNeuron);
-			for (int currentSynapse = 1; currentSynapse <= inputSynapsesQuantity; ++currentSynapse)
-				// Если связь прямая
-				if (neuralController->getNeuronLayer(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)) < neuralController->getNeuronLayer(currentNeuron))
-					synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] += 
-						fabs(neuralController->getSynapseWeight(currentNeuron, currentSynapse) * neuralController->getNeuronCurrentOut(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)));
-				// Если связь обратная
-				else
-					synapsesSummaryPotential[neuralController->getSynapseID(currentNeuron, currentSynapse) - 1] += 
-							fabs(neuralController->getSynapseWeight(currentNeuron, currentSynapse) * neuralController->getNeuronPreviousOut(neuralController->getSynapsePreNeuronID(currentNeuron, currentSynapse)));
-			int inputPredConnectionsQuantity = neuralController->getNeuronInputPredConnectionsQuantity(currentNeuron);
-			for (int currentPredConnection = 1; currentPredConnection <= inputPredConnectionsQuantity; ++currentPredConnection){
-				int preNeuronID = neuralController->getPredConnectionPreNeuronID(currentNeuron, currentPredConnection);
-        // Если пресинаптический нейрон правильно предсказал активацию / молчание постсинаптического
-				if (((neuralController->getNeuronCurrentOut(currentNeuron) > TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(preNeuronID) > TNeuron::ACTIVITY_TRESHOLD)) ||
-            ((neuralController->getNeuronCurrentOut(currentNeuron) <= TNeuron::ACTIVITY_TRESHOLD) && (neuralController->getNeuronPreviousOut(preNeuronID) <= TNeuron::ACTIVITY_TRESHOLD)))
-					predictorSignificance[neuralController->getPredConnectionID(currentNeuron, currentPredConnection) - 1] += 1;
-      }
-		}
-	}
-	// Нормировка показателей статистической значимости предикторных связей
-	for (int currentPredConnection = 1; currentPredConnection <= neuralController->getPredConnectionsQuantity(); ++currentPredConnection)
-		predictorSignificance[currentPredConnection - 1] /= (primarySystemogenesisSettings.primarySystemogenesisTime - 1);
+  vector<double> neuronsSummaryPotential;
+	vector<double> synapsesSummaryPotential;
+	vector<double> predictorSignificance;
+  primarySystemogenesisProcess(neuronsSummaryPotential, synapsesSummaryPotential, predictorSignificance);
 	// Производим отбор
 	neuronsSelection(neuronsSummaryPotential);
+  //neuronsUnifSelection(neuronsSummaryPotential);
 	synapsesSelection(synapsesSummaryPotential);
 	predConnectionsSelection(predictorSignificance);
+  //predConnectionsFullSelection(predictorSignificance);
+
 }
 
 // Альтернативный системогенез (активным становится только один нейрон в пуле с детерминированной структурой связей)
@@ -517,7 +587,7 @@ void TAgent::alternativeSystemogenesis(){
     for (unsigned int neuron = 2; neuron <= genome->getPoolCapacity(pool); ++neuron){
       neuralController->addNeuron(genome->getPoolType(pool), genome->getPoolLayer(pool),
                                   service::normalDistribution(genome->getPoolBiasMean(pool), genome->getPoolBiasVariance(pool)),
-                                  false, genome->getPoolID(pool));
+                                  true, genome->getPoolID(pool));
       neuronsInPools.at(pool - 1).push_back(neuralController->getNeuronsQuantity());
     }
   }
@@ -561,6 +631,17 @@ void TAgent::alternativeSystemogenesis(){
                                                 neuronsInPools.at(pool - 1).at(neuron - 1), true);
         }
       }
+  // Проводим процесс первичного системогенеза
+ // vector<double> neuronsSummaryPotential;
+	//vector<double> synapsesSummaryPotential;
+	//vector<double> predictorSignificance;
+ // primarySystemogenesisProcess(neuronsSummaryPotential, synapsesSummaryPotential, predictorSignificance);
+  // Выключаем недетерминированные нейроны
+  for (unsigned int pool = 1; pool <= genome->getPoolsQuantity(); ++pool)
+    for (unsigned int neuron = 2; neuron <= genome->getPoolCapacity(pool); ++neuron)
+      neuralController->setNeuronActive(neuronsInPools[pool - 1][neuron - 1], false);
+  // Отбираем предикторные связи
+  //predConnectionsSelection(predictorSignificance);
 }
 
 //-------------------- МЕТОДЫ, ОБЕСПЕЧИВАЮЩИЕ ОБУЧЕНИЕ АГЕНТА --------------------

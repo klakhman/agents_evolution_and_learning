@@ -123,8 +123,56 @@ int main(int argc, char** argv){
       }
     return 0;
   }
-  else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски    
+  else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски  
     srand(static_cast<unsigned int>(time(0)));
+    const string homeDir = "C:/SANDBOX/";
+    TAgent agent;
+    settings::fillAgentSettingsFromFile(agent, homeDir + "settings_PC40REDSYS.ini");
+    RestrictedHypercubeEnv env(homeDir + "Environment2004.txt");
+    settings::fillEnvironmentSettingsFromFile(env, homeDir + "settings_PC40REDSYS.ini");
+    //vector<double> allRewards(250, 0);
+    //for (unsigned int agentN = 0; agentN < 250; ++agentN){
+    //  agent.loadGenome(homeDir + "En2004_pc40redsys_mod(7)_bestpopulation.txt", agentN+1);
+    //  for (unsigned int sysN = 0; sysN < 3; ++sysN){
+    //    agent.systemogenesis();
+    //    vector<double> agentRewards = techanalysis::totalRun(agent, env);
+    //    allRewards[agentN] += techanalysis::sum(agentRewards) / (agentRewards.size() * 3);
+    //    cout << " + ";
+    //  }
+    //  cout << agentN << " = " << allRewards[agentN] << endl;
+    //}
+    //ofstream of((homeDir + "En2004_pc40redsys_mod(7)_bestpopulation_rewards_noal.txt").c_str());
+    //copy(allRewards.begin(), allRewards.end(), ostream_iterator<double>(of, "\n"));
+    //of.close();
+    //return 0;
+    agent.loadGenome(homeDir + "En2004_pc40redsys_mod(7)_bestpopulation.txt", 6);
+    const unsigned int initState = 127;
+    env.setStochasticityCoefficient(0.0);
+    env.setEnvironmentState(initState);
+    agent.systemogenesis();
+    agent.life(env, 250);
+    cout << agent.getReward() << endl << endl;
+    vector<unsigned int> aimSequence = env.aimsReachedLife();
+    vector<unsigned int> complexLevel(5, 0);
+    for (unsigned int aim = 0; aim < aimSequence.size(); ++aim)
+      complexLevel[env.getAimReference(aimSequence[aim]).aimComplexity - 2]++;
+    for (unsigned int complA = 0; complA < complexLevel.size(); ++complA)
+      cout << complA + 2 << " : " << complexLevel[complA] << endl;
+    cout << endl;
+    for (vector<unsigned int>::iterator aim = aimSequence.begin(); aim != aimSequence.end(); ++aim){
+      cout << *aim << endl;
+      env.getAimReference(*aim).print(cout);
+      cout << endl;
+    }
+    //copy(aimSequence.begin(), aimSequence.end(), ostream_iterator<unsigned int>(cout, "\t"));
+    cout << endl;
+    env.setEnvironmentState(initState);
+    TBehaviorAnalysis::drawAgentLife(agent, env, 50, homeDir + "En2004_pc40redsys_mod(7)_A6_S0.jpg"); 
+    return 0;
+
+
+
+
     //const string root = "C:/AlternativeSystemogenesis/";
     //const string resultsDirectory = root + "/Results";  
     //const string runSign = "pc40alsys";
@@ -134,7 +182,6 @@ int main(int argc, char** argv){
 
     //testFunc();
     //currentAnalysis();
-    tests::testLearning("C:/SANDBOX/Tests/");
     return 0;
 
     srand(static_cast<unsigned int>(time(0)));
@@ -271,6 +318,31 @@ int main(int argc, char** argv){
     ofstream ofs(outFilename.str().c_str());
     copy(results.begin(), results.end(), ostream_iterator<double>(ofs, "\n"));
     ofs.close();
+  }
+  else if (programMode == "DIFFEV"){
+    const string dir = "C:/SANDBOX/";
+    techanalysis::difEvolutionAnalysis(dir + "En2004_pc40redsys_mod(7)_bestagents.txt", 5000, 
+                                      dir + "Environment2004.txt", 1, 
+                                      dir + "settings_PC40REDSYS.ini", dir + "En2004_pc40redsys_mod(7)_difevolution.txt");
+  }
+  else if (programMode == "TESTUNIT"){
+    //srand(static_cast<unsigned int>(time(0)));
+    //time_t start = clock();
+    //for (unsigned int n = 0; n < 2500000u; ++n){
+    //  vector<double> vec(10000u, 0);
+    //  for (auto& el : vec)
+    //    el = service::uniformDistribution(0, 100);
+    //  sort(vec.begin(), vec.end());
+    //  double tmp = vec[0];
+    //  ++tmp;
+    //  if (n % 1000 == 0) cout << n << endl;
+    //}
+    //cout << (clock() - start) / static_cast<double>(CLOCKS_PER_SEC) << endl;
+
+    //tests::t_learn_1("C:/SANDBOX/Tests");
+    //tests::t_learn_2("C:/SANDBOX/Tests");
+    //tests::t_learn_3("C:/SANDBOX/Tests");
+    //tests::t_learn_4("C:/SANDBOX/Tests");
   }
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {
