@@ -7,7 +7,7 @@
 #include "TPopulation.h"
 #include "TAgent.h"
 #include "settings.h"
-
+#include <utility>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -30,39 +30,130 @@ void tests::lifeViz(TAgent& agent, std::vector< std::vector<double> >&  inputs,
   }
 }
 
-void tests::testLearning(const string& directory){
-  TAgent agent;
+void lifeStep(TAgent& agent, vector<double>& inputs, unsigned int lifeStep = 1, 
+              pair<bool, string> viz = make_pair(false, "")){
+   TNeuralNetwork* controller = agent.getPointerToAgentController();
+   controller->calculateNetwork(&inputs[0]);
+   if (lifeStep > 1) agent.learn();
+   if (viz.first)
+     controller->printGraphNetwork(viz.second, true, false, true);
+}
+
+void createTestNetwork(TAgent& agent){
   TNeuralNetwork* controller = agent.getPointerToAgentController();
-  //---------------- Creating test controller -----------------------
-  controller->addNeuron(TNeuralNetwork::INPUT_NEURON, 1, 0, true, 1);
-  controller->addNeuron(TNeuralNetwork::INPUT_NEURON, 1, 0, true, 2);
-  controller->addNeuron(TNeuralNetwork::OUTPUT_NEURON, 3, 0, true, 3);
-  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, true, 4);
-  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4);
-  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4);
-  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4);
+  controller->addNeuron(TNeuralNetwork::INPUT_NEURON, 1, 0, true, 1); // Neuron 1
+  controller->addNeuron(TNeuralNetwork::INPUT_NEURON, 1, 0, true, 2); // Neuron 2
+  controller->addNeuron(TNeuralNetwork::OUTPUT_NEURON, 3, 0, true, 3); // Neuron 3
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, true, 4); // Neuron 4  (active interneuron)
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4); // Neuron 5
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4); // Neuron 6
+  controller->addNeuron(TNeuralNetwork::HIDDEN_NEURON, 2, 0, false, 4); // Neuron 7
   controller->addSynapse(4, 3, 0.1);
   controller->addSynapse(5, 3, 0.4);
   controller->addSynapse(6, 3, 0.3);
   controller->addSynapse(7, 3, 0.5);
-  controller->addSynapse(1, 4, -1.8); // -0.3
+  controller->addSynapse(1, 4, -0.3);
   controller->addSynapse(2, 4, 0.2);
-  controller->addSynapse(1, 5, 0.3); // 0.5
+  controller->addSynapse(1, 5, 0.5);
   controller->addSynapse(2, 5, -0.4);
   controller->addSynapse(1, 6, 0.2);
   controller->addSynapse(1, 7, -0.35);
   controller->addSynapse(2, 7, 0.5);
   controller->addPredConnection(1, 4);
   controller->addPredConnection(2, 6);
+}
+
+/// Тест обучения №1: Тестирование включения нейрона в случае рассогласования первого типа (отсутствие предсказанной афферентации)
+void tests::t_learn_1(const string& directory){
+  TAgent agent;
+  TNeuralNetwork* controller = agent.getPointerToAgentController();
+  //---------------- Creating test controller -----------------------
+  createTestNetwork(agent);
   agent.setLearningMode(1);
+  agent.learningSettings.mismatchSignificanceTreshold = 0.5;
   //-------------------------------------------------------------------
-  agent.getPointerToAgentController()->printGraphNetwork(directory + "testLearnController.jpg", true, true, true);
   double input[] = {1.0, 1.0};
   vector< vector<double> > inputs;
-  for (unsigned int i = 0; i < 8; ++i)
+  for (unsigned int i = 0; i < 4; ++i)
     inputs.push_back(vector<double>(input, input + 2));
-   lifeViz(agent, inputs, directory);
+  controller->reset();
+  for (unsigned int step = 1; step <= inputs.size(); ++step){
+    stringstream tmp;
+    tmp << directory << "/t_learn_1_step_" << step << ".jpg";
+    lifeStep(agent, inputs[step - 1], step, make_pair(true, tmp.str()));
+  }
 }
+
+/// Тест обучения №2: Тестирование включения нейрона в случае рассогласования второго типа (присутствие непредсказанной афферентации)
+void tests::t_learn_2(const string& directory){
+  TAgent agent;
+  TNeuralNetwork* controller = agent.getPointerToAgentController();
+  //---------------- Creating test controller -----------------------
+  createTestNetwork(agent);
+  agent.setLearningMode(1);
+  agent.learningSettings.mismatchSignificanceTreshold = 0.5;
+  //-------------------------------------------------------------------
+  double input[] = {0.0, 1.0};
+  vector< vector<double> > inputs;
+  for (unsigned int i = 0; i < 4; ++i)
+    inputs.push_back(vector<double>(input, input + 2));
+  controller->reset();
+  for (unsigned int step = 1; step <= inputs.size(); ++step){
+    stringstream tmp;
+    tmp << directory << "/t_learn_2_step_" << step << ".jpg";
+    lifeStep(agent, inputs[step - 1], step, make_pair(true, tmp.str()));
+  }
+}
+
+/// Тест обучения №3: Тестирование ненахождения подходящего нейрона (потенциально активного) в пуле рассогласованного нейрона
+void tests::t_learn_3(const string& directory){
+  TAgent agent;
+  TNeuralNetwork* controller = agent.getPointerToAgentController();
+  //---------------- Creating test controller -----------------------
+  createTestNetwork(agent);
+  unsigned int synapseNumber = controller->findSynapseNumber(2, 7);
+  controller->setSynapseWeight(7, synapseNumber, -0.5); // Убираем активность на молчащем нейроне
+  agent.setLearningMode(1);
+  agent.learningSettings.mismatchSignificanceTreshold = 0.5;
+  //-------------------------------------------------------------------
+  double input[] = {0.0, 1.0};
+  vector< vector<double> > inputs;
+  for (unsigned int i = 0; i < 4; ++i)
+    inputs.push_back(vector<double>(input, input + 2));
+  controller->reset();
+  for (unsigned int step = 1; step <= inputs.size(); ++step){
+    stringstream tmp;
+    tmp << directory << "/t_learn_3_step_" << step << ".jpg";
+    lifeStep(agent, inputs[step - 1], step, make_pair(true, tmp.str()));
+  }
+}
+
+/// Тест обучения №4: Израсходывание включающихся нейронов (нехватка нейронов для согласования)
+void tests::t_learn_4(const string& directory){
+  TAgent agent;
+  TNeuralNetwork* controller = agent.getPointerToAgentController();
+  //---------------- Creating test controller -----------------------
+  createTestNetwork(agent);
+  unsigned int synapseNumber = controller->findSynapseNumber(2, 4);
+  controller->setSynapseWeight(4, synapseNumber, 1.5); // Добавляем сильную активацию
+  synapseNumber = controller->findSynapseNumber(2, 5);
+  controller->setSynapseWeight(5, synapseNumber, 0.4);
+  controller->addSynapse(2, 6, 0.2);
+  agent.setLearningMode(1);
+  agent.learningSettings.mismatchSignificanceTreshold = 0.5;
+  //-------------------------------------------------------------------
+  double input[] = {0.0, 1.0};
+  vector< vector<double> > inputs;
+  for (unsigned int i = 0; i < 6; ++i)
+    inputs.push_back(vector<double>(input, input + 2));
+  controller->reset();
+  for (unsigned int step = 1; step <= inputs.size(); ++step){
+    stringstream tmp;
+    tmp << directory << "/t_learn_4_step_" << step << ".jpg";
+    lifeStep(agent, inputs[step - 1], step, make_pair(true, tmp.str()));
+  }
+}
+
 
 /*int tests::testPoolNetwork(string outputFilename){
 	TPoolNetwork PoolNetwork;
