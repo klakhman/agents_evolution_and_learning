@@ -554,6 +554,16 @@ void TBehaviorAnalysis::drawActionSequenceToDot(std::vector<double> &sequence, T
   system(("dot -Tjpg " + outputImageFilename + ".dot -o " + outputImageFilename).c_str());
 }
 
+void TBehaviorAnalysis::drawAgentLife(TAgent& agent, THypercubeEnvironment& env, unsigned int lifetime, const string& lifeFilename){
+  unsigned int initialState = env.getEnvironmentState();
+  agent.life(env, lifetime);
+  vector< vector<double> > _agentLife = agent.getPointerToAgentLife();
+  vector<double> agentLife;
+  for (vector< vector<double> >::iterator action = _agentLife.begin(); action != _agentLife.end(); ++action)
+    agentLife.push_back((*action)[0]);
+  drawActionSequenceToDot(agentLife, env, lifeFilename, initialState);
+}
+
 void TBehaviorAnalysis::calculateMetricsForEvolutionaryProcess(string cyclesExistanceFilename, string cyclesFilename, THypercubeEnvironment &environment)
 {
   ifstream cyclesExistance;
