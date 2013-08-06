@@ -1,5 +1,4 @@
 ﻿#include "params.h"
-
 #include <sstream>
 
 using namespace std;
