@@ -62,6 +62,7 @@ public:
         "\tenv-type=restrhypercube" <<
         std::endl << std::endl;
   }
+  std::vector<unsigned int> aimsReachedLife() const { return aimsSequence; }
 
 private:
   /// Начальный вектор среды, из которого запускается текущая жизнь агента
@@ -70,6 +71,8 @@ private:
   double currentAgentReward;
   /// Запись текущей жизни агента
   std::vector< std::vector<double> > agentLifeRecord; 
+  /// Последовательность достижения целей агентом
+  std::vector<unsigned int> aimsSequence;
   /// Времена последнего достижения всех целей в среде
   std::vector<int> reachedAimsTimes;
   /// Метод перезагрузки среды (обнуление жизни агента и времен восстановления награды)

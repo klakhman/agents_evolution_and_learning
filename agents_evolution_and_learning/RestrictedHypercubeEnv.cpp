@@ -67,6 +67,7 @@ int RestrictedHypercubeEnv::forceEnvironment(const vector<double>& action){
           actionSuccess = true;
           reachedAimsTimes.at((*aim).aimNumber - 1) = agentLifeRecord.size();
           currentAgentReward += aimsSet.at((*aim).aimNumber - 1).reward;
+          aimsSequence.push_back((*aim).aimNumber);
           break;
         }
     }
@@ -305,6 +306,7 @@ void RestrictedHypercubeEnv::setEnvResolution(unsigned int _envResolution){
 /// Метод перезагрузки среды (обнуление жизни агента и времен восстановления награды)
 void RestrictedHypercubeEnv::resetEnvironment(){
   agentLifeRecord.clear();
+  aimsSequence.clear();
   currentAgentReward = 0;
   fill(reachedAimsTimes.begin(), reachedAimsTimes.end(), -rewardRecoveryTime);
 }
