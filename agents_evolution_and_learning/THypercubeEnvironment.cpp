@@ -13,7 +13,7 @@ using namespace std;
 
 // Печать цели на экран
 void THypercubeEnvironment::TAim::print(std::ostream& os) const{
-  for (int currentAction = 1; currentAction < aimComplexity; ++currentAction)
+  for (int currentAction = 1; currentAction <= aimComplexity; ++currentAction)
     os << actionsSequence[currentAction - 1].bitNumber << "->" << actionsSequence[currentAction - 1].desiredValue << " ; ";
   os << endl;
 }
