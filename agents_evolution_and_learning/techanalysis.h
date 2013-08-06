@@ -74,7 +74,7 @@ namespace techanalysis{
   std::vector<double> totalRun(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime = 250);
   
   // Анализ на эволюцию разницы награды с обучением и без (с дискретизацией)
-  void difEvolutionAnalysis(const std::string& bestAgentsFilename, unsigned int evolTime, const std::string& environmentFilename, 
+  void difEvolutionAnalysis(const std::string& bestAgentsFilename, unsigned int evolTime, const std::string& environmentFilename, unsigned int envType, 
                             const std::string& settingsFilename, const std::string& resultsFilename, unsigned int evolDiscr = 50, 
                             unsigned int sysNumber = 5, unsigned int lifetime = 100);
 

@@ -15,6 +15,7 @@
 #include "TAgent.h"
 #include "THypercubeEnvironment.h"
 #include "TBehaviorAnalysis.h"
+#include "RestrictedHypercubeEnv.h"
 #include "settings.h"
 #include "config.h"
 #include <map>
@@ -616,17 +617,26 @@ vector<double> techanalysis::totalRun(TAgent& agent, THypercubeEnvironment& envi
   return runs;
 }
 
-// Анализ на эволюцию разницы награды с обучением и без (с дискретизацией)
-void techanalysis::difEvolutionAnalysis(const string& bestAgentsFilename, unsigned int evolTime, const string& environmentFilename, 
+// Анализ на эволюцию разницы награды с обучением и без (с дискретизацией) (envType - 0 (обычная среда гиперкуб), 1 (ограниченная среда))
+void techanalysis::difEvolutionAnalysis(const string& bestAgentsFilename, unsigned int evolTime, const string& environmentFilename, unsigned int envType, 
                                         const string& settingsFilename, const string& resultsFilename, unsigned int evolDiscr /*=50*/,
                                         unsigned int sysNumber /*=5*/, unsigned int lifetime /*=100*/){
-  THypercubeEnvironment environment(environmentFilename);
-  settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
-  environment.setStochasticityCoefficient(0.0);
+  THypercubeEnvironment* environment;
+  switch (envType){
+    case 0: 
+      environment = new THypercubeEnvironment(environmentFilename);
+      break;
+    case 1:
+      environment = new RestrictedHypercubeEnv(environmentFilename);
+      break;
+  }
+  settings::fillEnvironmentSettingsFromFile(*environment, settingsFilename);
+  environment->setStochasticityCoefficient(0.0);
   TAgent agent;
   settings::fillAgentSettingsFromFile(agent, settingsFilename);
   const unsigned int bins = evolTime / evolDiscr;
   ofstream results(resultsFilename.c_str());
+  unsigned int learningMode = agent.getLearningMode();
   for (unsigned int bin = 0; bin < bins; ++bin){
     agent.loadGenome(bestAgentsFilename, bin * evolDiscr + 1);
     double rewardWithLearning = 0;
@@ -634,15 +644,16 @@ void techanalysis::difEvolutionAnalysis(const string& bestAgentsFilename, unsign
     for (unsigned int run = 0; run < sysNumber; ++run){
       agent.systemogenesis();
       agent.setLearningMode(0);
-      vector<double> rewardsWithoutLearning = totalRun(agent, environment, lifetime);
+      vector<double> rewardsWithoutLearning = totalRun(agent, *environment, lifetime);
       rewardWithoutLearning += sum(rewardsWithoutLearning) / (sysNumber * rewardsWithoutLearning.size());
-      agent.setLearningMode(1);      
-      vector<double> rewardsWithLearning = totalRun(agent, environment, lifetime);
+      agent.setLearningMode(learningMode);      
+      vector<double> rewardsWithLearning = totalRun(agent, *environment, lifetime);
       rewardWithLearning += sum(rewardsWithLearning) / (sysNumber * rewardsWithLearning.size());
     }
     results << bin * evolDiscr + 1 << "\t" << rewardWithLearning << "\t" << rewardWithoutLearning << endl;
     cout << bin * evolDiscr + 1 << "\t" << rewardWithLearning << "\t" << rewardWithoutLearning << endl;
   }
+  delete environment;
   results.close();
 }
 
