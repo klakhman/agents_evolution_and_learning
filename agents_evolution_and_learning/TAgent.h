@@ -4,6 +4,7 @@
 #include "TNeuralNetwork.h"
 #include "TPoolNetwork.h"
 #include "TEnvironment.h"
+#include "watchers.h"
 
 #include <iostream>
 #include <vector>
@@ -21,6 +22,7 @@ virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 
 */
 class tests;
+class LifeWatcher;
 
 class TAgent{
 protected:
@@ -152,6 +154,9 @@ public:
 	virtual void generateMinimalAgent(int inputResolution);
 	// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
 	virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
+  // Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
+  // Данная версия позволяет вести лог жизни агента в соответствии с переданным "наблюдателем"
+  virtual void life(TEnvironment& environment, int agentLifeTime, watchers::LifeWatcher& watcher, bool rewardCalculate = true);
 	// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
 	TAgent& operator=(const TAgent& sourceAgent);
   // Подсчет количества активных нейронов

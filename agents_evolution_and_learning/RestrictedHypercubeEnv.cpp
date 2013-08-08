@@ -160,7 +160,7 @@ RestrictedHypercubeEnv* RestrictedHypercubeEnv::generateEnvironment(unsigned int
   vector<unsigned int> desiredAimsDistr(maxAimComplexity - minAimComplexity + 1, 0);
   //  !!! Как-то заполняем желаемое распределение !!!
   const unsigned int increaseCoef = 5;
-  const unsigned int firstComplAimsQ = 25;
+  const unsigned int firstComplAimsQ = 4; // 25
   desiredAimsDistr.at(0) = firstComplAimsQ;
   for (vector<unsigned int>::iterator complexity = desiredAimsDistr.begin() + 1; complexity != desiredAimsDistr.end(); ++complexity)
     *complexity = (*(complexity - 1)) * increaseCoef;
@@ -193,6 +193,9 @@ RestrictedHypercubeEnv* RestrictedHypercubeEnv::generateEnvironment(unsigned int
   // Необходимо создать среду и записать все цели
   RestrictedHypercubeEnv* environment = new RestrictedHypercubeEnv;
   environment->environmentResolution = _environmentResolution;
+  //for (unsigned int level = 0; level < aimsViaComplexity.size(); level += 2)
+  //  for (vector<TAim>::const_iterator aim = aimsViaComplexity[level].begin(); aim != aimsViaComplexity[level].end(); ++aim)
+  //    environment->addAim(*aim);
   for (vector< vector<TAim> >::const_iterator level = aimsViaComplexity.begin(); level != aimsViaComplexity.end(); ++level)
     for (vector<TAim>::const_iterator aim = level->begin(); aim != level->end(); ++aim)
       environment->addAim(*aim);

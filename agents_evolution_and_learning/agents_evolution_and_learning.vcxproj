@@ -118,6 +118,7 @@
     <ClInclude Include="TSharedEvolutionaryProcess.h" />
     <ClInclude Include="TSynapse.h" />
     <ClInclude Include="TTopologyAnalysis.h" />
+    <ClInclude Include="watchers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="TSharedEvolutionaryProcess.cpp" />
     <ClCompile Include="TSynapse.cpp" />
     <ClCompile Include="TTopologyAnalysis.cpp" />
+    <ClCompile Include="watchers.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

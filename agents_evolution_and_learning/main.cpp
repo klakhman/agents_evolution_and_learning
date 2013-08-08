@@ -326,6 +326,18 @@ int main(int argc, char** argv){
                                       dir + "settings_PC40REDSYS.ini", dir + "En2004_pc40redsys_mod(7)_difevolution.txt");
   }
   else if (programMode == "TESTUNIT"){
+    srand(static_cast<unsigned int>(time(0)));
+    rand();
+    rand();
+    rand();
+    THypercubeEnvironment env("C:/SANDBOX/Environment1001.txt");
+    cout << env.calculateOccupancyCoefficient() << endl;
+    RestrictedHypercubeEnv renv("C:/SANDBOX/Environment2001.txt");
+    cout << renv.calculateOccupancyCoefficient() << endl;
+    RestrictedHypercubeEnv* new_env = RestrictedHypercubeEnv::generateEnvironment(8, 0, 6, 2);
+    cout << new_env->calculateOccupancyCoefficient();
+    new_env->uploadEnvironment("C:/SANDBOX/Environment3010.txt");
+    delete new_env;
     //srand(static_cast<unsigned int>(time(0)));
     //time_t start = clock();
     //for (unsigned int n = 0; n < 2500000u; ++n){
@@ -343,6 +355,7 @@ int main(int argc, char** argv){
     //tests::t_learn_2("C:/SANDBOX/Tests");
     //tests::t_learn_3("C:/SANDBOX/Tests");
     //tests::t_learn_4("C:/SANDBOX/Tests");
+    return 0;
   }
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {

@@ -3,6 +3,7 @@
 #include "TNeuralNetwork.h"
 #include "TPoolNetwork.h"
 #include "service.h"
+#include "watchers.h"
 
 #include <iostream>
 #include <cstring>
@@ -196,6 +197,38 @@ void TAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
     if (agentLifeStep > 1) // На первом шаге обучение не имеет смысла (еще не было предсказания)
       learn();
+	}
+	if (rewardCalculate) 
+		reward = environment.calculateReward(agentLife, agentLifeTime);
+	else 
+		reward = 0;
+	delete []outputVector;
+	delete []environmentVector;
+}
+
+// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
+// Данная версия позволяет вести лог жизни агента в соответствии с переданным "наблюдателем"
+void TAgent::life(TEnvironment& environment, int agentLifeTime, watchers::LifeWatcher& watcher, bool rewardCalculate /*= true*/){
+	double* environmentVector = new double[neuralController->getInputResolution()];
+	double* outputVector = new double[neuralController->getOutputResolution()];
+
+	agentLife.resize(agentLifeTime);
+
+	neuralController->reset();
+  watcher.watch(*this, environment); // !!! Наблюдение
+	for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep){
+		// Здесь в теории надо вместо просто получения вектора среды поставить процедуру кодировщика
+		environment.getCurrentEnvironmentVector(environmentVector);
+		neuralController->calculateNetwork(environmentVector);
+		neuralController->getOutputVector(outputVector);
+		agentLife[agentLifeStep - 1] = decodeAction(outputVector);
+		// Действуем на среду и проверяем успешно ли действие
+		bool actionSuccess = (environment.forceEnvironment(agentLife[agentLifeStep - 1]) != 0);
+		if (!actionSuccess) agentLife[agentLifeStep - 1][0] = 0;
+    if (agentLifeStep > 1) // На первом шаге обучение не имеет смысла (еще не было предсказания)
+      learn();
+    
+    watcher.watch(*this, environment); // !!! Наблюдение
 	}
 	if (rewardCalculate) 
 		reward = environment.calculateReward(agentLife, agentLifeTime);
