@@ -605,4 +605,3 @@ void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned i
   //_life.reserve(life.size());
   //transform(life.cbegin(), life.cend(), back_inserter(_life), [](const vector<double>& v){ return v.at(0); });  
   //TBehaviorAnalysis::drawActionSequenceToDot(_life, environment, imageFilename, initState);
-}
