@@ -80,7 +80,9 @@ void TEnkiEvolutionaryProcess::createMainResultsFile(std::ofstream& resultsFile,
   // Записываем параметры обучения
   resultsFile << "Learning_parameters:" << "\tlearning-mode=" << pointerToAgent->learningSettings.learningMode << "\tmismatch-significance-treshold=" << pointerToAgent->learningSettings.mismatchSignificanceTreshold << endl << endl;
 	// Записываем параметры среды
-	dynamic_cast<TEnkiEnvironment*>(environment)->printSettings(resultsFile);
+  //environment->printSettings(resultsFile);
+  //TEnkiEnvironment * enkiEnvironment = dynamic_cast<TEnkiEnvironment *>(environment);
+	environment->printSettings(resultsFile);
 	//Записываем уникальное ядро рандомизации
 	resultsFile << "Random_seed:\t" << randomSeed << endl << endl;
 	// Записываем заголовки
@@ -100,15 +102,22 @@ void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	// Загружаем среду
 	if (environment)
 		delete environment;
-	environment = new TEnkiEnvironment(filenameSettings.environmentFilename);
-	settings::fillEnvironmentSettingsFromFile(*dynamic_cast<TEnkiEnvironment*>(environment), filenameSettings.settingsFilename);
+  TEnkiEnvironment * newEnvironment = new TEnkiEnvironment;
+  settings::fillEnvironmentSettingsFromFile(*dynamic_cast<TEnkiEnvironment*>(newEnvironment), filenameSettings.settingsFilename);
+  newEnvironment->loadEnvironment(filenameSettings.environmentFilename);
+  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt", 0);
+  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt", 1);
+  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt", 2);
+  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt", 3);
+  environment = newEnvironment;
+	// environment = new TEnkiEnvironment(filenameSettings.environmentFilename);
 	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
 	if (agentsPopulation)
 		delete agentsPopulation;
 	agentsPopulation = new TPopulation<TEnkiAgent>;
-	//settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
+	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
-	//settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
+	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
 	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
 	ofstream resultsFile;
 	createMainResultsFile(resultsFile, randomSeed);

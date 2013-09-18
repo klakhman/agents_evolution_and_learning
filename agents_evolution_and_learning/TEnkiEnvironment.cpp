@@ -89,10 +89,10 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   
   // Создаем E-PUCK и размещаем его в среде
   ePuckBot = new Enki::EPuck();
-  ePuckBot->pos = Enki::Point(20, 50);
+  ePuckBot->pos = Enki::Point(4.0, 4.0);
   ePuckBot->angle = 0;
-  ePuckBot->leftSpeed = 10;
-  ePuckBot->rightSpeed = 10;
+  ePuckBot->leftSpeed = 0;
+  ePuckBot->rightSpeed = 0;
   ePuckBot->setColor(Enki::Color(1, 0, 0));
   world->addObject(ePuckBot);
   objectsInTheWorld.push_back(ePuckBot);
@@ -193,7 +193,7 @@ void TEnkiEnvironment::getCurrentEnvironmentVector(double environmentVector[]) c
     double leftSensorValue = ePuckBot->infraredSensor5.finalValue/4000.0;
     double frontFrontLeftSensorValue = ePuckBot->infraredSensor7.finalValue/4000.0;
     
-    std::cout << "E-puck current state vector is (" << firstSection.components[0] << ";" << firstSection.components[1] << ";" << firstSection.components[2] << ";" << secondSection.components[0] << ";" << secondSection.components[1] << ";" << secondSection.components[2] << ";" <<thirdSection.components[0] << ";" << thirdSection.components[1] << ";" << thirdSection.components[2] << ";" << leftSpeed << ";" << rightSpeed << ";" << frontFrontRightSensorValue << ";" << rightSensorValue << ";" << leftSensorValue << ";" << frontFrontLeftSensorValue << ")" << std::endl;
+    //std::cout << "E-puck current state vector is (" << firstSection.components[0] << ";" << firstSection.components[1] << ";" << firstSection.components[2] << ";" << secondSection.components[0] << ";" << secondSection.components[1] << ";" << secondSection.components[2] << ";" <<thirdSection.components[0] << ";" << thirdSection.components[1] << ";" << thirdSection.components[2] << ";" << leftSpeed << ";" << rightSpeed << ";" << frontFrontRightSensorValue << ";" << rightSensorValue << ";" << leftSensorValue << ";" << frontFrontLeftSensorValue << ")" << std::endl;
     
     environmentVector[0] = firstSection.components[0];
     environmentVector[1] = firstSection.components[1];
@@ -216,23 +216,21 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
     double xRandomValue;
     double yRandomValue;
     double angleRandomValue;
-    srand(time(0));
-    xRandomValue = service::uniformDistribution(0.0, xSize);//(xSize)*(((double) rand())/ (double) RAND_MAX);
-    srand(time(0));
-    yRandomValue = service::uniformDistribution(0.0, ySize);
-    srand(time(0));
+    xRandomValue = service::uniformDistribution(5.0, xSize-5.0);
+    yRandomValue = service::uniformDistribution(5.0, ySize-5.0);
     angleRandomValue = service::uniformDistribution(0.0, 2*M_PI);
   
     // Нужно проверить, не попадает ли робот в таком случае на установленный куб или например на стену, а если попадает, то сдвинуть его
     // Радиус EPUCK - 3.7 (на всякий случай возьмем 4)
     // Нижеследующие проверки обеспечивают гарантию того, что робот не будет соприкасаться ни со стенами среды, ни с объектами среды
   
-    if (xRandomValue >= xSize-5.0) {
+    /*if (xRandomValue >= xSize-5.0) {
       xRandomValue = xRandomValue-5.0;
     }
     if (yRandomValue >= ySize-5.0) {
       yRandomValue = yRandomValue-5.0;
-    }
+    }*/
+  
     for (int i=0; i<objectsNumber; i++) {
       if ((xRandomValue >= objectsArray.at(i).x-cubeSize/2.0) && (xRandomValue <= objectsArray.at(i).x+cubeSize/2.0)) {
         xRandomValue = objectsArray.at(i).x-cubeSize/2.0-5.0;
@@ -245,6 +243,8 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
     ePuckBot->pos.x = xRandomValue;
     ePuckBot->pos.y = yRandomValue;
     ePuckBot->angle = angleRandomValue;
+    ePuckBot->leftSpeed = 0.0;
+    ePuckBot->rightSpeed = 0.0;
 }
 
 int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
@@ -268,7 +268,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     ePuckBot->leftSpeed = ePuckBot->leftSpeed + action.at(0);
     ePuckBot->rightSpeed = ePuckBot->rightSpeed + action.at(1);
     world->step(worldStep);
-    this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotRobot.txt");
+    this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
     currentTime = currentTime + worldStep;
   
     /*for (int i=0; i<objectsInTheWorld.size(); i++) {

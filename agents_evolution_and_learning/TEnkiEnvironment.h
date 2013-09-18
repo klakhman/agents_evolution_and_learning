@@ -146,14 +146,7 @@ public:
   
   // Вывод настроек среды на печать
   void printSettings(std::ostream& os) {
-    os << "world-step" << std::endl;
-    os << worldStep << std::endl;
-    os << "cube-size" << std::endl;
-    os << cubeSize << std::endl;
-    os << "cube-radius" << std::endl;
-    os << cubeRadius << std::endl;
-    os << "reward-recovery-time" << std::endl;
-    os << rewardRecoveryTime << std::endl;
+    os << "Environment settings:     " << "world-step=" << worldStep << " cube-size=" << cubeSize << " cube-radius=" << cubeRadius << " reward-recovery-time=" << rewardRecoveryTime << std::endl << std::endl;
   };
   
   // Временный метод, используемый для диагностики правильной работы среды, а также сенсоров робота

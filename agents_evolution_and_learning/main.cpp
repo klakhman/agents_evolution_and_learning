@@ -15,6 +15,7 @@
 
 #include "TEnkiEnvironment.h"
 #include "TEnkiAgent.h"
+#include "TEnkiEvolutionaryProcess.h"
 
 #include <iostream>
 #include <fstream>
@@ -249,38 +250,72 @@ int main(int argc, char** argv){
   } 
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {
+    
+    // Устанавливаем зерно для генератора случайных чисел
+    srand(static_cast<unsigned int>(time(0)));
+    
+    // Формирование файла, заключающего информацию о объектах среды (необходим для построения графика в гнуплоте)
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+    
+    // Запускаем эволюционный процесс
+    TEnkiEvolutionaryProcess* evolutionaryProcess = new TEnkiEvolutionaryProcess;
+		evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
+		long randomSeed = 0;
+		bool extraPrint = false;
+		decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, randomSeed, extraPrint, argc, argv);
+		evolutionaryProcess->setExtraPrint(extraPrint);
+		evolutionaryProcess->start(static_cast<unsigned int>(randomSeed));
+    delete evolutionaryProcess;
+    
+  } else if (programMode == "ENKIDRAWBESTAGENT") {
+    
+    // Устанавливаем зерно для генератора случайных чисел
+    srand(static_cast<unsigned int>(time(0)));
+    
+    // Удаление файлов, заключающих информацию о объектах среды (необходимы для построения графика в гнуплоте)
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt");
+    
+    // Удаление файла с логами перемещения робота
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+    
     // Формирование среды
     TEnkiEnvironment enkiEnvironment;
-    settings::fillEnvironmentSettingsFromFile(enkiEnvironment, "/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/enkiEnvironmentSettings.txt");
-    enkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/testingEnvironment.txt");
+    settings::fillEnvironmentSettingsFromFile(enkiEnvironment, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
+    enkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/testingEnvironment.txt");
     
     // Установка начальных параметров робота (положения, угла (отсчитывается против часовой стрелки от оси, направленной вправо) и начальных скоростей)
-    enkiEnvironment.ePuckBot->pos.x = 50.0;
-    enkiEnvironment.ePuckBot->pos.y = 50.0+5.0+3.7;
-    enkiEnvironment.ePuckBot->angle = 0;
-    enkiEnvironment.ePuckBot->leftSpeed = 1;
-    enkiEnvironment.ePuckBot->rightSpeed = 1;
+    enkiEnvironment.setRandomEnvironmentState();
+    /*enkiEnvironment.ePuckBot->pos.x = 20.0;
+    enkiEnvironment.ePuckBot->pos.y = 120.0;
+    enkiEnvironment.ePuckBot->angle = 0.0;
+    enkiEnvironment.ePuckBot->leftSpeed = 0.0;
+    enkiEnvironment.ePuckBot->rightSpeed = 0.0;*/
     
     // Формирование агента
     TEnkiAgent enkiAgent;
-    settings::fillAgentSettingsFromFile(enkiAgent, "/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/settings_LINSYS.ini");
+    settings::fillAgentSettingsFromFile(enkiAgent, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
     
     // Формирование нейронной сети агента
-    std::fstream inputFileForGenome("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/Line_agent.txt");
-    enkiAgent.loadGenome(inputFileForGenome);
+    std::fstream inputFileForGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt");
+    enkiAgent.loadGenome(inputFileForGenome, 1158);
     enkiAgent.linearSystemogenesis();
     
-    // Формирование файла, заключающего информацию о объектах среды (необходим для построения графика в гнуплоте)
-    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects1.txt");
-    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects2.txt");
-    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects3.txt");
-    std::remove("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotRobot.txt");
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects1.txt", 0);
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects2.txt", 1);
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents Evolution And Learning ENKI/gnuplotObjects3.txt", 2);
+    // Формирование файлов с информацией об объектах в среде для гнуплота
+    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt", 0);
+    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt", 1);
+    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt", 2);
+    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt", 3);
     
     // Запуск агента
-    enkiAgent.life(enkiEnvironment, 10000);
+    enkiAgent.life(enkiEnvironment, 1600);
+    
   }
 #endif //NOT_USE_ROBOT_LIB
 

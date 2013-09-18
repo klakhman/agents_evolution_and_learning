@@ -35,6 +35,10 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
     environment.getCurrentEnvironmentVector(environmentVector);
     neuralController->calculateNetwork(environmentVector);
     neuralController->getOutputVector(outputVector);
+    
+    //cout << neuralController->getNeuronCurrentOut(16) << "\t" << neuralController->getNeuronCurrentOut(17) << endl;
+    //cout << neuralController->getNeuronCurrentOut(18) << "\t" << neuralController->getNeuronCurrentOut(19) << endl;
+
     actionVector = decodeAction(outputVector);
     // Действуем на среду, проверяем, успешно ли действие, а также проверяем, что это действие новое, так как в противном случае это действие не несет никакой новой информации
     int actionSuccess = environment.forceEnvironment(actionVector);
@@ -54,7 +58,7 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
   
 	if (rewardCalculate) {
 		reward = environment.calculateReward(agentLife, static_cast<int>(agentLife.size()));
-    std::cout << "Reward equals " << reward << " after the life is completed" << std::endl;
+    //std::cout << "Reward equals " << reward << " after the life is completed" << std::endl;
 	} else {
 		reward = 0;
   }

@@ -4,6 +4,7 @@
 #include "THypercubeEnvironment.h"
 #include "TPopulation.h"
 #include "TAgent.h"
+#include "TEnkiAgent.h"
 #include <string>
 
 #include "TEnkiEnvironment.h"
@@ -17,8 +18,12 @@ namespace settings{
 	void fillEnvironmentSettingsFromFile(THypercubeEnvironment& environment, std::string settingsFilename);
 	// Загрузка параметров популяции из файла
 	void fillPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, std::string settingsFilename);
+  // Загрузка параметров популяции из файла (для агентов ENKI)
+  void fillPopulationSettingsFromFile(TPopulation<TEnkiAgent>& agentsPopulation, std::string settingsFilename);
 	// Загрузка параметров всех агентов в популяции из файла
 	void fillAgentsPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulation, std::string settingsFilename);
+  // Загрузка параметров всех агентов в популяции из файла (для агентов ENKI)
+  void fillAgentsPopulationSettingsFromFile(TPopulation<TEnkiAgent>& agentsPopulation, std::string settingsFilename);
 	// Загрузка параметров агента из файла
 	void fillAgentSettingsFromFile(TAgent& agent, std::string settingsFilename);
   // Загрузка параметров среды ENKI из файла

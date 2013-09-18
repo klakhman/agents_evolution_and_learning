@@ -707,7 +707,7 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
     ofstream dotFile;
     //!С++ 11 only! Need to find a better solution
     //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".dot").c_str());
-    dotFile.open((outputImageFilename+std::to_string(aimNumber)+".gv").c_str());
+    //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".gv").c_str());
     dotFile<<"digraph G {"<<endl;
     
     int cycleNumber = 0;
