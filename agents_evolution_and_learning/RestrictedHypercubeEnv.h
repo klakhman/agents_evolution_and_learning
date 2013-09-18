@@ -17,7 +17,6 @@ public:
   /// Конструктор по умолчанию
   RestrictedHypercubeEnv(){
     currentAgentReward = 0;
-    
   }
   /// Конструктор с заполнением иерархии целей из файла
   RestrictedHypercubeEnv(std::string aimsFilename, int _rewardRecoveryTime = 0, double _nonstaionarityCoefficient = 0){
@@ -53,6 +52,17 @@ public:
   static bool equalAims(const TAim& firstAim, const TAim& secondAim);
   /// Проверка является ли одна цель родительской для другой цели
   static bool isParentAim(const TAim& potentialParentAim, const TAim& subAim);
+  /// Изменение размерности среды
+  void setEnvResolution(unsigned int _envResolution);
+  /// Печать параметров среды в рамках запуска в файл
+  virtual void printSettings(std::ostream& os) {
+    os << "Environment_parameters:" << 
+        "\tstochasticity-coefficient=" << getStochasticityCoefficient() << 
+        "\treward-recovery-time=" << getRewardRecoveryTime() << 
+        "\tenv-type=restrhypercube" <<
+        std::endl << std::endl;
+  }
+  std::vector<unsigned int> aimsReachedLife() const { return aimsSequence; }
 
 private:
   /// Начальный вектор среды, из которого запускается текущая жизнь агента
@@ -61,6 +71,8 @@ private:
   double currentAgentReward;
   /// Запись текущей жизни агента
   std::vector< std::vector<double> > agentLifeRecord; 
+  /// Последовательность достижения целей агентом
+  std::vector<unsigned int> aimsSequence;
   /// Времена последнего достижения всех целей в среде
   std::vector<int> reachedAimsTimes;
   /// Метод перезагрузки среды (обнуление жизни агента и времен восстановления награды)

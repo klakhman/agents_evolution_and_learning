@@ -4,6 +4,7 @@
 #include "TNeuralNetwork.h"
 #include "TPoolNetwork.h"
 #include "TEnvironment.h"
+#include "watchers.h"
 
 #include <iostream>
 #include <vector>
@@ -21,6 +22,7 @@ virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalcu
 
 */
 class tests;
+class LifeWatcher;
 
 class TAgent{
 protected:
@@ -43,12 +45,18 @@ protected:
 
 	// Построение первичного контроллера агента
 	void buildPrimaryNeuralController();
+  void primarySystemogenesisProcess(std::vector<double>& neuronsSummaryPotential, std::vector<double>& synapsesSummaryPotential,
+                                    std::vector<double>& predictorSignificance);
 	// Функция отбора активирующихся нейронов
-	void neuronsSelection(double neuronsSummaryPotential[]);
+	void neuronsSelection(std::vector<double>& neuronsSummaryPotential);
+  // Отбор активирующихся нейронов равномерно по пулам
+  void neuronsUnifSelection(std::vector<double>& neuronsSummaryPotential);
 	// Функция отбора наиболее активных синапсов
-	void synapsesSelection(double synapsesSummaryPotential[]);
+	void synapsesSelection(const std::vector<double>& synapsesSummaryPotential);
 	// Функция отбора предикторных связей
-	void predConnectionsSelection(double predictorSignificance[]);
+	void predConnectionsSelection(const std::vector<double>& predictorSignificance);
+  // Функция отбора применяемая ко всем предикторным связям (не только между активными нейронами)
+  void predConnectionsFullSelection(const std::vector<double>& predictorSignificance);
 
 	// Детекция рассогласования на нейроне
 	// 0 - отсутствие рассогласования, 1 - рассогласование типа "предсказана активация - ее нет", 2 - рассогласование типа "предсказано молчание - есть активация"
@@ -135,7 +143,7 @@ public:
 	// Загрузка генома нейрононтроллера
 	void loadGenome(std::istream& is, bool extra = false);
   // Загрузка генома нейроконтроллера по номеру из файла (номер начинается с 1) 
-  void loadGenome(std::string filename, int genomeNumber);
+  void loadGenome(std::string filename, int genomeNumber, bool extra = false);
   // Загрузка генома из файлов старого формата
   void loadOldFormatGenome(std::istream& is, int inputResolution, int outputResolution);
 	// Выгрузка нейроконтроллера агета в файл или на экран
@@ -146,12 +154,18 @@ public:
 	virtual void generateMinimalAgent(int inputResolution);
 	// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
 	virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
+  // Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
+  // Данная версия позволяет вести лог жизни агента в соответствии с переданным "наблюдателем"
+  virtual void life(TEnvironment& environment, int agentLifeTime, watchers::LifeWatcher& watcher, bool rewardCalculate = true);
 	// Оператор присваивания (фактически полное копирование агента, включая геном, но не включая контроллер - создание новых структур)
 	TAgent& operator=(const TAgent& sourceAgent);
   // Подсчет количества активных нейронов
   int getActiveNeuronsQuantity() const;
   //Временная процедура печати жизни агента
   void printLife(TEnvironment& environment, int agentLifeTime);
+
+  void systemogenesis();
+  void learn();
 
 	// Линейная процедра первичного системогеназа (когда происходит однозначная трансляция генотипа) - используется, когда нет ни настоящего системогенеза, ни обучения
 	void linearSystemogenesis();

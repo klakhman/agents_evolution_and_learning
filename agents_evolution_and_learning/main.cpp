@@ -12,6 +12,7 @@
 #include "functional"
 #include <iterator>
 #include "RestrictedHypercubeEnv.h"
+#include "params.h"
 
 #include "TEnkiEnvironment.h"
 #include "TEnkiAgent.h"
@@ -53,15 +54,6 @@ string decodeProgramMode(int argc, char** argv){
 	return "";
 }
 
-double irFunc(double dist){
-  double res = .0;
-  if (dist<0.5)
-    res = -440*dist+2965.98144;
-  else
-    res = 4526*exp(-0.9994*dist);
-  return res;
-}
-
 void decodeCommandPromt(string& environmentFilename, string& resultsFilename, string& bestPopulationFilename, string& bestAgentsFilename, long& randomSeed, bool& extraPrint, int argc, char** argv){
 	int currentArgNumber = 1; // Текущий номер параметра
 	while (currentArgNumber < argc){
@@ -76,6 +68,9 @@ void decodeCommandPromt(string& environmentFilename, string& resultsFilename, st
 		++currentArgNumber;
 	}
 }
+
+void testFunc();
+void currentAnalysis();
 
 int main(int argc, char** argv){
 	// Устанавливаем обработчик нехватки памяти
@@ -129,13 +124,67 @@ int main(int argc, char** argv){
       }
     return 0;
   }
-  else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски
-    unsigned int scale = 100;
-    ofstream ofs ("C:/Test/e-puckIRfunc.txt");
-    for (unsigned int i = 0; i < 1000; ++i)
-      ofs << (i + 1)/static_cast<double>(scale) << "\t"<< irFunc((i + 1)/static_cast<double>(scale)) << endl;
-    ofs.close();
+  else if(programMode == "TEST"){ // Отладочный (тестовый режим) - сюда можно писать различные тестовые запуски  
+    srand(static_cast<unsigned int>(time(0)));
+    const string homeDir = "C:/SANDBOX/";
+    TAgent agent;
+    settings::fillAgentSettingsFromFile(agent, homeDir + "settings_PC40REDSYS.ini");
+    RestrictedHypercubeEnv env(homeDir + "Environment2004.txt");
+    settings::fillEnvironmentSettingsFromFile(env, homeDir + "settings_PC40REDSYS.ini");
+    //vector<double> allRewards(250, 0);
+    //for (unsigned int agentN = 0; agentN < 250; ++agentN){
+    //  agent.loadGenome(homeDir + "En2004_pc40redsys_mod(7)_bestpopulation.txt", agentN+1);
+    //  for (unsigned int sysN = 0; sysN < 3; ++sysN){
+    //    agent.systemogenesis();
+    //    vector<double> agentRewards = techanalysis::totalRun(agent, env);
+    //    allRewards[agentN] += techanalysis::sum(agentRewards) / (agentRewards.size() * 3);
+    //    cout << " + ";
+    //  }
+    //  cout << agentN << " = " << allRewards[agentN] << endl;
+    //}
+    //ofstream of((homeDir + "En2004_pc40redsys_mod(7)_bestpopulation_rewards_noal.txt").c_str());
+    //copy(allRewards.begin(), allRewards.end(), ostream_iterator<double>(of, "\n"));
+    //of.close();
+    //return 0;
+    agent.loadGenome(homeDir + "En2004_pc40redsys_mod(7)_bestpopulation.txt", 6);
+    const unsigned int initState = 127;
+    env.setStochasticityCoefficient(0.0);
+    env.setEnvironmentState(initState);
+    agent.systemogenesis();
+    agent.life(env, 250);
+    cout << agent.getReward() << endl << endl;
+    vector<unsigned int> aimSequence = env.aimsReachedLife();
+    vector<unsigned int> complexLevel(5, 0);
+    for (unsigned int aim = 0; aim < aimSequence.size(); ++aim)
+      complexLevel[env.getAimReference(aimSequence[aim]).aimComplexity - 2]++;
+    for (unsigned int complA = 0; complA < complexLevel.size(); ++complA)
+      cout << complA + 2 << " : " << complexLevel[complA] << endl;
+    cout << endl;
+    for (vector<unsigned int>::iterator aim = aimSequence.begin(); aim != aimSequence.end(); ++aim){
+      cout << *aim << endl;
+      env.getAimReference(*aim).print(cout);
+      cout << endl;
+    }
+    //copy(aimSequence.begin(), aimSequence.end(), ostream_iterator<unsigned int>(cout, "\t"));
+    cout << endl;
+    env.setEnvironmentState(initState);
+    TBehaviorAnalysis::drawAgentLife(agent, env, 50, homeDir + "En2004_pc40redsys_mod(7)_A6_S0.jpg"); 
     return 0;
+
+
+
+
+    //const string root = "C:/AlternativeSystemogenesis/";
+    //const string resultsDirectory = root + "/Results";  
+    //const string runSign = "pc40alsys";
+    //TAnalysis analysis;
+    //cout << analysis.startBestPopulationAnalysis(service::bestPopPath(resultsDirectory, 1113, 14, runSign), root + "/Environments/Environment1113.txt",
+    //                                              root + "/settings_PC40ALSYS.ini");
+
+    //testFunc();
+    //currentAnalysis();
+    return 0;
+
     srand(static_cast<unsigned int>(time(0)));
     for (unsigned int envN = 1; envN <= 20; ++envN){
       RestrictedHypercubeEnv* env = RestrictedHypercubeEnv::generateEnvironment(8, 1);
@@ -248,6 +297,67 @@ int main(int argc, char** argv){
       life.push_back(agentLife[i][0]);
     TBehaviorAnalysis::drawActionSequenceToDot(life, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agent_poorNoAL_noL_state170.jpg", state);
   } 
+  else if (programMode == "AVANALYSIS"){
+    settings::PromtParams params;
+    unsigned int firstEnv = 0;
+    unsigned int lastEnv = 0;
+    unsigned int firstTry = 0;
+    unsigned int lastTry = 0;
+    string settingsFilename;
+    string runSign;
+    params << settings::DoubleParam("env", firstEnv, lastEnv) 
+            << settings::DoubleParam("try", firstTry , lastTry)
+            << settings::SingleParam("settings", settingsFilename)
+            << settings::SingleParam("sign", runSign);
+    params.fillSettings(argc, argv);
+    techanalysis::AnalysisRange range;
+    range.setEnvRange(firstEnv, lastEnv);
+    range.setTrialRange(firstTry, lastTry);
+    vector<double> results = techanalysis::analyseBestPopStruct(range, techanalysis::agentPredCon(), settingsFilename, runSign);
+    stringstream outFilename;
+    outFilename << "AveragePredConQuantity_En" << firstEnv << "-" << lastEnv << "_" << runSign << ".txt";
+    ofstream ofs(outFilename.str().c_str());
+    copy(results.begin(), results.end(), ostream_iterator<double>(ofs, "\n"));
+    ofs.close();
+  }
+  else if (programMode == "DIFFEV"){
+    const string dir = "C:/SANDBOX/";
+    techanalysis::difEvolutionAnalysis(dir + "En2004_pc40redsys_mod(7)_bestagents.txt", 5000, 
+                                      dir + "Environment2004.txt", 1, 
+                                      dir + "settings_PC40REDSYS.ini", dir + "En2004_pc40redsys_mod(7)_difevolution.txt");
+  }
+  else if (programMode == "TESTUNIT"){
+    srand(static_cast<unsigned int>(time(0)));
+    rand();
+    rand();
+    rand();
+    THypercubeEnvironment env("C:/SANDBOX/Environment1001.txt");
+    cout << env.calculateOccupancyCoefficient() << endl;
+    RestrictedHypercubeEnv renv("C:/SANDBOX/Environment2001.txt");
+    cout << renv.calculateOccupancyCoefficient() << endl;
+    RestrictedHypercubeEnv* new_env = RestrictedHypercubeEnv::generateEnvironment(8, 0, 6, 2);
+    cout << new_env->calculateOccupancyCoefficient();
+    new_env->uploadEnvironment("C:/SANDBOX/Environment3010.txt");
+    delete new_env;
+    //srand(static_cast<unsigned int>(time(0)));
+    //time_t start = clock();
+    //for (unsigned int n = 0; n < 2500000u; ++n){
+    //  vector<double> vec(10000u, 0);
+    //  for (auto& el : vec)
+    //    el = service::uniformDistribution(0, 100);
+    //  sort(vec.begin(), vec.end());
+    //  double tmp = vec[0];
+    //  ++tmp;
+    //  if (n % 1000 == 0) cout << n << endl;
+    //}
+    //cout << (clock() - start) / static_cast<double>(CLOCKS_PER_SEC) << endl;
+
+    //tests::t_learn_1("C:/SANDBOX/Tests");
+    //tests::t_learn_2("C:/SANDBOX/Tests");
+    //tests::t_learn_3("C:/SANDBOX/Tests");
+    //tests::t_learn_4("C:/SANDBOX/Tests");
+    return 0;
+  }
 #ifndef NOT_USE_ROBOT_LIB
   else if (programMode == "ENKITEST") {
     
@@ -319,7 +429,6 @@ int main(int argc, char** argv){
   }
 #endif //NOT_USE_ROBOT_LIB
 
-
   /*TAnalysis* analysis = new TAnalysis;
 	analysis->randomAgentAnalysis("C:/Tests/Environments/", 1001, 1360, "C:/Tests/settings.ini", "C:/Tests/RANDOM_agent_analysis.txt");
 	delete analysis;*/
@@ -387,4 +496,113 @@ int main(int argc, char** argv){
 	/*TAnalysis analysis;
 	analysis.makeBestPopulationAnalysisSummary("C:/Tests/RANDOM_agent_analysis.txt", "C:/Tests/summarydeterm.txt", 18, 20, 1);*/
 	//return 0;
+}
+
+void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime, const string& imageFilename);
+
+void testFunc(){
+  //const string folder = "C:/Test/(2013-05-31)_Learning_Test/";
+  //const string agentFilename = folder + "En10001_linsys(2)_bestpopulation.txt";
+  //const unsigned int agentNumber = 2;
+  //const string environmentFilename = folder + "Environments/Environment10001.txt";
+  //const string settingsFilename = folder + "settings_LINSYS.ini";
+  //const string imageFilename = folder + "agent-1_state-0.jpg";
+  //const unsigned int initState = 0;
+  //const unsigned int lifetime = 50;
+  //RestrictedHypercubeEnv environment(environmentFilename);
+  //settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  //environment.setEnvironmentState(initState);
+  //environment.setStochasticityCoefficient(0.0);
+  //TAgent agent;
+  //agent.loadGenome(agentFilename, agentNumber);
+  //settings::fillAgentSettingsFromFile(agent, settingsFilename);
+  //agent.linearSystemogenesis();
+  ////drawAgentLife(agent, environment, lifetime, imageFilename);
+  //auto cycle = TBehaviorAnalysis::findCycleInAgentLife(agent, environment);
+  //RestrictedHypercubeEnv emptyEnv;
+  //emptyEnv.setEnvResolution(environment.getEnvironmentResolution());
+  //TBehaviorAnalysis::drawCycleToDot(cycle, emptyEnv, imageFilename);
+  //auto cycles = TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment);
+  //copy(begin(cycles.at(0).cycleSequence), end(cycles.at(0).cycleSequence), ostream_iterator<double>(cout, "\t"));
+  //cout << endl << endl;
+  //TBehaviorAnalysis::drawCyclesListToDot(TBehaviorAnalysis::findAllCyclesOfAgent(agent, environment), environment, imageFilename);
+
+}
+
+void currentAnalysis(){
+  const string folder = "C:/Test/SANDBOX/";
+  const string agentFilename = folder + "En1113_pc40anp40(18)_bestpopulation.txt";
+  const string bestAgentsFilename = folder + "En1113_pc40anp40(18)_bestagents.txt";
+  const string environmentFilename = folder + "Environment1113.txt";
+  const string settingsFilename = folder + "settings_PC40ANP40.ini";
+  const unsigned int agentNumber = 179;
+  const unsigned int lifetime = 100;
+  TAgent agent;
+  ofstream res((folder + "devPredConHist.txt").c_str());
+  ifstream rew((folder + "bestPopRewards.txt").c_str());
+  for (int pop = 1; pop <= 100; ++pop){
+    double curRew;
+    rew >> curRew;
+    if (curRew < 700) continue;
+    stringstream some;
+    some << folder << "/bestpopulations/En1113_pc40anp40(" << pop << ")_bestpopulation.txt";
+    ifstream agentsFile(some.str().c_str());
+    cout << pop << endl;
+    for (int agentN = 1; agentN <= 250; ++agentN){
+      agent.loadGenome(agentsFile);
+      TPoolNetwork* genome = agent.getPointerToAgentGenome();
+      for (int pool = 16; pool <= genome->getPoolsQuantity(); ++pool)
+        for (int con = 1; con <= genome->getPoolInputPredConnectionsQuantity(pool); ++con)
+          res << genome->getDevelopPredConnectionProb(pool, con) << endl;
+    }
+    agentsFile.close();
+  }
+  res.close();
+  return;
+  //THypercubeEnvironment environment(environmentFilename);
+  //settings::fillEnvironmentSettingsFromFile(environment, settingsFilename);
+  //environment.setStochasticityCoefficient(0.0);
+  //TAgent agent;
+  //settings::fillAgentSettingsFromFile(agent, settingsFilename);
+  //agent.loadGenome(agentFilename, agentNumber);
+  //ofstream outRes((folder + "results.txt").c_str());
+  //for (unsigned int run = 0; run < 20; ++run){
+  //  agent.systemogenesis();
+
+  //  stringstream str;
+  //  str << folder << "agent" << run << ".txt";
+  //  ofstream out(str.str().c_str());
+  //  agent.uploadController(out);
+  //  out.close();
+
+  //  agent.setLearningMode(0);
+  //  vector<double> rewardsWithoutLearning = techanalysis::totalRun(agent, environment, lifetime);
+  //  double rewardWithoutLearning = techanalysis::sum(rewardsWithoutLearning) / rewardsWithoutLearning.size();
+  //  agent.setLearningMode(1);
+  //  vector<double> rewardsWithLearning = techanalysis::totalRun(agent, environment, lifetime);
+  //  double rewardWithLearning = techanalysis::sum(rewardsWithLearning) / rewardsWithLearning.size();
+  //  outRes << run << "\t" << rewardWithoutLearning << "\t" << rewardWithLearning << endl;
+  //  cout << run << "\t" << rewardWithoutLearning << "\t" << rewardWithLearning << endl;
+  //}
+  //outRes.close();
+  //techanalysis::difEvolutionAnalysis(bestAgentsFilename, 5000, environmentFilename, settingsFilename, folder + "evolutionDiffResults.txt", 25, 5, 100);
+}
+
+/**
+* Отрисовка жизни агента в формате .jpg с помощью утилиты dot (путь к утилите должен находиться в переменной $PATH$).
+* В среде должно быть установлено начальное состояние, из которого запускается агент.
+* \param [in] agent - нейросетевой агент.
+* \param [in] environment - среда с установленным начальным состоянием.
+* \param [in] lifetime - время жизни агента.
+* \param [in] imageFilename - путь к генерируемому файлу .jpg жизни агента.
+*/
+void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned int lifetime, const string& imageFilename){
+  //const int initState = environment.getEnvironmentState();
+  //environment.setStochasticityCoefficient(0.0);
+  //agent.life(environment, lifetime, false);
+  //const auto& life = agent.getPointerToAgentLife();
+  //vector<double> _life;
+  //_life.reserve(life.size());
+  //transform(life.cbegin(), life.cend(), back_inserter(_life), [](const vector<double>& v){ return v.at(0); });  
+  //TBehaviorAnalysis::drawActionSequenceToDot(_life, environment, imageFilename, initState);
 }

@@ -25,11 +25,19 @@ string settings::getSettingsFilename(int argc, char** argv){
 	return "";
 }
 
+void assert(bool cond, const string& errorMessage){
+  if (!cond){
+    cout << "Error: " << errorMessage << endl;
+    abort();
+  }
+}
+
 // Заполнение параметров директорий для записи файлов
 void settings::fillDirectoriesSettings(string& workDirectory, string& environmentDirectory, string& resultsDirectory, string settingsFilename){
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());
+  assert(settingsFile.is_open(), "Can not open settings file " + settingsFilename);
 	while (settingsFile >> optionString){
 		if (optionString == "work-directory") { settingsFile >> workDirectory; }
 		else if (optionString == "environment-directory") { settingsFile >> environmentDirectory; }
@@ -43,6 +51,7 @@ void settings::fillEnvironmentSettingsFromFile(THypercubeEnvironment& environmen
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());
+  assert(settingsFile.is_open(), "Can not open settings file " + settingsFilename);
 	while (settingsFile >> optionString){
 		if (optionString == "reward-recovery-time") { settingsFile >> optionString; environment.setRewardRecoveryTime(atoi(optionString.c_str())); }
 		else if (optionString == "stochasticity-coefficient") { settingsFile >> optionString; environment.setStochasticityCoefficient(atof(optionString.c_str())); }
@@ -82,6 +91,7 @@ void settings::fillPopulationSettingsFromFile(TPopulation<TAgent>& agentsPopulat
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());
+  assert(settingsFile.is_open(), "Can not open settings file " + settingsFilename);
 	while (settingsFile >> optionString){
 		if (optionString == "population-size") { settingsFile >> optionString; agentsPopulation.setPopulationSize(atoi(optionString.c_str())); }
 		else if (optionString == "agent-lifetime") { settingsFile >> optionString; agentsPopulation.evolutionSettings.agentLifetime = atoi(optionString.c_str()); }
@@ -146,6 +156,7 @@ void settings::fillAgentsPopulationSettingsFromFile(TPopulation<TAgent>& agentsP
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());
+  assert(settingsFile.is_open(), "Can not open settings file " + settingsFilename);
 	TAgent::SPrimarySystemogenesisSettings* primarySystemogenesisSettings = new TAgent::SPrimarySystemogenesisSettings;
 	TAgent::SLearningSettings* learningSettings = new TAgent::SLearningSettings;
 	while (settingsFile >> optionString){
@@ -228,6 +239,7 @@ void settings::fillAgentSettingsFromFile(TAgent& agent, string settingsFilename)
 	string optionString;
 	ifstream settingsFile;
 	settingsFile.open(settingsFilename.c_str());
+  assert(settingsFile.is_open(), "Can not open settings file " + settingsFilename);
 	while (settingsFile >> optionString){
 		// Параметры первичного системогенеза
 		if (optionString == "primary-systemogenesis-mode") { settingsFile >> optionString; agent.primarySystemogenesisSettings.primarySystemogenesisMode = atoi(optionString.c_str()); }

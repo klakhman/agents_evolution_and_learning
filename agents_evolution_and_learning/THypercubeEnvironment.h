@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <cstring>
 #include "service.h"
 #include "TEnvironment.h"
 /*
@@ -116,10 +117,12 @@ public:
 		for (int currentBit = 1; currentBit <= environmentResolution; ++currentBit)
 			environmentVector[currentBit - 1] = static_cast<double>(currentEnvironmentVector[currentBit - 1]);
 	}
-  void setEnvResolution(unsigned int _envResolution){
+  virtual void setEnvResolution(unsigned int _envResolution){
     if (currentEnvironmentVector)
       delete []currentEnvironmentVector;
+    environmentResolution = _envResolution;
     currentEnvironmentVector = new bool[_envResolution];
+    memset(currentEnvironmentVector, 0, environmentResolution * sizeof(*currentEnvironmentVector));
   }
 
   // Получение константной ссылки на цель в среде (номер цели начинается с единица)
@@ -177,8 +180,12 @@ public:
 	// Процедура генерации среды по требуемому коэффициенту заполненности, eps - точность генерации, также передается минимальная сложность цели и максимальная, а также минимальная максимальная сложность
 	double generateEnvironment(int _environmentResolution, double requiredOccupancyCoef, int maxAimComplexity = 5, int minAimComplexity = 2, int minMaxAimComplexity = 3, double eps = 0.0005);
 
-  void printSettings(std::ostream& os) {
-    os << "Environment_parameters:" << "\tstochasticity-coefficient=" << getStochasticityCoefficient() << "\treward-recovery-time=" << getRewardRecoveryTime() << std::endl << std::endl;
+  virtual void printSettings(std::ostream& os) {
+    os << "Environment_parameters:" << 
+        "\tstochasticity-coefficient=" << getStochasticityCoefficient() << 
+        "\treward-recovery-time=" << getRewardRecoveryTime() << 
+        "\tenv-type=hypercube" <<
+        std::endl << std::endl;
   }
   
 	// Добавляем в друзья тестовые процедуры

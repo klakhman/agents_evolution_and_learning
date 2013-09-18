@@ -60,7 +60,10 @@ public:
 	double getPoolBiasVariance(int poolNumber) const { return poolsStructure[poolNumber-1].getBiasVariance(); }
 	void setPoolBiasVariance(int poolNumber, double newBiasVariance) { poolsStructure[poolNumber-1].setBiasVariance(newBiasVariance); }
 	int getPoolLayer(int poolNumber) const { return poolsStructure[poolNumber-1].getLayer(); }
-	void setPoolLayer(int poolNumber, int newLayer) { poolsStructure[poolNumber-1].setLayer(newLayer); }
+	void setPoolLayer(int poolNumber, int newLayer) { 
+    poolsStructure[poolNumber-1].setLayer(newLayer);
+    layersQuantity = std::max(layersQuantity, newLayer);
+  }
 
 	void setPoolRootPoolID(int poolNumber, int _rootPoolID) { poolsStructure[poolNumber-1].setRootPoolID(_rootPoolID); }
 	int getPoolRootPoolID(int poolNumber) const { return poolsStructure[poolNumber-1].getRootPoolID(); }

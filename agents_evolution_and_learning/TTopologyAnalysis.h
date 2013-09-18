@@ -10,7 +10,7 @@
 class TTopologyAnalysis{
 	
 public:
-	TTopologyAnalysis(void);
+	TTopologyAnalysis();
 
 	// получить новый id для пула (необходимо предварительно инициализировать массив idArray)
 //	std::vector<int> getPoolId(int id);
@@ -20,7 +20,7 @@ public:
 
   static void printGraphNetworkMGraal(TPoolNetwork *network, std::map< int, std::vector<int> > idArray, std::string graphFilename);
 
-	~TTopologyAnalysis(void);
+	~TTopologyAnalysis();
 };
 
 #endif

@@ -3,7 +3,9 @@
 
 #include "THypercubeEnvironment.h"
 #include "TPoolNetwork.h"
+#include "TAgent.h"
 #include <string>
+#include <vector>
 
 class tests{
 	/*// Проверка непротиворечивости цели (true - цель противоречива, false - цель непротиворечива)
@@ -44,7 +46,13 @@ public:
 public:
 	static void createTestPoolNetwork(TPoolNetwork& poolNetwork);
 	static void testPrimarySystemogenesis(std::string testDirectory);
+  static void lifeViz(TAgent& agent, std::vector< std::vector<double> >&  inputs, 
+                      const std::string& outputDirectory);
 
+  static void t_learn_1(const std::string& directory);
+  static void t_learn_2(const std::string& directory);
+  static void t_learn_3(const std::string& directory);
+  static void t_learn_4(const std::string& directory);
 };
 
 #endif // TESTS_H

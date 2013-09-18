@@ -131,6 +131,8 @@ public:
   static void actionsSequence2aimSequence(double* actionsSequence, int actionsQuantity, const THypercubeEnvironment& environment, double* aimsSequence, int& aimsQuantity);
   
   static void drawSequenceWithAims(std::vector<double> &sequence, THypercubeEnvironment &environment, std::string outputImageFilename, double initialState = -1);
+
+  static void drawAgentLife(TAgent& agent, THypercubeEnvironment& env, unsigned int lifetime, const std::string& lifeFilename);
 };
 
 #endif /* defined(__agents_evolution_and_learning__TBehaviorAnalysis__) */

@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <ctime>
+#include <sstream>
 #include "config.h"
 
 using namespace std;
@@ -146,4 +147,32 @@ void service::HSVtoRGB(int& R, int& G, int& B, double H, double S, double V)
   R = static_cast<int>(255*_R);
   G = static_cast<int>(255*_G);
   B = static_cast<int>(255*_B);
+}
+
+/// Формирование имени файла среды
+string service::envName(unsigned int envNumber){
+  stringstream tmpStream;
+  tmpStream << "Environment" << envNumber << ".txt";
+  return tmpStream.str();
+}
+
+/// Формирование пути к файлу среды
+string service::envPath(const string& environmentDirectory, unsigned int envNumber){
+  stringstream tmpStream;
+  tmpStream << environmentDirectory << "/" << envName(envNumber);
+  return tmpStream.str();
+}
+
+/// Формирование имени файла лучшей популяции по аттрибутам запуска
+string service::bestPopName(unsigned int envNumber, unsigned int tryNumber, const string& runSign){
+  stringstream tmpStream;
+  tmpStream << "En" << envNumber << "_" << runSign << "(" << tryNumber << ")_bestpopulation.txt";
+  return tmpStream.str();
+}
+
+/// Формирование пути к файлу с лучшей популяцией по аттрибутам запуска 
+string service::bestPopPath(const string& resultsDirectory, unsigned int envNumber, unsigned int tryNumber, const string& runSign){
+  stringstream tmpStream;
+  tmpStream << resultsDirectory << "/En" << envNumber << "/" << bestPopName(envNumber, tryNumber, runSign);
+  return tmpStream.str();
 }

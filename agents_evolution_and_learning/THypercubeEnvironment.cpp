@@ -13,7 +13,7 @@ using namespace std;
 
 // Печать цели на экран
 void THypercubeEnvironment::TAim::print(std::ostream& os) const{
-  for (int currentAction = 1; currentAction < aimComplexity; ++currentAction)
+  for (int currentAction = 1; currentAction <= aimComplexity; ++currentAction)
     os << actionsSequence[currentAction - 1].bitNumber << "->" << actionsSequence[currentAction - 1].desiredValue << " ; ";
   os << endl;
 }
@@ -26,10 +26,14 @@ ostream& operator<<(ostream& os, const THypercubeEnvironment::TAim& aim){
 
 // Загрузка структуры целей среды из файла
 void THypercubeEnvironment::loadEnvironment(std::string environmentFilename){
-	// Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
-	if (environmentResolution) delete []currentEnvironmentVector;
 	ifstream environmentFile;
 	environmentFile.open(environmentFilename.c_str());
+  if (!environmentFile.is_open()){
+    cout << "Error: Can not open environment file " << environmentFilename << endl;
+    abort();
+  }
+  // Стираем текущий вектор среды (так как мы можем загружать среду другой размерности)
+	if (environmentResolution) delete []currentEnvironmentVector;
 	string tmp_str;
 	environmentFile >> tmp_str; // Считываем размерность среды
 	environmentResolution = atoi(tmp_str.c_str());

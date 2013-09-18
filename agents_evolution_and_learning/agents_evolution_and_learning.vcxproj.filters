@@ -96,6 +96,12 @@
     <ClInclude Include="RestrictedHypercubeEnv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="params.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="watchers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TNeuralPool.cpp">
@@ -171,6 +177,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RestrictedHypercubeEnv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="params.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="watchers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
