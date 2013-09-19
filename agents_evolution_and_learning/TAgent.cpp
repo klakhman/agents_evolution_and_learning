@@ -39,7 +39,7 @@ void TAgent::loadGenome(string filename, int genomeNumber, bool extra/*=false*/)
   ifstream genomeFile;
   genomeFile.open(filename.c_str());
   if (!genomeFile.is_open()){
-    cout << "Error: Can not open genome file " << genomeFile << endl;
+    cout << "Error: Can not open genome file " << filename << endl;
     abort();
   }
   for (int currentAgent = 1; currentAgent <= genomeNumber; ++currentAgent)

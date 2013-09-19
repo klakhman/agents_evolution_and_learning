@@ -25,9 +25,10 @@ void TNeuron::calculateOut(){
 		  double preNeuronOut = (layer > inputSynapsesSet[currentSynapse - 1].preNeuron->layer) ? 
 													  inputSynapsesSet[currentSynapse - 1].preNeuron->currentOut:
 													  inputSynapsesSet[currentSynapse - 1].preNeuron->previousOut;
+      int preNeuronType = inputSynapsesSet[currentSynapse - 1].preNeuron->type;
 		  // Если выход не означен, то что-то пошло не так (эта строчка больше для отладки)
 		  //if (preNeuronOut == EMPTY_OUT) exit(2);
-		  if (preNeuronOut > ACTIVITY_TRESHOLD) // Если пресинаптический сигнал проходит по синапсу
+		  if ((preNeuronOut > ACTIVITY_TRESHOLD) || (preNeuronType == INPUT_NEURON)) // Если пресинаптический сигнал проходит по синапсу
 			  potential += inputSynapsesSet[currentSynapse - 1].weight * preNeuronOut;
     }
 	}

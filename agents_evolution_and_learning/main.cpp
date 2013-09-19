@@ -385,6 +385,7 @@ int main(int argc, char** argv){
     
     // Устанавливаем зерно для генератора случайных чисел
     srand(static_cast<unsigned int>(time(0)));
+    rand();
     
     // Удаление файлов, заключающих информацию о объектах среды (необходимы для построения графика в гнуплоте)
     std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt");
@@ -399,6 +400,7 @@ int main(int argc, char** argv){
     TEnkiEnvironment enkiEnvironment;
     settings::fillEnvironmentSettingsFromFile(enkiEnvironment, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
     enkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/testingEnvironment.txt");
+    enkiEnvironment.willDrawThePlot = 1;
     
     // Установка начальных параметров робота (положения, угла (отсчитывается против часовой стрелки от оси, направленной вправо) и начальных скоростей)
     enkiEnvironment.setRandomEnvironmentState();
@@ -413,8 +415,11 @@ int main(int argc, char** argv){
     settings::fillAgentSettingsFromFile(enkiAgent, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
     
     // Формирование нейронной сети агента
-    std::fstream inputFileForGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt");
-    enkiAgent.loadGenome(inputFileForGenome, 1158);
+    //std::fstream inputFileForGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt");
+    enkiAgent.loadGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt", 2979);
+    /*ofstream out("/Users/Sergey/Desktop/1158.txt");
+    enkiAgent.uploadGenome(out);
+    out.close();*/
     enkiAgent.linearSystemogenesis();
     
     // Формирование файлов с информацией об объектах в среде для гнуплота
@@ -605,3 +610,4 @@ void drawAgentLife(TAgent& agent, THypercubeEnvironment& environment, unsigned i
   //_life.reserve(life.size());
   //transform(life.cbegin(), life.cend(), back_inserter(_life), [](const vector<double>& v){ return v.at(0); });  
   //TBehaviorAnalysis::drawActionSequenceToDot(_life, environment, imageFilename, initState);
+}

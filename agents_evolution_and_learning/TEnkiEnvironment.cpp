@@ -126,7 +126,7 @@ void TEnkiEnvironment::uploadEnvironment(std::string environmentFilename) const 
 }
 
 int TEnkiEnvironment::getEnvironmentResolution() const {
-    return 15;
+    return 17;
 }
 
 int TEnkiEnvironment::getActionResolution() const {
@@ -188,10 +188,10 @@ void TEnkiEnvironment::getCurrentEnvironmentVector(double environmentVector[]) c
         rightSpeed = ePuckBot->rightSpeed/12.8;
     }
     
-    double frontFrontRightSensorValue = ePuckBot->infraredSensor0.finalValue/4000.0;
-    double rightSensorValue = ePuckBot->infraredSensor2.finalValue/4000.0;
-    double leftSensorValue = ePuckBot->infraredSensor5.finalValue/4000.0;
-    double frontFrontLeftSensorValue = ePuckBot->infraredSensor7.finalValue/4000.0;
+    double frontFrontRightSensorValue = ePuckBot->infraredSensor0.finalValue/2000.0;
+    double rightSensorValue = ePuckBot->infraredSensor2.finalValue/2000.0;
+    double leftSensorValue = ePuckBot->infraredSensor5.finalValue/2000.0;
+    double frontFrontLeftSensorValue = ePuckBot->infraredSensor7.finalValue/2000.0;
     
     //std::cout << "E-puck current state vector is (" << firstSection.components[0] << ";" << firstSection.components[1] << ";" << firstSection.components[2] << ";" << secondSection.components[0] << ";" << secondSection.components[1] << ";" << secondSection.components[2] << ";" <<thirdSection.components[0] << ";" << thirdSection.components[1] << ";" << thirdSection.components[2] << ";" << leftSpeed << ";" << rightSpeed << ";" << frontFrontRightSensorValue << ";" << rightSensorValue << ";" << leftSensorValue << ";" << frontFrontLeftSensorValue << ")" << std::endl;
     
@@ -208,8 +208,22 @@ void TEnkiEnvironment::getCurrentEnvironmentVector(double environmentVector[]) c
     environmentVector[10] = leftSensorValue;
     environmentVector[11] = rightSensorValue;
     environmentVector[12] = frontFrontRightSensorValue;
-    environmentVector[13] = leftSpeed;
-    environmentVector[14] = rightSpeed;
+  
+    if (leftSpeed<0) {
+      environmentVector[13] = -leftSpeed;
+      environmentVector[14] = 0.0;
+    } else {
+      environmentVector[13] = 0.0;
+      environmentVector[14] = leftSpeed;
+    }
+  
+    if (rightSpeed<0) {
+      environmentVector[15] = -rightSpeed;
+      environmentVector[16] = 0.0;
+    } else {
+      environmentVector[15] = 0.0;
+      environmentVector[16] = rightSpeed;
+    }
 }
 
 void TEnkiEnvironment::setRandomEnvironmentState() {
@@ -268,8 +282,12 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     ePuckBot->leftSpeed = ePuckBot->leftSpeed + action.at(0);
     ePuckBot->rightSpeed = ePuckBot->rightSpeed + action.at(1);
     world->step(worldStep);
-    this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+    //this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
     currentTime = currentTime + worldStep;
+  
+    if (willDrawThePlot) {
+      this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+    }
   
     /*for (int i=0; i<objectsInTheWorld.size(); i++) {
       Enki::PhysicalObject * someObject = *world->objects.find(objectsInTheWorld[i]);

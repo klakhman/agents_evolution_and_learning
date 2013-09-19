@@ -84,6 +84,7 @@ public:
   int goalsNumber; // Количество целей в среде
   std::vector<TEnkiAim> goalsArray; // Вектор целей среды
   std::vector<Enki::PhysicalObject *> objectsInTheWorld;
+  int willDrawThePlot;
   
   Enki::EPuck * ePuckBot; // Робот E-Puck
   Enki::World * world; // Симуляция среды, в которой он существует
@@ -98,6 +99,7 @@ public:
     cubeRadius = 0;
     cubeSize = 0;
     rewardRecoveryTime = 0;
+    willDrawThePlot = 0;
   }
   
   // Конструктор среды с использованием параметров из файла
@@ -106,6 +108,7 @@ public:
     ySize = 0;
     objectsNumber = 0;
     goalsNumber = 0;
+    willDrawThePlot = 0;
 		loadEnvironment(aimsFilename);
 	}
   
