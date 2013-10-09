@@ -84,7 +84,7 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
 //     vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);
 //      int memory = calculateCycleLongestMemory(cycles[1358], *environment);
 //      cout<<memory;
-      calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Results/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
+  //    calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Results/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
      // drawCycleToDot(cycles[1358], *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
      // drawAllCyclesToDot(cycles, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States.gv");
 //      SCycle states = transformActionsCycleToStatesCycle(cycles[1189], *environment);
@@ -694,17 +694,14 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
   }
   
   const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
-  
-  for (map< int,std::vector<int> >::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
-    const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
+ 
     //Рисуем данную цель в dot файл
     ofstream dotFile;
     //!С++ 11 only! Need to find a better solution
     //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".dot").c_str());
     //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".gv").c_str());
     stringstream tmpBuf;
-    tmpBuf << it->first;
-    dotFile.open((outputImageFilename+tmpBuf.str()+".gv").c_str());
+    dotFile.open((outputImageFilename+".gv").c_str());
     dotFile<<"digraph G {"<<endl;
     
     int cycleNumber = 0;
@@ -729,21 +726,23 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
         dotFile<<currentStateVector[currentBit];
       dotFile<<"\"";
       //Проверяем, входит ли данный узел в данную цель
-      for (vector<int>::iterator action = aimsReachingpoints[it->first].begin(); action!=aimsReachingpoints[it->first].end();++action)
-        if (currentStep>*action-currentAim.aimComplexity && currentStep<=*action)
-          dotFile<<",style=filled,fillcolor="<<colorsArray[it->first%8];//Dynamic color picking, 8 is the size of array
+ 
       dotFile<<"]"<<endl;
       // Записываем переход
       dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<sequence[currentStep-1]<<")"<<"\"]"<<endl;
     }
     delete []currentStateVector;
-    
-    
-    dotFile<<"}"<<endl;
-    dotFile.close();
-    system(("dot -Tpng " + outputImageFilename + ".dot -o " + outputImageFilename).c_str());
-    cout << aimsReachingpoints[it->first].size() << "\n";
+  
+  
+  for (map< int,std::vector<int> >::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
+    const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
+    int entrance = it->second.at(0);
+    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[entrance]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[(entrance+currentAim.aimComplexity)%states.size()]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
   }
+  
+  dotFile<<"}"<<endl;
+  dotFile.close();
+  system(("dot -Tpng " + outputImageFilename + ".dot -o " + outputImageFilename).c_str());
 //  double aims[(int)sequence.size()];
 //  int aimsQ;
 //  const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
