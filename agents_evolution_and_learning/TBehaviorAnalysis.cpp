@@ -694,50 +694,43 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
   }
   
   const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
- 
-    //Рисуем данную цель в dot файл
-    ofstream dotFile;
-    //!С++ 11 only! Need to find a better solution
-    //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".dot").c_str());
-    //dotFile.open((outputImageFilename+std::to_string(aimNumber)+".gv").c_str());
-    stringstream tmpBuf;
-    dotFile.open((outputImageFilename+".gv").c_str());
-    dotFile<<"digraph G {"<<endl;
-    
-    int cycleNumber = 0;
-    environment.setStochasticityCoefficient(0.0);
-    vector<double> states = transformActionsSequenceToStatesSequence(sequence, environment, -1);
-    //Надо как-то динамически инициализировать
-    bool* currentStateVector = new bool[environment.getEnvironmentResolution()];
-    
-    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[0]<<" [label=\"";
-    service::decToBin(static_cast<int>(states[0] + 0.1), currentStateVector, environment.getEnvironmentResolution());
+  
+  //Рисуем данную цель в dot файл
+  ofstream dotFile;
+  dotFile.open((outputImageFilename+".gv").c_str());
+  dotFile<<"digraph G {"<<endl;
+  
+  environment.setStochasticityCoefficient(0.0);
+  vector<double> states = transformActionsSequenceToStatesSequence(sequence, environment, -1);
+  //Надо как-то динамически инициализировать
+  bool* currentStateVector = new bool[environment.getEnvironmentResolution()];
+  
+ // dotFile<<"\t"<<"sT"<<states[0]<<" [label=\"";
+  service::decToBin(static_cast<int>(states[0] + 0.1), currentStateVector, environment.getEnvironmentResolution());
+  //Пишем начальное состояние
+//  for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
+//    dotFile<<currentStateVector[currentBit];
+//  dotFile<<"\"]"<<endl;
+  //double intitalStateFromVector = service::binToDec(currentStateVector, environment.getEnvironmentResolution());
+ // states.insert(states.begin(), intitalStateFromVector);
+  for (unsigned int currentStep=1; currentStep<states.size(); ++currentStep) {
+    // Записываем очередную вершину
+    dotFile<<"\t"<<"sT"<<states[currentStep]<<" [label=\"";
+    service::decToBin(static_cast<int>(states[currentStep]), currentStateVector, environment.getEnvironmentResolution());
     
     for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
       dotFile<<currentStateVector[currentBit];
     dotFile<<"\"]"<<endl;
-    
-    for (unsigned int currentStep=1; currentStep<states.size(); ++currentStep) {
-      // Записываем очередную вершину
-      dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\"";
-      service::decToBin(static_cast<int>(states[currentStep]), currentStateVector, environment.getEnvironmentResolution());
-      
-      for (int currentBit=0; currentBit<environment.getEnvironmentResolution(); ++currentBit)
-        dotFile<<currentStateVector[currentBit];
-      dotFile<<"\"";
-      //Проверяем, входит ли данный узел в данную цель
- 
-      dotFile<<"]"<<endl;
-      // Записываем переход
-      dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[currentStep-1]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<sequence[currentStep-1]<<")"<<"\"]"<<endl;
-    }
-    delete []currentStateVector;
+    // Записываем переход
+    dotFile<<"\t"<<"sT"<<states[currentStep-1]<<" -> "<<"sT"<<states[currentStep]<<" [label=\""<<currentStep<<"("<<sequence[currentStep-1]<<")"<<"\"]"<<endl;
+  }
+  delete []currentStateVector;
   
   
   for (map< int,std::vector<int> >::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
     const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
-    int entrance = it->second.at(0);
-    dotFile<<"\t"<<"sT"<<cycleNumber<<"T"<<states[entrance]<<" -> "<<"sT"<<cycleNumber<<"T"<<states[(entrance+currentAim.aimComplexity)%states.size()]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
+    int reaching = it->second.at(0);
+    dotFile<<"\t"<<"sT"<<states[reaching-currentAim.aimComplexity+1]<<" -> "<<"sT"<<states[reaching+1]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
   }
   
   dotFile<<"}"<<endl;
