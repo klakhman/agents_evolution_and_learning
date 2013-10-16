@@ -730,7 +730,7 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
   for (map< int,std::vector<int> >::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
     const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
     int reaching = it->second.at(0);
-    dotFile<<"\t"<<"sT"<<states[reaching-currentAim.aimComplexity+1]<<" -> "<<"sT"<<states[reaching+1]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
+    dotFile<<"\t"<<"sT"<<states[reaching-currentAim.aimComplexity]<<" -> "<<"sT"<<states[reaching]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
   }
   
   dotFile<<"}"<<endl;
