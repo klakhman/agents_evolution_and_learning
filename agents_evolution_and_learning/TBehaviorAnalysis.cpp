@@ -77,7 +77,9 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
       environment->setStochasticityCoefficient(0.0);
       //Запускаем поиск циклов
       vector<SCycle>cycles = loadCycles(filenameSettings.cyclesFilename);//findCyclesInEvolution(*environment);
-      drawSequenceWithAims(cycles.at(1370).cycleSequence, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States");
+      for (int cycleNumber = 0;cycleNumber<1800;cycleNumber++)
+        if (cycles.at(cycleNumber).cycleSequence.size()>20)
+          drawSequenceWithAims(cycles.at(cycleNumber).cycleSequence, *environment, "/Users/nikitapestrov/Desktop/Neurointellect/Settings/States");
    //   double reward = calculateCycleReward(cycles.at(1170), *environment);
     //  uploadCycles(cycles, filenameSettings.cyclesFilename);
      // calculateMetricsForEvolutionaryProcess("/Users/nikitapestrov/Desktop/Neurointellect/Settings/EvoCycles.txt", filenameSettings.cyclesFilename, *environment);
@@ -729,8 +731,10 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
   
   for (map< int,std::vector<int> >::iterator it = aimsReachingpoints.begin(); it != aimsReachingpoints.end(); ++it) {
     const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
-    int reaching = it->second.at(0);
-    dotFile<<"\t"<<"sT"<<states[reaching-currentAim.aimComplexity]<<" -> "<<"sT"<<states[reaching]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
+    for (int aimReaching = 0; aimReaching < it->second.size(); ++aimReaching) {
+      int reaching = it->second.at(aimReaching);
+      dotFile<<"\t"<<"sT"<<states[reaching-currentAim.aimComplexity]<<" -> "<<"sT"<<states[reaching]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
+    }
   }
   
   dotFile<<"}"<<endl;
