@@ -16,6 +16,7 @@
 #include <map>
 #include <sstream>
 #include "settings.h"
+#include "techanalysis.h"
 
 using namespace std;
 
@@ -32,6 +33,8 @@ void TBehaviorAnalysis::decodeCommandPromt(int argc, char** argv){
 				  mode = TBAModeSingleAgent;
 			  else if (!strcmp("evolution", argv[currentArgNumber+1]))
 				  mode = TBAModeEvolution;
+        else if (!strcmp("aims", argv[currentArgNumber+1]))
+				  mode = TBAModeAims;
         ++currentArgNumber;
 			}
 			else if (!strcmp("-settings", argv[currentArgNumber])) 
@@ -70,6 +73,10 @@ void TBehaviorAnalysis::beginAnalysis(int argc, char **argv)
      }
     case TBAModeSingleAgent:
       ;
+    case TBAModeAims: {
+      techanalysis::conductBehaviorEvolutionAnalysis("/Users/nikitapestrov/Desktop/Neurointellect/Aims/settings_LINSYS.ini", "/Users/nikitapestrov/Desktop/Neurointellect/Aims/Environment1120.txt", "/Users/nikitapestrov/Desktop/Neurointellect/Aims/En1120_63(5)_bestagents.txt", 5000, "/Users/nikitapestrov/Desktop/Neurointellect/Aims/Aimresults1120.txt", "/Users/nikitapestrov/Desktop/Neurointellect/Aims/AimdataOutput1120.txt",true);
+      break;
+    }
     case TBAModeEvolution: {
       THypercubeEnvironment* environment = new THypercubeEnvironment(filenameSettings.environmentFilename);
       settings::fillEnvironmentSettingsFromFile(*environment, filenameSettings.settingsFilename);

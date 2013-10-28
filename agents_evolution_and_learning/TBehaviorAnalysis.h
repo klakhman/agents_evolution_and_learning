@@ -23,6 +23,7 @@ class TBehaviorAnalysis{
 		TBAModePoulation,//Поиск циклов во всей популяции
 		TBAModeSingleAgent,//Поиск циклов в одном агенте
     TBAModeEvolution,//Поиск циклов в ходе эволюции
+    TBAModeAims
 	}TBehaviorAnalysisMode;
 
   //Режим анализа - всей популции, одного агента, и т.д.
