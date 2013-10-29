@@ -19,19 +19,22 @@ vector<double> TEnkiAgent::decodeAction(double outputVector[]) {
   return actionVector;
 }
 
-void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate /*= true*/){
+void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate /*= true*/, bool resetNet /*= true*/, bool resetLife /*=true*/, int lastLifeStep /*=0*/){
 	double* environmentVector = new double[neuralController->getInputResolution()];
 	double* outputVector = new double[neuralController->getOutputResolution()];
   vector<double> actionVector(getActionResolution());
   
-  agentLife.erase(agentLife.begin(), agentLife.end());
-  vector<double> firstVector;
-  firstVector.push_back(0);
-  firstVector.push_back(0);
-  agentLife.push_back(firstVector);
+  if (resetLife) {
+    agentLife.clear();
+    vector<double> firstVector;
+    firstVector.push_back(0);
+    firstVector.push_back(0);
+    agentLife.push_back(firstVector);
+  }
   
-	neuralController->reset();
-  for (int agentLifeStep = 1; agentLifeStep <= agentLifeTime; ++agentLifeStep) {
+	if (resetNet) neuralController->reset();
+  
+  for (int agentLifeStep = lastLifeStep+1; agentLifeStep <= agentLifeTime+lastLifeStep; ++agentLifeStep) {
     environment.getCurrentEnvironmentVector(environmentVector);
     neuralController->calculateNetwork(environmentVector);
     neuralController->getOutputVector(outputVector);

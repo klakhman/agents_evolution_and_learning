@@ -24,6 +24,14 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
     xSize = atof(tmp_str.c_str());
     environmentFile >> tmp_str;
     ySize = atof(tmp_str.c_str());
+    environmentFile >> tmp_str;
+    xBirthMin = atof(tmp_str.c_str());
+    environmentFile >> tmp_str;
+    xBirthMax = atof(tmp_str.c_str());
+    environmentFile >> tmp_str;
+    yBirthMin = atof(tmp_str.c_str());
+    environmentFile >> tmp_str;
+    yBirthMax = atof(tmp_str.c_str());
     environmentFile >> tmp_str; // Считываем количество объектов в среде (по умолчанию - кубы)
     objectsNumber = atoi(tmp_str.c_str());
     for (int i=0; i<objectsNumber; i++) { // Заполняем массив объектов, каждый из которых имеет позицию своего центра и цвет
@@ -80,11 +88,11 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
     Enki::PhysicalObject* o = new Enki::PhysicalObject;
     Enki::PhysicalObject::Hull hull(Enki::PhysicalObject::Part(p2, cubeSize));
     o->setCustomHull(hull, -100000); // Отрицательная масса - то же, что бесконечная, поэтому объекты сдвинуть с места будет невозможно
-    o->setColor(Enki::Color(objectsArray.at(i).color[0], objectsArray.at(i).color[1], objectsArray.at(i).color[2]));
+    o->setColor(Enki::Color(objectsArray.at(i).color[0]/255.0, objectsArray.at(i).color[1]/255.0, objectsArray.at(i).color[2]/255.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ));
     o->collisionElasticity = 0; // Все тепло от столкновения поглощается
     o->pos = Enki::Point(objectsArray.at(i).x, objectsArray.at(i).y);
     world->addObject(o);
-    objectsInTheWorld.push_back(o);
+    //objectsInTheWorld.push_back(o);
   }
   
   // Создаем E-PUCK и размещаем его в среде
@@ -95,8 +103,6 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   ePuckBot->rightSpeed = 0;
   ePuckBot->setColor(Enki::Color(1, 0, 0));
   world->addObject(ePuckBot);
-  objectsInTheWorld.push_back(ePuckBot);
-  
 }
 
 void TEnkiEnvironment::uploadEnvironment(std::string environmentFilename) const {
@@ -138,26 +144,26 @@ void TEnkiEnvironment::getCurrentEnvironmentVector(double environmentVector[]) c
     
     int numberOfPixelsToCoverTheFullView = 180;
     
-    //Сперва просто суммируем значения по каждому из пикселей для его R,G,B и A составляющих. Это проделываем для трех секторов - левого, центрального и правого. Также нормируем на интервал [0; 1], деля на 255.
+    //Сперва просто суммируем значения по каждому из пикселей для его R,G,B и A составляющих. Это проделываем для трех секторов - левого, центрального и правого. Значения уже отнормированы на интервал [0; 1].
   
     for (int i=0; i<numberOfPixelsToCoverTheFullView/3; i++) {
-        firstSection.components[0]+=ePuckBot->camera.image[i].components[0]/255.0;
-        firstSection.components[1]+=ePuckBot->camera.image[i].components[1]/255.0;
-        firstSection.components[2]+=ePuckBot->camera.image[i].components[2]/255.0;
+        firstSection.components[0]+=ePuckBot->camera.image[i].components[0];
+        firstSection.components[1]+=ePuckBot->camera.image[i].components[1];
+        firstSection.components[2]+=ePuckBot->camera.image[i].components[2];
         firstSection.components[3]+=ePuckBot->camera.image[i].components[3];
     }
     
     for (int i=numberOfPixelsToCoverTheFullView/3; i<2*numberOfPixelsToCoverTheFullView/3; i++) {
-        secondSection.components[0]+=ePuckBot->camera.image[i].components[0]/255.0;
-        secondSection.components[1]+=ePuckBot->camera.image[i].components[1]/255.0;
-        secondSection.components[2]+=ePuckBot->camera.image[i].components[2]/255.0;
+        secondSection.components[0]+=ePuckBot->camera.image[i].components[0];
+        secondSection.components[1]+=ePuckBot->camera.image[i].components[1];
+        secondSection.components[2]+=ePuckBot->camera.image[i].components[2];
         secondSection.components[3]+=ePuckBot->camera.image[i].components[3];
     }
     
     for (int i=2*numberOfPixelsToCoverTheFullView/3; i<numberOfPixelsToCoverTheFullView; i++) {
-        thirdSection.components[0]+=ePuckBot->camera.image[i].components[0]/255.0;
-        thirdSection.components[1]+=ePuckBot->camera.image[i].components[1]/255.0;
-        thirdSection.components[2]+=ePuckBot->camera.image[i].components[2]/255.0;
+        thirdSection.components[0]+=ePuckBot->camera.image[i].components[0];
+        thirdSection.components[1]+=ePuckBot->camera.image[i].components[1];
+        thirdSection.components[2]+=ePuckBot->camera.image[i].components[2];
         thirdSection.components[3]+=ePuckBot->camera.image[i].components[3];
     }
     
@@ -230,20 +236,25 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
     double xRandomValue;
     double yRandomValue;
     double angleRandomValue;
-    xRandomValue = service::uniformDistribution(5.0, xSize-5.0);
-    yRandomValue = service::uniformDistribution(5.0, ySize-5.0);
+    xRandomValue = service::uniformDistribution(xBirthMin, xBirthMax);
+    yRandomValue = service::uniformDistribution(yBirthMin, yBirthMax);
     angleRandomValue = service::uniformDistribution(0.0, 2*M_PI);
   
     // Нужно проверить, не попадает ли робот в таком случае на установленный куб или например на стену, а если попадает, то сдвинуть его
     // Радиус EPUCK - 3.7 (на всякий случай возьмем 4)
     // Нижеследующие проверки обеспечивают гарантию того, что робот не будет соприкасаться ни со стенами среды, ни с объектами среды
   
-    /*if (xRandomValue >= xSize-5.0) {
+    if (xRandomValue >= xSize-5.0) {
       xRandomValue = xRandomValue-5.0;
+    } else if (xRandomValue <= 5.0) {
+      xRandomValue = 5.0;
     }
+  
     if (yRandomValue >= ySize-5.0) {
       yRandomValue = yRandomValue-5.0;
-    }*/
+    } else if(yRandomValue <= 5.0) {
+      yRandomValue = 5.0;
+    }
   
     for (int i=0; i<objectsNumber; i++) {
       if ((xRandomValue >= objectsArray.at(i).x-cubeSize/2.0) && (xRandomValue <= objectsArray.at(i).x+cubeSize/2.0)) {
@@ -254,11 +265,67 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
       }
     }
   
+    if (willDrawThePlot) {
+      std::cout << "Random starting parameters:" << std::endl;
+      std::cout << "x=" << xRandomValue << ", y=" << yRandomValue << std::endl;
+      std::cout << "angle=" << angleRandomValue/(M_PI) << std::endl << std::endl;
+    }
+  
+    // Убираем старого робота из арены
+    world->removeObject(ePuckBot);
+  
+    // Создаем E-PUCK с нуля, чтобы обнулить значения всех его параметров и ставим его в арену
+    ePuckBot = new Enki::EPuck();
+    ePuckBot->setColor(Enki::Color(1, 0, 0));
     ePuckBot->pos.x = xRandomValue;
     ePuckBot->pos.y = yRandomValue;
     ePuckBot->angle = angleRandomValue;
     ePuckBot->leftSpeed = 0.0;
     ePuckBot->rightSpeed = 0.0;
+    world->addObject(ePuckBot);
+
+}
+
+// Меняем местами положение кубов (в том числе и в массиве целей)
+void TEnkiEnvironment::swapCubesForColors(double r1, double g1, double b1, double r2, double g2, double b2) {
+  // Находим кубы в массиве объектов ENKI по их цвету, а затем перекрашиваем их
+  std::set<Enki::PhysicalObject *>objects = world->objects;
+  std::set<Enki::PhysicalObject *>::iterator someObject;
+  for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+    Enki::PhysicalObject * actualObject = *someObject;
+    Enki::Color color;
+    color = actualObject->getColor();
+    if ((color.components[0] == r1) && (color.components[1] == g1) && (color.components[2] == b1)) {
+      color.components[0] = r2;
+      color.components[1] = g2;
+      color.components[2] = b2;
+      actualObject->setColor(color);
+      cout << "found first cube" << std::endl;
+    } else if ((color.components[0] == r2) && (color.components[1] == g2) && (color.components[2] == b2)) {
+      color.components[0] = r1;
+      color.components[1] = g1;
+      color.components[2] = b1;
+      actualObject->setColor(color);
+      cout << "found second cube" << std::endl;
+    }
+  }
+  
+  // Находим кубы в массиве объектов среды (который служит для определения достижения целей) и меняем их в нем местами
+  int firstIndexToSwap = 0;
+  int secondIndexToSwap = 0;
+  for (int i=0; i<objectsArray.size(); i++) {
+    TEnkiObject someEnkiObject = objectsArray[i];
+    if ((someEnkiObject.color[0]/255.0 == r1) && (someEnkiObject.color[1]/255.0 == g1) && (someEnkiObject.color[2]/255.0 == b1)) {
+      firstIndexToSwap = i;
+    } else if ((someEnkiObject.color[0]/255.0 == r2) && (someEnkiObject.color[1]/255.0 == g2) && (someEnkiObject.color[2]/255.0 == b2)) {
+      secondIndexToSwap = i;
+    }
+  }
+  
+  TEnkiObject storedObject = objectsArray.at(firstIndexToSwap);
+  objectsArray.at(firstIndexToSwap) = objectsArray.at(secondIndexToSwap);
+  objectsArray.at(secondIndexToSwap) = storedObject;
+  
 }
 
 int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
@@ -268,7 +335,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     for (int i=0; i<objectsNumber; i++) {
       if ((ePuckBot->pos.x>objectsArray[i].x-cubeRadius) && (ePuckBot->pos.x<objectsArray[i].x+cubeRadius)) {
         if ((ePuckBot->pos.y>objectsArray[i].y-cubeRadius) && (ePuckBot->pos.y<objectsArray[i].y+cubeRadius)) {
-          if (sqrt((ePuckBot->pos.x-objectsArray[i].x)*(ePuckBot->pos.x-objectsArray[i].x)+(ePuckBot->pos.y-objectsArray[i].y)*(ePuckBot->pos.y-objectsArray[i].y))) {
+          if (sqrt((ePuckBot->pos.x-objectsArray[i].x)*(ePuckBot->pos.x-objectsArray[i].x)+(ePuckBot->pos.y-objectsArray[i].y)*(ePuckBot->pos.y-objectsArray[i].y)) < cubeRadius) {
             // Нужно добавить в некий массив число (i+1), которое как раз и соответствует номеру объекта, в радиусе которого робот сейчас находится
             whatToReturn = i+1;
             break;
@@ -286,7 +353,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
     currentTime = currentTime + worldStep;
   
     if (willDrawThePlot) {
-      this->printOutPositionForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+      this->printOutPositionForGnuplot(gnuplotOutputString);
     }
   
     /*for (int i=0; i<objectsInTheWorld.size(); i++) {
@@ -316,6 +383,14 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
   }
   
   int newActionsQuantity = static_cast<int>(correctedActionsVector.size());
+  
+  if (willDrawThePlot) {
+    std::cout<<"Corrected actions vector:" << std::endl;
+    for (int i=0; i<correctedActionsVector.size(); i++) {
+      std::cout << correctedActionsVector[i][0] << "\t" << correctedActionsVector[i][1] << std::endl;
+    }
+    std::cout<<"_________________________" << std::endl << std::endl;
+  }
   
 	double accumulatedReward = 0.0; // Награда агента
 	// Времена последнего достижения цели агентом
@@ -347,9 +422,21 @@ double TEnkiEnvironment::calculateReward(const std::vector< std::vector<double> 
 				}
 				// Если не было нарушения последовательности, то цель достигнута
 				if (achivedFlag){
-					// Награда линейно восстанавливается до максимального (исходного) уровня за фиксированное кол-во тактов
+          /*std::cout << "Aim achieved" << std::endl;
+          std::cout << "Current action step:" << currentActionStep << std::endl;
+          std::cout << "Current action:" << currentAction << std::endl;
+          std::cout << "Current accumulatedReward:" << accumulatedReward << std::endl;
+          std::cout << "Current aim:" << currentAim << std::endl;
+          std::cout << "Current time:" << currentTime << std::endl;
+          std::cout << "Current achieving time:" << achievingTime[currentAim-1] << std::endl << std::endl;*/
+          
+          // Награда линейно восстанавливается до максимального (исходного) уровня за фиксированное кол-во тактов
 					accumulatedReward += goalsArray[currentAim - 1].reward * min(1.0, (correctedActionsVector[currentActionStep-1][1] - achievingTime[currentAim - 1])/static_cast<double>(max(1.0, rewardRecoveryTime/worldStep)));
           achievingTime[currentAim - 1] = correctedActionsVector[currentActionStep - 1][1];
+          
+          /*std::cout << "Recalculated accumulatedReward:" << accumulatedReward << std::endl;
+          std::cout << "Recalculated achieving time:" << achievingTime[currentAim-1] << std::endl;
+          std::cout << "____________________________" << std::endl << std::endl;*/
 				}
 			} // Конец проверки одной цели
 		} // Конец проверки всех целей относительно одного фронта времени

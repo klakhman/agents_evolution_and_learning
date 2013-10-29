@@ -23,7 +23,7 @@ class TEnkiAgent:public TAgent {
     return 4;
   }
   std::vector<double> decodeAction(double outputVector[]);
-  void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
+  void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true, bool resetNet = true, bool resetLife = true, int lastLifeStep = 0);
 };
 
 

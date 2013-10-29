@@ -153,7 +153,7 @@ public:
 	// Генерация случайного минимального возможного генома агента
 	virtual void generateMinimalAgent(int inputResolution);
 	// Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
-	virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true);
+  virtual void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true, bool resetNet = true);
   // Моделирование жизни агента (rewardCalculate - опциональный признак автоматического подсчета награды, которую агент достиг в течение жизни (можно выключать для оптимизации для больших сред))
   // Данная версия позволяет вести лог жизни агента в соответствии с переданным "наблюдателем"
   virtual void life(TEnvironment& environment, int agentLifeTime, watchers::LifeWatcher& watcher, bool rewardCalculate = true);

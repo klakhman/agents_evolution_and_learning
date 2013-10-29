@@ -79,12 +79,15 @@ public:
 
   double xSize, ySize; // Размеры квадратной арены, в которой находится агент
   double currentTime; // Текущее время в среде
+  double xBirthMin, xBirthMax;
+  double yBirthMin, yBirthMax;
   int objectsNumber; // Количество объектов в среде
   std::vector<TEnkiObject> objectsArray; // Вектор объектов среды
   int goalsNumber; // Количество целей в среде
   std::vector<TEnkiAim> goalsArray; // Вектор целей среды
   std::vector<Enki::PhysicalObject *> objectsInTheWorld;
   int willDrawThePlot;
+  std::string gnuplotOutputString;
   
   Enki::EPuck * ePuckBot; // Робот E-Puck
   Enki::World * world; // Симуляция среды, в которой он существует
@@ -93,6 +96,10 @@ public:
   TEnkiEnvironment() {
     xSize = 0;
     ySize = 0;
+    xBirthMin = 0;
+    xBirthMax = 0;
+    yBirthMin = 0;
+    yBirthMax = 0;
     objectsNumber = 0;
     goalsNumber = 0;
     worldStep = 0;
@@ -100,15 +107,21 @@ public:
     cubeSize = 0;
     rewardRecoveryTime = 0;
     willDrawThePlot = 0;
+    gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt";
   }
   
   // Конструктор среды с использованием параметров из файла
   TEnkiEnvironment(std::string aimsFilename, double _worldStep=0, double _cubeSize=0, double _cubeRadius=0, double _rewardRecoveryTime = 0){
     xSize = 0;
     ySize = 0;
+    xBirthMin = 0;
+    xBirthMax = 0;
+    yBirthMin = 0;
+    yBirthMax = 0;
     objectsNumber = 0;
     goalsNumber = 0;
     willDrawThePlot = 0;
+    gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt";
 		loadEnvironment(aimsFilename);
 	}
   
@@ -135,6 +148,9 @@ public:
   
   // Задание случайного состояния среды (здесь под случайным состоянием понимается случайное положение робота в среде, а также случайное направление его взгляда)
   void setRandomEnvironmentState();
+  
+  // Изменение положения объектов в среде
+  void swapCubesForColors(double r1, double g1, double b1, double r2, double g2, double b2);
   
   // Воздействие на среду - возвращает номер объекта, рядом с которым сейчас находится агент
   int forceEnvironment(const std::vector<double>& action);

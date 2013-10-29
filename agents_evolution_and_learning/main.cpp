@@ -17,6 +17,7 @@
 #include "TEnkiEnvironment.h"
 #include "TEnkiAgent.h"
 #include "TEnkiEvolutionaryProcess.h"
+#include "TEnkiRobotAnalyzer.h"
 
 #include <iostream>
 #include <fstream>
@@ -374,7 +375,7 @@ int main(int argc, char** argv){
     // Запускаем эволюционный процесс
     TEnkiEvolutionaryProcess* evolutionaryProcess = new TEnkiEvolutionaryProcess;
 		evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
-		long randomSeed = 0;
+		long randomSeed = 1382520412;
 		bool extraPrint = false;
 		decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, randomSeed, extraPrint, argc, argv);
 		evolutionaryProcess->setExtraPrint(extraPrint);
@@ -382,6 +383,19 @@ int main(int argc, char** argv){
     delete evolutionaryProcess;
     
   } else if (programMode == "ENKIDRAWBESTAGENT") {
+    // Устанавливаем параметры запуска
+    int drawBeforeAndAfterSwap = 0;
+    int desiredAgentNumber = 4000;
+    int singleLifetime = 4000;
+    int lifetimeBeforeSwap = 3100;
+    int lifetimeAfterSwap = 4000;
+    
+    double red1 = 0.0;
+    double green1 = 1.0;
+    double blue1 = 0.0;
+    double red2 = 0.0;
+    double green2 = 0.0;
+    double blue2 = 1.0;
     
     // Устанавливаем зерно для генератора случайных чисел
     srand(static_cast<unsigned int>(time(0)));
@@ -393,8 +407,9 @@ int main(int argc, char** argv){
     std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt");
     std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt");
     
-    // Удаление файла с логами перемещения робота
+    // Удаление файлов с логами перемещения робота
     std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobotAfterSwap.txt");
     
     // Формирование среды
     TEnkiEnvironment enkiEnvironment;
@@ -403,12 +418,12 @@ int main(int argc, char** argv){
     enkiEnvironment.willDrawThePlot = 1;
     
     // Установка начальных параметров робота (положения, угла (отсчитывается против часовой стрелки от оси, направленной вправо) и начальных скоростей)
-    enkiEnvironment.setRandomEnvironmentState();
-    /*enkiEnvironment.ePuckBot->pos.x = 20.0;
-    enkiEnvironment.ePuckBot->pos.y = 120.0;
-    enkiEnvironment.ePuckBot->angle = 0.0;
+    //enkiEnvironment.setRandomEnvironmentState();
+    enkiEnvironment.ePuckBot->pos.x = 770.0;
+    enkiEnvironment.ePuckBot->pos.y = 600.0;
+    enkiEnvironment.ePuckBot->angle = 0.5*M_PI;
     enkiEnvironment.ePuckBot->leftSpeed = 0.0;
-    enkiEnvironment.ePuckBot->rightSpeed = 0.0;*/
+    enkiEnvironment.ePuckBot->rightSpeed = 0.0;
     
     // Формирование агента
     TEnkiAgent enkiAgent;
@@ -416,7 +431,7 @@ int main(int argc, char** argv){
     
     // Формирование нейронной сети агента
     //std::fstream inputFileForGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt");
-    enkiAgent.loadGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt", 2979);
+    enkiAgent.loadGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt", desiredAgentNumber);
     /*ofstream out("/Users/Sergey/Desktop/1158.txt");
     enkiAgent.uploadGenome(out);
     out.close();*/
@@ -428,8 +443,71 @@ int main(int argc, char** argv){
     enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt", 2);
     enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt", 3);
     
-    // Запуск агента
-    enkiAgent.life(enkiEnvironment, 1600);
+    if (drawBeforeAndAfterSwap) {
+      enkiAgent.life(enkiEnvironment, lifetimeBeforeSwap);
+      double storedPositionx = enkiEnvironment.ePuckBot->pos.x;
+      double storedPositiony = enkiEnvironment.ePuckBot->pos.y;
+      double storedAngle = enkiEnvironment.ePuckBot->angle;
+      double storedLeftSpeed = enkiEnvironment.ePuckBot->leftSpeed;
+      double storedRightSpeed = enkiEnvironment.ePuckBot->rightSpeed;
+
+      //enkiEnvironment.gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobotAfterSwap.txt";
+      //enkiEnvironment.swapCubesForColors(red1, green1, blue1, red2, green2, blue2);
+      //enkiAgent.life(enkiEnvironment, lifetimeBeforeSwap);
+      //enkiEnvironment.swapCubesForColors(red1, green1, blue1, red2, green2, blue2);
+      //enkiAgent.life(enkiEnvironment, lifetimeAfterSwap, true, false, true, 0);
+      
+      TEnkiEnvironment newEnkiEnvironment;
+      settings::fillEnvironmentSettingsFromFile(newEnkiEnvironment, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
+      newEnkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/testingEnvironment.txt");
+      newEnkiEnvironment.willDrawThePlot = 1;
+      
+      // Переместим кубы в начальное положение и запустим агента из начального положения
+      newEnkiEnvironment.gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobotAfterSwap.txt";
+      newEnkiEnvironment.swapCubesForColors(red1, green1, blue1, red2, green2, blue2);
+      
+      newEnkiEnvironment.ePuckBot->pos.x = storedPositionx;
+      newEnkiEnvironment.ePuckBot->pos.y = storedPositiony;
+      newEnkiEnvironment.ePuckBot->angle = storedAngle;
+      newEnkiEnvironment.ePuckBot->leftSpeed = storedLeftSpeed;
+      newEnkiEnvironment.ePuckBot->rightSpeed = storedRightSpeed;
+
+      enkiAgent.life(newEnkiEnvironment, lifetimeAfterSwap);
+    } else {
+      /*double xpos[10] = {640.0, 590.0, 700.0, 440.0, 420.0, 700.0, 580.0};
+      double ypos[10] = {480.0, 560.0, 600.0, 650.0, 570.0, 650.0, 740.0};
+      double angle[10] = {0.0, M_PI*0.25, M_PI*1.5, M_PI*0.75, M_PI*1.25, M_PI*0.25, M_PI};*/
+      
+      /*double xpos[7] = {640.0, 430.0, 500.0, 410.0, 350.0, 640.0, 500.0};
+      double ypos[7] = {500.0, 570.0, 620.0, 420.0, 560.0, 590.0, 400.0};
+      double angle[7] = {M_PI*0.75, M_PI*1.75, M_PI, M_PI*1.35, M_PI*0.75, M_PI*1.25, M_PI*0.5};
+      for (int i=1; i<=7; i++) {
+        TEnkiEnvironment newEnkiEnvironment;
+        settings::fillEnvironmentSettingsFromFile(newEnkiEnvironment, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
+        newEnkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/testingEnvironment.txt");
+        newEnkiEnvironment.willDrawThePlot = 1;
+        
+        newEnkiEnvironment.ePuckBot->pos.x = xpos[i-1];
+        newEnkiEnvironment.ePuckBot->pos.y = ypos[i-1];
+        newEnkiEnvironment.ePuckBot->angle = angle[i-1];
+        newEnkiEnvironment.ePuckBot->leftSpeed = 0.0;
+        newEnkiEnvironment.ePuckBot->rightSpeed = 0.0;
+        
+        enkiAgent.life(newEnkiEnvironment, singleLifetime);
+      }*/
+      enkiAgent.life(enkiEnvironment, singleLifetime);
+      //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+      //enkiAgent.life(enkiEnvironment, 5000, true, false, false, 15000);
+    }
+    
+    // Запуск агента (простой режим)
+    //enkiAgent.life(enkiEnvironment, 5000, true, true);
+    
+    // Запуск агента с переменой положения мест кубов в процессе заезда
+    
+    //enkiAgent.life(enkiEnvironment, 500, true, true);
+    //enkiEnvironment.swapCubesForColors(255.0, 255.0, 0.0, 0.0, 0.0, 255.0);
+    //enkiAgent.life(enkiEnvironment, 5000, true, false);
     
   }
 #endif //NOT_USE_ROBOT_LIB
