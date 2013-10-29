@@ -695,13 +695,20 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
   }
   
   std::map< int, std::vector<int> > aimsReachingpoints;
-  for (int currentTimeStep = 0; currentTimeStep < sequence.size(); ++currentTimeStep) {
-    std::vector<int>currentStepAims = environment.testReachingAims(sequenceOnVectors, currentTimeStep);
-    for (vector<int>::iterator aim = currentStepAims.begin(); aim!=currentStepAims.end();++aim) {
-      aimsReachingpoints[*aim].push_back(currentTimeStep);
+  for (unsigned sequenceShiftingIndex = 0; sequenceShiftingIndex<sequenceOnVectors.size();++sequenceShiftingIndex) {
+    //detecting aims between tail and head
+    std::vector< std::vector<double> > sequenceOnVectorsToCheck;
+    for (unsigned sequenceStep = 0; sequenceStep<sequenceOnVectors.size();++sequenceStep) {
+      sequenceOnVectorsToCheck.push_back(sequenceOnVectors.at((sequenceStep+sequenceShiftingIndex)%sequenceOnVectors.size()));
+    }
+    for (unsigned currentTimeStep = 0; currentTimeStep < sequence.size(); ++currentTimeStep) {
+      std::vector<int>currentStepAims = environment.testReachingAims(sequenceOnVectorsToCheck, currentTimeStep);
+      for (vector<int>::iterator aim = currentStepAims.begin(); aim!=currentStepAims.end();++aim) {
+        if (find(aimsReachingpoints[*aim].begin(), aimsReachingpoints[*aim].end(), (currentTimeStep+sequenceShiftingIndex)%sequenceOnVectors.size())==aimsReachingpoints[*aim].end())
+          aimsReachingpoints[*aim].push_back((currentTimeStep+sequenceShiftingIndex)%sequenceOnVectors.size());
+      }
     }
   }
-  
   const std::string colorsArray[] = { "red", "blue", "green", "purple", "yellow", "pink", "brown", "orange" };
   
   //Рисуем данную цель в dot файл
@@ -740,7 +747,7 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
     const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
     for (int aimReaching = 0; aimReaching < it->second.size(); ++aimReaching) {
       int reaching = it->second.at(aimReaching);
-      dotFile<<"\t"<<"sT"<<states[reaching-currentAim.aimComplexity]<<" -> "<<"sT"<<states[reaching]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
+      dotFile<<"\t"<<"sT"<<states[(reaching-currentAim.aimComplexity)%states.size()]<<" -> "<<"sT"<<states[reaching]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
     }
   }
   
