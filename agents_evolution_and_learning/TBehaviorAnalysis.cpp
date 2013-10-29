@@ -747,7 +747,7 @@ void TBehaviorAnalysis::drawSequenceWithAims(std::vector<double> &sequence, THyp
     const THypercubeEnvironment::TAim &currentAim = environment.getAimReference(it->first);
     for (int aimReaching = 0; aimReaching < it->second.size(); ++aimReaching) {
       int reaching = it->second.at(aimReaching);
-      dotFile<<"\t"<<"sT"<<states[(reaching-currentAim.aimComplexity)%states.size()]<<" -> "<<"sT"<<states[reaching]<<" [label=\""<<it->first<<"\"color = \"red\"]"<<endl;
+      dotFile<<"\t"<<"sT"<<states[(reaching-currentAim.aimComplexity)%states.size()]<<" -> "<<"sT"<<states[reaching]<<" [label=\""<<it->first<<"\"color = \"red\" style = \"dotted\"]"<<endl;
     }
   }
   
