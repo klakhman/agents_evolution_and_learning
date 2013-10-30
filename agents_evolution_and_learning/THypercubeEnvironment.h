@@ -130,7 +130,7 @@ public:
 
 	// Получение кол-ва начальных состояний среды (для текущей бинарной среды - фактически общее кол-во состояний)
 	int getInitialStatesQuantity() const {
-		return static_cast<int>(pow(2, environmentResolution));
+		return static_cast<int>(pow(2.0, environmentResolution));
 	}
 	// Задание вектора среды (по значению целого вектора)
 	virtual void setEnvironmentVector(double environmentVector[]) {

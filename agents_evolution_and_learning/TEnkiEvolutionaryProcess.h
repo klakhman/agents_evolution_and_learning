@@ -18,6 +18,8 @@ class TEnkiEvolutionaryProcess:public TEvolutionaryProcess
 {
   public:
     TPopulation<TEnkiAgent> *agentsPopulation;
+
+	TEnkiEvolutionaryProcess(){agentsPopulation = 0;}
   
     void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
     void start(unsigned int randomSeed = 0);
