@@ -177,6 +177,8 @@ public:
   
   void printOutCurrentIRSensorResponse(std::string IRSensorResponseFilename);
   
+  void makeGnuplotScriptAndRunIt(std::string graphFilename);
+  
   // Геттеры и сеттеры параметров среды
   
   double getRewardRecoveryTime() const { return rewardRecoveryTime; }

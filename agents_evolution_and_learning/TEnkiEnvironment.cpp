@@ -91,6 +91,7 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
     o->setColor(Enki::Color(objectsArray.at(i).color[0]/255.0, objectsArray.at(i).color[1]/255.0, objectsArray.at(i).color[2]/255.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ));
     o->collisionElasticity = 0; // Все тепло от столкновения поглощается
     o->pos = Enki::Point(objectsArray.at(i).x, objectsArray.at(i).y);
+    o->objectNumber = i;
     world->addObject(o);
     //objectsInTheWorld.push_back(o);
   }
@@ -101,6 +102,7 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   ePuckBot->angle = 0;
   ePuckBot->leftSpeed = 0;
   ePuckBot->rightSpeed = 0;
+  ePuckBot->objectNumber = -1;
   ePuckBot->setColor(Enki::Color(1, 0, 0));
   world->addObject(ePuckBot);
 }
@@ -474,17 +476,68 @@ void TEnkiEnvironment::printOutCurrentIRSensorResponse(std::string IRSensorRespo
 void TEnkiEnvironment::printOutObjectsForGnuplot(std::string objectsPositionFile, int objectNumber) {
   ofstream objectsFile;
   objectsFile.open(objectsPositionFile.c_str(), ios_base::app);
-  objectsFile << objectsArray.at(objectNumber).x-cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y-cubeSize/2.0 << std::endl;
-  objectsFile << objectsArray.at(objectNumber).x-cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y+cubeSize/2.0 << std::endl;
-  objectsFile << objectsArray.at(objectNumber).x+cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y+cubeSize/2.0 << std::endl;
-  objectsFile << objectsArray.at(objectNumber).x+cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y-cubeSize/2.0 << std::endl;
-  objectsFile << objectsArray.at(objectNumber).x-cubeSize/2.0 << "\t" << objectsArray.at(objectNumber).y-cubeSize/2.0 << std::endl; // Чтобы замкнуть линии в гнуплоте
+  // Чтобы замкнуть линии в гнуплоте
+  std::set<Enki::PhysicalObject *>objects = world->objects;
+  std::set<Enki::PhysicalObject *>::iterator someObject;
+  for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+    Enki::PhysicalObject * actualObject = *someObject;
+    if (actualObject->objectNumber == objectNumber) {
+      objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y-cubeSize/2.0 << std::endl;
+      objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y+cubeSize/2.0 << std::endl;
+      objectsFile << actualObject->pos.x+cubeSize/2.0 << "\t" << actualObject->pos.y+cubeSize/2.0 << std::endl;
+      objectsFile << actualObject->pos.x+cubeSize/2.0 << "\t" << actualObject->pos.y-cubeSize/2.0 << std::endl;
+      objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y-cubeSize/2.0 << std::endl;
+    }
+  }
 }
 
 void TEnkiEnvironment::printOutPositionForGnuplot(std::string robotPositionFile) {
   ofstream robotFile;
   robotFile.open(robotPositionFile.c_str(), ios_base::app);
   robotFile << ePuckBot->pos.x << "\t" << ePuckBot->pos.y << "\t" << countColorValueBasedOnVelocity() << std::endl;
+}
+
+void TEnkiEnvironment::makeGnuplotScriptAndRunIt(std::string graphFilename) {
+  ofstream gnuplotGraphFile;
+	gnuplotGraphFile.open((graphFilename + ".sh").c_str());
+  gnuplotGraphFile << "cat << __EOF | gnuplot\nset terminal pdf size 10cm,10cm font 'Times-Roman,5'" << std::endl;
+  gnuplotGraphFile << "set output '" << graphFilename << ".pdf'" << std::endl;
+  gnuplotGraphFile << "set xtics " << static_cast<int>(xBirthMin) <<",50," << static_cast<int>(xBirthMax) << std::endl;
+  gnuplotGraphFile << "set ytics " << static_cast<int>(yBirthMin) <<",50," << static_cast<int>(yBirthMax) << std::endl;
+  gnuplotGraphFile << "set mxtics 5\nset mytics 5" << std::endl;
+  gnuplotGraphFile << "set grid xtics ytics mytics mxtics lt 0 lw 1" << std::endl;
+  gnuplotGraphFile << "set palette defined ( 0 \"#660099\", 1 \"#0000CC\", 2 \"#3399FF\", 3 \"#00CC00\", 4 \"#FFFF33\", 5 \"#FF6600\", 6 \"#CC0000\" )" << std::endl;
+  gnuplotGraphFile << "unset colorbox" << std::endl;
+  std::string objectsColorsStrings[4];
+  std::set<Enki::PhysicalObject *>objects = world->objects;
+  std::set<Enki::PhysicalObject *>::iterator someObject;
+  for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+    Enki::PhysicalObject * actualObject = *someObject;
+    if (actualObject->objectNumber <= 3) {
+      const Enki::Color objectColor = actualObject->getColor();
+      if ((objectColor.components[0] == 1.0) && (objectColor.components[1] == 0.0) && (objectColor.components[2] == 0.0)) {
+        objectsColorsStrings[actualObject->objectNumber] = "red";
+      } else if ((objectColor.components[0] == 1.0) && (objectColor.components[1] == 1.0) && (objectColor.components[2] == 0.0)) {
+        objectsColorsStrings[actualObject->objectNumber] = "yellow";
+      } else if ((objectColor.components[0] == 0.0) && (objectColor.components[1] == 1.0) && (objectColor.components[2] == 0.0)) {
+        objectsColorsStrings[actualObject->objectNumber] = "green";
+      } else if ((objectColor.components[0] == 0.0) && (objectColor.components[1] == 0.0) && (objectColor.components[2] == 1.0)) {
+        objectsColorsStrings[actualObject->objectNumber] = "blue";
+      }
+    }
+  }
+  gnuplotGraphFile << "plot " << "[" << static_cast<int>(xBirthMin) << ":" << static_cast<int>(xBirthMax) << "] "
+                              << "[" << static_cast<int>(yBirthMin) << ":" << static_cast<int>(yBirthMax) << "] "
+                              << "'" << gnuplotOutputString << "'" << " u 1:2:(0.2):3 with circles palette notitle, "
+  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[0] << "\", "
+  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[1] << "\", "
+  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[2] << "\", "
+  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[3] << "\", " << std::endl;
+  gnuplotGraphFile << "set terminal pdf" << std::endl;
+  gnuplotGraphFile << "__EOF" << std::endl;
+  gnuplotGraphFile.close();
+  system(("chmod +x "+graphFilename+".sh").c_str());
+  system(("sh "+graphFilename+".sh").c_str());
 }
 
 double TEnkiEnvironment::countColorValueBasedOnVelocity() {

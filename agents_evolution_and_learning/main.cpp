@@ -17,7 +17,7 @@
 #include "TEnkiEnvironment.h"
 #include "TEnkiAgent.h"
 #include "TEnkiEvolutionaryProcess.h"
-#include "TEnkiRobotAnalyzer.h"
+//#include "TEnkiRobotAnalyzer.h"
 
 #include <iostream>
 #include <fstream>
@@ -499,6 +499,7 @@ int main(int argc, char** argv){
       //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
       //enkiAgent.life(enkiEnvironment, 5000, true, false, false, 15000);
     }
+    enkiEnvironment.makeGnuplotScriptAndRunIt("/Users/Sergey/Desktop/drawenkilogtest");
     
     // Запуск агента (простой режим)
     //enkiAgent.life(enkiEnvironment, 5000, true, true);
