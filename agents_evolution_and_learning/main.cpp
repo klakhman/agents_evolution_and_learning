@@ -17,7 +17,6 @@
 #include "TEnkiEnvironment.h"
 #include "TEnkiAgent.h"
 #include "TEnkiEvolutionaryProcess.h"
-//#include "TEnkiRobotAnalyzer.h"
 
 #include <iostream>
 #include <fstream>

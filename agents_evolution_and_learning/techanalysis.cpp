@@ -99,7 +99,7 @@ bool techanalysis::testSampleNormality_KS(const vector<double>& sample, double a
     D_minus = max(D_minus, normDistr[currentValue] - currentValue / static_cast<double>(sorted_sample.size())); 
   }
   // Используем модифицированную статистику (Кобзарь, стр.215)
-  double D = max(D_plus, D_minus) * (sqrt(sorted_sample.size()) - 0.01 +  0.85/sqrt(sorted_sample.size()));
+  double D = max(D_plus, D_minus) * (sqrt(static_cast<double>(sorted_sample.size())) - 0.01 +  0.85/sqrt(static_cast<double>(sorted_sample.size())));
   // Используем точную формулу для нахождения критического значения (Кобзарь, стр.215)
   // double D_crit = sqrt(1.0/(2.0*sorted_sample.size()) * (-log(alpha) - (2*log(alpha)*log(alpha) + 4*log(alpha) - 1)/(18.0 * sorted_sample.size()))) - 1.0 / (6.0 * sorted_sample.size());
   // Для сравнения выборки с нормальным распределением с параметрами, выделенным из выборки нужно использовать данное критическое значение (Кобзарь, стр.233)
