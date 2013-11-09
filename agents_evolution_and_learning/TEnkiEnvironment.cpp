@@ -257,15 +257,25 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
     } else if(yRandomValue <= 5.0) {
       yRandomValue = 5.0;
     }
-  
-    for (int i=0; i<objectsNumber; i++) {
-      if ((xRandomValue >= objectsArray.at(i).x-cubeSize/2.0) && (xRandomValue <= objectsArray.at(i).x+cubeSize/2.0)) {
-        xRandomValue = objectsArray.at(i).x-cubeSize/2.0-5.0;
-      }
-      if ((yRandomValue >= objectsArray.at(i).y-cubeSize/2.0) && (xRandomValue <= objectsArray.at(i).y+cubeSize/2.0)) {
-        yRandomValue = objectsArray.at(i).y-cubeSize/2.0-5.0;
-      }
-    }
+
+	// Убираем старого робота из арены
+    world->removeObject(ePuckBot);
+
+	std::set<Enki::PhysicalObject *>objects = world->objects;
+	std::set<Enki::PhysicalObject *>::iterator someObject;
+	// Проходимся по объектам среды
+	for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+		Enki::PhysicalObject * actualObject = *someObject;
+		// Находим кубы (это все объекты, кроме робота E-PUCK)
+		if (actualObject != ePuckBot) {
+			if ((xRandomValue >= actualObject->pos.x-cubeSize/2.0) && (xRandomValue <= actualObject->pos.x+cubeSize/2.0)) {
+				xRandomValue = actualObject->pos.x-cubeSize/2.0-5.0;
+			}
+			if ((yRandomValue >= actualObject->pos.y-cubeSize/2.0) && (yRandomValue <= actualObject->pos.y+cubeSize/2.0)) {
+				yRandomValue = actualObject->pos.y-cubeSize/2.0-5.0;
+			}
+		}
+	}
   
     if (willDrawThePlot) {
       std::cout << "Random starting parameters:" << std::endl;
@@ -273,10 +283,8 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
       std::cout << "angle=" << angleRandomValue/(M_PI) << std::endl << std::endl;
     }
   
-    // Убираем старого робота из арены
-    world->removeObject(ePuckBot);
-  
     // Создаем E-PUCK с нуля, чтобы обнулить значения всех его параметров и ставим его в арену
+	if (ePuckBot) delete ePuckBot;
     ePuckBot = new Enki::EPuck();
     ePuckBot->setColor(Enki::Color(1, 0, 0));
     ePuckBot->pos.x = xRandomValue;
@@ -330,10 +338,85 @@ void TEnkiEnvironment::swapCubesForColors(double r1, double g1, double b1, doubl
   
 }
 
+void TEnkiEnvironment::completelyRandomizeCubesPositionsInEnvironment() {
+	set<Enki::PhysicalObject*>& objects = world->objects;
+	// Проходимся по объектам среды
+	for (set<Enki::PhysicalObject*>::iterator someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+		Enki::PhysicalObject* actualObject = *someObject;
+		// Находим кубы (это все объекты, кроме робота E-PUCK)
+		if (actualObject != ePuckBot) {
+			bool randomizedSuccessfully = true;
+			double xRandomValue;
+			double yRandomValue;
+			do {
+				randomizedSuccessfully = true;
+				xRandomValue = service::uniformDistribution(450.0, 750.0);
+				yRandomValue = service::uniformDistribution(450.0, 750.0);
+				for (set<Enki::PhysicalObject*>::iterator someOtherObject=objects.begin(); someOtherObject!=someObject; ++someOtherObject) {
+					Enki::PhysicalObject* objectToCompareWith = *someOtherObject;
+					if (objectToCompareWith == ePuckBot) continue;
+					const double xDelta = objectToCompareWith->pos.x - xRandomValue;
+					const double yDelta = objectToCompareWith->pos.y - yRandomValue;
+					if (sqrt(xDelta*xDelta + yDelta*yDelta) <= 2*cubeRadius) {
+						randomizedSuccessfully = false;
+						break;
+					}
+				}
+			} while (!randomizedSuccessfully);
+			actualObject->pos.x = xRandomValue;
+			actualObject->pos.y = yRandomValue;
+		}
+	}
+}
+
+void TEnkiEnvironment::randomizeCubesPositionsInEnvironment() {
+	std::set<Enki::PhysicalObject *>objects = world->objects;
+	std::set<Enki::PhysicalObject *>::iterator someObject;
+	// Проходимся по объектам среды
+	for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+		Enki::PhysicalObject * actualObject = *someObject;
+		// Находим кубы (это все объекты, кроме робота E-PUCK)
+		if (actualObject != ePuckBot) {
+			int i=0;
+			for (i=0; i<objectsArray.size(); i++) {
+				TEnkiObject someEnkiObject = objectsArray[i];
+				if ((someEnkiObject.x == actualObject->pos.x) && (someEnkiObject.y == actualObject->pos.y)) {
+					break;
+				}
+			}
+			// Меняем положение куба по оси y
+			double yRandomValue = service::uniformDistribution(500.0, 700.0);
+			actualObject->pos.y = yRandomValue;
+			objectsArray[i].y = yRandomValue;
+		}
+	}
+}
+
 int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
-  
+	int whatToReturn = 0;
+	std::set<Enki::PhysicalObject *>objects = world->objects;
+	std::set<Enki::PhysicalObject *>::iterator someObject;
+	// Проходимся по объектам среды
+	for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+		Enki::PhysicalObject * actualObject = *someObject;
+		// Находим кубы (это все объекты, кроме робота E-PUCK)
+		if (actualObject != ePuckBot) {
+			if ((ePuckBot->pos.x>actualObject->pos.x-cubeRadius) && (ePuckBot->pos.x<actualObject->pos.x+cubeRadius)) {
+				if ((ePuckBot->pos.y>actualObject->pos.y-cubeRadius) && (ePuckBot->pos.y<actualObject->pos.y+cubeRadius)) {
+					if (sqrt((ePuckBot->pos.x-actualObject->pos.x)*(ePuckBot->pos.x-actualObject->pos.x)+(ePuckBot->pos.y-actualObject->pos.y)*(ePuckBot->pos.y-actualObject->pos.y)) < cubeRadius) {
+						// Нужно добавить в некий массив число (i+1), которое как раз и соответствует номеру объекта, в радиусе которого робот сейчас находится
+						whatToReturn = actualObject->objectNumber+1;
+						break;
+					} else {
+						whatToReturn = 0;
+					}
+				}
+			}
+		}
+	}
+
     // Блок, который вычисляет какое число нужно ставить в массив жизни (в рамках агента)
-    int whatToReturn=0;
+    /*int whatToReturn=0;
     for (int i=0; i<objectsNumber; i++) {
       if ((ePuckBot->pos.x>objectsArray[i].x-cubeRadius) && (ePuckBot->pos.x<objectsArray[i].x+cubeRadius)) {
         if ((ePuckBot->pos.y>objectsArray[i].y-cubeRadius) && (ePuckBot->pos.y<objectsArray[i].y+cubeRadius)) {
@@ -346,7 +429,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
           }
         }
       }
-    }
+    }*/
   
     ePuckBot->leftSpeed = ePuckBot->leftSpeed + action.at(0);
     ePuckBot->rightSpeed = ePuckBot->rightSpeed + action.at(1);

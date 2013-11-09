@@ -69,6 +69,16 @@ void decodeCommandPromt(string& environmentFilename, string& resultsFilename, st
 	}
 }
 
+void decodeCommandPromtInitPop(string& initPopulationFilename, int argc, char** argv){
+	int currentArgNumber = 1; // Текущий номер параметра
+	while (currentArgNumber < argc){
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if (!strcmp("-initpop", argv[currentArgNumber])) initPopulationFilename = argv[++currentArgNumber];
+		}
+		++currentArgNumber;
+	}
+}
+
 void testFunc();
 void currentAnalysis();
 
@@ -254,7 +264,25 @@ int main(int argc, char** argv){
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
+	TEnkiEvolutionaryProcess::makeResultsOverview("C:/enki-log-files/test/", 6000, "C:/enki-log-files/max.txt", "C:/enki-log-files/av.txt");
+	return 0;
     srand(static_cast<unsigned int>(time(0)));
+	int populationNumber = 40;
+	// Leaving populations 22, 28, 31, 34, 40
+	const string dir = "C:/enki-log-files/";
+	for (unsigned int i = 1; i <= 4; ++i){
+		stringstream tmpStream;
+		tmpStream << dir << "linenv-" << i << "-completely-random-from-pop-" << populationNumber << ".bat";
+		ofstream batFile(tmpStream.str().c_str());
+		batFile << "Agents-Evolution-And-Learning-ENKI.exe -settings C:/enki-log-files/enkiEnvironmentSettings.txt "
+				<< "-envfile C:/enki-log-files/testingEnvironmentLinear.txt -resultfile C:/enki-log-files/Results/enkiResults_linenv_"<< i << "-random-from-pop-" << populationNumber << ".txt "
+				<< "-bestpopfile C:/enki-log-files/Results/enkiBestPopulation_linenv_"<< i << "-random-from-pop-" << populationNumber << ".txt "
+				<< "-bestagentfile C:/enki-log-files/Results/enkiBestAgent_linenv_"<< i << "-random-from-pop-" << populationNumber << ".txt "
+				<< "-initpop C:/enki-log-files/good-launches/enkiBestPopulation_linenv_" << populationNumber << ".txt "
+				<< "-randomseed 0 -extraprint 0 -mode ENKITEST" << endl;
+		batFile.close();
+	}
+	return 0;
     //techanalysis::analysisSLengthVsConvSize("C:/Test/settings_LINSYS.ini", "C:/Test/En1001_linsys(1)_bestpopulation.txt", 
     //                                        "C:/Test/Environments/Environment1001.txt", "C:/Test/An_SLengthVsConvSize_En1001_linsys(1).txt");
     //techanalysis::evolutionSLengthVsConvSize("C:/Test/SANDBOX/settings_LINSYS.ini", "C:/Test/SANDBOX/En1113_linsys(2)_bestagents.txt", 5000, 
@@ -365,20 +393,24 @@ int main(int argc, char** argv){
     srand(static_cast<unsigned int>(time(0)));
     
     // Формирование файла, заключающего информацию о объектах среды (необходим для построения графика в гнуплоте)
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+    //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt");
+    //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt");
+    //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt");
+    //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt");
+    //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
     
     // Запускаем эволюционный процесс
     TEnkiEvolutionaryProcess* evolutionaryProcess = new TEnkiEvolutionaryProcess;
 		evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
 		long randomSeed = 1382520412;
 		bool extraPrint = false;
-		decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, randomSeed, extraPrint, argc, argv);
+		string initPopulationFilename = "";
+		decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, 
+							evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, 
+							randomSeed, extraPrint, argc, argv);
+		decodeCommandPromtInitPop(initPopulationFilename, argc, argv);
 		evolutionaryProcess->setExtraPrint(extraPrint);
-		evolutionaryProcess->start(static_cast<unsigned int>(randomSeed));
+		evolutionaryProcess->start(static_cast<unsigned int>(randomSeed), initPopulationFilename);
     delete evolutionaryProcess;
     
   } else if (programMode == "ENKIDRAWBESTAGENT") {

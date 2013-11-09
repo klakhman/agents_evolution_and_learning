@@ -13,6 +13,7 @@
 #include "TEvolutionaryProcess.h"
 #include "TEnkiAgent.h"
 #include "TEnkiEnvironment.h"
+#include <string>
 
 class TEnkiEvolutionaryProcess:public TEvolutionaryProcess
 {
@@ -22,8 +23,10 @@ class TEnkiEvolutionaryProcess:public TEvolutionaryProcess
 	TEnkiEvolutionaryProcess(){agentsPopulation = 0;}
   
     void createMainResultsFile(std::ofstream& resultsFile, unsigned int randomSeed);
-    void start(unsigned int randomSeed = 0);
+    void start(unsigned int randomSeed = 0, const std::string initPopulationFilename = "");
   	void makeLogNote(std::ostream& outputConsole, std::ostream& bestAgentsConsole, TPopulation<TEnkiAgent>* bestPopulation, int currentEvolutionStep /*=0*/);
+
+	static void makeResultsOverview(const std::string& dir, unsigned int evolutionDuration, const std::string& maxRewardFilename, const std::string& averageRewardFilename);
 };
 
 #endif /* defined(__Agents_Evolution_And_Learning_ENKI__TEnkiEvolutionaryProcess__) */

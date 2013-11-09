@@ -7,6 +7,7 @@
 //
 
 #include "TEnkiAgent.h"
+#include "service.h"
 
 using namespace std;
 
@@ -18,6 +19,42 @@ vector<double> TEnkiAgent::decodeAction(double outputVector[]) {
   actionVector.push_back((outputVector[2]-outputVector[3])*deltaSpeedForWheels);
   return actionVector;
 }
+
+// Генерация случайного минимального возможного генома агента
+/*void TEnkiAgent::generateMinimalAgent(int inputResolution){
+	if (!genome) 
+		genome = new TPoolNetwork;
+	else 
+		genome->erasePoolNetwork();
+
+	int outputResolution = calculateOutputResolution(inputResolution);
+
+	unsigned int hiddenLayersQ = 3; 
+	vector<unsigned int> layers(hiddenLayersQ + 2);
+	layers[0] = inputResolution; layers[1] = 10; layers[2] = 8; layers[3] = 6; layers[4] = outputResolution;
+
+	for (unsigned int currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron)
+    genome->addPool(TPoolNetwork::INPUT_POOL, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
+
+	for (unsigned int currentNeuron = 1; currentNeuron <= outputResolution; ++currentNeuron)
+		genome->addPool(TPoolNetwork::OUTPUT_POOL, 2 + hiddenLayersQ, service::uniformDistribution(-0.5, 0.5), 0, 1);
+	
+  for (unsigned int layer = 1; layer <= hiddenLayersQ; ++layer)
+  	for (unsigned int currentNeuron = 1; currentNeuron <= layers[layer]; ++currentNeuron)
+  		genome->addPool(TPoolNetwork::HIDDEN_POOL, 1 + layer, service::uniformDistribution(-0.5, 0.5), 0, 1);
+
+  vector<unsigned int> cummulativeNeuronsQ(hiddenLayersQ + 2);
+  cummulativeNeuronsQ[0] = 0;
+  cummulativeNeuronsQ[1] = inputResolution + outputResolution;
+  for (unsigned int layer = 2; layer <= hiddenLayersQ; ++layer)
+  	cummulativeNeuronsQ[layer] = layers[layer - 1] + cummulativeNeuronsQ[layer - 1];
+  cummulativeNeuronsQ.back() = inputResolution;
+
+  for (unsigned int layer = 1; layer < layers.size(); ++ layer)
+  	for (unsigned int postN = 1; postN <= layers[layer]; ++postN)
+  		for (unsigned int preN = 1; preN <= layers[layer - 1]; ++preN)
+  			genome->addConnection(cummulativeNeuronsQ[layer - 1] + preN, cummulativeNeuronsQ[layer] + postN, service::uniformDistribution(-0.5, 0.5)); 
+}*/
 
 void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate /*= true*/, bool resetNet /*= true*/, bool resetLife /*=true*/, int lastLifeStep /*=0*/){
 	double* environmentVector = new double[neuralController->getInputResolution()];

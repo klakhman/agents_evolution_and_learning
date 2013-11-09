@@ -16,7 +16,7 @@
 #include <vector>
 
 #ifndef NOT_USE_ROBOT_LIB
-#include "robots/e-puck/EPuck.h"
+#include "EPuck.h"
 #include "Types.h"
 
 //Данный класс описывает среду, в которой есть один агент - робот E-PUCK а также объекты разных цветов. Цели формулируются как последовательность посещения роботом объектов, причем разные последовательности дают разную награду. Робот имеет инфракрасные сенсоры а также камеру для определения положения объектов и их цвета. Собственно, пользуясь этой информацией, робот должен оптимизировать свои действия для получения максимальной награды - что мы и хотим проверить в рамках этой модели.
@@ -107,6 +107,7 @@ public:
     cubeSize = 0;
     rewardRecoveryTime = 0;
     willDrawThePlot = 0;
+	ePuckBot = 0;
     gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt";
   }
   
@@ -118,6 +119,7 @@ public:
     xBirthMax = 0;
     yBirthMin = 0;
     yBirthMax = 0;
+	ePuckBot = 0;
     objectsNumber = 0;
     goalsNumber = 0;
     willDrawThePlot = 0;
@@ -151,6 +153,12 @@ public:
   
   // Изменение положения объектов в среде
   void swapCubesForColors(double r1, double g1, double b1, double r2, double g2, double b2);
+
+  // Случайное изменение положения кубов в среде (только по вертикали)
+  void randomizeCubesPositionsInEnvironment();
+
+  // Случайное изменение положения кубов в среде (по горизонтали и по вертикали в рамках определенной зоны)
+  void TEnkiEnvironment::completelyRandomizeCubesPositionsInEnvironment();
   
   // Воздействие на среду - возвращает номер объекта, рядом с которым сейчас находится агент
   int forceEnvironment(const std::vector<double>& action);
@@ -218,6 +226,7 @@ public:
   }
   void getCurrentEnvironmentVector(double environmentVector[]) const {};
   void setRandomEnvironmentState() {};
+  void randomizeCubesPositionsInEnvironment() {};
   int forceEnvironment(const std::vector<double>& action) {
     return 0;
   }

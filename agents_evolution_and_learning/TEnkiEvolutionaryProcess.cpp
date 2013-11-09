@@ -12,6 +12,12 @@
 #include <cstdlib>
 #include <string>
 #include <fstream>
+#include <string>
+
+#include <windows.h>
+#include "atlstr.h"
+#include <tchar.h>
+#include <comdef.h> 
 
 using namespace std;
 
@@ -90,7 +96,7 @@ void TEnkiEvolutionaryProcess::createMainResultsFile(std::ofstream& resultsFile,
 	//resultsFile.close();
 }
 
-void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
+void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/, const string initPopulationFilename/*=""*/){
 	// Если не было передано зерно рандомизации
 	if (!randomSeed)
 		randomSeed = static_cast<unsigned int>(time(0));
@@ -105,10 +111,10 @@ void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
   TEnkiEnvironment * newEnvironment = new TEnkiEnvironment;
   settings::fillEnvironmentSettingsFromFile(*dynamic_cast<TEnkiEnvironment*>(newEnvironment), filenameSettings.settingsFilename);
   newEnvironment->loadEnvironment(filenameSettings.environmentFilename);
-  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt", 0);
-  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt", 1);
-  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt", 2);
-  newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt", 3);
+  //newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt", 0);
+  //newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt", 1);
+  //newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt", 2);
+  //newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt", 3);
   environment = newEnvironment;
 	// environment = new TEnkiEnvironment(filenameSettings.environmentFilename);
 	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
@@ -118,18 +124,22 @@ void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
 	settings::fillPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
 	// Физически агенты в популяции уже созданы (после того, как загрузился размер популяции), поэтому можем загрузить в них настройки
 	settings::fillAgentsPopulationSettingsFromFile(*agentsPopulation, filenameSettings.settingsFilename);
+	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
+	if (initPopulationFilename == "")
+		agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
+	else
+		agentsPopulation->loadPopulation(initPopulationFilename);
 	// Опустошаем файл лучших агентов если он есть и создаем файл результатов
 	ofstream resultsFile;
 	createMainResultsFile(resultsFile, randomSeed);
 	ofstream bestAgentsFile;
 	bestAgentsFile.open(filenameSettings.bestAgentsFilename.c_str());
-	// Настройки уже загружены в агентов, поэтому можем генерировать минимальную популяцию
-	agentsPopulation->generateMinimalPopulation(environment->getEnvironmentResolution());
 	// Создаем структуру лучшей популяции (если процессор достаточно быстрый, то копирование популяций будет быстрее чем каждый раз записывать популяцию в файл)
 	TPopulation<TEnkiAgent>* bestPopulation = new TPopulation<TEnkiAgent>;
 	for (int currentEvolutionStep = 1; currentEvolutionStep <= agentsPopulation->evolutionSettings.evolutionTime; ++currentEvolutionStep){
+		newEnvironment->completelyRandomizeCubesPositionsInEnvironment();
 		agentsPopulation->evolutionaryStep(*environment, currentEvolutionStep);
-    TEnkiEvolutionaryProcess::makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
+		TEnkiEvolutionaryProcess::makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
 	}
 	// Заспиываем лучшую популяцию
 	if (!extraPrint) bestPopulation->uploadPopulation(filenameSettings.bestPopulationFilename);
@@ -145,4 +155,56 @@ void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/){
   
 	resultsFile.close();
 	bestAgentsFile.close();
+}
+
+void TEnkiEvolutionaryProcess::makeResultsOverview(const string& dir, unsigned int evolutionDuration, const string& maxRewardFilename, const string& averageRewardFilename){
+	string tmp_dir = dir + "/*.*"; 
+    std::vector<TCHAR> tchar_dir(tmp_dir.size() + 1);
+    std::copy(tmp_dir.begin(), tmp_dir.end(), tchar_dir.begin()); 
+    tchar_dir[tchar_dir.size() - 1] = 0;
+	
+	vector< vector<double> > averageRewards, maxRewards;
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	hFind = FindFirstFile(&tchar_dir[0], &FindFileData);
+	int exit = 1;
+	while (exit != 0) {
+		_bstr_t tmp(FindFileData.cFileName);
+		const char* c = tmp;
+		string filename = c;
+		if (!((filename == ".") || (filename == ".."))){ 
+			filename = dir + filename;
+			cout << filename << "\n";
+			averageRewards.push_back(vector<double>());
+			averageRewards.back().resize(evolutionDuration);
+			maxRewards.push_back(vector<double>());
+			maxRewards.back().resize(evolutionDuration);
+			ifstream inputFile(filename.c_str());
+			string tmpStr; 
+			for (unsigned int i = 0; i < 13; ++i){
+				getline(inputFile, tmpStr);
+				//cout << tmpStr << endl;
+			}
+			for (unsigned int evolutionaryStep = 1; evolutionaryStep <= evolutionDuration; ++evolutionaryStep){
+				inputFile >> tmpStr;
+				inputFile >> averageRewards.back()[evolutionaryStep - 1] >> maxRewards.back()[evolutionaryStep - 1];
+				inputFile >> tmpStr >> tmpStr >> tmpStr;
+			}
+		}
+		exit = FindNextFile(hFind, &FindFileData);
+	}
+	ofstream maxRewardsFile((maxRewardFilename).c_str());
+	ofstream averageRewardsFile((averageRewardFilename).c_str());
+	for (unsigned int step = 1; step <= evolutionDuration; ++step){
+		maxRewardsFile << step << "\t";
+		averageRewardsFile << step << "\t";
+		for (unsigned int run = 1; run <= averageRewards.size(); ++run){
+			maxRewardsFile << maxRewards[run - 1][step - 1] << "\t";
+			averageRewardsFile << averageRewards[run - 1][step - 1] << "\t";
+		}
+		maxRewardsFile << endl;
+		averageRewardsFile << endl;
+	}
+	maxRewardsFile.close();
+	averageRewardsFile.close();
 }
