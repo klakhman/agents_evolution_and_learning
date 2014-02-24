@@ -9,6 +9,8 @@
 
 using namespace std;
 
+
+
 // Функция генерации псевдослучайного равномерно распределенного дискретной величины (куски интервалов включаются)
 int service::uniformDiscreteDistribution(int A, int B)
 {

@@ -74,7 +74,7 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   //Переходим к постройке мира исходя из параметров, полученных из файла
     
   // Создаем саму арену
-  world = new Enki::World(xSize, ySize, Enki::Color(0.9, 0.9, 0.9));
+  world = new Enki::World(xSize, ySize, Enki::Color(0.1, 0.1, 0.1));
   
   // Создаем объекты
   Enki::Polygone p2;
@@ -105,6 +105,25 @@ void TEnkiEnvironment::loadEnvironment(std::string environmentFilename) {
   ePuckBot->objectNumber = -1;
   ePuckBot->setColor(Enki::Color(1, 0, 0));
   world->addObject(ePuckBot);
+}
+
+void TEnkiEnvironment::addCubeWithParameters (double x, double y, Enki::Color color, int objectNumber)
+{
+  // Создаем полигон, являющийся основнанием куба
+  Enki::Polygone p;
+  p.push_back(Enki::Point(cubeSize/2.0,cubeSize/2.0));
+  p.push_back(Enki::Point(-cubeSize/2.0,cubeSize/2.0));
+  p.push_back(Enki::Point(-cubeSize/2.0,-cubeSize/2.0));
+  p.push_back(Enki::Point(cubeSize/2.0,-cubeSize/2.0));
+  
+  Enki::PhysicalObject* o = new Enki::PhysicalObject;
+  Enki::PhysicalObject::Hull hull(Enki::PhysicalObject::Part(p, cubeSize)); // Задаем форму куба
+  o->setCustomHull(hull, -100000); // Отрицательная масса - то же, что бесконечная, поэтому куб сдвинуть с места будет невозможно                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ));
+  o->collisionElasticity = 0; // Все тепло от столкновения поглощается
+  o->setColor(color);    
+  o->pos = Enki::Point(x, y);
+  o->objectNumber = objectNumber;
+  world->addObject(o);
 }
 
 void TEnkiEnvironment::uploadEnvironment(std::string environmentFilename) const {
@@ -235,6 +254,8 @@ void TEnkiEnvironment::getCurrentEnvironmentVector(double environmentVector[]) c
 }
 
 void TEnkiEnvironment::setRandomEnvironmentState() {
+	this->randomlySwapCubesForCircleEnvironment();
+
     double xRandomValue;
     double yRandomValue;
     double angleRandomValue;
@@ -296,6 +317,41 @@ void TEnkiEnvironment::setRandomEnvironmentState() {
 
 }
 
+void TEnkiEnvironment::predefinedCustomize() {
+  std::set<Enki::PhysicalObject *>objects = world->objects;
+  std::set<Enki::PhysicalObject *>::iterator someObject;
+  Enki::Color redEnkiColor = Enki::Color(1.0, 0.0, 0.0, 1.0);
+  Enki::Color yellowEnkiColor = Enki::Color(1.0, 1.0, 0.0, 1.0);
+  for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+    Enki::PhysicalObject * actualObject = *someObject;
+	switch (actualObject->objectNumber) {
+		case 0:
+			actualObject->pos.x = 550.0;
+			actualObject->pos.y = 600.0;
+			//actualObject->setColor(redEnkiColor);
+			break;
+		case 1:
+			actualObject->pos.x = 30.0;
+			actualObject->pos.y = 10.0;
+			//actualObject->setColor(yellowEnkiColor);
+			break;
+		case 2:
+			actualObject->pos.x = 10.0;
+			actualObject->pos.y = 10.0;
+			break;
+		case 3:
+			actualObject->pos.x = 650.0;
+			actualObject->pos.y = 600.0;
+			//actualObject->setColor(redEnkiColor);
+			break;
+		case -1:
+			break;
+		default:
+			break;
+	}
+  }
+}
+
 // Меняем местами положение кубов (в том числе и в массиве целей)
 void TEnkiEnvironment::swapCubesForColors(double r1, double g1, double b1, double r2, double g2, double b2) {
   // Находим кубы в массиве объектов ENKI по их цвету, а затем перекрашиваем их
@@ -321,7 +377,7 @@ void TEnkiEnvironment::swapCubesForColors(double r1, double g1, double b1, doubl
   }
   
   // Находим кубы в массиве объектов среды (который служит для определения достижения целей) и меняем их в нем местами
-  int firstIndexToSwap = 0;
+  /*int firstIndexToSwap = 0;
   int secondIndexToSwap = 0;
   for (int i=0; i<objectsArray.size(); i++) {
     TEnkiObject someEnkiObject = objectsArray[i];
@@ -334,8 +390,28 @@ void TEnkiEnvironment::swapCubesForColors(double r1, double g1, double b1, doubl
   
   TEnkiObject storedObject = objectsArray.at(firstIndexToSwap);
   objectsArray.at(firstIndexToSwap) = objectsArray.at(secondIndexToSwap);
-  objectsArray.at(secondIndexToSwap) = storedObject;
+  objectsArray.at(secondIndexToSwap) = storedObject;*/
   
+}
+
+void TEnkiEnvironment::randomlySwapCubesForCircleEnvironment() {
+	set<Enki::PhysicalObject*>& objects = world->objects;
+	std::vector<Enki::Point> cubesPositions;
+	for (set<Enki::PhysicalObject*>::iterator someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+		Enki::PhysicalObject* actualObject = *someObject;
+		if (actualObject != ePuckBot) {
+			cubesPositions.push_back(actualObject->pos);
+		}
+	}
+	std::random_shuffle(cubesPositions.begin(), cubesPositions.end());
+	int i = 0;
+	for (set<Enki::PhysicalObject*>::iterator someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+		Enki::PhysicalObject* actualObject = *someObject;
+		if (actualObject != ePuckBot) {
+			actualObject->pos = cubesPositions.at(i);
+			i++;
+		}
+	}
 }
 
 void TEnkiEnvironment::completelyRandomizeCubesPositionsInEnvironment() {
@@ -377,17 +453,17 @@ void TEnkiEnvironment::randomizeCubesPositionsInEnvironment() {
 		Enki::PhysicalObject * actualObject = *someObject;
 		// Находим кубы (это все объекты, кроме робота E-PUCK)
 		if (actualObject != ePuckBot) {
-			int i=0;
+			/*int i=0;
 			for (i=0; i<objectsArray.size(); i++) {
 				TEnkiObject someEnkiObject = objectsArray[i];
 				if ((someEnkiObject.x == actualObject->pos.x) && (someEnkiObject.y == actualObject->pos.y)) {
 					break;
 				}
-			}
+			}*/
 			// Меняем положение куба по оси y
 			double yRandomValue = service::uniformDistribution(500.0, 700.0);
 			actualObject->pos.y = yRandomValue;
-			objectsArray[i].y = yRandomValue;
+			//objectsArray[i].y = yRandomValue;
 		}
 	}
 }
@@ -439,6 +515,7 @@ int TEnkiEnvironment::forceEnvironment(const std::vector<double>& action) {
   
     if (willDrawThePlot) {
       this->printOutPositionForGnuplot(gnuplotOutputString);
+	  this->printOutCurrentEnvironmentState("C:/enki-log-files/cameraLogs.txt");
     }
   
     /*for (int i=0; i<objectsInTheWorld.size(); i++) {
@@ -535,8 +612,8 @@ void TEnkiEnvironment::printOutCurrentEnvironmentState(std::string logsFilename)
   logsFile.open(logsFilename.c_str(), ios_base::app);
   logsFile << "Current Time:" << currentTime << "\tRobot Position:(" << ePuckBot->pos.x << "," << ePuckBot->pos.y << ")" << std::endl;
   logsFile << "Sensoric information:" << std::endl;
-  double environmentVector[15];
-  this->getCurrentEnvironmentVector(environmentVector);
+  double environmentVector[17];
+  getCurrentEnvironmentVector(environmentVector);
   logsFile << "Left camera section color components:" << environmentVector[0]*255 << " " << environmentVector[1]*255 << " " << environmentVector[2]*255 << std::endl;
   logsFile << "Center camera section color components:" << environmentVector[3]*255 << " " << environmentVector[4]*255 << " " << environmentVector[5]*255 << std::endl;
   logsFile << "Right camera section color components:" << environmentVector[6]*255 << " " << environmentVector[7]*255 << " " << environmentVector[8]*255 << std::endl;
@@ -558,13 +635,13 @@ void TEnkiEnvironment::printOutCurrentIRSensorResponse(std::string IRSensorRespo
 
 void TEnkiEnvironment::printOutObjectsForGnuplot(std::string objectsPositionFile, int objectNumber) {
   ofstream objectsFile;
-  objectsFile.open(objectsPositionFile.c_str(), ios_base::app);
+  objectsFile.open(objectsPositionFile.c_str());
   // Чтобы замкнуть линии в гнуплоте
   std::set<Enki::PhysicalObject *>objects = world->objects;
   std::set<Enki::PhysicalObject *>::iterator someObject;
   for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
     Enki::PhysicalObject * actualObject = *someObject;
-    if (actualObject->objectNumber == objectNumber) {
+    if ((actualObject->objectNumber == objectNumber) && (actualObject != ePuckBot)) {
       objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y-cubeSize/2.0 << std::endl;
       objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y+cubeSize/2.0 << std::endl;
       objectsFile << actualObject->pos.x+cubeSize/2.0 << "\t" << actualObject->pos.y+cubeSize/2.0 << std::endl;
@@ -580,25 +657,55 @@ void TEnkiEnvironment::printOutPositionForGnuplot(std::string robotPositionFile)
   robotFile << ePuckBot->pos.x << "\t" << ePuckBot->pos.y << "\t" << countColorValueBasedOnVelocity() << std::endl;
 }
 
-void TEnkiEnvironment::makeGnuplotScriptAndRunIt(std::string graphFilename) {
-  ofstream gnuplotGraphFile;
-	gnuplotGraphFile.open((graphFilename + ".sh").c_str());
-  gnuplotGraphFile << "cat << __EOF | gnuplot\nset terminal pdf size 10cm,10cm font 'Times-Roman,5'" << std::endl;
-  gnuplotGraphFile << "set output '" << graphFilename << ".pdf'" << std::endl;
-  gnuplotGraphFile << "set xtics " << static_cast<int>(xBirthMin) <<",50," << static_cast<int>(xBirthMax) << std::endl;
-  gnuplotGraphFile << "set ytics " << static_cast<int>(yBirthMin) <<",50," << static_cast<int>(yBirthMax) << std::endl;
-  gnuplotGraphFile << "set mxtics 5\nset mytics 5" << std::endl;
-  gnuplotGraphFile << "set grid xtics ytics mytics mxtics lt 0 lw 1" << std::endl;
-  gnuplotGraphFile << "set palette defined ( 0 \"#660099\", 1 \"#0000CC\", 2 \"#3399FF\", 3 \"#00CC00\", 4 \"#FFFF33\", 5 \"#FF6600\", 6 \"#CC0000\" )" << std::endl;
-  gnuplotGraphFile << "unset colorbox" << std::endl;
-  std::string objectsColorsStrings[4];
+void TEnkiEnvironment::makeGnuplotScriptAndRunIt(std::string graphFilename, double xmin, double xmax, double ymin, double ymax) {
+  // Чтобы замкнуть линии в гнуплоте
   std::set<Enki::PhysicalObject *>objects = world->objects;
   std::set<Enki::PhysicalObject *>::iterator someObject;
   for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
     Enki::PhysicalObject * actualObject = *someObject;
-    if (actualObject->objectNumber <= 3) {
+	if (actualObject != ePuckBot) {
+		ofstream objectsFile;
+		stringstream buf;
+		buf << "C:/enki-log-files/gnuplotObjects" << actualObject->objectNumber << ".txt";
+		objectsFile.open(buf.str().c_str());
+		objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y-cubeSize/2.0 << std::endl;
+		objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y+cubeSize/2.0 << std::endl;
+		objectsFile << actualObject->pos.x+cubeSize/2.0 << "\t" << actualObject->pos.y+cubeSize/2.0 << std::endl;
+		objectsFile << actualObject->pos.x+cubeSize/2.0 << "\t" << actualObject->pos.y-cubeSize/2.0 << std::endl;
+		objectsFile << actualObject->pos.x-cubeSize/2.0 << "\t" << actualObject->pos.y-cubeSize/2.0 << std::endl;
+		objectsFile.close();
+    }
+  }
+
+  ofstream gnuplotGraphFile;
+  gnuplotGraphFile.open((graphFilename).c_str());
+  gnuplotGraphFile << "set terminal pdf size 10cm," << 10*(ymax-ymin)/(xmax-xmin) << "cm font 'Times-New-Roman,5'" << std::endl;
+  gnuplotGraphFile << "set output '" << graphFilename << ".pdf'" << std::endl;
+  gnuplotGraphFile << "set xtics " << static_cast<int>(xmin) <<",50," << static_cast<int>(xmax) << std::endl;
+  gnuplotGraphFile << "set ytics " << static_cast<int>(ymin) <<",50," << static_cast<int>(ymax) << std::endl;
+  gnuplotGraphFile << "set mxtics 5\nset mytics 5" << std::endl;
+  gnuplotGraphFile << "set grid xtics ytics mytics mxtics lt 1 lw 1 linecolor rgb \"gray\"" << std::endl;
+  gnuplotGraphFile << "set palette defined ( 0 \"#660099\", 1 \"#0000CC\", 2 \"#3399FF\", 3 \"#00CC00\", 4 \"#FFFF33\", 5 \"#FF6600\", 6 \"#CC0000\" )" << std::endl;
+  gnuplotGraphFile << "unset colorbox" << std::endl;
+  std::string objectsColorsStrings[10];
+  for (someObject=objects.begin(); someObject!=objects.end(); ++someObject) {
+    Enki::PhysicalObject * actualObject = *someObject;
+    if (actualObject->objectNumber >= 0) {
       const Enki::Color objectColor = actualObject->getColor();
-      if ((objectColor.components[0] == 1.0) && (objectColor.components[1] == 0.0) && (objectColor.components[2] == 0.0)) {
+	  std::string rColor = "00";
+	  if (objectColor.components[0] == 1.0) {
+		  rColor = "FF";
+	  }
+	  std::string gColor = "00";
+	  if (objectColor.components[1] == 1.0) {
+		  gColor = "FF";
+	  }
+	  std::string bColor = "00";
+	  if (objectColor.components[2] == 1.0) {
+		  bColor = "FF";
+	  }
+	  objectsColorsStrings[actualObject->objectNumber] = "#" + rColor + gColor + bColor;
+      /*if ((objectColor.components[0] == 1.0) && (objectColor.components[1] == 0.0) && (objectColor.components[2] == 0.0)) {
         objectsColorsStrings[actualObject->objectNumber] = "red";
       } else if ((objectColor.components[0] == 1.0) && (objectColor.components[1] == 1.0) && (objectColor.components[2] == 0.0)) {
         objectsColorsStrings[actualObject->objectNumber] = "yellow";
@@ -606,21 +713,31 @@ void TEnkiEnvironment::makeGnuplotScriptAndRunIt(std::string graphFilename) {
         objectsColorsStrings[actualObject->objectNumber] = "green";
       } else if ((objectColor.components[0] == 0.0) && (objectColor.components[1] == 0.0) && (objectColor.components[2] == 1.0)) {
         objectsColorsStrings[actualObject->objectNumber] = "blue";
-      }
+      }*/
     }
   }
-  gnuplotGraphFile << "plot " << "[" << static_cast<int>(xBirthMin) << ":" << static_cast<int>(xBirthMax) << "] "
-                              << "[" << static_cast<int>(yBirthMin) << ":" << static_cast<int>(yBirthMax) << "] "
-                              << "'" << gnuplotOutputString << "'" << " u 1:2:(0.2):3 with circles palette notitle, "
-  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[0] << "\", "
-  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[1] << "\", "
-  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[2] << "\", "
-  << "'/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[3] << "\", " << std::endl;
-  gnuplotGraphFile << "set terminal pdf" << std::endl;
-  gnuplotGraphFile << "__EOF" << std::endl;
+  gnuplotGraphFile << "plot " << "[" << static_cast<int>(xmin) << ":" << static_cast<int>(xmax) << "] "
+                              << "[" << static_cast<int>(ymin) << ":" << static_cast<int>(ymax) << "] "
+                              << "'" << gnuplotOutputString << "'" << " u 1:2:(0.2):3 with circles palette notitle, ";
+  for (int i = 0; i < 10; i++) {
+	  if (objectsColorsStrings[i].length()) {
+		if (i>=1) {
+		  gnuplotGraphFile << ", ";
+		}
+		gnuplotGraphFile << "'C:/enki-log-files/gnuplotObjects" << i << ".txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[i].c_str() << "\"";
+	  } else {
+		  break;
+	  }
+  }
+  gnuplotGraphFile << std::endl;
+  /*<< "'C:/enki-log-files/gnuplotObjects1.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[0] << "\", "
+  << "'C:/enki-log-files/gnuplotObjects2.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[1] << "\", "
+  << "'C:/enki-log-files/gnuplotObjects3.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[2] << "\", "
+  << "'C:/enki-log-files/gnuplotObjects4.txt' with filledcurves notitle linecolor rgb \"" << objectsColorsStrings[3] << "\", " << std::endl;*/
+  //gnuplotGraphFile << "__EOF" << std::endl;
   gnuplotGraphFile.close();
-  system(("chmod +x "+graphFilename+".sh").c_str());
-  system(("sh "+graphFilename+".sh").c_str());
+  //system(("chmod +x "+graphFilename+".sh").c_str());
+  system(("gnuplot "+graphFilename).c_str());
 }
 
 double TEnkiEnvironment::countColorValueBasedOnVelocity() {

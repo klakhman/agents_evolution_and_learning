@@ -21,7 +21,7 @@ vector<double> TEnkiAgent::decodeAction(double outputVector[]) {
 }
 
 // Генерация случайного минимального возможного генома агента
-/*void TEnkiAgent::generateMinimalAgent(int inputResolution){
+void TEnkiAgent::generateMinimalAgent(int inputResolution){
 	if (!genome) 
 		genome = new TPoolNetwork;
 	else 
@@ -31,7 +31,8 @@ vector<double> TEnkiAgent::decodeAction(double outputVector[]) {
 
 	unsigned int hiddenLayersQ = 3; 
 	vector<unsigned int> layers(hiddenLayersQ + 2);
-	layers[0] = inputResolution; layers[1] = 10; layers[2] = 8; layers[3] = 6; layers[4] = outputResolution;
+	// Former configuration for hidden layers: 10, 8, 6
+	layers[0] = inputResolution; layers[1] = 20; layers[2] = 10; layers[3] = 10; layers[4] = outputResolution;
 
 	for (unsigned int currentNeuron = 1; currentNeuron <= inputResolution; ++currentNeuron)
     genome->addPool(TPoolNetwork::INPUT_POOL, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
@@ -54,7 +55,7 @@ vector<double> TEnkiAgent::decodeAction(double outputVector[]) {
   	for (unsigned int postN = 1; postN <= layers[layer]; ++postN)
   		for (unsigned int preN = 1; preN <= layers[layer - 1]; ++preN)
   			genome->addConnection(cummulativeNeuronsQ[layer - 1] + preN, cummulativeNeuronsQ[layer] + postN, service::uniformDistribution(-0.5, 0.5)); 
-}*/
+}
 
 void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate /*= true*/, bool resetNet /*= true*/, bool resetLife /*=true*/, int lastLifeStep /*=0*/){
 	double* environmentVector = new double[neuralController->getInputResolution()];
@@ -71,7 +72,7 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
   
 	if (resetNet) neuralController->reset();
   
-  for (int agentLifeStep = lastLifeStep+1; agentLifeStep <= agentLifeTime+lastLifeStep; ++agentLifeStep) {
+  for (int agentLifeStep = lastLifeStep+1; agentLifeStep <= lastLifeStep+agentLifeTime; ++agentLifeStep) {
     environment.getCurrentEnvironmentVector(environmentVector);
     neuralController->calculateNetwork(environmentVector);
     neuralController->getOutputVector(outputVector);
@@ -98,7 +99,7 @@ void TEnkiAgent::life(TEnvironment& environment, int agentLifeTime, bool rewardC
   
 	if (rewardCalculate) {
 		reward = environment.calculateReward(agentLife, static_cast<int>(agentLife.size()));
-    //std::cout << "Reward equals " << reward << " after the life is completed" << std::endl;
+		std::cout << "Reward equals " << reward << " after the life is completed" << std::endl;
 	} else {
 		reward = 0;
   }

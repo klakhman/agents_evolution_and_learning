@@ -115,6 +115,7 @@ void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/, const stri
   //newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt", 1);
   //newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt", 2);
   //newEnvironment->printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt", 3);
+  newEnvironment->randomlySwapCubesForCircleEnvironment();
   environment = newEnvironment;
 	// environment = new TEnkiEnvironment(filenameSettings.environmentFilename);
 	// Если этот процесс уже запускался (ВООБЩЕ НАДО БЫ СДЕЛАТЬ ВОЗМОЖНОСТЬ ПРОСТОГО ПРОДОЛЖЕНИЯ ЭВОЛЮЦИИ)
@@ -137,7 +138,6 @@ void TEnkiEvolutionaryProcess::start(unsigned int randomSeed /*= 0*/, const stri
 	// Создаем структуру лучшей популяции (если процессор достаточно быстрый, то копирование популяций будет быстрее чем каждый раз записывать популяцию в файл)
 	TPopulation<TEnkiAgent>* bestPopulation = new TPopulation<TEnkiAgent>;
 	for (int currentEvolutionStep = 1; currentEvolutionStep <= agentsPopulation->evolutionSettings.evolutionTime; ++currentEvolutionStep){
-		newEnvironment->completelyRandomizeCubesPositionsInEnvironment();
 		agentsPopulation->evolutionaryStep(*environment, currentEvolutionStep);
 		TEnkiEvolutionaryProcess::makeLogNote(resultsFile, bestAgentsFile, bestPopulation, currentEvolutionStep);
 	}

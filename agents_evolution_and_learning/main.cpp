@@ -79,6 +79,16 @@ void decodeCommandPromtInitPop(string& initPopulationFilename, int argc, char** 
 	}
 }
 
+void decodeCommandPromtGnuplot(string& gnuplotBestPopulationFilename, int argc, char** argv) {
+	int currentArgNumber = 1; // Текущий номер параметра
+	while (currentArgNumber < argc){
+		if (argv[currentArgNumber][0] == '-'){ // Если это название настройки
+			if (!strcmp("-gnuplotpop", argv[currentArgNumber])) gnuplotBestPopulationFilename = argv[++currentArgNumber];
+		}
+		++currentArgNumber;
+	}
+}
+
 void testFunc();
 void currentAnalysis();
 
@@ -264,21 +274,61 @@ int main(int argc, char** argv){
   }
   // Тестирование различных конструкций, несвязанных с основным кодом
   else if (programMode == "TESTUN"){
-	TEnkiEvolutionaryProcess::makeResultsOverview("C:/enki-log-files/test/", 6000, "C:/enki-log-files/max.txt", "C:/enki-log-files/av.txt");
+	srand(static_cast<unsigned int>(time(0)));
+	rand();
+	rand();
+	rand();
+	TEnkiEvolutionaryProcess::makeResultsOverview("C:/enki-log-files/Results/excel-results-for-circle-arena-fixed-topology/", 12000, "C:/enki-log-files/Results/excel-results-for-circle-arena-fixed-topology/max.txt", "C:/enki-log-files/Results/excel-results-for-circle-arena-fixed-topology/av.txt");
 	return 0;
+
+	/*TEnkiEnvironment newEnkiEnvironment;
+    settings::fillEnvironmentSettingsFromFile(newEnkiEnvironment, "C:/enki-log-files/enkiEnvironmentSettings.txt");
+    newEnkiEnvironment.loadEnvironment("C:/enki-log-files/testingEnvironmentCircle2.txt");
+    newEnkiEnvironment.willDrawThePlot = 1;*/
+
+	/*double x0 = 500.0;
+	double y0 = 500.0;
+	double r = 115.0;
+	double alpha = 2*(M_PI)/7.0;
+	std::vector<Enki::Color> colorVector;
+	colorVector.push_back(Enki::Color(1.0, 0.0, 0.0, 1.0)); // Красный
+	colorVector.push_back(Enki::Color(0.0, 1.0, 0.0, 1.0)); // Зеленый
+	colorVector.push_back(Enki::Color(0.0, 0.0, 1.0, 1.0)); // Синий
+	colorVector.push_back(Enki::Color(1.0, 1.0, 0.0, 1.0)); // Желтый
+	colorVector.push_back(Enki::Color(0.0, 1.0, 1.0, 1.0)); // Голубой
+	colorVector.push_back(Enki::Color(1.0, 0.0, 1.0, 1.0)); // Пурпурный
+	colorVector.push_back(Enki::Color(1.0, 1.0, 1.0, 1.0)); // Белый
+	for (int i=0; i<7; i++) {
+		newEnkiEnvironment.addCubeWithParameters(x0+r*sin(i*alpha), y0-r*cos(i*alpha), colorVector.at(i), i);
+	}
+
+	newEnkiEnvironment.ePuckBot->pos.x = 410.0;
+    newEnkiEnvironment.ePuckBot->pos.y = 450.0;
+    newEnkiEnvironment.ePuckBot->angle = 1.5*M_PI;
+    newEnkiEnvironment.ePuckBot->leftSpeed = 1.0;
+    newEnkiEnvironment.ePuckBot->rightSpeed = 1.0;
+	
+	std::vector<double> action;
+	action.push_back(0.0);
+	action.push_back(0.0);
+	for (int i = 0; i < 4000; i++) {
+		newEnkiEnvironment.forceEnvironment(action);
+	}*/
+	//newEnkiEnvironment.makeGnuplotScriptAndRunIt("C:/enki-log-files/drawenkilogcircleEMPTYCLOSEUP", 350.0, 650.0, 350.0, 650.0);
+	//newEnkiEnvironment.makeGnuplotScriptAndRunIt("C:/enki-log-files/drawenkilogsevencubes");
+	  
+	//return 0;
     srand(static_cast<unsigned int>(time(0)));
-	int populationNumber = 40;
-	// Leaving populations 22, 28, 31, 34, 40
 	const string dir = "C:/enki-log-files/";
-	for (unsigned int i = 1; i <= 4; ++i){
+	for (unsigned int i = 1; i <= 20; ++i){
 		stringstream tmpStream;
-		tmpStream << dir << "linenv-" << i << "-completely-random-from-pop-" << populationNumber << ".bat";
+		tmpStream << dir << "circle-arena-fixed-topology-" << i << ".bat";
 		ofstream batFile(tmpStream.str().c_str());
-		batFile << "Agents-Evolution-And-Learning-ENKI.exe -settings C:/enki-log-files/enkiEnvironmentSettings.txt "
-				<< "-envfile C:/enki-log-files/testingEnvironmentLinear.txt -resultfile C:/enki-log-files/Results/enkiResults_linenv_"<< i << "-random-from-pop-" << populationNumber << ".txt "
-				<< "-bestpopfile C:/enki-log-files/Results/enkiBestPopulation_linenv_"<< i << "-random-from-pop-" << populationNumber << ".txt "
-				<< "-bestagentfile C:/enki-log-files/Results/enkiBestAgent_linenv_"<< i << "-random-from-pop-" << populationNumber << ".txt "
-				<< "-initpop C:/enki-log-files/good-launches/enkiBestPopulation_linenv_" << populationNumber << ".txt "
+		batFile << "Agents-Evolution-And-Learning-ENKI.exe -settings C:/enki-log-files/enkiEnvironmentSettingsCircleLongerWithoutMutation.txt "
+				<< "-envfile C:/enki-log-files/testingEnvironmentCircle2.txt -resultfile C:/enki-log-files/Results/enkiResults_circle-arena-fixed-topology-"<< i << ".txt "
+				<< "-bestpopfile C:/enki-log-files/Results/enkiBestPopulation_circle-arena-fixed-topology-"<< i << ".txt "
+				<< "-bestagentfile C:/enki-log-files/Results/enkiBestAgent_circle-arena-fixed-topology-"<< i << ".txt "
+				//<< "-initpop C:/enki-log-files/Results/best-fixed-topology-results/enkiBestPopulation_fixed_topology_" << populationNumber << ".txt "
 				<< "-randomseed 0 -extraprint 0 -mode ENKITEST" << endl;
 		batFile.close();
 	}
@@ -289,7 +339,7 @@ int main(int argc, char** argv){
     //                                       "C:/Test/SANDBOX/Environment1113.txt", "C:/Test/SANDBOX/An_evolutionSLengthVsConvSize_En1113_linsys(2).txt");
     //techanalysis::conductBehaviorEvolutionAnalysis("D:/1/Test/SANDBOX/settings_LINSYS.ini","D:/1/Test/SANDBOX/Environment1120.txt",  "D:/1/Test/SANDBOX/En1120_63(5)_bestagents_mod_newformat.txt", 5000, 
     //                                                "D:/1/Test/SANDBOX/AimCyclesEvolution_En1120_63(5).txt", "D:/1/Test/SANDBOX/AimCyclesEvolution(CyclesData)_En1120_63(5).txt", true);
-    TAgent agent;
+    /*TAgent agent;
     settings::fillAgentSettingsFromFile(agent, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
     THypercubeEnvironment environment("C:/Test/SANDBOX/Environment1113.txt");
     settings::fillEnvironmentSettingsFromFile(environment, "C:/Test/SANDBOX/settings_PC40ANP40.ini");
@@ -323,7 +373,7 @@ int main(int argc, char** argv){
     const vector< vector<double> >& agentLife = agent.getPointerToAgentLife(); 
     for (unsigned int i=0; i < agentLife.size(); ++i)
       life.push_back(agentLife[i][0]);
-    TBehaviorAnalysis::drawActionSequenceToDot(life, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agent_poorNoAL_noL_state170.jpg", state);
+    TBehaviorAnalysis::drawActionSequenceToDot(life, environment, "C:/Test/SANDBOX/En1113_pc40anp40(18)_bestpop_179agent_poorNoAL_noL_state170.jpg", state);*/
   } 
   else if (programMode == "AVANALYSIS"){
     settings::PromtParams params;
@@ -401,80 +451,86 @@ int main(int argc, char** argv){
     
     // Запускаем эволюционный процесс
     TEnkiEvolutionaryProcess* evolutionaryProcess = new TEnkiEvolutionaryProcess;
-		evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
-		long randomSeed = 1382520412;
-		bool extraPrint = false;
-		string initPopulationFilename = "";
-		decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, 
+	evolutionaryProcess->filenameSettings.settingsFilename = settings::getSettingsFilename(argc, argv);
+	long randomSeed = 1382520412;
+	bool extraPrint = false;
+	string initPopulationFilename = "";		
+	decodeCommandPromt(evolutionaryProcess->filenameSettings.environmentFilename, evolutionaryProcess->filenameSettings.resultsFilename, 
 							evolutionaryProcess->filenameSettings.bestPopulationFilename, evolutionaryProcess->filenameSettings.bestAgentsFilename, 
 							randomSeed, extraPrint, argc, argv);
-		decodeCommandPromtInitPop(initPopulationFilename, argc, argv);
-		evolutionaryProcess->setExtraPrint(extraPrint);
-		evolutionaryProcess->start(static_cast<unsigned int>(randomSeed), initPopulationFilename);
+	decodeCommandPromtInitPop(initPopulationFilename, argc, argv);
+	evolutionaryProcess->setExtraPrint(extraPrint);
+	evolutionaryProcess->start(static_cast<unsigned int>(randomSeed), initPopulationFilename);
     delete evolutionaryProcess;
     
-  } else if (programMode == "ENKIDRAWBESTAGENT") {
+  } else if (programMode == "ENKIDRAW") {
     // Устанавливаем параметры запуска
     int drawBeforeAndAfterSwap = 0;
-    int desiredAgentNumber = 4000;
-    int singleLifetime = 4000;
-    int lifetimeBeforeSwap = 3100;
+    int desiredAgentNumber = 25;
+    int singleLifetime = 3200;
+
+    int lifetimeBeforeSwap = 2000;
     int lifetimeAfterSwap = 4000;
     
-    double red1 = 0.0;
+    double red1 = 1.0;
     double green1 = 1.0;
     double blue1 = 0.0;
-    double red2 = 0.0;
+    double red2 = 1.0;
     double green2 = 0.0;
-    double blue2 = 1.0;
+    double blue2 = 0.0;
     
     // Устанавливаем зерно для генератора случайных чисел
     srand(static_cast<unsigned int>(time(0)));
     rand();
-    
-    // Удаление файлов, заключающих информацию о объектах среды (необходимы для построения графика в гнуплоте)
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt");
-    
+
     // Удаление файлов с логами перемещения робота
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
-    std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobotAfterSwap.txt");
+	std::remove("C:/enki-log-files/gnuplotRobotBefore.txt");
+	std::remove("C:/enki-log-files/gnuplotRobotAfter.txt");
+    std::remove("C:/enki-log-files/gnuplotRobot.txt");
     
     // Формирование среды
     TEnkiEnvironment enkiEnvironment;
-    settings::fillEnvironmentSettingsFromFile(enkiEnvironment, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
-    enkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/testingEnvironment.txt");
+    settings::fillEnvironmentSettingsFromFile(enkiEnvironment, "C:/enki-log-files/enkiEnvironmentSettingsCircleLongerWithoutMutation.txt");
+    enkiEnvironment.loadEnvironment("C:/enki-log-files/testingEnvironmentCircle2.txt");
     enkiEnvironment.willDrawThePlot = 1;
+	//enkiEnvironment.predefinedCustomize();
+
+	string gnuplotPopulation = "";
+	decodeCommandPromtGnuplot(gnuplotPopulation, argc, argv);
+
+	// best of average are 2, 4, 7
+	// best of max are 1, 2, 5, 4, 7
+
+	gnuplotPopulation = "C:/enki-log-files/Results/enkiBestPopulation_circle-arena-fixed-topology-4.txt";
     
     // Установка начальных параметров робота (положения, угла (отсчитывается против часовой стрелки от оси, направленной вправо) и начальных скоростей)
     //enkiEnvironment.setRandomEnvironmentState();
-    enkiEnvironment.ePuckBot->pos.x = 770.0;
-    enkiEnvironment.ePuckBot->pos.y = 600.0;
-    enkiEnvironment.ePuckBot->angle = 0.5*M_PI;
+    enkiEnvironment.ePuckBot->pos.x = 500.0;
+    enkiEnvironment.ePuckBot->pos.y = 500.0;
+    enkiEnvironment.ePuckBot->angle = service::uniformDistribution(0.0, 2*M_PI);
     enkiEnvironment.ePuckBot->leftSpeed = 0.0;
     enkiEnvironment.ePuckBot->rightSpeed = 0.0;
     
     // Формирование агента
     TEnkiAgent enkiAgent;
-    settings::fillAgentSettingsFromFile(enkiAgent, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
+    settings::fillAgentSettingsFromFile(enkiAgent, "C:/enki-log-files/enkiEnvironmentSettingsCircleLongerWithoutMutation.txt");
     
     // Формирование нейронной сети агента
     //std::fstream inputFileForGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt");
-    enkiAgent.loadGenome("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiBestAgent.txt", desiredAgentNumber);
+    enkiAgent.loadGenome(gnuplotPopulation, desiredAgentNumber);
     /*ofstream out("/Users/Sergey/Desktop/1158.txt");
     enkiAgent.uploadGenome(out);
     out.close();*/
     enkiAgent.linearSystemogenesis();
     
     // Формирование файлов с информацией об объектах в среде для гнуплота
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects1.txt", 0);
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects2.txt", 1);
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects3.txt", 2);
-    enkiEnvironment.printOutObjectsForGnuplot("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotObjects4.txt", 3);
+    /*enkiEnvironment.printOutObjectsForGnuplot("C:/enki-log-files/gnuplotObjects1.txt", 0);
+    enkiEnvironment.printOutObjectsForGnuplot("C:/enki-log-files/gnuplotObjects2.txt", 1);
+    enkiEnvironment.printOutObjectsForGnuplot("C:/enki-log-files/gnuplotObjects3.txt", 2);
+    enkiEnvironment.printOutObjectsForGnuplot("C:/enki-log-files/gnuplotObjects4.txt", 3);*/
     
     if (drawBeforeAndAfterSwap) {
+	  enkiEnvironment.gnuplotOutputString = "C:/enki-log-files/gnuplotRobotasdasd.txt";
       enkiAgent.life(enkiEnvironment, lifetimeBeforeSwap);
       double storedPositionx = enkiEnvironment.ePuckBot->pos.x;
       double storedPositiony = enkiEnvironment.ePuckBot->pos.y;
@@ -489,12 +545,13 @@ int main(int argc, char** argv){
       //enkiAgent.life(enkiEnvironment, lifetimeAfterSwap, true, false, true, 0);
       
       TEnkiEnvironment newEnkiEnvironment;
-      settings::fillEnvironmentSettingsFromFile(newEnkiEnvironment, "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/enkiEnvironmentSettings.txt");
-      newEnkiEnvironment.loadEnvironment("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/testingEnvironment.txt");
+      settings::fillEnvironmentSettingsFromFile(newEnkiEnvironment, "C:/enki-log-files/enkiEnvironmentSettings.txt");
+      newEnkiEnvironment.loadEnvironment("C:/enki-log-files/testingEnvironmentLinear.txt");
+	  newEnkiEnvironment.predefinedCustomize();
       newEnkiEnvironment.willDrawThePlot = 1;
       
       // Переместим кубы в начальное положение и запустим агента из начального положения
-      newEnkiEnvironment.gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobotAfterSwap.txt";
+      newEnkiEnvironment.gnuplotOutputString = "C:/enki-log-files/gnuplotRobot.txt";
       newEnkiEnvironment.swapCubesForColors(red1, green1, blue1, red2, green2, blue2);
       
       newEnkiEnvironment.ePuckBot->pos.x = storedPositionx;
@@ -504,6 +561,7 @@ int main(int argc, char** argv){
       newEnkiEnvironment.ePuckBot->rightSpeed = storedRightSpeed;
 
       enkiAgent.life(newEnkiEnvironment, lifetimeAfterSwap);
+	  //newEnkiEnvironment.makeGnuplotScriptAndRunIt("C:/enki-log-files/drawenkiloglinear");
     } else {
       /*double xpos[10] = {640.0, 590.0, 700.0, 440.0, 420.0, 700.0, 580.0};
       double ypos[10] = {480.0, 560.0, 600.0, 650.0, 570.0, 650.0, 740.0};
@@ -526,11 +584,19 @@ int main(int argc, char** argv){
         
         enkiAgent.life(newEnkiEnvironment, singleLifetime);
       }*/
-      enkiAgent.life(enkiEnvironment, singleLifetime);
-      //std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");
+	  //enkiEnvironment.willDrawThePlot = 0;
+	  //enkiEnvironment.gnuplotOutputString = "C:/enki-log-files/gnuplotRobotBefore.txt";
+      enkiAgent.life(enkiEnvironment, 3200);
+	  enkiEnvironment.makeGnuplotScriptAndRunIt("C:/enki-log-files/drawenkilogcircleBefore", 200.0, 800.0, 200.0, 800.0);
+
+	  /*enkiEnvironment.willDrawThePlot = 1;
+	  enkiEnvironment.gnuplotOutputString = "C:/enki-log-files/gnuplotRobotAfter.txt";
+	  enkiAgent.life(enkiEnvironment, 4000, true, false, false, 6000);
+	  enkiEnvironment.makeGnuplotScriptAndRunIt("C:/enki-log-files/drawenkilogcircleAfter", 200.0, 800.0, 200.0, 800.0);
+      std::remove("/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt");*/
       //enkiAgent.life(enkiEnvironment, 5000, true, false, false, 15000);
     }
-    enkiEnvironment.makeGnuplotScriptAndRunIt("/Users/Sergey/Desktop/drawenkilogtest");
+    //enkiEnvironment.makeGnuplotScriptAndRunIt("C:/enki-log-files/drawenkiloglinear");
     
     // Запуск агента (простой режим)
     //enkiAgent.life(enkiEnvironment, 5000, true, true);

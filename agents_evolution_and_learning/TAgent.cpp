@@ -95,10 +95,10 @@ void TAgent::generateMinimalAgent(int inputResolution){
 	int currentNeuron = 1;
 	int outputResolution = calculateOutputResolution(inputResolution);
 	for (currentNeuron; currentNeuron <= inputResolution; ++currentNeuron)
-    genome->addPool(TPoolNetwork::INPUT_POOL, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
+		genome->addPool(TPoolNetwork::INPUT_POOL, 1, service::uniformDistribution(-0.5, 0.5), 0, 1);
 	for (currentNeuron; currentNeuron <= inputResolution + outputResolution; ++currentNeuron)
-    genome->addPool(TPoolNetwork::OUTPUT_POOL, 3, service::uniformDistribution(-0.5, 0.5), 0, 1);
-  genome->addPool(TPoolNetwork::HIDDEN_POOL, 2, service::uniformDistribution(-0.5, 0.5), 0, primarySystemogenesisSettings.initialPoolCapacity);
+		genome->addPool(TPoolNetwork::OUTPUT_POOL, 3, service::uniformDistribution(-0.5, 0.5), 0, 1);
+	genome->addPool(TPoolNetwork::HIDDEN_POOL, 2, service::uniformDistribution(-0.5, 0.5), 0, primarySystemogenesisSettings.initialPoolCapacity);
 	int currentConnection = 1;
 	for (currentNeuron = inputResolution + 1; currentNeuron <= inputResolution + outputResolution; ++currentNeuron){
 		genome->addConnection(inputResolution + outputResolution + 1, currentNeuron, service::uniformDistribution(-0.5, 0.5), 0, primarySystemogenesisSettings.initialDevelopSynapseProbability, true, 0, currentConnection); 

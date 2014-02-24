@@ -24,7 +24,7 @@ class TEnkiAgent:public TAgent {
   }
   std::vector<double> decodeAction(double outputVector[]);
   void life(TEnvironment& environment, int agentLifeTime, bool rewardCalculate = true, bool resetNet = true, bool resetLife = true, int lastLifeStep = 0);
-  //void generateMinimalAgent(int inputResolution);
+  virtual void generateMinimalAgent(int inputResolution);
 };
 
 

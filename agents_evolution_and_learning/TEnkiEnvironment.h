@@ -96,6 +96,7 @@ public:
   TEnkiEnvironment() {
     xSize = 0;
     ySize = 0;
+	currentTime = 0.0;
     xBirthMin = 0;
     xBirthMax = 0;
     yBirthMin = 0;
@@ -108,13 +109,14 @@ public:
     rewardRecoveryTime = 0;
     willDrawThePlot = 0;
 	ePuckBot = 0;
-    gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt";
+    gnuplotOutputString = "C:/enki-log-files/gnuplotRobot.txt";
   }
   
   // Конструктор среды с использованием параметров из файла
   TEnkiEnvironment(std::string aimsFilename, double _worldStep=0, double _cubeSize=0, double _cubeRadius=0, double _rewardRecoveryTime = 0){
     xSize = 0;
     ySize = 0;
+	currentTime = 0.0;
     xBirthMin = 0;
     xBirthMax = 0;
     yBirthMin = 0;
@@ -123,7 +125,7 @@ public:
     objectsNumber = 0;
     goalsNumber = 0;
     willDrawThePlot = 0;
-    gnuplotOutputString = "/Users/Sergey/Desktop/Agents-Evolution-And-Learning-ENKI/gnuplotRobot.txt";
+    gnuplotOutputString = "C:/enki-log-files/gnuplotRobot.txt";
 		loadEnvironment(aimsFilename);
 	}
   
@@ -154,8 +156,17 @@ public:
   // Изменение положения объектов в среде
   void swapCubesForColors(double r1, double g1, double b1, double r2, double g2, double b2);
 
+  // Изменение положения кубов в круглой среде
+  void randomlySwapCubesForCircleEnvironment();
+
   // Случайное изменение положения кубов в среде (только по вертикали)
   void randomizeCubesPositionsInEnvironment();
+
+  // Функция для размещения объектов в предопределенном состоянии
+  void predefinedCustomize();
+
+  // Функция для добавления куба в среду
+  void addCubeWithParameters (double x, double y, Enki::Color color, int objectNumber);
 
   // Случайное изменение положения кубов в среде (по горизонтали и по вертикали в рамках определенной зоны)
   void TEnkiEnvironment::completelyRandomizeCubesPositionsInEnvironment();
@@ -185,7 +196,7 @@ public:
   
   void printOutCurrentIRSensorResponse(std::string IRSensorResponseFilename);
   
-  void makeGnuplotScriptAndRunIt(std::string graphFilename);
+  void makeGnuplotScriptAndRunIt(std::string graphFilename, double xmin, double xmax, double ymin, double ymax);
   
   // Геттеры и сеттеры параметров среды
   
